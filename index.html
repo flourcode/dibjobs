@@ -4,54 +4,54 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>DIB Jobs // Defense Industrial Base Job Matcher</title>
-	<meta name="description" content="A job matching and application toolkit built for Defense Industrial Base professionals.">
-<link rel="canonical" href="https://dibjobs.com/">
-<!-- Open Graph / LinkedIn -->
-<meta property="og:type" content="website">
-<meta property="og:title" content="DIB Jobs - Defense Industrial Base Job Matcher">
-<meta property="og:description" content="A job matching and application toolkit for Defense Industrial Base professionals. Resume fit, gap analysis, interview prep, and job intel.">
-<meta property="og:url" content="https://dibjobs.com/">
-<meta property="og:image" content="https://dibjobs.com/dibjobs.png">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
-
-<!-- Twitter Card -->
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="DIB Jobs - Defense Industrial Base Job Matcher">
-<meta name="twitter:description" content="See how your resume stacks up against real DIB roles. Match score, gaps, interview prep, and job intel.">
-<meta name="twitter:image" content="https://dibjobs.com/dibjobs.png">
-
+    <meta name="description" content="A job matching and application toolkit built for Defense Industrial Base professionals.">
+    <link rel="canonical" href="https://dibjobs.com/">
+    <!-- Open Graph / LinkedIn -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="DIB Jobs - Defense Industrial Base Job Matcher">
+    <meta property="og:description" content="A job matching and application toolkit for Defense Industrial Base professionals. Resume fit, gap analysis, interview prep, and job intel.">
+    <meta property="og:url" content="https://dibjobs.com/">
+    <meta property="og:image" content="https://dibjobs.com/dibjobs.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="DIB Jobs - Defense Industrial Base Job Matcher">
+    <meta name="twitter:description" content="See how your resume stacks up against real DIB roles. Match score, gaps, interview prep, and job intel.">
+    <meta name="twitter:image" content="https://dibjobs.com/dibjobs.png">
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
-	
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-N10ZLNFZHE"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-N10ZLNFZHE');
-</script>
-
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-N10ZLNFZHE"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-N10ZLNFZHE');
+    </script>
 <style>
     :root {
-        /* Palette - Optimized Job Hunter Green */
-        --deep-green: #3d6b4c;
-        --sage-green: #6b9b7a;
-        --fresh-green: #a8c9a0;
-        --warm-cream: #f9f7f2;
+        /* Palette - Soft Blue & Cream Theme */
+        --deep-blue: #4a6a8a;
+        --soft-blue: #93b5d9;
+        --pale-blue: #c8dae8;
+        --warm-cream: #f8f6f1;
+        
         /* Mapped Colors */
         --bg-cream: var(--warm-cream);
         --card-white: #FFFFFF;
-        --ink-black: #2d4a35;
+        --ink-black: #3d4f5f;
+        
         /* Accents */
-        --accent-mint: var(--fresh-green);
-        --accent-olive: var(--sage-green);
-        --accent-clay: #d18f7a;
-        --accent-gold: #e2bb6e;
-        --accent-blue: var(--sage-green);
+        --accent-mint: var(--pale-blue);
+        --accent-olive: var(--soft-blue);
+        --accent-clay: #d4918a;
+        --accent-gold: #e8c992;
+        --accent-blue: var(--soft-blue);
+        
         /* Spacing & Layout */
         --border-thick: 2px;
         --shadow-hard: 5px 5px 0px var(--ink-black);
@@ -84,7 +84,12 @@
     .brand {
         display: flex;
         align-items: center;
-        gap: 16px;
+        gap: 12px;
+    }
+    .logo-icon {
+        width: 40px;
+        height: 40px;
+        color: var(--ink-black);
     }
     .logo-box {
         width: 48px;
@@ -156,6 +161,32 @@
     }
     .card-title.has-avatar::before {
         display: none;
+    }
+    /* Resume controls - responsive */
+    .resume-controls {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+    }
+    .resume-controls select {
+        padding: 6px 10px;
+        font-size: 11px;
+        font-family: 'Space Mono', monospace;
+        border: 2px solid var(--ink-black);
+        border-radius: var(--radius);
+        background: var(--card-white);
+        cursor: pointer;
+        max-width: 180px;
+    }
+    @media (max-width: 500px) {
+        .resume-controls {
+            width: 100%;
+            justify-content: flex-end;
+        }
+        .resume-controls select {
+            flex: 1;
+            max-width: none;
+        }
     }
     .card-body {
         padding: 32px;
@@ -364,7 +395,7 @@
         background: rgba(107, 155, 122, 0.12);
         border-left: 8px solid var(--accent-olive);
     }
-    .item-match strong { color: #3d6b4c; }
+    .item-match strong { color: var(--deep-blue); }
     .item-gap {
         background: rgba(209, 143, 122, 0.12);
         border-left: 8px solid var(--accent-clay);
@@ -544,7 +575,7 @@
     .how-to-tip {
         margin-top: 20px;
         padding: 16px 20px;
-        background: rgba(168, 201, 160, 0.3);
+        background: rgba(147, 181, 217, 0.3);
         border-left: 4px solid var(--accent-mint);
         border-radius: 0 var(--radius) var(--radius) 0;
         font-size: 13px;
@@ -707,7 +738,7 @@
     }
     .keyword-tag.in-resume {
         background: var(--accent-mint);
-        border-color: #3d6b4c;
+        border-color: var(--deep-blue);
     }
     .keyword-tag.missing {
         background: rgba(209, 143, 122, 0.2);
@@ -789,7 +820,7 @@
         vertical-align: middle;
         font-size: 12px;
     }
-    .tracker-table tr:hover td { background: rgba(168, 201, 160, 0.1); }
+    .tracker-table tr:hover td { background: rgba(147, 181, 217, 0.1); }
     /* Hide less important columns on mobile */
     @media (max-width: 600px) {
         .tracker-table th:nth-child(5),
@@ -1075,6 +1106,10 @@
 <body>
 <header>
     <div class="brand">
+        <svg class="logo-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="40" height="40">
+            <polygon points="55,8 90,35 77,78 33,78 20,35" fill="var(--ink-black)"/>
+            <polygon points="50,12 82,37 70,76 30,76 18,37" fill="#fff" stroke="var(--ink-black)" stroke-width="4"/>
+        </svg>
         <div>
             <div class="app-title">DIB Jobs</div>
             <div class="app-version">Defense Industrial Base Job Matcher</div>
@@ -1132,10 +1167,10 @@
     </div>
     <!-- RESUME INPUT CARD -->
     <div class="card">
-        <div class="card-header">
+        <div class="card-header" style="flex-wrap: wrap; gap: 12px;">
             <span class="card-title">Your Resume</span>
-            <div style="display: flex; gap: 8px;">
-                <select id="resumeSelector" onchange="loadSavedResume()" style="padding: 6px 10px; font-size: 11px; font-family: 'Space Mono', monospace; border: 2px solid var(--ink-black); border-radius: var(--radius); background: var(--card-white); cursor: pointer;">
+            <div class="resume-controls">
+                <select id="resumeSelector" onchange="loadSavedResume()" aria-label="Select saved resume">
                     <option value="">-- Saved Resumes --</option>
                 </select>
                 <button class="btn btn-secondary" onclick="saveCurrentResume()" style="padding: 6px 12px; font-size: 11px;">Save</button>
@@ -1194,6 +1229,7 @@
                 </div>
         </div>
         
+       
         
         <!-- 3. JOB INTEL (Combined: salary, timeline, competition, flags, company) -->
         <div id="jobIntelSection" class="card" style="display:none;">
@@ -1265,7 +1301,7 @@
             <div class="card-header">
                 <span class="card-title has-avatar" style="gap: 12px;">
                     <img src="arti.png" alt="Expert" style="width: 48px; height: 48px; border-radius: var(--radius);">
-                    Ask a Simulated Recruiter
+                    Ask an Expert
                 </span>
             </div>
             <div class="card-body">
@@ -1273,21 +1309,20 @@
                 <textarea id="recruiterQuestion" placeholder="e.g. 'Is this salary competitive?' or 'How should I address that gap?'" style="min-height: 80px;" aria-label="Your question"></textarea>
                 <div class="action-bar">
                     <button id="askRecruiterBtn" class="btn btn-primary" onclick="askExpert()" aria-label="Ask the expert">
-                        <span id="askRecruiterBtnText">Ask Anything</span>
+                        <span id="askRecruiterBtnText">Ask</span>
                     </button>
                     <button class="btn btn-secondary" onclick="clearExpertChat()" aria-label="Clear conversation">Clear</button>
                 </div>
                 <div id="recruiterChatHistory" style="margin-top: 24px; display: none;"></div>
             </div>
         </div>
-        <!-- 2. GAP ANALYSIS -->
+         <!-- 2. GAP ANALYSIS -->
         <div class="card">
             <div class="card-header"><span class="card-title">Gap Analysis</span></div>
             <div class="card-body">
                 <ul id="analysisList" class="analysis-list"></ul>
             </div>
         </div>
-        
         <!-- 5. APPLICATION KIT (Collapsible: keywords, resume, intro email) -->
         <div id="applicationKitCard" class="card collapsible-card collapsed">
             <div class="card-header collapsible-trigger" onclick="toggleKit('application')" role="button" tabindex="0" aria-expanded="false">
@@ -1436,7 +1471,7 @@
     // ==========================================================================
     // CONFIGURATION
     // ==========================================================================
-    const API_ENDPOINT = 'https://76unm1rlj0.execute-api.us-east-1.amazonaws.com/default/grumpy2';
+    const API_ENDPOINT = 'https://76unm1rlj0.execute-api.us-east-1.amazonaws.com/default/grumpy';
     const MAX_RETRIES = 3;
     const RETRY_DELAY_MS = 2000;
     const RESUME_STORAGE_KEY = 'dib_jobs_resumes';
