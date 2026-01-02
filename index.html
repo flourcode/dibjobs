@@ -1202,6 +1202,7 @@
                     <span id="btnText">Analyze Match</span>
                 </button>
                 <button class="btn btn-secondary" onclick="clearAll()" aria-label="Reset form and clear results">Reset</button>
+                <button class="btn btn-secondary" onclick="loadSampleData()" aria-label="Load sample resume and job description">Load Sample</button>
             </div>
             <div id="inlineError" class="inline-error" role="alert" aria-live="polite">
                 <span id="inlineErrorText"></span>
@@ -1305,7 +1306,7 @@
             <div class="card-header">
                 <span class="card-title has-avatar" style="gap: 12px;">
                     <img src="arti.png" alt="Expert" style="width: 48px; height: 48px; border-radius: var(--radius);">
-                    Ask an Expert
+                    Ask a Simulated Recruiter
                 </span>
             </div>
             <div class="card-body">
@@ -1320,7 +1321,7 @@
                 <div id="recruiterChatHistory" style="margin-top: 24px; display: none;"></div>
             </div>
         </div>
-        <!-- 2. GAP ANALYSIS -->
+         <!-- 2. GAP ANALYSIS -->
         <div class="card">
             <div class="card-header"><span class="card-title">Gap Analysis</span></div>
             <div class="card-body">
@@ -2091,6 +2092,92 @@
         analysisData = null;
         resumeText = '';
         clearExpertChat();
+    }
+    
+    function loadSampleData() {
+        // Sample resume - generic cleared professional
+        const sampleResume = `SAMPLE CANDIDATE
+Washington, DC Metro Area | sample@email.com | (555) 123-4567
+
+CLEARANCE: Top Secret/SCI with CI Polygraph
+
+SUMMARY
+Program Manager with 12+ years of experience delivering mission-critical solutions for Department of Defense and Intelligence Community customers. Proven track record managing $50M+ programs, leading cross-functional teams, and driving digital transformation initiatives. PMP certified with deep expertise in Agile methodologies and federal acquisition.
+
+EXPERIENCE
+
+Senior Program Manager | Defense Contractor Inc. | 2019-Present
+- Lead $45M cloud migration program for DoD customer, delivering 6 months ahead of schedule
+- Manage team of 35 engineers, developers, and analysts across 3 locations
+- Achieved 100% CPARS ratings across all task orders
+- Drove adoption of DevSecOps practices reducing deployment time by 60%
+
+Program Manager | Federal Systems Corp | 2015-2019
+- Managed $28M IT modernization contract for Intelligence Community customer
+- Led requirements gathering and solution design for enterprise data platform
+- Coordinated with contracting officers and government stakeholders
+- Mentored 5 junior PMs, 3 promoted to senior roles
+
+Systems Engineer | Tech Solutions LLC | 2011-2015
+- Designed and implemented secure network architectures for classified environments
+- Supported ATO processes and security documentation
+- Provided technical leadership on $12M infrastructure upgrade
+
+EDUCATION
+M.S. Information Technology, George Mason University
+B.S. Computer Science, Virginia Tech
+
+CERTIFICATIONS
+- PMP (Project Management Professional)
+- AWS Solutions Architect Associate
+- ITIL v4 Foundation
+- Security+
+
+SKILLS
+Program Management, Agile/Scrum, Federal Acquisition (FAR/DFARS), 
+Cloud Migration, DevSecOps, Stakeholder Management, CPARS, 
+Risk Management, Cost Control, Team Leadership`;
+
+        // Sample job description
+        const sampleJD = `Director of Cloud Programs
+Acme Defense Solutions - Reston, VA
+
+About the Role:
+We are seeking an experienced Director of Cloud Programs to lead our growing portfolio of cloud transformation initiatives for Department of Defense customers. This role will oversee multiple program managers and drive strategic growth in our federal cloud practice.
+
+Requirements:
+- Active Top Secret/SCI clearance with polygraph (Full Scope preferred)
+- 15+ years of experience in federal IT program management
+- 8+ years managing cloud migration or modernization programs
+- Experience with DoD and Intelligence Community customers
+- PMP certification required; AWS certifications preferred
+- Proven track record managing programs over $75M
+- Experience with Agile at scale and DevSecOps
+- Strong business development and capture experience
+- Excellent communication and executive presence
+
+Responsibilities:
+- Lead portfolio of 5-7 cloud programs totaling $150M+ annually
+- Develop and execute growth strategy for federal cloud practice
+- Build and mentor high-performing program management team
+- Serve as executive sponsor for key customer relationships
+- Drive operational excellence and delivery performance
+- Support capture efforts and proposal development
+- Manage P&L for cloud programs business unit
+
+Preferred:
+- Experience with FedRAMP and cloud security frameworks
+- Background in software development or systems engineering
+- MBA or advanced degree
+- Experience scaling programs from $50M to $100M+
+
+Compensation: $180,000 - $220,000 base + bonus + equity
+Location: Hybrid (Reston, VA - 3 days/week onsite)`;
+
+        document.getElementById('resumeText').value = sampleResume;
+        document.getElementById('jobDescription').value = sampleJD;
+        document.getElementById('resumeSelector').value = '';
+        showErrorToast('Sample data loaded. Click "Analyze Match" to see how it works.', 4000);
     }
     // ==========================================================================
     // ASK AN EXPERT
