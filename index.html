@@ -3,10 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Doug-O-Matic // Job Analyzer</title>
+    <title>DIB Jobs // Defense Industrial Base Job Matcher</title>
+	<meta name="description" content="A job matching and application toolkit built for Defense Industrial Base professionals.">
+<link rel="canonical" href="https://dibjobs.com/">
+<!-- Open Graph / LinkedIn -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="DIB Jobs - Defense Industrial Base Job Matcher">
+<meta property="og:description" content="A job matching and application toolkit for Defense Industrial Base professionals. Resume fit, gap analysis, interview prep, and job intel.">
+<meta property="og:url" content="https://dibjobs.com/">
+<meta property="og:image" content="https://dibjobs.com/dibjobs.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="DIB Jobs - Defense Industrial Base Job Matcher">
+<meta name="twitter:description" content="See how your resume stacks up against real DIB roles. Match score, gaps, interview prep, and job intel.">
+<meta name="twitter:image" content="https://dibjobs.com/dibjobs.png">
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+	
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-N10ZLNFZHE"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-N10ZLNFZHE');
+</script>
+
 <style>
     :root {
         /* Palette - Optimized Job Hunter Green */
@@ -1048,8 +1076,8 @@
 <header>
     <div class="brand">
         <div>
-            <div class="app-title">Super Doug-O-Matic '76</div>
-            <div class="app-version">v2.5 // Flournoy-Yutani Corporation</div>
+            <div class="app-title">DIB Jobs</div>
+            <div class="app-version">Defense Industrial Base Job Matcher</div>
         </div>
     </div>
 </header>
@@ -1057,7 +1085,7 @@
     <!-- QUICK START CARD (Collapsible, starts collapsed) -->
     <div id="quickStartCard" class="card collapsible-card collapsed">
         <div class="card-header collapsible-trigger" onclick="toggleQuickStart()" role="button" tabindex="0" aria-expanded="false" aria-controls="quickStartContent" aria-label="Toggle quick start guide" onkeydown="if(event.key==='Enter'||event.key===' '){toggleQuickStart();event.preventDefault();}">
-            <span class="card-title">Quick Start</span>
+            <span class="card-title">How It Works</span>
             <span id="quickStartToggleIcon" class="mono" style="font-weight: 700; font-size: 20px;" aria-hidden="true">+</span>
         </div>
         <div id="quickStartContent" class="collapsible-content">
@@ -1066,187 +1094,82 @@
                     <div class="how-to-step">
                         <div class="step-number">1</div>
                         <div class="step-content">
-                            <h3>Find a Job</h3>
-                            <p>Use the <strong>Job Search</strong> tab to find fresh listings on job boards or browse LinkedIn company pages.</p>
+                            <h3>Add Your Resume</h3>
+                            <p>Paste your resume text or upload a file. Your resume stays in your browser and is not stored.</p>
                         </div>
                     </div>
                     <div class="how-to-step">
                         <div class="step-number">2</div>
                         <div class="step-content">
-                            <h3>Grab the Posting</h3>
-                            <p>Copy the full job description text <em>or</em> just paste the URL directly — Doug-O-Matic will fetch it for you.</p>
+                            <h3>Add a Job Description</h3>
+                            <p>Paste the job description text or enter a URL and we'll fetch it for you.</p>
                         </div>
                     </div>
                     <div class="how-to-step">
                         <div class="step-number">3</div>
                         <div class="step-content">
-                            <h3>Analyze & Prep</h3>
-                            <p>Hit <strong>Analyze Match</strong> to get your fit score, tailored resume, interview prep, and a custom intro email.</p>
+                            <h3>Get Your Analysis</h3>
+                            <p>Receive a match score, gap analysis, interview prep, and tailored application materials.</p>
                         </div>
                     </div>
                 </div>
                 <div class="how-to-tip">
-                    <strong>Hey, Doug! Welcome to your custom job search engine.</strong> Here's what this thing does for you:
+                    <strong>Features:</strong>
                     <ul style="margin: 12px 0 0 20px; line-height: 1.8;">
-                        <li><strong>Job Search:</strong> Google-dork hidden ATS platforms (Greenhouse, Lever, Workday, etc.) to find jobs before they hit LinkedIn. Also quick links to aggregators and company pages.</li>
-                        <li><strong>Match Score:</strong> AI analyzes the JD against your full resume and gives you a realistic 0-100 fit score.</li>
-                        <li><strong>Gap Analysis:</strong> Shows your strongest matches AND flags gaps/risks so you know what to address.</li>
-                        <li><strong>Job Intel:</strong> AI-generated salary estimates, hiring timeline, competition level, and company intel.</li>
-                        <li><strong>Red/Green Flags:</strong> AI analyzes the job posting itself for warning signs or positive indicators.</li>
-                        <li><strong>Keywords:</strong> Important terms from the JD with a check on which ones are already in your resume.</li>
-                        <li><strong>Tailored Resume:</strong> Rewrites your executive summary with keywords from the JD. Copy and paste into your resume.</li>
-                        <li><strong>Intro Email:</strong> One-click generation of a confident, no-BS email to the recruiter or hiring manager.</li>
-                        <li><strong>Interview Prep:</strong> Generates likely interview questions with suggested answers pulled from your actual experience.</li>
-                        <li><strong>Gap Strategies:</strong> Tactical talking points for spinning or mitigating any weaknesses.</li>
-                        <li><strong>Ask a Recruiter:</strong> Chat with "Arti" — a grumpy-but-helpful senior federal recruiter who gives you straight talk on salary, gaps, company intel, and how to actually land the job.</li>
-                        <li><strong>Network Intel:</strong> LinkedIn search links to find recruiters, executives, and veterans at the target company.</li>
-                        <li><strong>Follow-up Templates:</strong> Pre-written emails for after applying, post-interview, check-ins, and negotiation.</li>
-                        <li><strong>Application Tracker:</strong> Save jobs locally and track your application status over time.</li>
+                        <li><strong>Match Score:</strong> AI analyzes the job against your resume with a 0-100 fit score.</li>
+                        <li><strong>Gap Analysis:</strong> Identifies your strongest matches and potential gaps.</li>
+                        <li><strong>Job Intel:</strong> Salary estimates, hiring timeline, competition level, and company intel.</li>
+                        <li><strong>Keywords:</strong> Important terms from the JD with a check on which are in your resume.</li>
+                        <li><strong>Tailored Summary:</strong> AI-rewritten executive summary optimized for this role.</li>
+                        <li><strong>Intro Email:</strong> Generate a professional intro email to send with your application.</li>
+                        <li><strong>Interview Prep:</strong> Likely interview questions with suggested answers from your experience.</li>
+                        <li><strong>Expert Q&A:</strong> Ask questions about the role, salary, gaps, or application strategy.</li>
+                        <li><strong>Application Tracker:</strong> Save jobs locally and track your application status.</li>
                     </ul>
-                    <p style="margin-top: 12px;">Paste a JD (or just the URL) and hit <strong>Analyze Match</strong>. Let me know if you want to tweak anything!</p>
                 </div>
             </div>
         </div>
     </div>
+    <!-- RESUME INPUT CARD -->
+    <div class="card">
+        <div class="card-header">
+            <span class="card-title">Your Resume</span>
+            <div style="display: flex; gap: 8px;">
+                <select id="resumeSelector" onchange="loadSavedResume()" style="padding: 6px 10px; font-size: 11px; font-family: 'Space Mono', monospace; border: 2px solid var(--ink-black); border-radius: var(--radius); background: var(--card-white); cursor: pointer;">
+                    <option value="">-- Saved Resumes --</option>
+                </select>
+                <button class="btn btn-secondary" onclick="saveCurrentResume()" style="padding: 6px 12px; font-size: 11px;">Save</button>
+            </div>
+        </div>
+        <div class="card-body">
+            <textarea id="resumeText" placeholder="Paste your resume text here..." aria-label="Resume input" style="min-height: 150px;"></textarea>
+            <div style="margin-top: 12px; padding: 12px; background: rgba(0,0,0,0.03); border-radius: var(--radius); font-size: 12px; line-height: 1.6;">
+                <strong style="font-family: 'Space Mono', monospace; text-transform: uppercase; font-size: 10px; letter-spacing: 0.5px;">Privacy Notice:</strong>
+                <ul style="margin: 8px 0 0 16px; opacity: 0.8;">
+                    <li>Your resume is <strong>not stored</strong> on our servers</li>
+                    <li>Data is sent to Google Gemini AI for analysis</li>
+                    <li>Google's API does not use your data for model training</li>
+                    <li>Saved resumes are stored locally in your browser only</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
     <!-- JOB DESCRIPTION CARD -->
     <div class="card">
         <div class="card-header">
-            <span class="card-title">Paste Job Description or URL</span>
+            <span class="card-title">Job Description</span>
         </div>
         <div class="card-body">
-            <textarea id="jobDescription" placeholder="Paste JD content or a URL to the JD here..." aria-label="Job description input"></textarea>
+            <textarea id="jobDescription" placeholder="Paste job description text or a URL..." aria-label="Job description input"></textarea>
             <div class="action-bar">
                 <button id="analyzeBtn" class="btn btn-primary" onclick="analyzeJob()" aria-label="Analyze job match">
                     <span id="btnText">Analyze Match</span>
                 </button>
                 <button class="btn btn-secondary" onclick="clearAll()" aria-label="Reset form and clear results">Reset</button>
-                <button class="btn btn-secondary" onclick="loadSampleJD()" aria-label="Load sample job description">Load Sample</button>
             </div>
-            <!-- Inline error message for form validation -->
             <div id="inlineError" class="inline-error" role="alert" aria-live="polite">
                 <span id="inlineErrorText"></span>
-            </div>
-        </div>
-    </div>
-    <!-- JOB SEARCH CARD (Collapsible, starts open) -->
-    <div id="jobSearchCard" class="card collapsible-card">
-        <div class="card-header collapsible-trigger" onclick="toggleJobSearch()" role="button" tabindex="0" aria-expanded="true" aria-controls="jobSearchContent" aria-label="Toggle job search tools" onkeydown="if(event.key==='Enter'||event.key===' '){toggleJobSearch();event.preventDefault();}">
-            <span class="card-title">Job Search</span>
-            <span id="jobSearchToggleIcon" class="mono" style="font-weight: 700; font-size: 20px;" aria-hidden="true">−</span>
-        </div>
-        <div id="jobSearchContent" class="collapsible-content">
-            <div class="card-body">
-                <!-- HUNTER-KILLER SECTION -->
-                <div class="search-section">
-                    <h3 class="section-label">Cyberdyne T-1000 Job Hunter</h3>
-                    <p class="section-desc">Google-dork ATS platforms to find jobs before they hit the aggregators.</p>
-                    <div class="input-grid" style="margin: 16px 0;">
-                        <div>
-                            <label class="category-label">Target Role</label>
-                            <input type="text" id="targetRole" value="Director" placeholder="e.g. Director, VP, Capture Manager">
-                        </div>
-                        <div>
-                            <label class="category-label">Keyword</label>
-                            <input type="text" id="targetKeyword" value="TS/SCI" placeholder="e.g. TS/SCI, Company, Polygraph, Remote">
-                        </div>
-                    </div>
-<div class="category-label" style="margin-bottom: 8px;">Job Boards & Aggregators</div>
-                    <div class="action-bar" style="margin-top:0; margin-bottom: 16px;">
-                        <button class="btn btn-secondary" onclick="runLinkedIn()">LinkedIn (7 Days)</button>
-                        <button class="btn btn-secondary" onclick="runClearanceJobs()">ClearanceJobs</button>
-                        <button class="btn btn-secondary" onclick="runDork('myworkdayjobs.com')">Workday</button>
-                    </div>
-                </div>
-                <!-- DIVIDER -->
-                <hr class="section-divider">
-                <!-- BROWSE BY COMPANY SECTION -->
-                <div class="search-section" style="background: #fafafa; margin: -32px; margin-top: 0; padding: 24px 32px;">
-                    <h3 class="section-label">Browse by Company</h3>
-                    <p class="section-desc">Direct links to company career pages on LinkedIn.</p>
-                    <div class="category-group">
-                        <span class="category-label">Federal Primes</span>
-                        <div class="tag-cloud">
-                            <a href="https://www.linkedin.com/company/lockheed-martin/jobs/" target="_blank" class="job-tag">Lockheed Martin</a>
-                            <a href="https://www.linkedin.com/company/rtx/jobs/" target="_blank" class="job-tag">RTX (Raytheon)</a>
-                            <a href="https://www.linkedin.com/company/gdit/jobs/" target="_blank" class="job-tag">GDIT</a>
-                            <a href="https://www.linkedin.com/company/northrop-grumman-corporation/jobs/" target="_blank" class="job-tag">Northrop Grumman</a>
-                            <a href="https://www.linkedin.com/company/boeing/jobs/" target="_blank" class="job-tag">Boeing</a>
-                            <a href="https://www.linkedin.com/company/leidos/jobs/" target="_blank" class="job-tag">Leidos</a>
-                            <a href="https://www.linkedin.com/company/bae-systems/jobs/" target="_blank" class="job-tag">BAE Systems</a>
-                            <a href="https://www.linkedin.com/company/l3harris-technologies/jobs/" target="_blank" class="job-tag">L3Harris</a>
-                            <a href="https://www.linkedin.com/company/mission-technologies-a-division-of-hii/jobs/" target="_blank" class="job-tag">HII</a>
-                            <a href="https://www.linkedin.com/company/booz-allen-hamilton/jobs/" target="_blank" class="job-tag">Booz Allen Hamilton</a>
-                            <a href="https://www.linkedin.com/company/saicinc/jobs/" target="_blank" class="job-tag">SAIC</a>
-                            <a href="https://www.linkedin.com/company/caci-international-inc/jobs/" target="_blank" class="job-tag">CACI</a>
-                            <a href="https://www.linkedin.com/company/mantech/jobs/" target="_blank" class="job-tag">ManTech</a>
-                            <a href="https://www.linkedin.com/company/peraton/jobs/" target="_blank" class="job-tag">Peraton</a>
-                            <a href="https://www.linkedin.com/company/parsons/jobs/" target="_blank" class="job-tag">Parsons</a>
-                            <a href="https://www.linkedin.com/company/amentumcorp/jobs/" target="_blank" class="job-tag">Amentum</a>
-                            <a href="https://www.linkedin.com/company/kbr-inc/jobs/" target="_blank" class="job-tag">KBR</a>
-                            <a href="https://www.linkedin.com/company/maxar-technologies-ltd/jobs/" target="_blank" class="job-tag">Maxar</a>
-                            <a href="https://www.linkedin.com/company/anduril/jobs/" target="_blank" class="job-tag">Anduril</a>
-                            <a href="https://www.linkedin.com/company/palantir-technologies/jobs/" target="_blank" class="job-tag">Palantir</a>
-                            <a href="https://www.linkedin.com/company/shield-ai/jobs/" target="_blank" class="job-tag">Shield AI</a>
-                            <a href="https://www.linkedin.com/company/sierra-nevada-corporation/jobs/" target="_blank" class="job-tag">SNC</a>
-                            <a href="https://www.linkedin.com/company/jacobs/jobs/" target="_blank" class="job-tag">Jacobs</a>
-                            <a href="https://www.linkedin.com/company/mitre/jobs/" target="_blank" class="job-tag">MITRE</a>
-                            <a href="https://www.linkedin.com/company/battelle/jobs/" target="_blank" class="job-tag">Battelle</a>
-                            <a href="https://www.linkedin.com/company/guidehouse/jobs/" target="_blank" class="job-tag">Guidehouse</a>
-                            <a href="https://www.linkedin.com/company/spacex/jobs/" target="_blank" class="job-tag">SpaceX</a>
-                        </div>
-                    </div>
-                    <div class="category-group">
-                        <span class="category-label">Cloud Service Providers</span>
-                        <div class="tag-cloud">
-                            <a href="https://www.linkedin.com/company/amazon-web-services/jobs/" target="_blank" class="job-tag">Amazon / AWS</a>
-                            <a href="https://www.linkedin.com/company/microsoft/jobs/" target="_blank" class="job-tag">Microsoft / Azure</a>
-                            <a href="https://www.linkedin.com/company/google-cloud/jobs/" target="_blank" class="job-tag">Google Cloud</a>
-                            <a href="https://www.linkedin.com/company/oracle/jobs/" target="_blank" class="job-tag">Oracle Cloud</a>
-                            <a href="https://www.linkedin.com/company/ibm/jobs/" target="_blank" class="job-tag">IBM Cloud</a>
-                        </div>
-                    </div>
-                    <div class="category-group">
-                        <span class="category-label">SaaS & Platforms</span>
-                        <div class="tag-cloud">
-                            <a href="https://www.linkedin.com/company/salesforce/jobs/" target="_blank" class="job-tag">Salesforce</a>
-                            <a href="https://www.linkedin.com/company/servicenow/jobs/" target="_blank" class="job-tag">ServiceNow</a>
-                            <a href="https://www.linkedin.com/company/snowflake-computing/jobs/" target="_blank" class="job-tag">Snowflake</a>
-                            <a href="https://www.linkedin.com/company/databricks/jobs/" target="_blank" class="job-tag">Databricks</a>
-                            <a href="https://www.linkedin.com/company/atlassian/jobs/" target="_blank" class="job-tag">Atlassian</a>
-                            <a href="https://www.linkedin.com/company/palo-alto-networks/jobs/" target="_blank" class="job-tag">Palo Alto Networks</a>
-                            <a href="https://www.linkedin.com/company/crowdstrike/jobs/" target="_blank" class="job-tag">CrowdStrike</a>
-                            <a href="https://www.linkedin.com/company/zscaler/jobs/" target="_blank" class="job-tag">Zscaler</a>
-                            <a href="https://www.linkedin.com/company/tenableinc/jobs/" target="_blank" class="job-tag">Tenable</a>
-                            <a href="https://www.linkedin.com/company/okta-inc-/jobs/" target="_blank" class="job-tag">Okta</a>
-                            <a href="https://www.linkedin.com/company/splunk/jobs/" target="_blank" class="job-tag">Splunk (Cisco)</a>
-                        </div>
-                    </div>
-                    <div class="category-group">
-                        <span class="category-label">Systems Integrators</span>
-                        <div class="tag-cloud">
-                            <a href="https://www.linkedin.com/company/accenturefederalservices/jobs/" target="_blank" class="job-tag">Accenture Federal</a>
-                            <a href="https://www.linkedin.com/company/deloitte/jobs/" target="_blank" class="job-tag">Deloitte</a>
-                            <a href="https://www.linkedin.com/company/pwc/jobs/" target="_blank" class="job-tag">PwC</a>
-                            <a href="https://www.linkedin.com/company/ernstandyoung/jobs/" target="_blank" class="job-tag">EY</a>
-                            <a href="https://www.linkedin.com/company/kpmg-us/jobs/" target="_blank" class="job-tag">KPMG</a>
-                            <a href="https://www.linkedin.com/company/capgemini/jobs/" target="_blank" class="job-tag">Capgemini</a>
-                        </div>
-                    </div>
-                    <div class="category-group" style="margin-bottom: 0;">
-                        <span class="category-label">VARs & Resellers</span>
-                        <div class="tag-cloud">
-                            <a href="https://www.linkedin.com/company/cdw/jobs/" target="_blank" class="job-tag">CDW-G</a>
-                            <a href="https://www.linkedin.com/company/carahsoft/jobs/" target="_blank" class="job-tag">Carahsoft</a>
-                            <a href="https://www.linkedin.com/company/world-wide-technology/jobs/" target="_blank" class="job-tag">WWT</a>
-                            <a href="https://www.linkedin.com/company/iron-bow-technologies/jobs/" target="_blank" class="job-tag">Iron Bow</a>
-                            <a href="https://www.linkedin.com/company/presidio-/jobs/" target="_blank" class="job-tag">Presidio</a>
-                            <a href="https://www.linkedin.com/company/dxctechnology/jobs/" target="_blank" class="job-tag">DXC Technology</a>
-                            <a href="https://www.linkedin.com/company/cgi/jobs/" target="_blank" class="job-tag">CGI Federal</a>
-                            <a href="https://www.linkedin.com/company/red-river-technology/jobs/" target="_blank" class="job-tag">Red River</a>
-                            <a href="https://www.linkedin.com/company/thundercat-technology/jobs/" target="_blank" class="job-tag">ThunderCat</a>
-                        </div>
-                    </div>
-                </div>
             </div>
         </div>
     </div>
@@ -1261,7 +1184,7 @@
             <div id="loadingProgress" style="width: 5%; height: 100%; background: var(--accent-mint); border-right: 2px solid var(--ink-black); transition: width 0.3s ease;"></div>
         </div>
         <p style="margin-top: 16px; font-family: 'Space Mono'; font-size: 11px; opacity: 0.6;">
-            Analyzing 25+ years of experience against job requirements...
+            Analyzing your resume against job requirements...
         </p>
     </div>
     <div id="analysisResults" style="display: none;">
@@ -1271,7 +1194,6 @@
                 </div>
         </div>
         
-       
         
         <!-- 3. JOB INTEL (Combined: salary, timeline, competition, flags, company) -->
         <div id="jobIntelSection" class="card" style="display:none;">
@@ -1338,33 +1260,34 @@
             </div>
         </div>
         
-        <!-- 4. ASK A RECRUITER (high for decision support) -->
+        <!-- 4. ASK AN EXPERT -->
         <div id="askRecruiterSection" class="card">
             <div class="card-header">
                 <span class="card-title has-avatar" style="gap: 12px;">
-                    <img src="arti.png" alt="Arti" style="width: 48px; height: 48px; border-radius: var(--radius);">
-                    Ask a Grumpy Recruiter
+                    <img src="arti.png" alt="Expert" style="width: 48px; height: 48px; border-radius: var(--radius);">
+                    Ask a Simulated Recruiter
                 </span>
             </div>
             <div class="card-body">
-                <p style="margin-bottom: 16px; font-size: 14px; opacity: 0.8;">Questions about salary, fit, red flags, or how to position yourself? Get straight answers.</p>
-                <textarea id="recruiterQuestion" placeholder="e.g. 'Is this salary competitive?' or 'Should I be worried about that gap?'" style="min-height: 80px;" aria-label="Your question for the recruiter"></textarea>
+                <p style="margin-bottom: 16px; font-size: 14px; opacity: 0.8;">Questions about salary, fit, gaps, or application strategy? Get answers from a federal recruiting expert.</p>
+                <textarea id="recruiterQuestion" placeholder="e.g. 'Is this salary competitive?' or 'How should I address that gap?'" style="min-height: 80px;" aria-label="Your question"></textarea>
                 <div class="action-bar">
-                    <button id="askRecruiterBtn" class="btn btn-primary" onclick="askRecruiter()" aria-label="Ask the recruiter">
-                        <span id="askRecruiterBtnText">Ask</span>
+                    <button id="askRecruiterBtn" class="btn btn-primary" onclick="askExpert()" aria-label="Ask the expert">
+                        <span id="askRecruiterBtnText">Ask Anything</span>
                     </button>
-                    <button class="btn btn-secondary" onclick="clearRecruiterChat()" aria-label="Clear conversation">Clear</button>
+                    <button class="btn btn-secondary" onclick="clearExpertChat()" aria-label="Clear conversation">Clear</button>
                 </div>
                 <div id="recruiterChatHistory" style="margin-top: 24px; display: none;"></div>
             </div>
         </div>
-         <!-- 2. GAP ANALYSIS -->
+        <!-- 2. GAP ANALYSIS -->
         <div class="card">
             <div class="card-header"><span class="card-title">Gap Analysis</span></div>
             <div class="card-body">
                 <ul id="analysisList" class="analysis-list"></ul>
             </div>
         </div>
+        
         <!-- 5. APPLICATION KIT (Collapsible: keywords, resume, intro email) -->
         <div id="applicationKitCard" class="card collapsible-card collapsed">
             <div class="card-header collapsible-trigger" onclick="toggleKit('application')" role="button" tabindex="0" aria-expanded="false">
@@ -1513,150 +1436,147 @@
     // ==========================================================================
     // CONFIGURATION
     // ==========================================================================
-    const API_ENDPOINT = 'https://76unm1rlj0.execute-api.us-east-1.amazonaws.com/default/grumpy';
+    const API_ENDPOINT = 'https://76unm1rlj0.execute-api.us-east-1.amazonaws.com/default/grumpy2';
     const MAX_RETRIES = 3;
     const RETRY_DELAY_MS = 2000;
+    const RESUME_STORAGE_KEY = 'dib_jobs_resumes';
     let analysisData = null;
     let loadingInterval = null;
+    let resumeText = ''; // Store resume text for API calls
+    
     // ==========================================================================
-    // DOUG'S FULL PROFILE (Single Source of Truth)
+    // RESUME MANAGEMENT (localStorage)
     // ==========================================================================
-    const dougProfile = {
-        clearances: "Top Secret/SCI with Full Scope Polygraph | SAP Cleared",
-        certifications: "PMP | AWS Certified Cloud Practitioner | Security+ | Network+ | ISSA Member | Northrop Grumman PM Level I/II",
-        education: { 
-            institution: "United States Military Academy at West Point", 
-            degree: "Bachelor of Science, Management and Engineering" 
-        },
-        military: { 
-            rank: "Major", 
-            branch: "United States Army", 
-            unit: "Special Operations Command — Delta Force (1st SFOD-D)",
-            decorations: ["Bronze Star", "Defense Meritorious Service Medal"],
-            training: [
-                "Delta Operator Training Course",
-                "Special Forces Qualification Course (18-Series)",
-                "Ranger School",
-                "Airborne",
-                "Military Free Fall (HALO/HAHO)",
-                "Pathfinder",
-                "Air Assault",
-                "Jungle Warfare School"
-            ]
-        },
-        expertise: {
-            contracts: ["GWAC", "IDIQ/IDOA", "8(a)", "HUBZone", "SDVOSB", "GSA Schedule"],
-            customers: ["DoD (Army, Navy, Air Force, USSOCOM)", "Intelligence Community (All 18 Agencies)", "DHS", "DoS", "DoE", "NASA"],
-            capture: ["FAR/DFARS", "CPARS", "Past Performance", "Price-to-Win", "Color Team Reviews", "Orals Coaching"],
-            security: ["TS/SCI", "SAP", "SCIF Operations", "Compartmented Programs", "Polygraph"],
-            compliance: ["ISO 9001", "AS9100", "PSC.1", "ICoCA", "OSHA", "ITAR"]
-        },
-        experiences: [
-            { 
-                company: "Centre Support Services LLC", 
-                location: "Fairfax, VA", 
-                title: "Chief Operating Officer", 
-                period: "2024–Present", 
-                summary: "Executive operational leader for six geographically dispersed operating companies serving Intelligence Community, Department of Defense, federal law enforcement, and commercial customers. Portfolio: $110M+ annual revenue, 190 staff.", 
-                bullets: [
-                    "Assumed COO role following sustained financial losses, quality failures, and leadership gaps.",
-                    "Restored profitability and stakeholder confidence within one year.",
-                    "Increased revenue from $6.4M (2023) to $8.9M (2024); tracking $16M+ in 2025.",
-                    "Reduced staff turnover by 30% and passed two OSHA audits.",
-                    "Implemented formal operating cadence, quality controls, and executive reporting."
-                ] 
-            },
-            { 
-                company: "PTR Industries Inc.", 
-                location: "Aynor, SC", 
-                title: "Chief Operating Officer (Interim)", 
-                period: "2024", 
-                summary: "Stabilized manufacturing operations following prolonged losses and morale issues.", 
-                bullets: [
-                    "Implemented quality control programs reducing test failures by 12% and material scrap by 23%."
-                ] 
-            },
-            { 
-                company: "Revolutionary Technologies Inc.", 
-                location: "Columbia, SC", 
-                title: "Operating Executive", 
-                period: "2024", 
-                summary: "Led additive manufacturing and CNC operations producing complex titanium and Inconel components.", 
-                bullets: [
-                    "Managed 18+ staff across five 3D printing platforms, lathe, mill, and wire EDM operations.",
-                    "Achieved AS9100 certification in 2025."
-                ] 
-            },
-            { 
-                company: "Amazon Web Services", 
-                location: "Arlington, VA", 
-                title: "Principal, Partner Sales Manager / Senior Partner Account Manager", 
-                period: "2018–2023", 
-                summary: "Led National Security partner sales strategy driving classified cloud adoption across Intelligence Community. Strategic partnerships with defense primes: GDIT, Northrop Grumman, Raytheon/RTX, Lockheed Martin, SAIC, BAE Systems.", 
-                bullets: [
-                    "Managed portfolio of $1B+ in annual cloud revenue through partner-led delivery model.",
-                    "Directly engaged CIOs, CTOs, and program executives on mission-critical workload migration.",
-                    "Led team of 25 sales and technical leaders delivering partner-led cloud revenue at scale.",
-                    "2023: Delivered $1.4B in AWS revenue (117% of goal) across IC customers.",
-                    "2022: Delivered $580.1M across 156 partners (107% of goal).",
-                    "Closed $97.5M in committed AWS contracts with Northrop Grumman within first year (largest partner-led deal in AWS Public Sector).",
-                    "Architected capture strategies where AWS served as prime cloud provider for SAP and SCI environments.",
-                    "Selected Top 1% of Amazon employees (2019, 2020); promoted to Level 7 ahead of peers.",
-                    "Certified Amazon Bar Raiser; conducted 195 executive and technical interviews."
-                ] 
-            },
-            { 
-                company: "Chenega Corporation", 
-                location: "Chantilly, VA", 
-                title: "President and Program Director", 
-                period: "2015–2018", 
-                summary: "President of two Chenega subsidiaries managing $29M in annual prime contracts and 500+ personnel across NASA, DoD, and DoS CONUS and OCONUS locations. Led complete business development lifecycle from capture through contract execution.", 
-                bullets: [
-                    "Senior capture leader on the $12B+ Worldwide Protective Services II (WPS II) IDIQ win (Department of State).",
-                    "Directed operations at NASA Cape Kennedy, NASA Johnson Space Center, NASA White Sands, Walter Reed Medical Center, and Naval facilities in Japan.",
-                    "Achieved 100% CPARS \"Exceptional\" ratings across all task orders.",
-                    "Negotiated and managed high-risk insurance strategies and threat mitigation for OCONUS operations.",
-                    "Built strategic relationships with NASA, DoD, and DoS contracting officers and program managers."
-                ] 
-            },
-            { 
-                company: "Northrop Grumman Corporation", 
-                location: "Chantilly, VA", 
-                title: "Program Director, CNTPO and Classified Programs", 
-                period: "2009–2015", 
-                summary: "Program Director for the Counter Narco-Terrorism Technology Program Office, a five-year $15B IDIQ supporting global counter-narcotics and counter-terrorism missions.", 
-                bullets: [
-                    "Managed 82 task orders totaling $1.01B across 34 countries with 372 personnel.",
-                    "Led PMO of 35 staff and 25 subcontractor companies; oversaw $135M+ in recurring contracts.",
-                    "Submitted 114 proposals; won 46 totaling $682M (40% win rate).",
-                    "Directed aviation training programs for Afghan Army across seven bases with zero casualties over five years.",
-                    "Managed multiple Special Access Programs for USSOCOM and USG customers."
-                ] 
-            },
-            { 
-                company: "Osen-Hunter Group, LLC", 
-                location: "Madison, VA", 
-                title: "Vice President, Operations", 
-                period: "2008–2009", 
-                summary: "Managed operations for a $7M+ SDVOSB supporting Intelligence Community missions.", 
-                bullets: [
-                    "Served as Proposal Manager on 15 submissions, winning six awards totaling $4.9M."
-                ] 
-            },
-            { 
-                company: "Triple Canopy Inc.", 
-                location: "Herndon, VA", 
-                title: "Director of Operations / Program Director / Director of Training", 
-                period: "2004–2008", 
-                summary: "Led growth of international security operations from startup to $198M+ in revenue.", 
-                bullets: [
-                    "Scaled international security operations from startup to more than $198M in revenue in under 20 months.",
-                    "Led 120-day mobilization for Department of State's largest contract at the time (U.S. Embassy Baghdad).",
-                    "Recruited, trained, cleared, and deployed 1,100 personnel."
-                ] 
-            }
-        ]
-    };
+    function getSavedResumes() {
+        try {
+            const saved = localStorage.getItem(RESUME_STORAGE_KEY);
+            return saved ? JSON.parse(saved) : {};
+        } catch (e) {
+            console.error('Error reading saved resumes:', e);
+            return {};
+        }
+    }
+    
+    function updateResumeSelector() {
+        const selector = document.getElementById('resumeSelector');
+        const resumes = getSavedResumes();
+        const names = Object.keys(resumes);
+        
+        selector.innerHTML = '<option value="">-- Saved Resumes --</option>';
+        if (names.length === 0) {
+            selector.innerHTML += '<option value="" disabled>No saved resumes yet</option>';
+        } else {
+            names.forEach(name => {
+                const option = document.createElement('option');
+                option.value = name;
+                option.textContent = name;
+                selector.appendChild(option);
+            });
+            selector.innerHTML += '<option value="__delete__" style="color: #999;">Delete a resume...</option>';
+        }
+    }
+    
+    function saveCurrentResume() {
+        const textarea = document.getElementById('resumeText');
+        const text = textarea.value.trim();
+        
+        if (!text || text.length < 100) {
+            showErrorToast('Please paste a resume first (at least 100 characters).');
+            return;
+        }
+        
+        const resumes = getSavedResumes();
+        const existingNames = Object.keys(resumes);
+        
+        // Suggest a default name
+        let defaultName = 'My Resume';
+        if (existingNames.includes(defaultName)) {
+            defaultName = `Resume ${existingNames.length + 1}`;
+        }
+        
+        const name = prompt('Name this resume version:', defaultName);
+        if (!name) return;
+        
+        const trimmedName = name.trim().substring(0, 50);
+        if (!trimmedName) return;
+        
+        resumes[trimmedName] = {
+            text: text,
+            savedAt: new Date().toISOString()
+        };
+        
+        try {
+            localStorage.setItem(RESUME_STORAGE_KEY, JSON.stringify(resumes));
+            updateResumeSelector();
+            document.getElementById('resumeSelector').value = trimmedName;
+            showErrorToast(`Resume "${trimmedName}" saved to browser.`, 3000);
+        } catch (e) {
+            showErrorToast('Could not save resume. Browser storage may be full.');
+        }
+    }
+    
+    function loadSavedResume() {
+        const selector = document.getElementById('resumeSelector');
+        const selectedName = selector.value;
+        
+        if (!selectedName) return;
+        
+        if (selectedName === '__delete__') {
+            selector.value = '';
+            deleteResumePrompt();
+            return;
+        }
+        
+        const resumes = getSavedResumes();
+        if (resumes[selectedName]) {
+            document.getElementById('resumeText').value = resumes[selectedName].text;
+            showErrorToast(`Loaded "${selectedName}"`, 2000);
+        }
+    }
+    
+    function deleteResumePrompt() {
+        const resumes = getSavedResumes();
+        const names = Object.keys(resumes);
+        
+        if (names.length === 0) {
+            showErrorToast('No saved resumes to delete.');
+            return;
+        }
+        
+        const name = prompt('Enter the exact name of the resume to delete:\n\nSaved resumes: ' + names.join(', '));
+        if (!name) return;
+        
+        if (resumes[name]) {
+            delete resumes[name];
+            localStorage.setItem(RESUME_STORAGE_KEY, JSON.stringify(resumes));
+            updateResumeSelector();
+            showErrorToast(`Deleted "${name}"`, 3000);
+        } else {
+            showErrorToast(`Resume "${name}" not found.`);
+        }
+    }
+    
+    function loadLastUsedResume() {
+        const resumes = getSavedResumes();
+        const names = Object.keys(resumes);
+        
+        if (names.length > 0) {
+            // Load the most recently saved resume
+            let mostRecent = names[0];
+            let mostRecentTime = resumes[names[0]].savedAt || '';
+            
+            names.forEach(name => {
+                if (resumes[name].savedAt > mostRecentTime) {
+                    mostRecent = name;
+                    mostRecentTime = resumes[name].savedAt;
+                }
+            });
+            
+            document.getElementById('resumeText').value = resumes[mostRecent].text;
+            document.getElementById('resumeSelector').value = mostRecent;
+        }
+    }
+    
     // ==========================================================================
     // UTILITIES
     // ==========================================================================
@@ -1781,20 +1701,6 @@
             trigger.setAttribute('aria-expanded', 'false');
         }
     }
-    function toggleJobSearch() {
-        const card = document.getElementById('jobSearchCard');
-        const icon = document.getElementById('jobSearchToggleIcon');
-        const trigger = card.querySelector('.collapsible-trigger');
-        if (card.classList.contains('collapsed')) {
-            card.classList.remove('collapsed');
-            icon.textContent = '−';
-            trigger.setAttribute('aria-expanded', 'true');
-        } else {
-            card.classList.add('collapsed');
-            icon.textContent = '+';
-            trigger.setAttribute('aria-expanded', 'false');
-        }
-    }
     function collapseAllCards() {
         // Collapse Quick Start
         const quickStartCard = document.getElementById('quickStartCard');
@@ -1803,14 +1709,6 @@
             quickStartCard.classList.add('collapsed');
             quickStartIcon.textContent = '+';
             quickStartCard.querySelector('.collapsible-trigger').setAttribute('aria-expanded', 'false');
-        }
-        // Collapse Job Search
-        const jobSearchCard = document.getElementById('jobSearchCard');
-        const jobSearchIcon = document.getElementById('jobSearchToggleIcon');
-        if (jobSearchCard && !jobSearchCard.classList.contains('collapsed')) {
-            jobSearchCard.classList.add('collapsed');
-            jobSearchIcon.textContent = '+';
-            jobSearchCard.querySelector('.collapsible-trigger').setAttribute('aria-expanded', 'false');
         }
     }
     
@@ -1829,45 +1727,6 @@
             trigger.setAttribute('aria-expanded', 'false');
         }
     }
-// ==========================================================================
-// SEARCH UTILITIES (HUNTER-KILLER)
-// ==========================================================================
-function runDork(site) {
-    const role = document.getElementById('targetRole').value.trim() || "Director";
-    const kw = document.getElementById('targetKeyword').value.trim() || "TS/SCI";
-    // Construct a Google Dork query: site:greenhouse.io "Director" "TS/SCI"
-    // Added tbs=qdr:m to restrict results to past month (fresher postings)
-    const query = `site:${site} "${role}" "${kw}"`;
-    const url = `https://www.google.com/search?q=${encodeURIComponent(query)}&tbs=qdr:m`;
-    window.open(url, '_blank');
-}
-function runLinkedIn() {
-    const role = document.getElementById('targetRole').value.trim() || "Director";
-    const kw = document.getElementById('targetKeyword').value.trim() || "TS/SCI";
-    // LinkedIn Search URL with "Date Posted: Past 24 hours" filter (f_TPR=r86400)
-    const url = `https://www.linkedin.com/jobs/search/?keywords=${encodeURIComponent(role + " " + kw)}&f_TPR=r604800`;
-    window.open(url, '_blank');
-}
-function runClearanceJobs() {
-    const role = document.getElementById('targetRole').value.trim() || "Director";
-    const kw = document.getElementById('targetKeyword').value.trim() || "TS/SCI";
-    // ClearanceJobs query format - include keyword for clearance filtering
-    const url = `https://www.clearancejobs.com/jobs?keywords=${encodeURIComponent(role + " " + kw)}`;
-    window.open(url, '_blank');
-}
-function runIndeed() {
-    const role = document.getElementById('targetRole').value.trim() || "Director";
-    const kw = document.getElementById('targetKeyword').value.trim() || "TS/SCI";
-    // Indeed search - fromage=7 restricts to last 7 days
-    const url = `https://www.indeed.com/jobs?q=${encodeURIComponent(role + " " + kw)}&fromage=7`;
-    window.open(url, '_blank');
-}
-function runUSAJobs() {
-    const role = document.getElementById('targetRole').value.trim() || "Director";
-    // USAJobs federal job search - gs=15 filters for GS-15 level (executive)
-    const url = `https://www.usajobs.gov/Search/Results?k=${encodeURIComponent(role)}&p=1`;
-    window.open(url, '_blank');
-}
     // ==========================================================================
     // MAIN ANALYSIS LOGIC (Two-call architecture)
     // ==========================================================================
@@ -1877,8 +1736,19 @@ function runUSAJobs() {
         hideInlineError();
         // Collapse both helper cards
         collapseAllCards();
+        
+        // Get resume text
+        resumeText = document.getElementById('resumeText').value.trim();
+        if (!resumeText) { 
+            showInlineError("Please paste your resume first.");
+            return; 
+        }
+        if (resumeText.length < 100) { 
+            showInlineError("Resume is too short. Please provide more details.");
+            return; 
+        }
         if (!jd) { 
-            showInlineError("Please paste a Job Description first.");
+            showInlineError("Please paste a job description.");
             return; 
         }
         // UI Reset
@@ -1902,7 +1772,8 @@ function runUSAJobs() {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ 
-                        situation: jd, 
+                        job_description: jd,
+                        resume_text: resumeText,
                         request_type: 'resume_match' 
                     })
                 });
@@ -2092,47 +1963,19 @@ function runUSAJobs() {
         document.getElementById('jobIntelSection').style.display = 'none';
     }
     // ==========================================================================
-    // RESUME GENERATION (FULL DETAIL)
+    // TAILORED SUMMARY DISPLAY
     // ==========================================================================
     function generateResumeHTML(aiSummary) {
         const out = document.getElementById('resumeOutput');
-        let html = `<h2>Doug Datka</h2>`;
-        html += `<p>Centreville, Virginia | 312.399.0776 | DougDatka@mac.com</p>`;
-        html += `<p><strong>${dougProfile.clearances}</strong><br>`;
-        html += `${dougProfile.certifications}</p>`;
-        html += `<h2>Executive Summary</h2>`;
-        html += `<p>${escapeHtml(aiSummary)}</p>`;
-        html += `<h2>Professional Experience</h2>`;
-        dougProfile.experiences.forEach(exp => {
-            html += `<div style="margin-bottom: 24px;">`;
-            html += `<h3 style="font-size:15px; margin-bottom:4px;">${escapeHtml(exp.company)} — ${escapeHtml(exp.location)}</h3>`;
-            html += `<div style="font-size:13px; font-weight:700; margin-bottom:8px;">${escapeHtml(exp.title)} | ${escapeHtml(exp.period)}</div>`;
-            html += `<p><em>${escapeHtml(exp.summary)}</em></p>`;
-            html += `<ul style="margin-top:8px; padding-left:20px;">`;
-            exp.bullets.forEach(b => {
-                html += `<li style="margin-bottom:4px;">${escapeHtml(b)}</li>`;
-            });
-            html += `</ul></div>`;
-        });
-        html += `<h2>Military Service</h2>`;
-        html += `<p><strong>${dougProfile.military.rank}, ${dougProfile.military.branch}</strong><br>`;
-        html += `${dougProfile.military.unit}<br>`;
-        html += `Decorations: ${dougProfile.military.decorations.join(', ')}</p>`;
-        html += `<p>Training: ${dougProfile.military.training.join(', ')}</p>`;
-        html += `<h2>Education</h2>`;
-        html += `<p><strong>${dougProfile.education.institution}</strong><br>${dougProfile.education.degree}</p>`;
-        html += `<h2>Federal Market Expertise</h2>`;
-        html += `<p><strong>Contract Vehicles:</strong> ${dougProfile.expertise.contracts.join(', ')}<br>`;
-        html += `<strong>Customers:</strong> ${dougProfile.expertise.customers.join(', ')}<br>`;
-        html += `<strong>Capture:</strong> ${dougProfile.expertise.capture.join(', ')}<br>`;
-        html += `<strong>Security:</strong> ${dougProfile.expertise.security.join(', ')}</p>`;
-        out.innerHTML = html;
+        out.innerHTML = `<h3 style="font-size: 14px; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Tailored Executive Summary</h3>
+            <p style="line-height: 1.7;">${escapeHtml(aiSummary)}</p>
+            <p style="margin-top: 16px; font-size: 12px; opacity: 0.6;">Copy this summary and paste it into your resume, replacing your current executive summary.</p>`;
     }
     // ==========================================================================
     // INTRO EMAIL & UTILS
     // ==========================================================================
     async function generateCoverLetter() {
-        if (!analysisData) return;
+        if (!analysisData || !resumeText) return;
         const btn = document.getElementById('generateCoverLetterBtn');
         const originalText = btn.innerHTML;
         btn.innerHTML = "Writing Email..."; 
@@ -2142,15 +1985,15 @@ function runUSAJobs() {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ 
-                    request_type: "generate_cover_letter", 
-                    job_description: document.getElementById("jobDescription").value, 
+                    request_type: "generate_intro_email", 
+                    job_description: document.getElementById("jobDescription").value,
+                    resume_text: resumeText,
                     analysis_data: analysisData 
                 })
             });
             const data = await res.json();
-            if(data.cover_letter) {
-                // Clean up any potential markdown or placeholders
-                let cleanLetter = data.cover_letter.replace(/\[.*?\]/g, '').trim();
+            if(data.intro_email) {
+                let cleanLetter = data.intro_email.replace(/\[.*?\]/g, '').trim();
                 document.getElementById('coverLetterDisplay').textContent = cleanLetter;
                 document.getElementById('coverLetterDisplay').style.display = 'block';
                 document.getElementById('coverLetterPlaceholder').style.display = 'none';
@@ -2159,7 +2002,7 @@ function runUSAJobs() {
                 throw new Error("No intro email returned");
             }
         } catch(e) { 
-            showErrorToast("Error generating letter: " + e.message); 
+            showErrorToast("Error generating email: " + e.message); 
         } finally { 
             btn.innerHTML = originalText; 
             btn.disabled = false; 
@@ -2192,26 +2035,36 @@ function runUSAJobs() {
         });
     }
     function clearAll() { 
+        // Clear job description and results, but KEEP the resume
         document.getElementById('jobDescription').value = ''; 
         document.getElementById('analysisResults').style.display = 'none';
         analysisData = null;
-        clearRecruiterChat();
+        // Note: resumeText and resumeText textarea are preserved for the next job
+        clearExpertChat();
     }
-    function loadSampleJD() {
-        document.getElementById('jobDescription').value = `Director of Federal Sales\nCompany: Palantir\n\nRequirements:\n- 10+ years selling to IC/DoD\n- TS/SCI Polygraph required\n- Experience identifying $50M+ opportunities\n- Technical background in data/software preferred.`;
+    
+    function clearEverything() {
+        // Full reset including resume
+        document.getElementById('resumeText').value = '';
+        document.getElementById('resumeSelector').value = '';
+        document.getElementById('jobDescription').value = ''; 
+        document.getElementById('analysisResults').style.display = 'none';
+        analysisData = null;
+        resumeText = '';
+        clearExpertChat();
     }
     // ==========================================================================
-    // ASK A RECRUITER
+    // ASK AN EXPERT
     // ==========================================================================
     let recruiterChatHistory = [];
-    async function askRecruiter() {
+    async function askExpert() {
         const questionInput = document.getElementById('recruiterQuestion');
         const question = questionInput.value.trim();
         if (!question) {
             showErrorToast('Please enter a question.');
             return;
         }
-        if (!analysisData) {
+        if (!analysisData || !resumeText) {
             showErrorToast('Please analyze a job first before asking questions.');
             return;
         }
@@ -2224,7 +2077,7 @@ function runUSAJobs() {
         // Add user message to UI
         const userMsg = document.createElement('div');
         userMsg.className = 'recruiter-message user';
-        userMsg.innerHTML = `<span class="user-label">Doug</span><p>${escapeHtml(question)}</p>`;
+        userMsg.innerHTML = `<span class="user-label">You</span><p>${escapeHtml(question)}</p>`;
         chatContainer.appendChild(userMsg);
         // Add to history
         recruiterChatHistory.push({ role: 'user', content: question });
@@ -2245,11 +2098,12 @@ function runUSAJobs() {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    request_type: 'ask_recruiter',
+                    request_type: 'ask_expert',
                     question: question,
                     job_description: document.getElementById('jobDescription').value,
+                    resume_text: resumeText,
                     analysis_data: analysisData,
-                    chat_history: recruiterChatHistory.slice(-10) // Last 10 messages for context
+                    chat_history: recruiterChatHistory.slice(-10)
                 })
             });
             const data = await res.json();
@@ -2259,10 +2113,10 @@ function runUSAJobs() {
                 throw new Error(data.error);
             }
             if (data.response) {
-                // Add recruiter response to UI
+                // Add expert response to UI
                 const assistantMsg = document.createElement('div');
                 assistantMsg.className = 'recruiter-message assistant';
-                assistantMsg.innerHTML = formatRecruiterResponse(data.response);
+                assistantMsg.innerHTML = formatExpertResponse(data.response);
                 chatContainer.appendChild(assistantMsg);
                 // Add to history
                 recruiterChatHistory.push({ role: 'assistant', content: data.response });
@@ -2279,7 +2133,7 @@ function runUSAJobs() {
             btn.disabled = false;
         }
     }
-    function formatRecruiterResponse(text) {
+    function formatExpertResponse(text) {
         // Convert markdown-style formatting to HTML with proper paragraphs
         let formatted = escapeHtml(text)
             .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
@@ -2287,20 +2141,18 @@ function runUSAJobs() {
         // Split into paragraphs and wrap each
         const paragraphs = formatted.split(/\n\n+/).filter(p => p.trim());
         const bodyHtml = paragraphs.map(p => `<p>${p.replace(/\n/g, '<br>')}</p>`).join('');
-        // Create header with avatar - neo brutalist style
         const headerHtml = `
             <div class="recruiter-header">
-                <img src="arti.png" alt="Arti" class="recruiter-avatar">
+                <img src="arti.png" alt="Expert" class="recruiter-avatar">
                 <div class="recruiter-info">
-                    <div class="recruiter-name">Arti</div>
-                    <div class="recruiter-title">Senior Federal Recruiter</div>
+                    <div class="recruiter-name">Expert</div>
+                    <div class="recruiter-title">Federal Recruiting Specialist</div>
                 </div>
-                <span class="recruiter-badge">25+ Years Grumpy</span>
             </div>
         `;
         return headerHtml + bodyHtml;
     }
-    function clearRecruiterChat() {
+    function clearExpertChat() {
         recruiterChatHistory = [];
         const chatContainer = document.getElementById('recruiterChatHistory');
         if (chatContainer) {
@@ -2534,13 +2386,13 @@ Hi [Recruiter Name],
 
 I recently submitted my application for the ${role} position at ${company} and wanted to follow up to express my continued interest.
 
-With 25+ years of federal market experience—including $1.4B in IC cloud sales at AWS and program management for $15B IDIQs—I believe my background in ${matchHighlights} aligns well with what you're looking for.
+My background in ${matchHighlights} aligns well with what you're looking for, and I'm confident I can contribute to your team's success.
 
 I'd welcome the opportunity to discuss how my experience can contribute to ${company}'s mission. Would you have 15-20 minutes for a brief call this week?
 
 Best regards,
-Doug Datka
-312.399.0776`;
+[Your Name]
+[Your Phone]`;
         
         document.getElementById('templateInterview').textContent = `Subject: Thank You – ${role} Interview
 
@@ -2553,8 +2405,8 @@ Our conversation reinforced my enthusiasm for this opportunity. I was particular
 Please don't hesitate to reach out if you need any additional information. I look forward to hearing about next steps.
 
 Best regards,
-Doug Datka
-312.399.0776`;
+[Your Name]
+[Your Phone]`;
         
         document.getElementById('templateFollowup').textContent = `Subject: Checking In – ${role} Position
 
@@ -2567,8 +2419,8 @@ I remain very interested in this opportunity and am happy to provide any additio
 Is there an updated timeline you can share for next steps?
 
 Best regards,
-Doug Datka
-312.399.0776`;
+[Your Name]
+[Your Phone]`;
         
         document.getElementById('templateNegotiate').textContent = `Subject: RE: ${role} Offer Discussion
 
@@ -2576,15 +2428,15 @@ Hi [Recruiter/Hiring Manager],
 
 Thank you for extending the offer for the ${role} position. I'm excited about the opportunity to join ${company}.
 
-After reviewing the offer and considering ${salaryReasoning}, I'd like to discuss the compensation package. Based on my background—including TS/SCI with Full Scope Poly, $1.4B in federal cloud sales, and 25+ years of executive leadership—I believe a base salary in the range of ${salaryTarget} would be more aligned with the value I'll bring.
+After reviewing the offer and considering ${salaryReasoning}, I'd like to discuss the compensation package. Based on my background and the value I'll bring, I believe a base salary in the range of ${salaryTarget} would be appropriate.
 
 I'm also interested in discussing [signing bonus / equity / PTO / start date flexibility].
 
 I'm committed to making this work and look forward to finding a package that reflects the mutual fit.
 
 Best regards,
-Doug Datka
-312.399.0776`;
+[Your Name]
+[Your Phone]`;
         
         showTemplate('applied');
     }
@@ -2731,7 +2583,11 @@ Doug Datka
     }
     
     // Initialize tracker on page load
-    document.addEventListener('DOMContentLoaded', initTracker);
+    document.addEventListener('DOMContentLoaded', () => {
+        initTracker();
+        updateResumeSelector();
+        loadLastUsedResume();
+    });
 </script>
 <!-- Error Toast (for API/network errors) -->
 <div id="errorToast" class="error-toast" role="alert" aria-live="assertive">
