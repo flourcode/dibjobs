@@ -1174,6 +1174,7 @@
                     <option value="">-- Saved Resumes --</option>
                 </select>
                 <button class="btn btn-secondary" onclick="saveCurrentResume()" style="padding: 6px 12px; font-size: 11px;">Save</button>
+                <button class="btn btn-secondary" onclick="clearResume()" style="padding: 6px 12px; font-size: 11px;">Clear</button>
             </div>
         </div>
         <div class="card-body">
@@ -1229,6 +1230,7 @@
             <div id="matchScoreContainer" class="hero-grid">
                 </div>
         </div>
+        
         
         <!-- 3. JOB INTEL (Combined: salary, timeline, competition, flags, company) -->
         <div id="jobIntelSection" class="card" style="display:none;">
@@ -1321,7 +1323,8 @@
                 <div id="recruiterChatHistory" style="margin-top: 24px; display: none;"></div>
             </div>
         </div>
-         <!-- 2. GAP ANALYSIS -->
+        
+        <!-- 2. GAP ANALYSIS -->
         <div class="card">
             <div class="card-header"><span class="card-title">Gap Analysis</span></div>
             <div class="card-body">
@@ -2092,6 +2095,12 @@
         analysisData = null;
         resumeText = '';
         clearExpertChat();
+    }
+    
+    function clearResume() {
+        document.getElementById('resumeText').value = '';
+        document.getElementById('resumeSelector').value = '';
+        resumeText = '';
     }
     
     function loadSampleData() {
