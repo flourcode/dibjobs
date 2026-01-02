@@ -73,23 +73,65 @@
     header {
         background: var(--card-white);
         border-bottom: var(--border-thick) solid var(--ink-black);
-        padding: 24px 40px;
+        padding: 16px 24px;
         display: flex;
         align-items: center;
         justify-content: space-between;
         position: sticky;
         top: 0;
         z-index: 100;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
     }
     .brand {
         display: flex;
         align-items: center;
-        gap: 12px;
+        gap: 14px;
     }
     .logo-icon {
-        width: 40px;
-        height: 40px;
+        width: 44px;
+        height: 44px;
+        flex-shrink: 0;
+    }
+    .brand-text {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+    .app-title {
+        font-family: 'Space Mono', monospace;
+        font-size: 22px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: -0.5px;
+        line-height: 1.1;
         color: var(--ink-black);
+    }
+    .app-subtitle {
+        font-family: 'Space Mono', monospace;
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--ink-black);
+        opacity: 0.6;
+    }
+    @media (max-width: 500px) {
+        header {
+            padding: 12px 16px;
+        }
+        .brand {
+            gap: 10px;
+        }
+        .logo-icon {
+            width: 36px;
+            height: 36px;
+        }
+        .app-title {
+            font-size: 18px;
+        }
+        .app-subtitle {
+            font-size: 9px;
+            letter-spacing: 0.3px;
+        }
     }
     .logo-box {
         width: 48px;
@@ -102,21 +144,6 @@
         font-weight: 700;
         font-size: 28px;
         border-radius: var(--radius);
-    }
-    .app-title {
-        font-size: 20px;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: -0.5px;
-    }
-    .app-version {
-        font-size: 10px;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        background: var(--accent-mint);
-        padding: 4px 8px;
-        border-radius: 4px;
-        border: 1px solid var(--ink-black);
     }
     /* MAIN CONTAINER */
     main {
@@ -1106,13 +1133,13 @@
 <body>
 <header>
     <div class="brand">
-        <svg class="logo-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="40" height="40">
+        <svg class="logo-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
             <polygon points="55,8 90,35 77,78 33,78 20,35" fill="var(--ink-black)"/>
             <polygon points="50,12 82,37 70,76 30,76 18,37" fill="#fff" stroke="var(--ink-black)" stroke-width="4"/>
         </svg>
-        <div>
+        <div class="brand-text">
             <div class="app-title">DIB Jobs</div>
-            <div class="app-version">Defense Industrial Base Job Matcher</div>
+            <div class="app-subtitle">Defense Industrial Base Job Matcher</div>
         </div>
     </div>
 </header>
@@ -1231,7 +1258,6 @@
                 </div>
         </div>
         
-        
         <!-- 3. JOB INTEL (Combined: salary, timeline, competition, flags, company) -->
         <div id="jobIntelSection" class="card" style="display:none;">
             <div class="card-header">
@@ -1323,7 +1349,6 @@
                 <div id="recruiterChatHistory" style="margin-top: 24px; display: none;"></div>
             </div>
         </div>
-        
         <!-- 2. GAP ANALYSIS -->
         <div class="card">
             <div class="card-header"><span class="card-title">Gap Analysis</span></div>
@@ -2104,84 +2129,94 @@
     }
     
     function loadSampleData() {
-        // Sample resume - generic cleared professional
-        const sampleResume = `SAMPLE CANDIDATE
-Washington, DC Metro Area | sample@email.com | (555) 123-4567
+        // Sample resume - John Doe, federal sales professional
+        const sampleResume = `JOHN DOE
+Arlington, VA | johndoe@email.com | (703) 555-1234
 
-CLEARANCE: Top Secret/SCI with CI Polygraph
+CLEARANCE: Top Secret/SCI with Full Scope Polygraph
 
 SUMMARY
-Program Manager with 12+ years of experience delivering mission-critical solutions for Department of Defense and Intelligence Community customers. Proven track record managing $50M+ programs, leading cross-functional teams, and driving digital transformation initiatives. PMP certified with deep expertise in Agile methodologies and federal acquisition.
+Senior Federal Sales Executive with 15+ years driving revenue growth across Department of Defense and Intelligence Community accounts. Proven track record of closing $500M+ in federal cloud and IT contracts. Deep relationships with DoD CIOs, program executives, and acquisition leaders. Expert in navigating complex federal procurement cycles and building strategic partner ecosystems.
 
 EXPERIENCE
 
-Senior Program Manager | Defense Contractor Inc. | 2019-Present
-- Lead $45M cloud migration program for DoD customer, delivering 6 months ahead of schedule
-- Manage team of 35 engineers, developers, and analysts across 3 locations
-- Achieved 100% CPARS ratings across all task orders
-- Drove adoption of DevSecOps practices reducing deployment time by 60%
+Principal Federal Sales Manager | Major Cloud Provider | 2019-Present
+- Lead DoD sales territory generating $180M+ annual revenue
+- Closed $95M multi-year enterprise license agreement with Army customer
+- Built partner ecosystem of 25+ defense contractors driving 40% of pipeline
+- Achieved 145% of quota in FY23, 138% in FY22, President's Club both years
+- Manage relationships with DISA, Army, Navy, and Air Force accounts
+- Coordinate with solutions architects on technical requirements and ATO support
 
-Program Manager | Federal Systems Corp | 2015-2019
-- Managed $28M IT modernization contract for Intelligence Community customer
-- Led requirements gathering and solution design for enterprise data platform
-- Coordinated with contracting officers and government stakeholders
-- Mentored 5 junior PMs, 3 promoted to senior roles
+Senior Account Executive, Defense | Enterprise Software Company | 2015-2019
+- Grew DoD territory from $12M to $67M in annual recurring revenue
+- Led capture of $45M IDIQ contract with Navy customer
+- Developed strategic account plans for top 15 DoD accounts
+- Partnered with Lockheed Martin, Northrop Grumman, and GDIT on joint pursuits
+- Consistently exceeded quota: 112%, 128%, 135%, 141% over four years
 
-Systems Engineer | Tech Solutions LLC | 2011-2015
-- Designed and implemented secure network architectures for classified environments
-- Supported ATO processes and security documentation
-- Provided technical leadership on $12M infrastructure upgrade
+Federal Account Manager | Defense Contractor | 2010-2015
+- Managed $35M book of business across Army and Intel Community accounts
+- Supported $200M program capture as sales lead
+- Built relationships with contracting officers and program managers
+- Transitioned 8 accounts from on-premise to cloud solutions
+
+Sales Representative | Technology Reseller | 2007-2010
+- Developed new business in federal civilian and DoD markets
+- Achieved Rookie of the Year, promoted twice in three years
 
 EDUCATION
-M.S. Information Technology, George Mason University
-B.S. Computer Science, Virginia Tech
+MBA, Georgetown University McDonough School of Business
+B.S. Business Administration, Penn State University
 
 CERTIFICATIONS
-- PMP (Project Management Professional)
-- AWS Solutions Architect Associate
-- ITIL v4 Foundation
-- Security+
+- AWS Cloud Practitioner
+- Salesforce Certified Administrator
+- MEDDIC Sales Methodology Certified
 
 SKILLS
-Program Management, Agile/Scrum, Federal Acquisition (FAR/DFARS), 
-Cloud Migration, DevSecOps, Stakeholder Management, CPARS, 
-Risk Management, Cost Control, Team Leadership`;
+Federal Sales, DoD Procurement, Cloud Solutions, Strategic Partnerships,
+Account Planning, Contract Negotiations, IDIQ/GWAC, FAR/DFARS,
+Executive Relationships, Pipeline Management, Salesforce, Quota Achievement`;
 
-        // Sample job description
-        const sampleJD = `Director of Cloud Programs
-Acme Defense Solutions - Reston, VA
+        // Sample job description - AWS DoD Sales
+        const sampleJD = `Principal DoD Sales Representative
+Amazon Web Services (AWS) - Arlington, VA
 
 About the Role:
-We are seeking an experienced Director of Cloud Programs to lead our growing portfolio of cloud transformation initiatives for Department of Defense customers. This role will oversee multiple program managers and drive strategic growth in our federal cloud practice.
+AWS is seeking an experienced Principal DoD Sales Representative to drive adoption of cloud services across Department of Defense customers. You will be responsible for developing and executing sales strategies for a portfolio of DoD accounts, working closely with solutions architects, partners, and AWS leadership to accelerate cloud adoption.
 
-Requirements:
-- Active Top Secret/SCI clearance with polygraph (Full Scope preferred)
-- 15+ years of experience in federal IT program management
-- 8+ years managing cloud migration or modernization programs
-- Experience with DoD and Intelligence Community customers
-- PMP certification required; AWS certifications preferred
-- Proven track record managing programs over $75M
-- Experience with Agile at scale and DevSecOps
-- Strong business development and capture experience
-- Excellent communication and executive presence
+Basic Qualifications:
+- 10+ years of enterprise sales experience, with 7+ years selling to DoD customers
+- Active Top Secret/SCI clearance with Full Scope Polygraph
+- Track record of exceeding sales quotas of $50M+ annually
+- Experience selling cloud, SaaS, or enterprise software solutions
+- Bachelor's degree required
+
+Preferred Qualifications:
+- Experience selling cloud infrastructure (AWS, Azure, GCP)
+- Established relationships with DoD CIOs and program executives
+- Experience with DoD procurement vehicles (IDIQ, BPA, GWACs)
+- Understanding of FedRAMP, IL4/IL5/IL6 requirements
+- MBA or advanced degree
+- AWS certifications
+- Experience working with defense prime contractors and system integrators
+- MEDDIC or similar sales methodology experience
 
 Responsibilities:
-- Lead portfolio of 5-7 cloud programs totaling $150M+ annually
-- Develop and execute growth strategy for federal cloud practice
-- Build and mentor high-performing program management team
-- Serve as executive sponsor for key customer relationships
-- Drive operational excellence and delivery performance
-- Support capture efforts and proposal development
-- Manage P&L for cloud programs business unit
+- Own full sales cycle for assigned DoD accounts
+- Develop account strategies and territory plans to exceed revenue targets
+- Build and maintain executive relationships with DoD customers
+- Collaborate with solutions architects on technical requirements
+- Coordinate with partners to drive joint opportunities
+- Provide accurate forecasting and pipeline management
+- Support ATO and security accreditation processes
+- Represent AWS at DoD industry events and conferences
 
-Preferred:
-- Experience with FedRAMP and cloud security frameworks
-- Background in software development or systems engineering
-- MBA or advanced degree
-- Experience scaling programs from $50M to $100M+
+Compensation: $200,000 - $280,000 OTE (base + variable)
+Location: Arlington, VA (customer site visits required)
 
-Compensation: $180,000 - $220,000 base + bonus + equity
-Location: Hybrid (Reston, VA - 3 days/week onsite)`;
+Amazon is an Equal Opportunity Employer.`;
 
         document.getElementById('resumeText').value = sampleResume;
         document.getElementById('jobDescription').value = sampleJD;
