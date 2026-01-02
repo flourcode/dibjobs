@@ -1229,8 +1229,6 @@
                 </div>
         </div>
         
-       
-        
         <!-- 3. JOB INTEL (Combined: salary, timeline, competition, flags, company) -->
         <div id="jobIntelSection" class="card" style="display:none;">
             <div class="card-header">
@@ -1293,6 +1291,12 @@
                 </div>
                 <!-- Company Intel (rendered by JS if available) -->
                 <div id="companyIntelContainer" style="margin-top: 24px;"></div>
+                
+                <!-- Quick Links (always visible when company is known) -->
+                <div id="quickLinksContainer" style="margin-top: 24px; display: none;">
+                    <div class="kit-section-title" style="margin-bottom: 12px;">Research This Company</div>
+                    <div id="quickLinksButtons" class="network-links"></div>
+                </div>
             </div>
         </div>
         
@@ -1316,7 +1320,7 @@
                 <div id="recruiterChatHistory" style="margin-top: 24px; display: none;"></div>
             </div>
         </div>
-         <!-- 2. GAP ANALYSIS -->
+        <!-- 2. GAP ANALYSIS -->
         <div class="card">
             <div class="card-header"><span class="card-title">Gap Analysis</span></div>
             <div class="card-body">
@@ -2362,11 +2366,14 @@
     function renderNetworkFinder(data) {
         const company = data.company;
         const container = document.getElementById('networkLinks');
+        const quickLinksContainer = document.getElementById('quickLinksContainer');
+        const quickLinksButtons = document.getElementById('quickLinksButtons');
         
-        // If company is not specified, show message
+        // If company is not specified, show message and hide quick links
         if (!company || company === 'Not Specified' || company.toLowerCase().includes('not specified')) {
             document.getElementById('networkCompany').textContent = 'Unknown Company';
             container.innerHTML = '<span style="opacity: 0.6; font-size: 13px;">Company not identified - network search unavailable</span>';
+            if (quickLinksContainer) quickLinksContainer.style.display = 'none';
             return;
         }
         
@@ -2374,7 +2381,7 @@
         
         const companyEncoded = encodeURIComponent(company);
         
-        container.innerHTML = `
+        const linksHTML = `
             <a href="https://www.linkedin.com/search/results/people/?keywords=${companyEncoded}%20AND%20(recruiter%20OR%20talent%20OR%20HR)" target="_blank" class="network-link">
                 Find Recruiters
             </a>
@@ -2384,9 +2391,6 @@
             <a href="https://www.linkedin.com/search/results/people/?keywords=${companyEncoded}%20AND%20(army%20OR%20military%20OR%20veteran%20OR%20special%20operations)" target="_blank" class="network-link">
                 Find Veterans
             </a>
-            <a href="https://www.linkedin.com/search/results/people/?keywords=${companyEncoded}%20AND%20(AWS%20OR%20Northrop%20OR%20Chenega%20OR%20Triple%20Canopy)" target="_blank" class="network-link">
-                Past Employers
-            </a>
             <a href="https://www.glassdoor.com/Search/results.htm?keyword=${companyEncoded}" target="_blank" class="network-link">
                 Glassdoor
             </a>
@@ -2394,6 +2398,14 @@
                 Contract News
             </a>
         `;
+        
+        // Populate both locations
+        container.innerHTML = linksHTML;
+        
+        if (quickLinksButtons && quickLinksContainer) {
+            quickLinksButtons.innerHTML = linksHTML;
+            quickLinksContainer.style.display = 'block';
+        }
     }
     
     // ==========================================================================
