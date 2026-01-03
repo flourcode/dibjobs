@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DIB Jobs // Defense Industrial Base Job Matcher</title>
+    <title>DIB Jobs // Defense Industrial Base Job Analyzer</title>
     <meta name="description" content="A job matching and application toolkit built for Defense Industrial Base professionals.">
     <link rel="canonical" href="https://dibjobs.com/">
     <!-- Open Graph / LinkedIn -->
@@ -110,9 +110,7 @@
         font-family: 'Space Mono', monospace;
         font-size: 10px;
         text-transform: uppercase;
-        letter-spacing: 0.5px;
         color: var(--ink-black);
-        opacity: 0.6;
     }
     @media (max-width: 500px) {
         header {
@@ -162,7 +160,7 @@
         transition: transform 0.2s ease;
     }
     .card-header {
-        background: var(--bg-cream);
+        background: var(--accent-mint);
         border-bottom: var(--border-thick) solid var(--ink-black);
         padding: 16px 24px;
         display: flex;
@@ -236,6 +234,19 @@
         background: #FFFFFF;
         box-shadow: 4px 4px 0 rgba(0,0,0,0.1);
         border-color: var(--ink-black);
+    }
+    .textarea-wrapper {
+        position: relative;
+    }
+    .char-count {
+        position: absolute;
+        bottom: 8px;
+        right: 12px;
+        font-family: 'Space Mono', monospace;
+        font-size: 10px;
+        color: var(--ink-black);
+        opacity: 0.4;
+        pointer-events: none;
     }
     /* BUTTONS */
     .btn {
@@ -527,6 +538,73 @@
     .error-toast-close:hover {
         opacity: 1;
     }
+    /* FOOTER */
+    footer {
+        background: var(--card-white);
+        border-top: var(--border-thick) solid var(--ink-black);
+        padding: 20px 24px;
+        margin-top: 40px;
+    }
+    .footer-content {
+        max-width: 1200px;
+        margin: 0 auto;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 16px;
+    }
+    .footer-brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-family: 'Space Mono', monospace;
+        font-weight: 700;
+        font-size: 14px;
+        text-transform: uppercase;
+    }
+    .footer-links {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 13px;
+    }
+    .footer-links a {
+        color: var(--ink-black);
+        text-decoration: none;
+        opacity: 0.7;
+        transition: opacity 0.2s;
+    }
+    .footer-links a:hover {
+        opacity: 1;
+    }
+    .footer-divider {
+        opacity: 0.3;
+    }
+    .footer-share-btn {
+        background: none;
+        border: none;
+        color: var(--ink-black);
+        font-family: inherit;
+        font-size: 13px;
+        cursor: pointer;
+        opacity: 0.7;
+        transition: opacity 0.2s;
+        padding: 0;
+    }
+    .footer-share-btn:hover {
+        opacity: 1;
+    }
+    @media (max-width: 500px) {
+        .footer-content {
+            flex-direction: column;
+            text-align: center;
+        }
+        .footer-links {
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+    }
     /* INLINE ERROR MESSAGE (for form validation) */
     .inline-error {
         background: rgba(209, 143, 122, 0.15);
@@ -674,6 +752,18 @@
         grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
         gap: 16px;
         margin-bottom: 24px;
+    }
+    .results-actions {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 24px;
+        flex-wrap: wrap;
+    }
+    .salary-disclaimer {
+        font-size: 10px;
+        font-style: italic;
+        opacity: 0.5;
+        margin-top: 8px;
     }
     .intel-panel {
         background: var(--bg-cream);
@@ -1163,7 +1253,7 @@
         </svg>
         <div class="brand-text">
             <div class="app-title">DIB Jobs</div>
-            <div class="app-subtitle">Defense Industrial Base Job Matcher</div>
+            <div class="app-subtitle">Defense Industrial Base Job Analyzer</div>
         </div>
     </div>
 </header>
@@ -1220,12 +1310,12 @@
     <!-- JOB SEARCH CARD (Collapsible) -->
     <div id="jobSearchCard" class="card collapsible-card collapsed">
         <div class="card-header collapsible-trigger" onclick="toggleJobSearch()" role="button" tabindex="0" aria-expanded="false">
-            <span class="card-title">LinkedIn Job Boards</span>
+            <span class="card-title">Find Jobs</span>
             <span id="jobSearchToggle" class="mono" style="font-weight: 700; font-size: 20px;">+</span>
         </div>
         <div id="jobSearchContent" class="collapsible-content">
             <div class="card-body">
-                <p style="margin-bottom: 16px; font-size: 13px; opacity: 0.8;">Quick links to Company Linkedin Job Boards.</p>
+                <p style="margin-bottom: 16px; font-size: 13px; opacity: 0.8;">Quick links to federal tech sales and BD roles at top employers.</p>
                 
                 <!-- Federal Primes -->
                 <div style="margin-bottom: 20px;">
@@ -1276,7 +1366,7 @@
                         <a href="https://www.linkedin.com/company/zscaler/jobs/" target="_blank" class="job-search-link">Zscaler</a>
                         <a href="https://www.linkedin.com/company/tenableinc/jobs/" target="_blank" class="job-search-link">Tenable</a>
                         <a href="https://www.linkedin.com/company/okta-inc-/jobs/" target="_blank" class="job-search-link">Okta</a>
-                        <a href="https://www.linkedin.com/company/splunk/jobs/" target="_blank" class="job-search-link">Splunk</a>
+                        <a href="https://www.linkedin.com/company/splunk/jobs/" target="_blank" class="job-search-link">Splunk (Cisco)</a>
                     </div>
                 </div>
                 
@@ -1297,6 +1387,7 @@
                 <div>
                     <div class="kit-section-title" style="margin-bottom: 10px;">VARs & Resellers</div>
                     <div class="job-search-grid">
+                        <a href="https://www.linkedin.com/company/cdw/jobs/" target="_blank" class="job-search-link">CDW-G</a>
                         <a href="https://www.linkedin.com/company/carahsoft/jobs/" target="_blank" class="job-search-link">Carahsoft</a>
                         <a href="https://www.linkedin.com/company/world-wide-technology/jobs/" target="_blank" class="job-search-link">WWT</a>
                         <a href="https://www.linkedin.com/company/iron-bow-technologies/jobs/" target="_blank" class="job-search-link">Iron Bow</a>
@@ -1314,8 +1405,8 @@
                     <div class="kit-section-title" style="margin-bottom: 10px;">Cleared Job Boards</div>
                     <div class="job-search-grid">
                         <a href="https://www.clearancejobs.com/jobs?keywords=sales" target="_blank" class="job-search-link">ClearanceJobs</a>
-                        <a href="https://www.linkedin.com/jobs/search/?keywords=director&f_TPR=r604800" target="_blank" class="job-search-link">LinkedIn</a>
-                        <a href="https://www.indeed.com/jobs?q=federal+sales" target="_blank" class="job-search-link">Indeed</a>
+                        <a href="https://www.linkedin.com/jobs/search/?keywords=TS%2FSCI%20sales&f_TPR=r604800" target="_blank" class="job-search-link">LinkedIn (TS/SCI)</a>
+                        <a href="https://www.indeed.com/jobs?q=federal+sales+top+secret" target="_blank" class="job-search-link">Indeed</a>
                     </div>
                 </div>
             </div>
@@ -1335,7 +1426,10 @@
             </div>
         </div>
         <div class="card-body">
-            <textarea id="resumeText" placeholder="Paste your resume text here..." aria-label="Resume input" style="min-height: 150px;"></textarea>
+            <div class="textarea-wrapper">
+                <textarea id="resumeText" placeholder="Paste your resume text here..." aria-label="Resume input" style="min-height: 150px;" oninput="updateCharCount('resumeText', 'resumeCharCount')"></textarea>
+                <div class="char-count" id="resumeCharCount">0 characters</div>
+            </div>
             <div style="margin-top: 12px; padding: 12px; background: rgba(0,0,0,0.03); border-radius: var(--radius); font-size: 12px; line-height: 1.6;">
                 <strong style="font-family: 'Space Mono', monospace; text-transform: uppercase; font-size: 10px; letter-spacing: 0.5px;">Privacy Notice:</strong>
                 <ul style="margin: 8px 0 0 16px; opacity: 0.8;">
@@ -1354,7 +1448,10 @@
             <span class="card-title">Job Description</span>
         </div>
         <div class="card-body">
-            <textarea id="jobDescription" placeholder="Paste job description text or a URL..." aria-label="Job description input"></textarea>
+            <div class="textarea-wrapper">
+                <textarea id="jobDescription" placeholder="Paste job description text or a URL..." aria-label="Job description input" oninput="updateCharCount('jobDescription', 'jdCharCount')"></textarea>
+                <div class="char-count" id="jdCharCount">0 characters</div>
+            </div>
             <div class="action-bar">
                 <button id="analyzeBtn" class="btn btn-primary" onclick="analyzeJob()" aria-label="Analyze job match">
                     <span id="btnText">Analyze Match</span>
@@ -1388,6 +1485,18 @@
                 </div>
         </div>
         
+        <!-- Action buttons row -->
+        <div class="results-actions">
+            <button class="btn btn-secondary" onclick="exportToPDF()" style="font-size: 12px; padding: 10px 16px;">
+                📄 Export Text
+            </button>
+            <button class="btn btn-secondary" onclick="addToTracker()" style="font-size: 12px; padding: 10px 16px;">
+                📌 Track This Job
+            </button>
+        </div>
+        
+        
+        
         <!-- 3. JOB INTEL (Combined: salary, timeline, competition, flags, company) -->
         <div id="jobIntelSection" class="card" style="display:none;">
             <div class="card-header">
@@ -1409,6 +1518,7 @@
                                 <span id="salaryLow">$0K</span>
                                 <span id="salaryHigh">$0K</span>
                             </div>
+                            <div class="salary-disclaimer">AI estimate only — verify with market data</div>
                         </div>
                     </div>
                     <div class="intel-panel">
@@ -1464,7 +1574,7 @@
             <div class="card-header">
                 <span class="card-title has-avatar" style="gap: 12px;">
                     <img src="arti.png" alt="Expert" style="width: 48px; height: 48px; border-radius: var(--radius);">
-                    Ask a Simulated Recruiter
+                    Ask an Simulated Recruiter
                 </span>
             </div>
             <div class="card-body">
@@ -1783,6 +1893,125 @@
         if (!str) return '';
         return str.replace(/[&<>"']/g, m => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;' })[m]);
     }
+    
+    // Character count for textareas
+    function updateCharCount(textareaId, countId) {
+        const textarea = document.getElementById(textareaId);
+        const countEl = document.getElementById(countId);
+        if (textarea && countEl) {
+            const len = textarea.value.length;
+            const words = textarea.value.trim() ? textarea.value.trim().split(/\s+/).length : 0;
+            countEl.textContent = `${len.toLocaleString()} chars · ${words.toLocaleString()} words`;
+        }
+    }
+    
+    // Share this tool
+    function shareThisTool() {
+        const url = 'https://dibjobs.com';
+        const text = 'DIB Jobs - AI-powered resume matcher for Defense Industrial Base professionals. Check how your resume stacks up against federal tech roles.';
+        
+        if (navigator.share) {
+            navigator.share({ title: 'DIB Jobs', text: text, url: url })
+                .catch(err => console.log('Share cancelled'));
+        } else {
+            navigator.clipboard.writeText(url).then(() => {
+                showErrorToast('Link copied to clipboard!', 2000);
+            }).catch(() => {
+                showErrorToast('Could not copy link', 2000);
+            });
+        }
+    }
+    
+    // Export analysis to PDF
+    function exportToPDF() {
+        if (!analysisData) {
+            showErrorToast('No analysis to export. Run an analysis first.');
+            return;
+        }
+        
+        const data = analysisData;
+        const jobTitle = data.job_title || 'Unknown Role';
+        const company = data.company || 'Unknown Company';
+        const score = data.match_score || 'N/A';
+        const verdict = data.verdict || '';
+        
+        // Build content
+        let content = `
+DIB JOBS - ANALYSIS REPORT
+Generated: ${new Date().toLocaleDateString()}
+═══════════════════════════════════════════════════
+
+POSITION: ${jobTitle}
+COMPANY: ${company}
+MATCH SCORE: ${score}/100
+VERDICT: ${verdict}
+
+═══════════════════════════════════════════════════
+GAP ANALYSIS
+═══════════════════════════════════════════════════
+`;
+        
+        if (data.analysis && data.analysis.length > 0) {
+            data.analysis.forEach(item => {
+                const prefix = item.toLowerCase().startsWith('match') ? '✓' : 
+                              item.toLowerCase().startsWith('gap') ? '✗' : '•';
+                content += `${prefix} ${item}\n`;
+            });
+        }
+        
+        if (data.salary_intel) {
+            content += `
+═══════════════════════════════════════════════════
+SALARY INTEL (AI Estimate - Verify with market data)
+═══════════════════════════════════════════════════
+Range: $${data.salary_intel.low}K - $${data.salary_intel.high}K
+Target: $${data.salary_intel.mid}K
+Notes: ${data.salary_intel.notes || 'N/A'}
+`;
+        }
+        
+        if (data.interview_questions && data.interview_questions.length > 0) {
+            content += `
+═══════════════════════════════════════════════════
+INTERVIEW PREP
+═══════════════════════════════════════════════════
+`;
+            data.interview_questions.forEach((q, i) => {
+                content += `\nQ${i+1}: ${q.question}\n`;
+                content += `Suggested Answer: ${q.answer}\n`;
+            });
+        }
+        
+        content += `
+═══════════════════════════════════════════════════
+Generated by DIB Jobs - https://dibjobs.com
+`;
+        
+        // Create and download text file (PDF would require library)
+        const blob = new Blob([content], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `DIB-Jobs-Analysis-${company.replace(/[^a-z0-9]/gi, '-')}-${new Date().toISOString().split('T')[0]}.txt`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
+        showErrorToast('Analysis exported!', 2000);
+    }
+    
+    // Keyboard shortcut: Cmd/Ctrl + Enter to analyze
+    document.addEventListener('keydown', function(e) {
+        if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+            const activeEl = document.activeElement;
+            if (activeEl && (activeEl.id === 'jobDescription' || activeEl.id === 'resumeText')) {
+                e.preventDefault();
+                analyzeJob();
+            }
+        }
+    });
+    
     function startLoadingAnim() {
         const card = document.getElementById('loadingCard');
         const stepText = document.getElementById('loadingStep');
@@ -2917,6 +3146,9 @@ Best regards,
         initTracker();
         updateResumeSelector();
         loadLastUsedResume();
+        // Initialize char counts
+        updateCharCount('resumeText', 'resumeCharCount');
+        updateCharCount('jobDescription', 'jdCharCount');
     });
 </script>
 <!-- Error Toast (for API/network errors) -->
@@ -2924,5 +3156,23 @@ Best regards,
     <span id="errorToastText"></span>
     <button class="error-toast-close" onclick="hideErrorToast()" aria-label="Dismiss error message">×</button>
 </div>
+
+<!-- Footer -->
+<footer>
+    <div class="footer-content">
+        <div class="footer-brand">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="24" height="24">
+                <polygon points="55,8 90,35 77,78 33,78 20,35" fill="var(--ink-black)"/>
+                <polygon points="50,12 82,37 70,76 30,76 18,37" fill="#fff" stroke="var(--ink-black)" stroke-width="4"/>
+            </svg>
+            <span>DIB Jobs</span>
+        </div>
+        <div class="footer-links">
+            <a href="https://www.linkedin.com/in/markflournoy/" target="_blank">Built by Mark</a>
+            <span class="footer-divider">•</span>
+            <button onclick="shareThisTool()" class="footer-share-btn">Share This Tool</button>
+        </div>
+    </div>
+</footer>
 </body>
 </html>
