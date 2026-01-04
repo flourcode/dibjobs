@@ -3,486 +3,442 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Arti // DIB Career Super-App</title>
+    <title>Arti // Smart Career Agent</title>
     <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
 /* ==========================================================================
-   NEO-BRUTALIST SYSTEM
+   SMART STACK DESIGN SYSTEM (Slick Neo-Brutalist)
    ========================================================================== */
 :root {
     --ink: #1a1a2e;
     --paper: #ffffff;
-    --cream: #f8f6f1;
-    --pale-blue: #c8dae8;
-    --mint: #d4e8dc;
-    --clay: #e07a5f;
-    --gold: #f2cc8f;
-    --olive: #81b29a;
+    --canvas: #f4f6f8;
+    --accent: #c8dae8; /* Pale Blue */
+    --success: #d4e8dc; /* Mint */
+    --warning: #f2cc8f; /* Gold */
+    --danger: #e07a5f; /* Clay */
     
-    --border: 3px solid var(--ink);
+    --border: 2px solid var(--ink);
     --shadow: 4px 4px 0 var(--ink);
-    --radius: 12px;
+    --radius: 16px;
+    --font-main: 'DM Sans', sans-serif;
+    --font-mono: 'Space Mono', monospace;
 }
 
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-body { margin: 0; padding: 0; font-family: 'DM Sans', sans-serif; background: var(--pale-blue); color: var(--ink); height: 100vh; overflow: hidden; }
-h1, h2, h3, .mono { font-family: 'Space Mono', monospace; }
+body { margin: 0; padding: 0; font-family: var(--font-main); background: var(--canvas); color: var(--ink); height: 100vh; overflow: hidden; }
 
-/* APP FRAME */
-.app-frame {
-    max-width: 600px; margin: 0 auto; height: 100vh;
-    background: var(--cream); border-left: var(--border); border-right: var(--border);
-    display: flex; flex-direction: column; position: relative;
-    box-shadow: 0 0 60px rgba(0,0,0,0.1);
+/* APP SHELL */
+.app-shell {
+    max-width: 500px; /* Tighter mobile frame */
+    margin: 0 auto;
+    height: 100vh;
+    background: var(--canvas);
+    border-left: var(--border);
+    border-right: var(--border);
+    display: flex; flex-direction: column;
+    position: relative;
+    box-shadow: 0 0 80px rgba(0,0,0,0.15);
 }
-@media(max-width: 650px) { .app-frame { border: none; width: 100%; } }
+@media(max-width: 550px) { .app-shell { border: none; width: 100%; } }
 
 /* HEADER */
-.app-header {
-    padding: 16px 20px; border-bottom: var(--border); background: var(--paper);
-    display: flex; justify-content: space-between; align-items: center; z-index: 10;
-    flex-shrink: 0;
+.smart-header {
+    padding: 16px 24px; background: var(--paper); border-bottom: var(--border);
+    display: flex; justify-content: space-between; align-items: center; z-index: 20;
 }
-.brand { font-family: 'Space Mono'; font-weight: 700; font-size: 16px; display: flex; align-items: center; gap: 10px; text-transform: uppercase; }
-.brand-avatar { width: 36px; height: 36px; }
-.brand-avatar img { width: 100%; height: 100%; object-fit: contain; }
+.brand-pill {
+    background: var(--ink); color: white; padding: 6px 12px; border-radius: 30px;
+    font-family: var(--font-mono); font-weight: 700; font-size: 12px; letter-spacing: 1px;
+    display: flex; align-items: center; gap: 8px;
+}
+.mode-badge {
+    font-size: 10px; background: var(--success); color: var(--ink); padding: 2px 6px; border-radius: 4px;
+}
 
-/* ==========================================================================
-   VIEW CONTAINER (Swappable Tabs)
-   ========================================================================== */
-.view-container {
+/* MAIN SCROLL AREA */
+.feed-container {
     flex: 1; overflow-y: auto; padding: 20px;
-    display: none; /* Hidden by default */
-    padding-bottom: 100px; /* Space for Nav */
+    scroll-behavior: smooth;
+    padding-bottom: 120px; /* Space for the "Smart Bar" */
 }
-.view-container.active { display: block; }
 
-/* --------------------------------------------------------------------------
-   VIEW 1: THE GURU (Chat)
-   -------------------------------------------------------------------------- */
-.chat-stream { display: flex; flex-direction: column; gap: 16px; }
-.msg-row { display: flex; gap: 12px; align-items: flex-start; opacity: 0; animation: slideUp 0.3s forwards; }
-.msg-row.user { flex-direction: row-reverse; }
-.avatar { width: 32px; height: 32px; flex-shrink: 0; }
-.bubble {
-    max-width: 85%; padding: 14px 18px; border-radius: 12px;
-    font-size: 14px; line-height: 1.5; border: 2px solid var(--ink);
-    background: var(--paper); box-shadow: 3px 3px 0 rgba(0,0,0,0.05);
-}
-.msg-row.user .bubble { background: var(--ink); color: white; box-shadow: 3px 3px 0 rgba(0,0,0,0.2); }
-
-/* Chat Options */
-.chat-options { display: flex; flex-wrap: wrap; gap: 8px; margin-left: 44px; margin-top: 4px; }
-.chat-btn {
-    padding: 8px 14px; background: var(--paper); border: 2px solid var(--ink);
-    border-radius: 20px; font-family: 'Space Mono'; font-weight: 700; font-size: 11px;
-    cursor: pointer; transition: all 0.1s; box-shadow: 2px 2px 0 rgba(0,0,0,0.1);
-}
-.chat-btn:hover { transform: translate(-1px, -1px); box-shadow: 3px 3px 0 var(--ink); background: var(--mint); }
-.chat-btn.disabled { opacity: 0.5; pointer-events: none; border-color: #ccc; box-shadow: none; }
-.chat-btn.selected { background: var(--ink); color: white; opacity: 1; border-color: var(--ink); }
-
-/* --------------------------------------------------------------------------
-   VIEW 2: THE LAB (Input)
-   -------------------------------------------------------------------------- */
-.lab-header { margin-bottom: 24px; text-align: center; }
-.lab-title { font-size: 24px; font-weight: 700; margin-bottom: 8px; line-height: 1.1; }
-.lab-sub { font-size: 13px; opacity: 0.7; }
-
-.input-card {
+/* CARDS (The Building Blocks) */
+.stack-card {
     background: var(--paper); border: var(--border); border-radius: var(--radius);
-    padding: 20px; box-shadow: var(--shadow); margin-bottom: 20px;
-}
-.input-label { font-family: 'Space Mono'; font-size: 11px; font-weight: 700; text-transform: uppercase; margin-bottom: 10px; display: block; }
-.chunky-input {
-    width: 100%; height: 120px; padding: 14px; border: 2px solid var(--ink);
-    border-radius: 8px; font-family: 'DM Sans'; font-size: 13px; resize: none;
-    background: #fafafa; transition: all 0.2s;
-}
-.chunky-input:focus { outline: none; background: #fff; box-shadow: 3px 3px 0 var(--pale-blue); }
-
-.analyze-btn {
-    width: 100%; padding: 18px; background: var(--ink); color: white;
-    font-family: 'Space Mono'; font-size: 16px; font-weight: 700; text-transform: uppercase;
-    border: none; border-radius: 12px; cursor: pointer; box-shadow: var(--shadow);
-    display: flex; justify-content: space-between; align-items: center;
-    transition: transform 0.1s;
-}
-.analyze-btn:active { transform: translate(2px, 2px); box-shadow: none; }
-
-/* --------------------------------------------------------------------------
-   VIEW 3: THE REPORT (Results Dashboard)
-   -------------------------------------------------------------------------- */
-/* Score Hero */
-.score-card {
-    background: var(--ink); color: white; border: var(--border); border-radius: var(--radius);
     padding: 24px; margin-bottom: 20px; box-shadow: var(--shadow);
+    transition: transform 0.2s; animation: slideIn 0.4s ease;
+}
+.stack-card.highlight { border-color: var(--ink); box-shadow: 6px 6px 0 var(--ink); }
+
+.card-title {
+    font-family: var(--font-mono); font-weight: 700; font-size: 14px; text-transform: uppercase;
+    margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center;
+    color: var(--ink); opacity: 0.8; border-bottom: 2px dashed #eee; padding-bottom: 8px;
+}
+
+/* GURU QUIZ BUTTONS */
+.quiz-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
+.quiz-btn {
+    padding: 16px; background: var(--canvas); border: 2px solid var(--ink);
+    border-radius: 12px; text-align: left; font-weight: 700; cursor: pointer;
+    font-family: var(--font-main); font-size: 14px; transition: all 0.1s;
     display: flex; align-items: center; justify-content: space-between;
 }
-.score-circle {
-    width: 80px; height: 80px; background: var(--olive); color: var(--ink);
-    border-radius: 50%; display: grid; place-items: center;
-    font-family: 'Space Mono'; font-weight: 700; font-size: 28px; border: 2px solid var(--ink);
-}
-.score-text { flex: 1; margin-left: 20px; }
-.score-title { font-family: 'Space Mono'; font-size: 18px; font-weight: 700; margin-bottom: 4px; }
-.score-sub { font-size: 12px; opacity: 0.8; }
+.quiz-btn:active { transform: scale(0.98); background: var(--accent); }
+.quiz-btn span { font-size: 18px; }
 
-/* Stats Grid */
-.stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
-.stat-box {
-    background: var(--paper); border: 2px solid var(--ink); border-radius: 8px;
-    padding: 16px; text-align: center; box-shadow: 2px 2px 0 rgba(0,0,0,0.1);
+/* INPUTS */
+.smart-input {
+    width: 100%; border: var(--border); border-radius: 12px; padding: 16px;
+    font-family: var(--font-main); font-size: 14px; background: #fff;
+    resize: none; min-height: 100px;
 }
-.stat-num { font-family: 'Space Mono'; font-size: 18px; font-weight: 700; display: block; margin-bottom: 4px; }
-.stat-lbl { font-size: 10px; text-transform: uppercase; opacity: 0.6; font-weight: 700; }
+.smart-input:focus { outline: none; box-shadow: var(--shadow); }
 
-/* Keyword Pills */
-.pill-area { margin-bottom: 24px; background: var(--paper); padding: 16px; border: 2px solid var(--ink); border-radius: 12px; }
-.pill-title { font-family: 'Space Mono'; font-size: 11px; font-weight: 700; text-transform: uppercase; margin-bottom: 12px; display: block; }
-.pills { display: flex; flex-wrap: wrap; gap: 8px; }
-.pill {
-    padding: 6px 12px; font-family: 'Space Mono'; font-size: 10px; font-weight: 700;
-    border: 2px solid var(--ink); border-radius: 20px; background: #fff;
+/* DASHBOARD WIDGETS */
+.score-hero {
+    display: flex; align-items: center; gap: 20px;
+    background: var(--ink); color: white; padding: 20px; border-radius: 12px; margin-bottom: 16px;
 }
-.pill.match { background: var(--mint); }
-.pill.gap { background: var(--clay); color: white; border-color: var(--ink); }
+.score-val { font-family: var(--font-mono); font-size: 42px; font-weight: 700; line-height: 1; }
+.score-meta div { font-size: 12px; opacity: 0.7; font-family: var(--font-mono); text-transform: uppercase; }
+.score-meta h3 { margin: 4px 0; font-size: 16px; }
 
-/* Lists */
-.list-group { margin-bottom: 20px; }
-.list-item {
-    background: var(--paper); border: 2px solid var(--ink); border-radius: 8px;
-    padding: 12px; margin-bottom: 8px; font-size: 13px; line-height: 1.4;
-    border-left-width: 6px;
+.stat-row { display: flex; gap: 10px; margin-bottom: 16px; }
+.stat-pill {
+    flex: 1; background: var(--canvas); border: 2px solid var(--ink);
+    border-radius: 8px; padding: 10px; text-align: center;
 }
-.list-item.good { border-left-color: var(--olive); }
-.list-item.bad { border-left-color: var(--clay); }
+.stat-lbl { font-size: 9px; font-family: var(--font-mono); text-transform: uppercase; display: block; margin-bottom: 4px; }
+.stat-num { font-weight: 700; font-size: 14px; }
 
-/* ==========================================================================
-   BOTTOM NAV
-   ========================================================================== */
-.bottom-nav {
+/* AI ACTIONS (The "Smarts") */
+.action-row { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; margin-top: 12px; }
+.ai-action {
+    flex-shrink: 0; padding: 8px 12px;
+    background: var(--accent); border: 2px solid var(--ink); border-radius: 20px;
+    font-family: var(--font-mono); font-size: 10px; font-weight: 700; cursor: pointer;
+    display: flex; align-items: center; gap: 6px;
+}
+.ai-action:hover { transform: translateY(-2px); box-shadow: 2px 2px 0 var(--ink); }
+.ai-action svg { width: 12px; height: 12px; }
+
+/* THE "SMART BAR" (Floating Bottom Chat) */
+.smart-bar {
     position: absolute; bottom: 0; left: 0; right: 0;
     background: var(--paper); border-top: var(--border);
-    display: flex; padding: 12px; gap: 12px; z-index: 100;
+    padding: 12px 16px 20px 16px; z-index: 100;
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.05);
 }
-.nav-item {
-    flex: 1; padding: 12px; text-align: center;
-    font-family: 'Space Mono'; font-weight: 700; font-size: 11px; text-transform: uppercase;
-    border: 2px solid transparent; border-radius: 8px; cursor: pointer; opacity: 0.5;
-    transition: all 0.2s;
+.bar-header {
+    display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 11px; font-weight: 700; color: var(--ink); font-family: var(--font-mono); text-transform: uppercase;
 }
-.nav-item.active { opacity: 1; background: var(--pale-blue); border-color: var(--ink); box-shadow: 2px 2px 0 var(--ink); }
+.bar-input-wrap { display: flex; gap: 10px; }
+.bar-input {
+    flex: 1; border: 2px solid var(--ink); border-radius: 30px; padding: 12px 20px;
+    font-size: 14px; outline: none; transition: all 0.2s;
+}
+.bar-input:focus { border-color: var(--deep-blue); box-shadow: 0 0 0 2px var(--accent); }
+.bar-btn {
+    width: 46px; height: 46px; background: var(--ink); color: white;
+    border: none; border-radius: 50%; cursor: pointer; display: grid; place-items: center;
+}
 
-/* Animations */
-@keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+/* Chat Overlay (Expands from bottom) */
+.chat-layer {
+    position: absolute; bottom: 85px; left: 10px; right: 10px;
+    max-height: 60vh; background: var(--paper);
+    border: var(--border); border-radius: var(--radius);
+    display: none; flex-direction: column; overflow: hidden;
+    box-shadow: 0 -10px 40px rgba(0,0,0,0.1); z-index: 90;
+}
+.chat-scroll { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.msg { padding: 10px 14px; border-radius: 12px; font-size: 13px; line-height: 1.4; max-width: 85%; }
+.msg.arti { background: var(--canvas); border: 2px solid var(--ink); border-top-left-radius: 2px; }
+.msg.user { background: var(--ink); color: white; align-self: flex-end; border-top-right-radius: 2px; }
+
+@keyframes slideIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 </style>
 </head>
 <body>
 
-<div class="app-frame">
+<div class="app-shell">
     
-    <header class="app-header">
-        <div class="brand">
-            <div class="brand-avatar"><img src="arti.png" alt="A"></div>
-            <div>Arti // Super-App</div>
+    <div class="smart-header">
+        <div class="brand-pill">
+            <span>ARTI</span>
+            <span id="artiMode" class="mode-badge">CAREER GURU</span>
         </div>
-        <div class="mono" style="font-size:10px;">BETA</div>
-    </header>
-
-    <div id="viewGuru" class="view-container active">
-        <div id="chatStream" class="chat-stream">
-            </div>
+        <button onclick="resetApp()" style="background:none; border:none; text-decoration:underline; font-family:var(--font-mono); font-size:10px; cursor:pointer;">RESET</button>
     </div>
 
-    <div id="viewLab" class="view-container">
-        <div class="lab-header">
-            <div class="lab-title">The Job Lab</div>
-            <div class="lab-sub">Paste your data. Get the stats.</div>
+    <div id="feed" class="feed-container">
+        
+        <div id="cardGuru" class="stack-card">
+            <div class="card-title">Where do you fit?</div>
+            <p style="margin-bottom:20px; font-size:14px; opacity:0.8;">Let's find your archetype in the Defense Industrial Base.</p>
+            
+            <div id="quizStep1" class="quiz-grid">
+                <div class="quiz-btn" onclick="nextQuiz('money')">💰 Closing Deals <span>→</span></div>
+                <div class="quiz-btn" onclick="nextQuiz('people')">🤝 Leading Teams <span>→</span></div>
+                <div class="quiz-btn" onclick="nextQuiz('product')">🛠️ Building Tech <span>→</span></div>
+                <div class="quiz-btn" onclick="nextQuiz('puzzle')">🧩 Strategy & Intel <span>→</span></div>
+            </div>
         </div>
 
-        <div class="input-card">
-            <span class="input-label">1. Job Description</span>
-            <textarea id="jdText" class="chunky-input" placeholder="Paste JD text here..."></textarea>
+        <div id="cardLab" class="stack-card" style="display:none;">
+            <div class="card-title">Analysis Lab</div>
+            <p style="font-size:13px; margin-bottom:12px;">Paste your details to unlock the expert tools.</p>
+            <textarea id="jdInput" class="smart-input" placeholder="Paste Job Description here..." style="margin-bottom:12px;"></textarea>
+            <textarea id="resumeInput" class="smart-input" placeholder="Paste Resume here..." style="margin-bottom:16px;"></textarea>
+            <button class="quiz-btn" style="background:var(--ink); color:white; justify-content:center;" onclick="runAnalysis()">
+                RUN DEEP ANALYSIS
+            </button>
         </div>
 
-        <div class="input-card">
-            <span class="input-label">2. Your Resume</span>
-            <textarea id="resumeText" class="chunky-input" placeholder="Paste Resume text here..."></textarea>
-        </div>
-
-        <button class="analyze-btn" onclick="runFullAnalysis()">
-            <span>Analyze Match</span>
-            <span>→</span>
-        </button>
-    </div>
-
-    <div id="viewReport" class="view-container">
-        <div id="emptyReport" style="text-align:center; padding:40px; opacity:0.6;">
-            <div style="font-size:40px; margin-bottom:10px;">📊</div>
-            <p>No analysis yet.</p>
-            <button class="chat-btn" onclick="switchTab('lab')">Go to Lab</button>
-        </div>
-
-        <div id="reportContent" style="display:none;">
-            <div class="score-card">
-                <div class="score-text">
-                    <div class="score-title" id="resRole">Director of Sales</div>
-                    <div class="score-sub" id="resCompany">AWS Federal</div>
+        <div id="cardDash" class="stack-card" style="display:none; border-color:var(--ink);">
+            <div class="score-hero">
+                <div class="score-val" id="scoreVal">--</div>
+                <div class="score-meta">
+                    <h3 id="roleVal">Analyzing...</h3>
+                    <div id="compVal">--</div>
                 </div>
-                <div class="score-circle" id="resScore">78%</div>
             </div>
 
-            <div class="stats-grid">
-                <div class="stat-box">
-                    <span class="stat-num" id="resSalary">$250k</span>
-                    <span class="stat-lbl">Est. Salary</span>
+            <div class="stat-row">
+                <div class="stat-pill">
+                    <span class="stat-lbl">Salary Est.</span>
+                    <span class="stat-num" id="salaryVal">--</span>
                 </div>
-                <div class="stat-box">
-                    <span class="stat-num" id="resComp">Med</span>
+                <div class="stat-pill">
                     <span class="stat-lbl">Competition</span>
+                    <span class="stat-num" id="compLvl">--</span>
                 </div>
             </div>
 
-            <div class="pill-area">
-                <span class="pill-title">Keyword Signals</span>
-                <div class="pills" id="resPills"></div>
+            <div class="card-title" style="margin-top:24px;">Arti's Toolkit</div>
+            
+            <div style="background:var(--canvas); padding:12px; border-radius:8px; margin-bottom:10px;">
+                <div style="font-weight:700; font-size:13px;">Resume Gaps Found</div>
+                <div id="gapCount" style="font-size:11px; opacity:0.7; margin-bottom:8px;">Analyzing...</div>
+                <div class="action-row">
+                    <button class="ai-action" onclick="triggerSmartAction('fix_resume')">✨ Fix Bullets</button>
+                    <button class="ai-action" onclick="triggerSmartAction('ats_check')">🤖 ATS Check</button>
+                </div>
             </div>
 
-            <div class="list-group">
-                <span class="pill-title" style="color:var(--olive);">Top Strengths</span>
-                <div id="resStrengths"></div>
+            <div style="background:var(--canvas); padding:12px; border-radius:8px; margin-bottom:10px;">
+                <div style="font-weight:700; font-size:13px;">Interview Prep</div>
+                <div class="action-row">
+                    <button class="ai-action" onclick="triggerSmartAction('mock_interview')">🎤 Mock Loop</button>
+                    <button class="ai-action" onclick="triggerSmartAction('negotiate')">💰 Negotiate</button>
+                </div>
             </div>
-            
-            <div class="list-group">
-                <span class="pill-title" style="color:var(--clay);">Critical Gaps</span>
-                <div id="resGaps"></div>
-            </div>
-            
-            <div style="margin-top:30px; text-align:center;">
-                <button class="chat-btn" onclick="switchTab('guru'); addMessage('arti', 'I can help you draft an email for this. Just ask.');">Ask Arti for Help</button>
-            </div>
+
+        </div>
+
+    </div>
+
+    <div class="chat-layer" id="chatLayer">
+        <div class="chat-scroll" id="chatScroll">
+            <div class="msg arti">I'm ready. Use the buttons above or type a question.</div>
         </div>
     </div>
 
-    <nav class="bottom-nav">
-        <div class="nav-item active" id="tab-guru" onclick="switchTab('guru')">🧭 Guru</div>
-        <div class="nav-item" id="tab-lab" onclick="switchTab('lab')">🧪 The Lab</div>
-        <div class="nav-item" id="tab-report" onclick="switchTab('report')">📊 Report</div>
-    </nav>
+    <div class="smart-bar">
+        <div class="bar-header">
+            <span id="chatContext">General Chat</span>
+            <span style="cursor:pointer;" onclick="toggleChat()">Expand/Collapse</span>
+        </div>
+        <div class="bar-input-wrap">
+            <input type="text" id="chatInput" class="bar-input" placeholder="Ask Arti..." onkeydown="if(event.key==='Enter') sendChat()">
+            <button class="bar-btn" onclick="sendChat()">→</button>
+        </div>
+    </div>
 
 </div>
 
 <script>
 // ==========================================================================
-// CONFIG
+// STATE
 // ==========================================================================
 const API_ENDPOINT = 'https://76unm1rlj0.execute-api.us-east-1.amazonaws.com/default/grumpy2';
-let appState = {
+let state = {
+    mode: 'GURU', // GURU, ANALYZER, EXPERT
     quiz: {},
-    analysis: null
+    analysis: null,
+    chatHistory: []
 };
 
 // ==========================================================================
-// NAVIGATION
+// 1. THE GURU FLOW
 // ==========================================================================
-function switchTab(tabName) {
-    // Hide all
-    document.querySelectorAll('.view-container').forEach(el => el.classList.remove('active'));
-    document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-    
-    // Show Target
-    document.getElementById('view' + tabName.charAt(0).toUpperCase() + tabName.slice(1)).classList.add('active');
-    document.getElementById('tab-' + tabName).classList.add('active');
-}
-
-// ==========================================================================
-// VIEW 1: THE GURU (Chat Logic)
-// ==========================================================================
-const chatBox = document.getElementById('chatStream');
-
-document.addEventListener('DOMContentLoaded', () => {
-    startGuruFlow();
-});
-
-function addMessage(role, text) {
-    const div = document.createElement('div');
-    div.className = `msg-row ${role}`;
-    let avatar = role === 'arti' ? `<div class="avatar"><img src="arti.png" alt="A"></div>` : '';
-    div.innerHTML = `${avatar}<div class="bubble">${text}</div>`;
-    chatBox.appendChild(div);
-    chatBox.scrollTop = chatBox.scrollHeight;
-}
-
-function addOptions(options) {
-    const div = document.createElement('div');
-    div.className = 'chat-options';
-    options.forEach(opt => {
-        const btn = document.createElement('button');
-        btn.className = 'chat-btn';
-        btn.textContent = opt.label;
-        btn.onclick = () => handleOption(btn, opt);
-        div.appendChild(btn);
-    });
-    chatBox.appendChild(div);
-    chatBox.scrollTop = chatBox.scrollHeight;
-}
-
-function handleOption(btn, opt) {
-    // Freeze UI
-    const parent = btn.parentElement;
-    Array.from(parent.children).forEach(b => {
-        b.classList.add('disabled');
-        if(b === btn) b.classList.add('selected');
-    });
-
-    // Logic
-    if (opt.val === 'start_quiz') {
-        addMessage('arti', "Great. First question: What drives you most in your career?");
-        setTimeout(() => addOptions([
-            {label: "Money / Deals", val: "money", next: "q2"},
-            {label: "Leadership", val: "people", next: "q2"},
-            {label: "Tech / Product", val: "product", next: "q2"},
-            {label: "Strategy", val: "puzzle", next: "q2"}
-        ]), 600);
-    } else if (opt.next === 'q2') {
-        appState.quiz.driver = opt.val;
-        addMessage('arti', "Got it. And what is your superpower?");
-        setTimeout(() => addOptions([
-            {label: "Persuasion", val: "talk", next: "q3"},
-            {label: "Organization", val: "org", next: "q3"},
-            {label: "Coding", val: "code", next: "q3"},
-            {label: "Analysis", val: "strat", next: "q3"}
-        ]), 600);
-    } else if (opt.next === 'q3') {
-        appState.quiz.skill = opt.val;
-        addMessage('arti', "Final check: What is your clearance status?");
-        setTimeout(() => addOptions([
-            {label: "None", val: "none", next: "result"},
-            {label: "Secret", val: "secret", next: "result"},
-            {label: "TS / SCI", val: "ts", next: "result"}
-        ]), 600);
-    } else if (opt.next === 'result') {
-        appState.quiz.clearance = opt.val;
-        showArchetype();
-    } else if (opt.val === 'goto_lab') {
-        switchTab('lab');
-    }
-}
-
-function startGuruFlow() {
-    chatBox.innerHTML = '';
-    setTimeout(() => addMessage('arti', "Hi, I'm Arti. I can help you analyze a job match, or help you find your career path."), 500);
-    setTimeout(() => {
-        addOptions([
-            {label: "Analyze a Job", val: "goto_lab"},
-            {label: "Find My Path", val: "start_quiz"}
-        ]);
-    }, 1200);
-}
-
-function showArchetype() {
-    // Simple logic for demo
+function nextQuiz(val) {
+    // Determine Archetype (simplified logic)
     let role = "Program Analyst";
-    if (appState.quiz.driver === 'money') role = "Capture Manager";
-    if (appState.quiz.driver === 'product') role = "Solutions Architect";
+    if(val === 'money') role = "Capture Manager";
+    if(val === 'people') role = "Program Manager";
+    if(val === 'product') role = "Solutions Architect";
+    if(val === 'puzzle') role = "Intelligence Analyst";
+
+    // Update UI to Lab Mode
+    document.getElementById('cardGuru').style.display = 'none';
+    document.getElementById('cardLab').style.display = 'block';
+    document.getElementById('artiMode').innerText = "RESUME LAB";
+    document.getElementById('artiMode').style.background = "var(--warning)";
     
-    addMessage('arti', `Based on your answers, you are a natural **${role}**.`);
-    addMessage('arti', "I've unlocked the Analyzer tab for you. When you find a job description, paste it there.");
-    
-    // Add visual link
-    const div = document.createElement('div');
-    div.innerHTML = `<a href="https://www.linkedin.com/jobs/search/?keywords=${role}" target="_blank" style="display:block; margin:10px 0 10px 44px; padding:10px; background:white; border:2px solid #1a1a2e; border-radius:8px; text-decoration:none; color:#1a1a2e; font-family:'Space Mono'; font-size:12px;">Search ${role} Jobs ↗</a>`;
-    chatBox.appendChild(div);
+    // Inject "Smart Suggestion"
+    addMsg('arti', `Based on your choice, you fit the **${role}** archetype. Paste a ${role} job description and your resume above, and I'll run a deep fit analysis.`);
+    toggleChat(true); // Open chat to show the advice
 }
 
 // ==========================================================================
-// VIEW 2 & 3: ANALYZER & REPORT
+// 2. THE ANALYZER
 // ==========================================================================
-async function runFullAnalysis() {
-    const r = document.getElementById('resumeText').value;
-    const j = document.getElementById('jdText').value;
+async function runAnalysis() {
+    const jd = document.getElementById('jdInput').value;
+    const res = document.getElementById('resumeInput').value;
     
-    if(!r || !j) { alert("Please paste both Resume and JD."); return; }
+    if(!jd || !res) { alert("Please fill both fields."); return; }
     
-    const btn = document.querySelector('.analyze-btn');
-    const oldText = btn.innerHTML;
+    // UI Updates
+    const btn = document.querySelector('#cardLab button');
     btn.innerHTML = "ANALYZING...";
     btn.disabled = true;
     
     try {
-        const res = await fetch(API_ENDPOINT, {
+        const response = await fetch(API_ENDPOINT, {
             method: 'POST',
             body: JSON.stringify({
                 request_type: 'resume_match',
-                job_description: j,
-                resume_text: r
+                job_description: jd,
+                resume_text: res
             })
         });
-        const data = await res.json();
-        appState.analysis = data;
+        const data = await response.json();
+        state.analysis = data;
         
-        // Render Report
-        renderReport(data);
+        renderDashboard(data);
         
-        // Switch Tab
-        switchTab('report');
+        // Transition to Dashboard
+        document.getElementById('cardLab').style.display = 'none';
+        document.getElementById('cardDash').style.display = 'block';
+        document.getElementById('artiMode').innerText = "EXPERT MODE";
+        document.getElementById('artiMode').style.background = "var(--accent)";
         
-        // Notify in Chat
-        addMessage('arti', `I finished the analysis. You scored **${data.score}%**. Check the Report tab.`);
+        addMsg('arti', `Analysis Complete. Score: **${data.score}%**. Use the Toolkit buttons above to fix gaps or prep for the interview.`);
         
-        // Background fetch for intel
-        fetchIntel(j, data.job_title, data.company);
-        
+        // Background fetch intel
+        fetchIntel(jd, data.job_title, data.company);
+
     } catch(e) {
-        alert("Error analyzing. Try again.");
+        alert("Analysis failed.");
     } finally {
-        btn.innerHTML = oldText;
+        btn.innerHTML = "RUN DEEP ANALYSIS";
         btn.disabled = false;
     }
 }
 
-function renderReport(data) {
-    document.getElementById('emptyReport').style.display = 'none';
-    document.getElementById('reportContent').style.display = 'block';
+function renderDashboard(data) {
+    document.getElementById('scoreVal').innerText = data.score + '%';
+    document.getElementById('roleVal').innerText = data.job_title || 'Role';
+    document.getElementById('compVal').innerText = data.company || 'Company';
     
-    // Score
-    document.getElementById('resScore').textContent = data.score + '%';
-    document.getElementById('resRole').textContent = data.job_title;
-    document.getElementById('resCompany').textContent = data.company;
-    
-    // Pills
-    const pillBox = document.getElementById('resPills');
-    pillBox.innerHTML = '';
-    (data.keywords || []).forEach(k => {
-        const span = document.createElement('span');
-        span.className = `pill ${k.in_resume ? 'match' : 'gap'}`;
-        span.textContent = k.term;
-        pillBox.appendChild(span);
-    });
-    
-    // Lists
-    document.getElementById('resStrengths').innerHTML = data.analysis
-        .filter(x => x.startsWith('Match:'))
-        .map(x => `<div class="list-item good">${x.replace('Match:', '')}</div>`).join('');
-        
-    document.getElementById('resGaps').innerHTML = data.analysis
-        .filter(x => x.startsWith('Gap:'))
-        .map(x => `<div class="list-item bad">${x.replace('Gap:', '')}</div>`).join('');
+    const gaps = data.analysis.filter(x => x.startsWith('Gap')).length;
+    document.getElementById('gapCount').innerText = `${gaps} critical gaps found.`;
 }
 
 function fetchIntel(jd, title, company) {
     fetch(API_ENDPOINT, {
         method: 'POST',
-        body: JSON.stringify({request_type:'market_intel', job_description:jd, job_title:title, company:company})
-    })
-    .then(r => r.json())
-    .then(d => {
-        if(d.salary_intel) document.getElementById('resSalary').textContent = `$${d.salary_intel.mid}k`;
-        if(d.competition) document.getElementById('resComp').textContent = d.competition.level;
+        body: JSON.stringify({request_type: 'market_intel', job_description: jd, job_title: title, company: company})
+    }).then(r=>r.json()).then(d => {
+        if(d.salary_intel) document.getElementById('salaryVal').innerText = `$${d.salary_intel.mid}k`;
+        if(d.competition) document.getElementById('compLvl').innerText = d.competition.level;
     });
 }
 
+// ==========================================================================
+// 3. THE SMARTS (Chat & Tools)
+// ==========================================================================
+function triggerSmartAction(action) {
+    toggleChat(true);
+    let prompt = "";
+    
+    if(action === 'fix_resume') {
+        prompt = "Rewrite the bullet points in my resume to specifically address the gaps you found in the analysis. Make them high-impact.";
+        document.getElementById('chatContext').innerText = "RESUME EDITOR";
+    }
+    if(action === 'ats_check') {
+        prompt = "Analyze my resume for ATS readability. Which keywords from the JD are missing?";
+        document.getElementById('chatContext').innerText = "ATS CHECKER";
+    }
+    if(action === 'mock_interview') {
+        prompt = "Act as the Hiring Manager (Toni/Oliver). Ask me one tough behavioral question based on this job description.";
+        document.getElementById('chatContext').innerText = "MOCK INTERVIEW";
+    }
+    if(action === 'negotiate') {
+        prompt = "Based on the market salary data, script a negotiation counter-offer email for me.";
+        document.getElementById('chatContext').innerText = "NEGOTIATOR";
+    }
+    
+    // Simulate user sending this
+    sendChat(prompt);
+}
+
+async function sendChat(manualText = null) {
+    const input = document.getElementById('chatInput');
+    const text = manualText || input.value.trim();
+    if(!text) return;
+    
+    input.value = '';
+    addMsg('user', text);
+    
+    // Loading state
+    const loadId = 'load-'+Date.now();
+    addMsg('arti', '<span id="'+loadId+'">Thinking...</span>');
+    
+    try {
+        const res = await fetch(API_ENDPOINT, {
+            method: 'POST',
+            body: JSON.stringify({
+                request_type: 'ask_expert',
+                question: text,
+                job_description: document.getElementById('jdInput').value,
+                resume_text: document.getElementById('resumeInput').value,
+                analysis_data: state.analysis,
+                chat_history: state.chatHistory
+            })
+        });
+        const data = await res.json();
+        
+        document.getElementById(loadId).parentElement.innerHTML = data.response.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
+        state.chatHistory.push({role:'user',content:text}, {role:'assistant',content:data.response});
+        
+    } catch(e) {
+        document.getElementById(loadId).innerText = "Error.";
+    }
+}
+
+function addMsg(role, html) {
+    const div = document.createElement('div');
+    div.className = `msg ${role}`;
+    div.innerHTML = html;
+    const box = document.getElementById('chatScroll');
+    box.appendChild(div);
+    box.scrollTop = box.scrollHeight;
+}
+
+function toggleChat(forceOpen = false) {
+    const layer = document.getElementById('chatLayer');
+    if(forceOpen) layer.style.display = 'flex';
+    else layer.style.display = layer.style.display === 'flex' ? 'none' : 'flex';
+}
+
+function resetApp() {
+    location.reload();
+}
 </script>
 </body>
 </html>
