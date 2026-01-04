@@ -472,7 +472,7 @@ main {
     color: white;
     font-family: 'Space Mono', monospace;
     font-weight: 700;
-    font-size: 16px;
+    font-size: 10px; /* Adjusted for text */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1420,30 +1420,27 @@ textarea:focus {
 </header>
 
 <main>
-    <!-- HERO -->
     <section class="hero-section">
         <div class="hero-tagline">Like a gym buddy for your career</div>
         <h1 class="hero-title">Land Your Next DIB Role</h1>
         <p class="hero-subtitle">I'll analyze job fits, prep you for interviews, and coach you through the entire application process.</p>
     </section>
 
-    <!-- ARTI INTRO -->
     <div class="coach-intro" id="coachIntro">
         <div class="coach-message">
             <div class="coach-avatar">
-                <img src="arti.png" alt="Arti" onerror="this.parentElement.textContent='🎯'">
+                <img src="arti.png" alt="Arti" onerror="this.parentElement.textContent=''">
             </div>
             <div class="coach-bubble">
                 <div class="coach-name">Arti</div>
                 <div class="coach-text">
                     <strong>Hey! I'm Arti, your DIB career coach.</strong> Think of me as your gym buddy — but for job hunting. I'll spot you on resume gaps, coach you through interviews, and keep you accountable.<br><br>
-                    Ready to get started? Paste your resume below and let's find you a great match. 💪
+                    Ready to get started? Paste your resume below and let's find you a great match.
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- STATS BAR -->
     <div class="stats-bar" id="statsBar">
         <div class="stat-item">
             <span class="stat-value" id="statJobsAnalyzed">0</span>
@@ -1463,11 +1460,10 @@ textarea:focus {
         </div>
     </div>
 
-    <!-- WORKFLOW / GAME PLAN -->
     <div class="workflow-card" id="workflowCard">
         <div class="workflow-header">
             <div class="workflow-header-avatar">
-                <img src="arti.png" alt="Arti" onerror="this.parentElement.textContent='📋'">
+                <img src="arti.png" alt="Arti" onerror="this.parentElement.textContent=''">
             </div>
             <div class="workflow-header-text">
                 <h2>Your Game Plan</h2>
@@ -1501,16 +1497,15 @@ textarea:focus {
         </div>
     </div>
 
-    <!-- JOB BOARDS -->
     <div class="card collapsible-card collapsed" id="jobSearchCard">
         <div class="card-header collapsible-trigger" onclick="toggleSection('jobSearch')">
-            <span class="card-title">🔍 Browse DIB Job Boards</span>
+            <span class="card-title">Browse DIB Job Boards</span>
             <span id="jobSearchToggle" class="mono" style="font-weight: 700; font-size: 20px;">+</span>
         </div>
         <div id="jobSearchContent" class="collapsible-content">
             <div class="card-body">
                 <div class="coach-tip">
-                    <div class="coach-tip-avatar"><img src="arti.png" alt="Arti" onerror="this.parentElement.textContent='💡'"></div>
+                    <div class="coach-tip-avatar"><img src="arti.png" alt="Arti" onerror="this.parentElement.textContent=''"></div>
                     <div class="coach-tip-text"><strong>Pro tip:</strong> Don't just apply blind. Find a role, paste it below, and let me tell you if it's a good fit first.</div>
                 </div>
                 <div style="margin: 20px 0;">
@@ -1548,10 +1543,9 @@ textarea:focus {
         </div>
     </div>
 
-    <!-- RESUME INPUT -->
     <div class="card" id="resumeCard">
         <div class="card-header">
-            <span class="card-title">📄 Your Resume</span>
+            <span class="card-title">Your Resume</span>
             <div class="resume-controls">
                 <select id="resumeSelector" onchange="loadSavedResume()"><option value="">-- Saved Resumes --</option></select>
                 <button class="btn btn-small btn-secondary" onclick="saveCurrentResume()">Save</button>
@@ -1561,11 +1555,11 @@ textarea:focus {
         <div class="card-body">
             <textarea id="resumeText" placeholder="Paste your resume text here..."></textarea>
             <div class="coach-tip" id="resumeTip" style="display: none;">
-                <div class="coach-tip-avatar"><img src="arti.png" alt="Arti" onerror="this.parentElement.textContent='✓'"></div>
+                <div class="coach-tip-avatar"><img src="arti.png" alt="Arti" onerror="this.parentElement.textContent=''"></div>
                 <div class="coach-tip-text">Resume loaded! Now let's find you a job to target.</div>
             </div>
             <div class="privacy-notice">
-                <strong>🔒 Privacy First:</strong>
+                <strong>Privacy First:</strong>
                 <ul>
                     <li>Your resume stays in your browser — we don't store it</li>
                     <li>Analysis uses Google Gemini AI (they don't train on your data)</li>
@@ -1574,9 +1568,8 @@ textarea:focus {
         </div>
     </div>
 
-    <!-- JOB INPUT -->
     <div class="card" id="jobCard">
-        <div class="card-header"><span class="card-title">🎯 Target Job</span></div>
+        <div class="card-header"><span class="card-title">Target Job</span></div>
         <div class="card-body">
             <textarea id="jobDescription" placeholder="Paste a job description or URL..."></textarea>
             <div class="action-bar">
@@ -1588,17 +1581,14 @@ textarea:focus {
         </div>
     </div>
 
-    <!-- LOADING -->
     <div class="card loading-card" id="loadingCard" style="display: none;">
         <div class="spinner"></div>
         <h2 class="loading-title" id="loadingStep">Analyzing your fit...</h2>
         <div class="loading-bar"><div class="loading-progress" id="loadingProgress" style="width: 5%;"></div></div>
     </div>
 
-    <!-- RESULTS -->
     <div id="analysisResults" style="display: none;">
         
-        <!-- SCORE -->
         <div class="card" style="padding: 0;" id="scoreCard">
             <div class="score-hero" id="scoreHero">
                 <div class="score-box">
@@ -1613,10 +1603,9 @@ textarea:focus {
             <div class="card-body" id="coachScoreCommentary" style="display: none;"></div>
         </div>
 
-        <!-- CHAT -->
         <div class="chat-section" id="chatSection">
             <div class="chat-header">
-                <div class="chat-header-avatar"><img src="arti.png" alt="Arti" onerror="this.parentElement.textContent='💬'"></div>
+                <div class="chat-header-avatar"><img src="arti.png" alt="Arti" onerror="this.parentElement.textContent=''"></div>
                 <div class="chat-header-text">
                     <h3>Ask Arti</h3>
                     <p>Questions about this role, your gaps, negotiation — ask me anything</p>
@@ -1624,14 +1613,14 @@ textarea:focus {
             </div>
             <div class="chat-messages" id="chatMessages">
                 <div class="chat-message coach">
-                    <div class="chat-message-avatar"><img src="arti.png" alt="Arti" onerror="this.parentElement.textContent='🎯'"></div>
+                    <div class="chat-message-avatar"><img src="arti.png" alt="Arti" onerror="this.parentElement.textContent=''"></div>
                     <div class="chat-message-bubble" id="initialChatMessage">I've analyzed this role. What would you like to know?</div>
                 </div>
             </div>
             <div class="chat-suggestions" id="chatSuggestions">
-                <button class="chat-suggestion" onclick="askSuggestion('What salary should I ask for?')">💰 Salary advice</button>
-                <button class="chat-suggestion" onclick="askSuggestion('How do I address my biggest gap?')">🔧 Address gaps</button>
-                <button class="chat-suggestion" onclick="askSuggestion('Is this role worth pursuing?')">🤔 Worth pursuing?</button>
+                <button class="chat-suggestion" onclick="askSuggestion('What salary should I ask for?')">Salary advice</button>
+                <button class="chat-suggestion" onclick="askSuggestion('How do I address my biggest gap?')">Address gaps</button>
+                <button class="chat-suggestion" onclick="askSuggestion('Is this role worth pursuing?')">Worth pursuing?</button>
             </div>
             <div class="chat-input-area">
                 <input type="text" class="chat-input" id="chatInput" placeholder="Ask me anything..." onkeypress="if(event.key==='Enter')sendChatMessage()">
@@ -1639,24 +1628,22 @@ textarea:focus {
             </div>
         </div>
 
-        <!-- ANALYSIS -->
         <div class="card" id="analysisCard">
-            <div class="card-header"><span class="card-title">📊 Fit Analysis</span></div>
+            <div class="card-header"><span class="card-title">Fit Analysis</span></div>
             <div class="card-body">
                 <div class="analysis-section">
-                    <div class="analysis-section-title"><span class="icon">✓</span> Your Strengths</div>
+                    <div class="analysis-section-title">Your Strengths</div>
                     <ul class="analysis-list" id="matchesList"></ul>
                 </div>
                 <div class="analysis-section" style="margin-top: 24px;">
-                    <div class="analysis-section-title"><span class="icon">⚠</span> Gaps to Address</div>
+                    <div class="analysis-section-title">Gaps to Address</div>
                     <ul class="analysis-list" id="gapsList"></ul>
                 </div>
             </div>
         </div>
 
-        <!-- JOB INTEL -->
         <div class="card" id="jobIntelCard" style="display: none;">
-            <div class="card-header"><span class="card-title">📈 Job Intel</span></div>
+            <div class="card-header"><span class="card-title">Job Intel</span></div>
             <div class="card-body">
                 <div class="intel-grid">
                     <div class="intel-panel">
@@ -1679,10 +1666,9 @@ textarea:focus {
             </div>
         </div>
 
-        <!-- APPLICATION KIT -->
         <div class="card collapsible-card collapsed" id="applicationKitCard">
             <div class="card-header collapsible-trigger" onclick="toggleSection('applicationKit')">
-                <span class="card-title">📝 Application Kit</span>
+                <span class="card-title">Application Kit</span>
                 <span id="applicationKitToggle" class="mono" style="font-weight: 700; font-size: 20px;">+</span>
             </div>
             <div id="applicationKitContent" class="collapsible-content">
@@ -1712,16 +1698,15 @@ textarea:focus {
             </div>
         </div>
 
-        <!-- INTERVIEW KIT -->
         <div class="card collapsible-card collapsed" id="interviewKitCard">
             <div class="card-header collapsible-trigger" onclick="toggleSection('interviewKit')">
-                <span class="card-title">🎤 Interview Kit</span>
+                <span class="card-title">Interview Kit</span>
                 <span id="interviewKitToggle" class="mono" style="font-weight: 700; font-size: 20px;">+</span>
             </div>
             <div id="interviewKitContent" class="collapsible-content">
                 <div class="card-body">
                     <div class="coach-tip">
-                        <div class="coach-tip-avatar"><img src="arti.png" alt="Arti" onerror="this.parentElement.textContent='🎯'"></div>
+                        <div class="coach-tip-avatar"><img src="arti.png" alt="Arti" onerror="this.parentElement.textContent=''"></div>
                         <div class="coach-tip-text">Practice these out loud — it makes a huge difference!</div>
                     </div>
                     <div class="kit-section">
@@ -1737,10 +1722,9 @@ textarea:focus {
             </div>
         </div>
 
-        <!-- OUTREACH KIT -->
         <div class="card collapsible-card collapsed" id="outreachKitCard">
             <div class="card-header collapsible-trigger" onclick="toggleSection('outreachKit')">
-                <span class="card-title">📧 Outreach Kit</span>
+                <span class="card-title">Outreach Kit</span>
                 <span id="outreachKitToggle" class="mono" style="font-weight: 700; font-size: 20px;">+</span>
             </div>
             <div id="outreachKitContent" class="collapsible-content">
@@ -1770,7 +1754,6 @@ textarea:focus {
             </div>
         </div>
 
-        <!-- SAVE TO TRACKER -->
         <div class="card" id="saveToTrackerCard" style="background: var(--coach-accent);">
             <div class="card-body" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
                 <div style="color: white;">
@@ -1782,10 +1765,9 @@ textarea:focus {
         </div>
     </div>
 
-    <!-- TRACKER -->
     <div class="card" id="trackerCard">
         <div class="card-header">
-            <span class="card-title">📋 Application Tracker</span>
+            <span class="card-title">Application Tracker</span>
             <span id="trackerCount" style="font-family: 'Space Mono', monospace; font-size: 12px; opacity: 0.7;">0 jobs tracked</span>
         </div>
         <div class="card-body">
@@ -1803,12 +1785,10 @@ textarea:focus {
     </div>
 </main>
 
-<!-- FLOATING COACH BUTTON -->
 <button class="coach-fab" id="coachFab" onclick="scrollToChat()" title="Ask Arti" style="display: none;">
-    <img src="arti.png" alt="Ask Arti" onerror="this.parentElement.innerHTML='💬'">
+    <img src="arti.png" alt="Ask Arti" onerror="this.parentElement.innerHTML=''">
 </button>
 
-<!-- ERROR TOAST -->
 <div id="errorToast" class="error-toast">
     <span id="errorToastText"></span>
     <button class="error-toast-close" onclick="hideErrorToast()">×</button>
@@ -1884,7 +1864,7 @@ function checkWorkflowProgress() {
     const step1 = document.getElementById('step1Indicator');
     if (resume && resume.length > 100) {
         step1.classList.add('completed');
-        step1.textContent = '✓';
+        step1.textContent = 'Done';
     } else {
         step1.classList.remove('completed');
         step1.textContent = '1';
@@ -2017,7 +1997,7 @@ async function analyzeJob() {
         updateStatsDisplay();
         
         document.getElementById('step2Indicator').classList.add('completed');
-        document.getElementById('step2Indicator').textContent = '✓';
+        document.getElementById('step2Indicator').textContent = 'Done';
         
         renderResults(analysisData);
         fetchMarketIntel(jobDescription, analysisData.job_title, analysisData.company);
@@ -2029,7 +2009,7 @@ async function analyzeJob() {
         chatHistory = [];
         document.getElementById('chatMessages').innerHTML = `
             <div class="chat-message coach">
-                <div class="chat-message-avatar"><img src="arti.png" alt="Arti" onerror="this.parentElement.textContent='🎯'"></div>
+                <div class="chat-message-avatar"><img src="arti.png" alt="Arti" onerror="this.parentElement.textContent=''"></div>
                 <div class="chat-message-bubble">${getInitialChatMessage(analysisData.score)}</div>
             </div>`;
         document.getElementById('chatSuggestions').style.display = 'flex';
@@ -2044,7 +2024,7 @@ async function analyzeJob() {
 }
 
 function getInitialChatMessage(score) {
-    if (score >= 80) return `Great news — you're a strong match! 🎉 Want help with salary negotiation or have questions about the role?`;
+    if (score >= 80) return `Great news — you're a strong match! Want help with salary negotiation or have questions about the role?`;
     if (score >= 65) return `Solid opportunity. You've got most of what they need. I can help with gaps, salary, or interview prep.`;
     if (score >= 50) return `This is a stretch, but achievable. Want to discuss if it's worth pursuing or how to position yourself?`;
     return `Tough fit based on your resume. Want to talk through whether it's worth your time?`;
@@ -2095,7 +2075,7 @@ function renderCoachCommentary(score) {
     else if (score >= 65) msg = `<strong>Solid match.</strong> Gaps aren't deal-breakers. Check the Interview Kit for strategies.`;
     else if (score >= 50) { cls = 'warning'; msg = `<strong>Reach role.</strong> Work harder to stand out. Consider networking in.`; }
     else { cls = 'concern'; msg = `<strong>Significant gaps.</strong> Use this as a target or focus on transferable skills.`; }
-    container.innerHTML = `<div class="coach-celebration ${cls}"><div class="coach-tip-avatar"><img src="arti.png" alt="Arti" onerror="this.parentElement.textContent='🎯'"></div><div class="coach-tip-text">${msg}</div></div>`;
+    container.innerHTML = `<div class="coach-celebration ${cls}"><div class="coach-tip-avatar"><img src="arti.png" alt="Arti" onerror="this.parentElement.textContent=''"></div><div class="coach-tip-text">${msg}</div></div>`;
     container.style.display = 'block';
 }
 
@@ -2193,9 +2173,9 @@ async function sendChatMessage() {
     if (!analysisData) { showErrorToast('Please analyze a job first'); return; }
     
     const container = document.getElementById('chatMessages');
-    container.innerHTML += `<div class="chat-message user"><div class="chat-message-avatar">👤</div><div class="chat-message-bubble">${escapeHtml(message)}</div></div>`;
+    container.innerHTML += `<div class="chat-message user"><div class="chat-message-avatar">User</div><div class="chat-message-bubble">${escapeHtml(message)}</div></div>`;
     const loadingId = 'loading-' + Date.now();
-    container.innerHTML += `<div class="chat-message coach" id="${loadingId}"><div class="chat-message-avatar"><img src="arti.png" alt="Arti" onerror="this.parentElement.textContent='🎯'"></div><div class="chat-message-bubble">Thinking...</div></div>`;
+    container.innerHTML += `<div class="chat-message coach" id="${loadingId}"><div class="chat-message-avatar"><img src="arti.png" alt="Arti" onerror="this.parentElement.textContent=''"></div><div class="chat-message-bubble">Thinking...</div></div>`;
     container.scrollTop = container.scrollHeight;
     input.value = '';
     document.getElementById('chatSuggestions').style.display = 'none';
@@ -2307,7 +2287,7 @@ function saveToTracker() {
     renderTracker();
     updateStatsDisplay();
     const btn = document.getElementById('saveToTrackerBtn');
-    btn.textContent = '✓ Saved!';
+    btn.textContent = 'Saved!';
     btn.disabled = true;
     setTimeout(() => { btn.textContent = 'Save to Tracker'; btn.disabled = false; }, 2000);
 }
