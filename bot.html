@@ -222,6 +222,41 @@ textarea.big-input:focus { outline: none; }
     .hero-card { grid-template-columns: 1fr; text-align: center; }
     .hero-score { border-right: none; border-bottom: var(--border); padding: 20px; }
 }
+/* Update these specific classes in your CSS */
+
+body {
+    /* Ensure the body never scrolls, only inner panels do */
+    height: 100vh;
+    overflow: hidden; 
+    margin: 0; 
+}
+
+.app-container {
+    display: grid;
+    grid-template-columns: 380px 1fr;
+    height: 100vh; /* Force full height */
+    overflow: hidden; /* Prevent container itself from scrolling */
+}
+
+.chat-panel {
+    background: var(--warm-cream);
+    border-right: var(--border);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0; /* Critical for nested scrolling */
+}
+
+.chat-thread {
+    flex: 1;
+    overflow-y: auto; /* Enable vertical scrolling */
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    background: var(--warm-cream);
+    min-height: 0; /* Critical: stops the div from growing beyond parent */
+}
 </style>
 </head>
 <body>
