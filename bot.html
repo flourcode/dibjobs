@@ -247,10 +247,9 @@ textarea:focus { outline: none; background: #FFFFFF; box-shadow: 4px 4px 0 rgba(
 }
 
 .arti-avatar-large {
-    width: 80px;
-    height: 80px;
+    width: 72px;
+    height: 72px;
     border-radius: var(--radius);
-    border: 3px solid var(--ink-black);
     flex-shrink: 0;
 }
 
@@ -287,7 +286,7 @@ textarea:focus { outline: none; background: #FFFFFF; box-shadow: 4px 4px 0 rgba(
     justify-content: space-between;
     align-items: center;
     padding: 12px 16px;
-    background: var(--accent-mint);
+    background: var(--pale-blue);
     border-bottom: var(--border-thick) solid var(--ink-black);
 }
 
@@ -304,6 +303,9 @@ textarea:focus { outline: none; background: #FFFFFF; box-shadow: 4px 4px 0 rgba(
     box-shadow: none;
     min-height: 180px;
 }
+
+.resume-controls { display: flex; gap: 8px; align-items: center; }
+.resume-controls select { padding: 6px; font-size: 11px; border: 1px solid var(--ink-black); border-radius: 3px; }
 
 .btn-small {
     padding: 6px 12px;
@@ -340,23 +342,19 @@ textarea:focus { outline: none; background: #FFFFFF; box-shadow: 4px 4px 0 rgba(
     border-radius: 4px;
 }
 
-/* SCORECARD */
-.scorecard {
+/* SCORE HERO */
+.score-hero {
     padding: 0 !important;
     overflow: hidden;
     margin-bottom: 24px;
-}
-
-.scorecard-hero {
     display: grid;
-    grid-template-columns: 160px 1fr;
-    border-bottom: var(--border-thick) solid var(--ink-black);
+    grid-template-columns: 200px 1fr;
 }
 
 .score-block {
     background: var(--ink-black);
     color: white;
-    padding: 32px 16px;
+    padding: 40px 24px;
     text-align: center;
     display: flex;
     flex-direction: column;
@@ -366,14 +364,14 @@ textarea:focus { outline: none; background: #FFFFFF; box-shadow: 4px 4px 0 rgba(
 
 .score-num {
     font-family: 'Space Mono', monospace;
-    font-size: 56px;
+    font-size: 72px;
     font-weight: 700;
     line-height: 1;
 }
 
 .score-pct {
     font-family: 'Space Mono', monospace;
-    font-size: 20px;
+    font-size: 28px;
     font-weight: 700;
 }
 
@@ -385,75 +383,84 @@ textarea:focus { outline: none; background: #FFFFFF; box-shadow: 4px 4px 0 rgba(
     margin-top: 8px;
 }
 
-.scorecard-hero.score-high .score-block { background: var(--accent-olive); }
-.scorecard-hero.score-mid .score-block { background: var(--accent-gold); color: var(--ink-black); }
-.scorecard-hero.score-low .score-block { background: var(--accent-clay); }
+.score-hero.score-high .score-block { background: var(--accent-olive); }
+.score-hero.score-mid .score-block { background: var(--accent-gold); color: var(--ink-black); }
+.score-hero.score-low .score-block { background: var(--accent-clay); }
 
-.score-details {
-    padding: 24px;
+.score-meta {
+    padding: 24px 32px;
     background: var(--bg-cream);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    border-left: var(--border-thick) solid var(--ink-black);
 }
 
-.score-details h2 {
+.score-meta h2 {
     font-family: 'Space Mono', monospace;
     font-size: 18px;
+    margin-bottom: 12px;
+    color: var(--accent-olive);
+}
+
+.score-meta p {
+    font-size: 13px;
     margin-bottom: 4px;
 }
 
-.score-details .company {
-    font-size: 14px;
-    margin-bottom: 8px;
-}
-
-.score-details .verdict {
-    font-size: 13px;
-    opacity: 0.75;
-    font-style: italic;
-}
-
-.scorecard-metrics {
+/* DASHBOARD GRID */
+.dashboard-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    background: white;
-}
-
-.metric {
-    padding: 16px;
-    text-align: center;
-    border-right: var(--border-thick) solid var(--ink-black);
-}
-
-.metric:last-child { border-right: none; }
-
-.metric-val {
-    display: block;
-    font-family: 'Space Mono', monospace;
-    font-size: 24px;
-    font-weight: 700;
-}
-
-.metric-label {
-    font-size: 10px;
-    text-transform: uppercase;
-    opacity: 0.6;
-}
-
-/* ARTI SECTIONS */
-.arti-section {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
     margin-bottom: 24px;
 }
 
-.arti-message {
+.dash-card {
+    background: var(--card-white);
+    border: var(--border-thick) solid var(--ink-black);
+    border-radius: var(--radius);
+    padding: 20px;
+    text-align: center;
+    box-shadow: var(--shadow-hard);
+}
+
+.dash-card-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    opacity: 0.6;
+    margin-bottom: 8px;
+}
+
+.dash-card-value {
+    font-family: 'Space Mono', monospace;
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--ink-black);
+    line-height: 1.1;
+}
+
+.dash-card-sub {
+    font-size: 11px;
+    opacity: 0.6;
+    margin-top: 4px;
+}
+
+/* ARTI TAKE */
+.arti-take {
     display: flex;
     gap: 16px;
     align-items: flex-start;
+    margin-bottom: 24px;
 }
 
 .arti-avatar {
     width: 48px;
     height: 48px;
     border-radius: var(--radius);
-    border: 2px solid var(--ink-black);
     flex-shrink: 0;
 }
 
@@ -461,8 +468,13 @@ textarea:focus { outline: none; background: #FFFFFF; box-shadow: 4px 4px 0 rgba(
     width: 36px;
     height: 36px;
     border-radius: var(--radius);
-    border: 2px solid var(--ink-black);
     flex-shrink: 0;
+}
+
+.header-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 4px;
 }
 
 .arti-bubble {
@@ -481,7 +493,7 @@ textarea:focus { outline: none; background: #FFFFFF; box-shadow: 4px 4px 0 rgba(
     content: '';
     position: absolute;
     left: -12px;
-    top: 16px;
+    top: 14px;
     width: 0;
     height: 0;
     border: 6px solid transparent;
@@ -491,15 +503,15 @@ textarea:focus { outline: none; background: #FFFFFF; box-shadow: 4px 4px 0 rgba(
 .arti-bubble::after {
     content: '';
     position: absolute;
-    left: -8px;
-    top: 18px;
+    left: -7px;
+    top: 16px;
     width: 0;
     height: 0;
     border: 4px solid transparent;
     border-right-color: var(--accent-mint);
 }
 
-/* TWO COLUMN LAYOUT */
+/* TWO COLUMN */
 .two-col {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -507,16 +519,16 @@ textarea:focus { outline: none; background: #FFFFFF; box-shadow: 4px 4px 0 rgba(
     margin-bottom: 24px;
 }
 
-.card-strengths .card-header { background: rgba(147, 181, 217, 0.3); }
-.card-gaps .card-header { background: rgba(212, 145, 138, 0.3); }
+.header-match { background: rgba(147, 181, 217, 0.3); }
+.header-gap { background: rgba(212, 145, 138, 0.3); }
 
 .fit-list {
     list-style: none;
 }
 
 .fit-list li {
-    padding: 12px 16px;
-    margin-bottom: 10px;
+    padding: 14px 16px;
+    margin-bottom: 12px;
     background: white;
     border: 2px solid var(--ink-black);
     border-radius: var(--radius);
@@ -526,8 +538,8 @@ textarea:focus { outline: none; background: #FFFFFF; box-shadow: 4px 4px 0 rgba(
 
 .fit-list li:last-child { margin-bottom: 0; }
 
-.card-strengths .fit-list li { border-left: 6px solid var(--accent-olive); }
-.card-gaps .fit-list li { border-left: 6px solid var(--accent-clay); }
+.fit-list.matches li { border-left: 6px solid var(--accent-olive); }
+.fit-list.gaps li { border-left: 6px solid var(--accent-clay); }
 
 .fit-list li strong {
     font-family: 'Space Mono', monospace;
@@ -537,31 +549,22 @@ textarea:focus { outline: none; background: #FFFFFF; box-shadow: 4px 4px 0 rgba(
     margin-bottom: 4px;
 }
 
-.card-strengths .fit-list li strong { color: var(--deep-blue); }
-.card-gaps .fit-list li strong { color: #a5635a; }
+.fit-list.matches li strong { color: var(--deep-blue); }
+.fit-list.gaps li strong { color: #a5635a; }
 
 /* CHAT */
-.arti-chat-card {
-    margin-bottom: 24px;
-}
-
 .chat-thread {
-    max-height: 350px;
+    max-height: 400px;
     overflow-y: auto;
     margin-bottom: 16px;
 }
 
-.chat-thread .arti-message {
+.chat-thread .arti-take {
     margin-bottom: 16px;
-}
-
-.chat-thread .arti-message:last-child {
-    margin-bottom: 0;
 }
 
 .user-message {
     display: flex;
-    gap: 12px;
     justify-content: flex-end;
     margin-bottom: 16px;
 }
@@ -569,7 +572,6 @@ textarea:focus { outline: none; background: #FFFFFF; box-shadow: 4px 4px 0 rgba(
 .user-bubble {
     background: var(--ink-black);
     color: white;
-    border: var(--border-thick) solid var(--ink-black);
     border-radius: var(--radius);
     padding: 12px 16px;
     font-size: 14px;
@@ -591,7 +593,6 @@ textarea:focus { outline: none; background: #FFFFFF; box-shadow: 4px 4px 0 rgba(
     border: 2px solid var(--ink-black);
     border-radius: var(--radius);
     cursor: pointer;
-    transition: all 0.15s;
 }
 
 .suggestion-btn:hover {
@@ -612,11 +613,6 @@ textarea:focus { outline: none; background: #FFFFFF; box-shadow: 4px 4px 0 rgba(
     border-radius: var(--radius);
 }
 
-.chat-input-row input:focus {
-    outline: none;
-    box-shadow: 4px 4px 0 rgba(0,0,0,0.1);
-}
-
 /* SAVE PROMPT */
 .save-prompt {
     display: flex;
@@ -631,11 +627,23 @@ textarea:focus { outline: none; background: #FFFFFF; box-shadow: 4px 4px 0 rgba(
     font-size: 14px;
 }
 
-/* CARD META */
-.card-meta {
+/* TOGGLE ICON */
+.toggle-icon {
     font-family: 'Space Mono', monospace;
-    font-size: 11px;
-    opacity: 0.7;
+    font-weight: 700;
+    font-size: 20px;
+}
+
+/* EMAIL OUTPUT */
+.email-output {
+    display: none;
+    white-space: pre-wrap;
+    font-size: 14px;
+    line-height: 1.6;
+    background: #fff;
+    padding: 16px;
+    border: 2px solid var(--ink-black);
+    border-radius: var(--radius);
 }
 
 /* RESPONSIVE */
@@ -645,14 +653,12 @@ textarea:focus { outline: none; background: #FFFFFF; box-shadow: 4px 4px 0 rgba(
         text-align: center;
         padding: 24px;
     }
-    .arti-welcome-text h1 { font-size: 22px; }
     .input-section { grid-template-columns: 1fr; }
-    .scorecard-hero { grid-template-columns: 1fr; }
-    .score-block { padding: 24px; flex-direction: row; gap: 8px; }
-    .score-num { font-size: 42px; }
-    .scorecard-metrics { grid-template-columns: repeat(2, 1fr); }
-    .metric:nth-child(2) { border-right: none; }
-    .metric:nth-child(1), .metric:nth-child(2) { border-bottom: var(--border-thick) solid var(--ink-black); }
+    .score-hero { grid-template-columns: 1fr; }
+    .score-block { padding: 24px; }
+    .score-num { font-size: 56px; }
+    .score-meta { border-left: none; border-top: var(--border-thick) solid var(--ink-black); }
+    .dashboard-grid { grid-template-columns: repeat(2, 1fr); }
     .two-col { grid-template-columns: 1fr; }
     .analyze-section { flex-direction: column; }
     .analyze-section .btn { width: 100%; }
@@ -739,34 +745,58 @@ textarea:focus { outline: none; background: #FFFFFF; box-shadow: 4px 4px 0 rgba(
     <!-- RESULTS -->
     <div id="analysisResults" style="display: none;">
 
-        <!-- SCORECARD -->
-        <div class="card scorecard" id="scoreDashboard">
-            <div class="scorecard-hero" id="scorecardHero">
-                <div class="score-block">
-                    <span class="score-num" id="scoreValue">--</span><span class="score-pct">%</span>
-                    <span class="score-word">MATCH</span>
-                </div>
-                <div class="score-details">
-                    <h2 id="jobTitle">Role</h2>
-                    <p class="company" id="jobCompany">Company</p>
-                    <p class="verdict" id="jobVerdict"></p>
-                </div>
+        <!-- SCORE HERO -->
+        <div class="card score-hero" id="scoreHero">
+            <div class="score-block" id="scoreBlock">
+                <span class="score-num" id="scoreValue">--</span><span class="score-pct">%</span>
+                <span class="score-word">MATCH SCORE</span>
             </div>
-            <div class="scorecard-metrics">
-                <div class="metric"><span class="metric-val" id="matchCount">0</span><span class="metric-label">Strengths</span></div>
-                <div class="metric"><span class="metric-val" id="gapCount">0</span><span class="metric-label">Gaps</span></div>
-                <div class="metric"><span class="metric-val" id="keywordHitRate">--%</span><span class="metric-label">Keywords</span></div>
-                <div class="metric"><span class="metric-val" id="salaryQuick">--</span><span class="metric-label">Est. Salary</span></div>
+            <div class="score-meta">
+                <h2 id="jobVerdict">Analyzing...</h2>
+                <p><strong>Role:</strong> <span id="jobTitle">--</span></p>
+                <p><strong>Company:</strong> <span id="jobCompany">--</span></p>
+            </div>
+        </div>
+
+        <!-- DASHBOARD GRID - 3x3 BI Style -->
+        <div class="dashboard-grid">
+            <div class="dash-card">
+                <div class="dash-card-label">Strengths</div>
+                <div class="dash-card-value" id="matchCount">0</div>
+                <div class="dash-card-sub">alignment points</div>
+            </div>
+            <div class="dash-card">
+                <div class="dash-card-label">Gaps</div>
+                <div class="dash-card-value" id="gapCount">0</div>
+                <div class="dash-card-sub">to address</div>
+            </div>
+            <div class="dash-card">
+                <div class="dash-card-label">Keywords</div>
+                <div class="dash-card-value" id="keywordHitRate">--%</div>
+                <div class="dash-card-sub"><span id="kwMatched">0</span> of <span id="kwTotal">0</span> matched</div>
+            </div>
+            <div class="dash-card">
+                <div class="dash-card-label">Salary Estimate</div>
+                <div class="dash-card-value" id="salaryQuick">--</div>
+                <div class="dash-card-sub" id="salaryRange">Loading...</div>
+            </div>
+            <div class="dash-card">
+                <div class="dash-card-label">Competition</div>
+                <div class="dash-card-value" id="competitionLevel">--</div>
+                <div class="dash-card-sub" id="competitionDesc">Analyzing...</div>
+            </div>
+            <div class="dash-card">
+                <div class="dash-card-label">Time to Offer</div>
+                <div class="dash-card-value" id="offerDays">--</div>
+                <div class="dash-card-sub">estimated timeline</div>
             </div>
         </div>
 
         <!-- ARTI'S TAKE -->
-        <div class="arti-section">
-            <div class="arti-message">
-                <img src="arti.png" alt="Arti" class="arti-avatar">
-                <div class="arti-bubble">
-                    <p id="coachTake">Analyzing...</p>
-                </div>
+        <div class="arti-take">
+            <img src="arti.png" alt="Arti" class="arti-avatar">
+            <div class="arti-bubble">
+                <p id="coachTake">Analyzing your fit...</p>
             </div>
         </div>
 
@@ -774,7 +804,7 @@ textarea:focus { outline: none; background: #FFFFFF; box-shadow: 4px 4px 0 rgba(
         <div class="card">
             <div class="card-header">
                 <span class="card-title">Keywords</span>
-                <span class="card-meta"><span id="kwMatched">0</span> matched, <span id="kwMissing">0</span> missing</span>
+                <span class="card-meta"><span id="kwMatchedAlt">0</span> matched, <span id="kwMissing">0</span> missing</span>
             </div>
             <div class="card-body">
                 <div class="keyword-cloud" id="dashboardKeywords"></div>
@@ -783,27 +813,27 @@ textarea:focus { outline: none; background: #FFFFFF; box-shadow: 4px 4px 0 rgba(
 
         <!-- STRENGTHS & GAPS -->
         <div class="two-col">
-            <div class="card card-strengths">
-                <div class="card-header"><span class="card-title">Your Strengths</span></div>
-                <div class="card-body"><ul id="topMatches" class="fit-list"></ul></div>
+            <div class="card">
+                <div class="card-header header-match"><span class="card-title">Your Strengths</span></div>
+                <div class="card-body"><ul id="topMatches" class="fit-list matches"></ul></div>
             </div>
-            <div class="card card-gaps">
-                <div class="card-header"><span class="card-title">Gaps to Address</span></div>
-                <div class="card-body"><ul id="topGaps" class="fit-list"></ul></div>
+            <div class="card">
+                <div class="card-header header-gap"><span class="card-title">Gaps to Address</span></div>
+                <div class="card-body"><ul id="topGaps" class="fit-list gaps"></ul></div>
             </div>
         </div>
 
-        <!-- ASK ARTI - PROMINENT -->
-        <div class="card arti-chat-card" id="chatSection">
+        <!-- ASK ARTI -->
+        <div class="card" id="chatSection">
             <div class="card-header">
                 <span class="card-title has-avatar">
-                    <img src="arti.png" alt="Arti" style="width: 32px; height: 32px; border-radius: var(--radius);">
+                    <img src="arti.png" alt="Arti" class="header-avatar">
                     Ask Arti
                 </span>
             </div>
             <div class="card-body">
                 <div class="chat-thread" id="chatMessages">
-                    <div class="arti-message">
+                    <div class="arti-take" style="margin-bottom: 0;">
                         <img src="arti.png" alt="Arti" class="arti-avatar-small">
                         <div class="arti-bubble" id="initialChatMessage">What would you like to know? I can help with salary negotiation, addressing gaps, interview prep, or whether this role is worth pursuing.</div>
                     </div>
@@ -812,7 +842,7 @@ textarea:focus { outline: none; background: #FFFFFF; box-shadow: 4px 4px 0 rgba(
                     <button class="suggestion-btn" onclick="askSuggestion('What salary should I ask for?')">Salary advice</button>
                     <button class="suggestion-btn" onclick="askSuggestion('How do I address my biggest gap?')">Address my gaps</button>
                     <button class="suggestion-btn" onclick="askSuggestion('Is this role worth pursuing?')">Worth pursuing?</button>
-                    <button class="suggestion-btn" onclick="askSuggestion('What questions will they ask me?')">Interview questions</button>
+                    <button class="suggestion-btn" onclick="askSuggestion('What questions will they ask me?')">Interview Qs</button>
                 </div>
                 <div class="chat-input-row">
                     <input type="text" id="chatInput" placeholder="Ask me anything about this role..." onkeypress="if(event.key==='Enter')sendChatMessage()">
@@ -821,96 +851,65 @@ textarea:focus { outline: none; background: #FFFFFF; box-shadow: 4px 4px 0 rgba(
             </div>
         </div>
 
-        <!-- TOOLKIT - Collapsible extras -->
+        <!-- TOOLKIT -->
         <div class="card collapsible-card collapsed" id="toolkitCard">
             <div class="card-header collapsible-trigger" onclick="toggleKit('toolkit')">
                 <span class="card-title">Application Toolkit</span>
-                <span id="toolkitToggle" class="mono" style="font-weight: 700; font-size: 20px;">+</span>
+                <span id="toolkitToggle" class="toggle-icon">+</span>
             </div>
             <div id="toolkitContent" class="collapsible-content">
                 <div class="card-body">
-                    <!-- Tailored Summary -->
                     <div class="kit-section">
                         <h4 class="kit-section-title">Tailored Executive Summary</h4>
-                        <div id="resumeOutput" class="resume-paper compact"></div>
+                        <div id="resumeOutput" class="resume-paper"></div>
                         <button class="btn btn-secondary btn-small" onclick="copyResume()">Copy</button>
                     </div>
                     <hr class="kit-divider">
-                    <!-- Intro Email -->
                     <div class="kit-section">
                         <h4 class="kit-section-title">Intro Email</h4>
                         <div id="coverLetterPlaceholder">
                             <button class="btn btn-primary" onclick="generateCoverLetter()" id="generateCoverLetterBtn">Generate Intro Email</button>
                         </div>
-                        <div id="coverLetterDisplay" style="display:none; white-space: pre-wrap; font-size: 14px; line-height: 1.6; background: #fff; padding: 16px; border: 1px solid #ddd; border-radius: var(--radius);"></div>
+                        <div id="coverLetterDisplay" class="email-output"></div>
                         <button id="copyCLBtn" class="btn btn-secondary btn-small" onclick="copyCoverLetter()" style="display:none;">Copy</button>
                     </div>
                     <hr class="kit-divider">
-                    <!-- Interview Prep -->
                     <div class="kit-section">
-                        <h4 class="kit-section-title">Interview Questions & Answers</h4>
+                        <h4 class="kit-section-title">Interview Questions</h4>
                         <div id="interviewQuestionsList"></div>
                     </div>
                     <hr class="kit-divider">
-                    <!-- Gap Strategies -->
                     <div class="kit-section">
-                        <h4 class="kit-section-title">How to Address Your Gaps</h4>
+                        <h4 class="kit-section-title">Gap Strategies</h4>
                         <div id="gapStrategiesList"></div>
                     </div>
                     <hr class="kit-divider">
-                    <!-- Market Intel -->
                     <div class="kit-section">
-                        <h4 class="kit-section-title">Market Intel</h4>
-                        <div class="intel-grid">
-                            <div class="intel-panel">
-                                <div class="intel-panel-title">Salary Range</div>
-                                <div class="intel-value" id="salaryRange">--</div>
-                                <div class="salary-range-bar">
-                                    <div class="salary-marker" id="salaryMarker" style="left: 50%;" data-label="Target"></div>
-                                </div>
-                                <div class="salary-labels"><span id="salaryLow">--</span><span id="salaryHigh">--</span></div>
-                            </div>
-                            <div class="intel-panel">
-                                <div class="intel-panel-title">Competition</div>
-                                <div class="intel-value" id="competitionLevel">--</div>
-                                <div class="intel-label" id="competitionDesc"></div>
-                            </div>
-                            <div class="intel-panel">
-                                <div class="intel-panel-title">Timeline to Offer</div>
-                                <div class="intel-value" id="offerDays">--</div>
-                            </div>
-                        </div>
-                    </div>
-                    <hr class="kit-divider">
-                    <!-- Network -->
-                    <div class="kit-section">
-                        <h4 class="kit-section-title">Find Connections at <span id="networkCompany">This Company</span></h4>
+                        <h4 class="kit-section-title">Research <span id="networkCompany">This Company</span></h4>
                         <div class="network-links" id="networkLinks"></div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Save option - subtle -->
+        <!-- SAVE -->
         <div class="save-prompt">
-            <span>Want to track this application?</span>
+            <span>Track this application?</span>
             <button class="btn btn-secondary btn-small" onclick="saveToTracker()" id="saveToTrackerBtn">Save to Tracker</button>
         </div>
     </div>
 
-    <!-- TRACKER - Hidden by default, only shown if they have tracked jobs -->
+    <!-- TRACKER -->
     <div id="trackerSection" class="card" style="display: none;">
         <div class="card-header">
             <span class="card-title">Tracked Applications</span>
             <span id="trackerCount" class="card-meta">0 jobs</span>
         </div>
         <div class="card-body">
-            <div id="trackerTableContainer" style="overflow-x: auto;">
-                <table class="tracker-table">
-                    <thead><tr><th>Company</th><th>Role</th><th>Score</th><th>Status</th><th>Actions</th></tr></thead>
-                    <tbody id="trackerBody"></tbody>
-                </table>
-            </div>
+            <table class="tracker-table">
+                <thead><tr><th>Company</th><th>Role</th><th>Score</th><th>Status</th><th></th></tr></thead>
+                <tbody id="trackerBody"></tbody>
+            </table>
         </div>
     </div>
 </main>
@@ -1186,8 +1185,8 @@ function getInitialChatMessage(score) {
 function renderResults(data) {
     const score = data.score || 0;
     
-    // Scorecard hero
-    const hero = document.getElementById('scorecardHero');
+    // Score hero
+    const hero = document.getElementById('scoreHero');
     if (hero) {
         hero.classList.remove('score-high', 'score-mid', 'score-low');
         hero.classList.add(score >= 75 ? 'score-high' : score >= 50 ? 'score-mid' : 'score-low');
@@ -1196,13 +1195,13 @@ function renderResults(data) {
     document.getElementById('scoreValue').textContent = score;
     document.getElementById('jobTitle').textContent = data.job_title || 'Role';
     document.getElementById('jobCompany').textContent = data.company || 'Company';
-    document.getElementById('jobVerdict').textContent = data.verdict || data.one_liner || '';
+    document.getElementById('jobVerdict').textContent = data.verdict || 'Match Analysis Complete';
     
     // Parse matches and gaps
     const matches = (data.analysis || []).filter(a => a.startsWith('Match:'));
     const gaps = (data.analysis || []).filter(a => a.startsWith('Gap:'));
     
-    // Metrics
+    // Dashboard metrics
     document.getElementById('matchCount').textContent = matches.length;
     document.getElementById('gapCount').textContent = gaps.length;
     
@@ -1214,18 +1213,20 @@ function renderResults(data) {
     
     document.getElementById('keywordHitRate').textContent = kwHitRate + '%';
     document.getElementById('kwMatched').textContent = kwMatched;
+    document.getElementById('kwTotal').textContent = keywords.length;
+    document.getElementById('kwMatchedAlt').textContent = kwMatched;
     document.getElementById('kwMissing').textContent = kwMissing;
     
     // Coach take
     let coachTake = '';
     if (score >= 80) {
-        coachTake = "Strong fit. You match most requirements and should be competitive. Focus on highlighting your relevant wins in the interview.";
+        coachTake = "Strong fit. You hit most of their requirements. Focus on your wins in the interview and you should be competitive.";
     } else if (score >= 65) {
-        coachTake = "Good opportunity with some gaps to address. Review the missing keywords and prepare talking points for your gaps.";
+        coachTake = "Good opportunity with gaps to address. Check the missing keywords and prepare talking points for your gaps before applying.";
     } else if (score >= 50) {
-        coachTake = "Stretch role. You'll need to work harder to stand out. Consider networking into this one and addressing gaps head-on.";
+        coachTake = "Stretch role. You'll need to work harder to stand out. Consider networking into this one and addressing gaps head-on in your cover letter.";
     } else {
-        coachTake = "Significant gaps. This role may require skills you're still building. Consider it a target to work toward.";
+        coachTake = "Significant gaps here. This role may require skills you're still building. Could be a target to work toward over time.";
     }
     document.getElementById('coachTake').textContent = coachTake;
     
@@ -1237,14 +1238,14 @@ function renderResults(data) {
         return `<span class="keyword-tag ${inResume ? 'in-resume' : 'missing'}">${esc(term)}</span>`;
     }).join('');
     
-    // Top matches
+    // Matches list
     document.getElementById('topMatches').innerHTML = matches.map(m => {
         const text = m.replace('Match:', '').trim();
         const parts = text.split(/→|--/);
         return `<li><strong>${esc(parts[0].trim())}</strong>${parts[1] ? esc(parts[1].trim()) : ''}</li>`;
     }).join('');
     
-    // Top gaps
+    // Gaps list
     document.getElementById('topGaps').innerHTML = gaps.map(g => {
         const text = g.replace('Gap:', '').trim();
         const parts = text.split(/→|--/);
@@ -1274,9 +1275,10 @@ function renderResults(data) {
     document.getElementById('networkCompany').textContent = data.company || 'This Company';
     const enc = encodeURIComponent(data.company || '');
     document.getElementById('networkLinks').innerHTML = `
-        <a href="https://www.linkedin.com/search/results/people/?keywords=${enc}" target="_blank" class="network-link">LinkedIn People</a>
-        <a href="https://www.linkedin.com/search/results/people/?keywords=${enc}%20recruiter" target="_blank" class="network-link">Recruiters</a>
-        <a href="https://www.linkedin.com/search/results/people/?keywords=${enc}%20hiring%20manager" target="_blank" class="network-link">Hiring Managers</a>
+        <a href="https://www.linkedin.com/search/results/people/?keywords=${enc}%20recruiter" target="_blank" class="network-link">Find Recruiters</a>
+        <a href="https://www.linkedin.com/search/results/people/?keywords=${enc}%20hiring%20manager" target="_blank" class="network-link">Find Executives</a>
+        <a href="https://www.linkedin.com/search/results/people/?keywords=${enc}%20veteran" target="_blank" class="network-link">Find Veterans</a>
+        <a href="https://www.glassdoor.com/Search/results.htm?keyword=${enc}" target="_blank" class="network-link">Glassdoor</a>
     `;
 }
 
@@ -1362,28 +1364,19 @@ async function fetchMarketIntel(jobDescription, jobTitle, company) {
         
         if (intel.salary_intel) {
             const s = intel.salary_intel;
-            document.getElementById('salaryRange').textContent = '$' + s.low + 'K - $' + s.high + 'K';
-            document.getElementById('salaryLow').textContent = '$' + s.low + 'K';
-            document.getElementById('salaryHigh').textContent = '$' + s.high + 'K';
-            document.getElementById('salaryMarker').style.left = ((s.mid - s.low) / (s.high - s.low) * 100) + '%';
-            document.getElementById('salaryMarker').setAttribute('data-label', '$' + s.mid + 'K Target');
-            
-            // Update quick displays
             document.getElementById('salaryQuick').textContent = '$' + s.mid + 'K';
-            document.getElementById('salaryPreview').textContent = '$' + s.low + 'K - $' + s.high + 'K';
-            
+            document.getElementById('salaryRange').textContent = '$' + s.low + 'K - $' + s.high + 'K';
             if (analysisData) analysisData.salary_intel = s;
         }
         
         if (intel.timeline) {
-            document.getElementById('screenDays').textContent = intel.timeline.screen || '1-2 wks';
-            document.getElementById('interviewDays').textContent = intel.timeline.interview || '2-4 wks';
-            document.getElementById('offerDays').textContent = intel.timeline.offer || '4-8 wks';
+            const t = intel.timeline;
+            document.getElementById('offerDays').textContent = t.offer || '4-8 wks';
         }
         
         if (intel.competition) {
             document.getElementById('competitionLevel').textContent = intel.competition.level || 'Medium';
-            document.getElementById('competitionDesc').textContent = intel.competition.reasoning || '';
+            document.getElementById('competitionDesc').textContent = intel.competition.reasoning ? intel.competition.reasoning.substring(0, 60) + '...' : '';
         }
     } catch (e) {
         console.error('Market intel error:', e);
@@ -1408,7 +1401,7 @@ async function sendChatMessage() {
     container.innerHTML += `<div class="user-message"><div class="user-bubble">${esc(msg)}</div></div>`;
     
     const loadingId = 'load-' + Date.now();
-    container.innerHTML += `<div class="arti-message" id="${loadingId}"><img src="arti.png" alt="Arti" class="arti-avatar-small"><div class="arti-bubble">Thinking...</div></div>`;
+    container.innerHTML += `<div class="arti-take" id="${loadingId}"><img src="arti.png" alt="Arti" class="arti-avatar-small"><div class="arti-bubble">Thinking...</div></div>`;
     container.scrollTop = container.scrollHeight;
     input.value = '';
     document.getElementById('chatSuggestions').style.display = 'none';
@@ -1641,7 +1634,7 @@ Senior Account Executive | CloudTech Federal | 2014-2019
 CLEARANCE: TS/SCI with Full Scope Polygraph
 EDUCATION: MBA, Georgetown University | BS Computer Science, Virginia Tech`;
 
-    document.getElementById('jobDescription').value = `Principle, DoD Sales - Amazon Web Services
+    document.getElementById('jobDescription').value = `Principal, DoD Sales - Amazon Web Services
 
 Location: Reston, VA (Hybrid)
 Clearance: TS/SCI with Polygraph Required
