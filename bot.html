@@ -12,26 +12,22 @@
 <style>
     :root {
         /* =========================================
-           PALETTE - EXTRACTED FROM IMAGE
+           PALETTE
            ========================================= */
         --bg-cream: #FDFBF7;
         --ink-black: #2A2A2A;
         
-        /* Specific Card Colors */
+        /* Card Backgrounds */
         --card-gold: #EAC985;   /* Match Score Background */
         --card-blue: #C5D9E8;   /* Strengths & Salary Background */
         --card-pink: #F2D5D0;   /* Gaps Background */
         --card-sand: #EEE2C8;   /* Keywords Stat Background */
         --card-white: #FFFFFF;
         
-        /* Accents */
-        --accent-blue: #C5D9E8; 
-        --accent-pink: #F2D5D0;
-
         /* Spacing & Layout */
-        --border-thick: 3px;    /* Thicker borders for Neo-brutalist look */
-        --radius: 8px;          /* Slightly tighter radius */
-        --shadow-hard: 6px 6px 0px var(--ink-black); /* Hard, offset shadow */
+        --border-thick: 3px;
+        --radius: 8px;
+        --shadow-hard: 6px 6px 0px var(--ink-black);
         --shadow-hover: 3px 3px 0px var(--ink-black);
     }
 
@@ -80,7 +76,7 @@
         padding: 0 20px;
     }
 
-    /* GENERIC CARD STYLES */
+    /* GENERIC CARD STYLES (Used for Input Forms) */
     .card {
         background: var(--card-white);
         border: var(--border-thick) solid var(--ink-black);
@@ -105,6 +101,18 @@
         letter-spacing: 0.05em;
     }
     .card-body { padding: 32px; }
+
+    /* =========================================
+       SUPER CARD (The Results Wrapper)
+       ========================================= */
+    .super-card {
+        background: var(--card-white);
+        border: var(--border-thick) solid var(--ink-black);
+        border-radius: 12px;
+        box-shadow: 8px 8px 0px var(--ink-black);
+        padding: 40px; /* Internal spacing */
+        margin-bottom: 40px;
+    }
 
     /* =========================================
        1. MATCH SCORE HERO (Top Split Card)
@@ -166,9 +174,9 @@
     .verdict-avatar {
         width: 54px;
         height: 54px;
-        border-radius: 50%; /* Circular avatar */
-        border: 2px solid var(--ink-black);
+        border-radius: 50%;
         object-fit: cover;
+        /* REMOVED BORDER AS REQUESTED */
     }
     
     .verdict-title {
@@ -183,7 +191,7 @@
         font-size: 13px;
         color: #555;
         line-height: 1.6;
-        padding-left: 74px; /* Align text with title, offset by avatar */
+        padding-left: 74px; /* Align text with title */
     }
     
     .verdict-details strong {
@@ -217,7 +225,6 @@
         min-height: 140px;
     }
     
-    /* Specific Background Colors */
     .stat-card.blue { background-color: var(--card-blue); }
     .stat-card.pink { background-color: var(--card-pink); }
     .stat-card.sand { background-color: var(--card-sand); }
@@ -250,7 +257,7 @@
     /* =========================================
        3. KEYWORDS & RESEARCH
        ========================================= */
-    .keywords-section { margin-bottom: 40px; }
+    .keywords-section { margin-bottom: 32px; }
     
     .section-header {
         font-family: 'Space Mono', monospace;
@@ -264,31 +271,28 @@
         gap: 12px;
     }
     
-    /* Legend Badges */
-    .keyword-legend { margin-bottom: 16px; font-size: 13px; }
+    .keyword-legend { margin-bottom: 16px; font-size: 13px; font-family: 'Space Mono', monospace;}
     .legend-badge {
         display: inline-block;
         padding: 2px 8px;
         border-radius: 4px;
-        font-family: 'Space Mono', monospace;
         font-size: 11px;
         margin-right: 8px;
         border: 1px solid var(--ink-black);
     }
     .legend-blue { background: var(--card-blue); }
-    .legend-pink { background: var(--card-pink); }
 
-    /* Keyword Pills */
     .keyword-cloud {
         display: flex;
         flex-wrap: wrap;
         gap: 10px;
+        margin-bottom: 24px;
     }
     
     .keyword-tag {
         display: inline-block;
         padding: 8px 16px;
-        border-radius: 20px; /* Fully rounded capsule */
+        border-radius: 20px;
         font-family: 'Space Mono', monospace;
         font-size: 12px;
         font-weight: 700;
@@ -299,22 +303,21 @@
     
     .keyword-tag:hover { transform: translateY(-2px); }
 
-    /* Matches Image: Blue fill for Match */
+    /* Blue fill for Match */
     .keyword-tag.in-resume {
         background-color: var(--card-blue);
         border: 2px solid var(--ink-black);
     }
     
-    /* Matches Image: White fill, Pink Border for Missing */
+    /* White fill, Pink Border for Missing */
     .keyword-tag.missing {
         background-color: #fff;
-        border: 2px solid var(--card-pink); 
-        color: #B08078; /* Muted pink text */
+        border: 2px solid var(--card-pink); /* Light Pink Border */
+        color: #B08078;
     }
 
     .btn-small-outline {
         display: inline-block;
-        margin-top: 16px;
         background: #fff;
         border: 2px solid var(--ink-black);
         padding: 8px 16px;
@@ -331,7 +334,6 @@
         box-shadow: 2px 2px 0 var(--ink-black);
     }
 
-    /* Research Buttons */
     .research-links { display: flex; flex-wrap: wrap; gap: 12px; }
     .research-btn {
         background: var(--card-white);
@@ -382,7 +384,7 @@
         border-radius: var(--radius);
         cursor: pointer;
         box-shadow: var(--shadow-hard);
-        transition: all 0.1s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        transition: all 0.1s;
     }
     .btn:hover:not(:disabled) { transform: translate(-2px, -2px); box-shadow: 8px 8px 0 var(--ink-black); }
     .btn:active:not(:disabled) { transform: translate(2px, 2px); box-shadow: 2px 2px 0 var(--ink-black); }
@@ -391,7 +393,6 @@
     .btn-secondary { background: var(--card-white); }
     .btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow: none; }
 
-    /* UTILS & RESPONSIVE */
     .collapsible-card.collapsed .card-body { display: none; }
     .resume-controls { display: flex; gap: 10px; align-items: center; flex-wrap: wrap;}
     
@@ -401,13 +402,12 @@
         .verdict-panel { padding: 24px; }
         .verdict-details { padding-left: 0; margin-top: 10px; }
         .stats-grid { grid-template-columns: 1fr 1fr; }
+        .super-card { padding: 20px; }
     }
     @media (max-width: 500px) {
         .stats-grid { grid-template-columns: 1fr; }
-        .header { padding: 12px; }
     }
     
-    /* Loading Spinner */
     .spinner-box { display: flex; justify-content: center; margin: 20px 0; }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 </style>
@@ -466,7 +466,7 @@
         <h2 id="loadingStep" style="font-size: 16px; text-transform: uppercase;">Initializing...</h2>
     </div>
 
-    <div id="analysisResults" style="display: none;">
+    <div id="analysisResults" class="super-card" style="display: none;">
         
         <div class="hero-container">
             <div class="score-panel">
@@ -521,33 +521,32 @@
             <button class="btn-small-outline" onclick="copyKeywords()">Copy Keywords</button>
         </div>
 
-        <div class="keywords-section">
+        <div class="keywords-section" style="margin-bottom:0;">
             <div class="section-header" style="opacity: 0.6; font-size: 12px; margin-bottom: 8px;">Research This Company</div>
             <div class="research-links" id="networkLinks">
                 </div>
         </div>
 
-        <div style="border-top: 2px dashed #ccc; margin: 40px 0; opacity: 0.3;"></div>
-
-        <div id="interviewKitCard" class="card collapsible-card collapsed">
-            <div class="card-header collapsible-trigger" onclick="toggleKit('interview')">
-                <span class="card-title">Interview Questions & Gap Strategy</span>
-                <span class="mono" style="font-size:20px;">+</span>
-            </div>
-            <div id="interviewKitContent" class="card-body" style="display:none;">
-                <div id="interviewQuestionsList"></div>
-                <div style="margin-top:20px;" id="gapStrategiesList"></div>
-            </div>
+    </div>
+    
+    <div id="interviewKitCard" class="card collapsible-card collapsed">
+        <div class="card-header collapsible-trigger" onclick="toggleKit('interview')">
+            <span class="card-title">Interview Questions & Gap Strategy</span>
+            <span class="mono" style="font-size:20px;">+</span>
         </div>
-
-        <div id="saveToTrackerSection" class="card" style="display:none; background: var(--card-blue);">
-            <div class="card-body" style="display: flex; align-items: center; justify-content: space-between;">
-                <div>
-                    <strong class="mono">Save Analysis</strong>
-                    <p style="font-size: 13px; opacity: 0.8;">Save this job to your local tracker.</p>
-                </div>
-                <button class="btn btn-secondary" onclick="saveToTracker()" id="saveToTrackerBtn">Save to Tracker</button>
+        <div id="interviewKitContent" class="card-body" style="display:none;">
+            <div id="interviewQuestionsList"></div>
+            <div style="margin-top:20px;" id="gapStrategiesList"></div>
+        </div>
+    </div>
+    
+    <div id="saveToTrackerSection" class="card" style="display:none; background: var(--card-blue);">
+        <div class="card-body" style="display: flex; align-items: center; justify-content: space-between;">
+            <div>
+                <strong class="mono">Save Analysis</strong>
+                <p style="font-size: 13px; opacity: 0.8;">Save this job to your local tracker.</p>
             </div>
+            <button class="btn btn-secondary" onclick="saveToTracker()" id="saveToTrackerBtn">Save to Tracker</button>
         </div>
     </div>
     
@@ -572,17 +571,10 @@
 </main>
 
 <script>
-    // ==========================================================================
-    // CONFIGURATION & STATE
-    // ==========================================================================
     const API_ENDPOINT = 'https://76unm1rlj0.execute-api.us-east-1.amazonaws.com/default/grumpy2';
     const RESUME_STORAGE_KEY = 'dib_jobs_resumes';
     let analysisData = null;
-    let loadingInterval = null;
 
-    // ==========================================================================
-    // UTILS
-    // ==========================================================================
     function escapeHtml(str) {
         if (!str) return '';
         return str.replace(/[&<>"']/g, m => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;' })[m]);
@@ -607,9 +599,6 @@
         }
     }
 
-    // ==========================================================================
-    // MAIN ANALYSIS LOGIC
-    // ==========================================================================
     async function analyzeJob() {
         const jd = document.getElementById('jobDescription').value.trim();
         const resumeText = document.getElementById('resumeText').value.trim();
@@ -617,14 +606,12 @@
         if (!resumeText) { showInlineError("Please paste your resume."); return; }
         if (!jd) { showInlineError("Please paste a job description."); return; }
 
-        // UI Prep
         document.getElementById('analysisResults').style.display = 'none';
         document.getElementById('loadingCard').style.display = 'block';
         document.getElementById('analyzeBtn').disabled = true;
         document.getElementById('loadingStep').textContent = "Analyzing Match...";
 
         try {
-            // 1. Match Analysis
             const response = await fetch(API_ENDPOINT, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -637,12 +624,8 @@
             const data = await response.json();
             if (data.error) throw new Error(data.error);
             
-            analysisData = data; // Store globally
-            
-            // 2. Render Base Results
+            analysisData = data;
             renderResults(data);
-            
-            // 3. Kick off background market intel (Salary etc)
             fetchMarketIntel(jd, data.job_title, data.company);
 
         } catch (e) {
@@ -653,27 +636,23 @@
         }
     }
 
-    // ==========================================================================
-    // RENDER LOGIC (UPDATED FOR NEW UI)
-    // ==========================================================================
     function renderResults(data) {
         document.getElementById('analysisResults').style.display = 'block';
         document.getElementById('loadingCard').style.display = 'none';
 
-        // 1. HERO SECTION
+        // Hero
         document.getElementById('scoreDisplay').textContent = `${data.score}%`;
         document.getElementById('verdictTitle').textContent = data.verdict || "Analysis Complete";
         document.getElementById('verdictRole').innerHTML = `<strong>Role:</strong> ${escapeHtml(data.job_title)}`;
         document.getElementById('verdictCompany').innerHTML = `<strong>Company:</strong> ${escapeHtml(data.company)}`;
 
-        // 2. STATS GRID
+        // Stats
         const gaps = data.analysis ? data.analysis.filter(x => /gap|risk|missing/i.test(x)) : [];
         const matches = data.analysis ? data.analysis.filter(x => !/gap|risk|missing/i.test(x)) : [];
         
         document.getElementById('strengthsCount').textContent = matches.length;
         document.getElementById('gapsCount').textContent = gaps.length;
         
-        // Keywords Calc
         const keywords = data.keywords || [];
         const matchedKeywords = keywords.filter(k => k.in_resume);
         const kPercent = keywords.length > 0 ? Math.round((matchedKeywords.length / keywords.length) * 100) : 0;
@@ -681,18 +660,17 @@
         document.getElementById('keywordsPercent').textContent = `${kPercent}%`;
         document.getElementById('keywordsSub').textContent = `${matchedKeywords.length} of ${keywords.length} matched`;
 
-        // 3. KEYWORDS PILLS
+        // Keywords
         const cloud = document.getElementById('keywordCloudNew');
         cloud.innerHTML = '';
         keywords.forEach(k => {
             const tag = document.createElement('span');
-            // Class logic: 'in-resume' = blue pill, 'missing' = white with pink border
             tag.className = `keyword-tag ${k.in_resume ? 'in-resume' : 'missing'}`;
             tag.textContent = k.term || k;
             cloud.appendChild(tag);
         });
 
-        // 4. GENERATE RESEARCH LINKS
+        // Research Links
         const company = data.company && data.company !== 'Not Specified' ? data.company : '';
         const linksContainer = document.getElementById('networkLinks');
         if(company) {
@@ -707,7 +685,7 @@
             linksContainer.innerHTML = '<span style="opacity:0.6; font-size:12px;">Company not identified.</span>';
         }
 
-        // 5. INTERVIEW KIT
+        // Interview Kit
         const qList = document.getElementById('interviewQuestionsList');
         qList.innerHTML = '';
         if (data.interview_questions) {
@@ -720,13 +698,9 @@
             });
         }
         
-        // Show Save Button
         document.getElementById('saveToTrackerSection').style.display = 'block';
     }
 
-    // ==========================================================================
-    // MARKET INTEL (Background Fetch)
-    // ==========================================================================
     async function fetchMarketIntel(jd, title, company) {
         document.getElementById('salaryEstimate').textContent = '...';
         document.getElementById('salarySub').textContent = 'Loading...';
@@ -757,9 +731,6 @@
         }
     }
 
-    // ==========================================================================
-    // TRACKER & STORAGE
-    // ==========================================================================
     let trackedJobs = JSON.parse(localStorage.getItem('dibTracker') || '[]');
 
     function saveToTracker() {
@@ -806,9 +777,6 @@
         renderTracker();
     }
 
-    // ==========================================================================
-    // RESUME SAVING
-    // ==========================================================================
     function saveCurrentResume() {
         const text = document.getElementById('resumeText').value;
         if(text.length < 10) return alert("Resume too short");
@@ -858,7 +826,6 @@
         alert("Keywords copied!");
     }
 
-    // Init
     updateResumeSelector();
     renderTracker();
 
