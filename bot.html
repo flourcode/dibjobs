@@ -1002,41 +1002,14 @@ function saveStats() {
 }
 
 function updateStatsDisplay() {
-    const jobs = careerStats.jobsAnalyzed;
-    const avg = careerStats.scores.length 
-        ? Math.round(careerStats.scores.reduce((a,b)=>a+b,0)/careerStats.scores.length) + '%' 
-        : '--';
-    const tracked = trackedJobs.length;
-    const applied = trackedJobs.filter(j => j.status !== 'saved').length;
-    
-    // Full stats
-    document.getElementById('statJobsAnalyzed').textContent = jobs;
-    document.getElementById('statAvgScore').textContent = avg;
-    document.getElementById('statTracked').textContent = tracked;
-    document.getElementById('statApplied').textContent = applied;
-    
-    // Compact stats in header
-    const jobsCompact = document.getElementById('statJobsCompact');
-    const avgCompact = document.getElementById('statAvgCompact');
-    const trackedCompact = document.getElementById('statTrackedCompact');
-    if (jobsCompact) jobsCompact.textContent = jobs;
-    if (avgCompact) avgCompact.textContent = avg;
-    if (trackedCompact) trackedCompact.textContent = tracked;
+    // Stats display removed from UI - function kept for compatibility
 }
 
 // ==========================================================================
 // WORKFLOW
 // ==========================================================================
 function checkWorkflowProgress() {
-    const resume = document.getElementById('resumeText').value;
-    const s1 = document.getElementById('step1Indicator');
-    if (resume && resume.length > 100) {
-        s1.classList.add('completed');
-        s1.textContent = 'OK';
-    } else {
-        s1.classList.remove('completed');
-        s1.textContent = '1';
-    }
+    // No longer needed - workflow steps removed
 }
 
 // ==========================================================================
@@ -1059,8 +1032,15 @@ function toggleKit(id) {
 // ==========================================================================
 function updateResumeSelector() {
     const sel = document.getElementById('resumeSelector');
-    const resumes = JSON.parse(localStorage.getItem(RESUME_STORAGE_KEY) || '[]');
-    sel.innerHTML = '<option value="">-- Saved Resumes --</option>';
+    if (!sel) return;
+    let resumes = [];
+    try {
+        resumes = JSON.parse(localStorage.getItem(RESUME_STORAGE_KEY) || '[]');
+        if (!Array.isArray(resumes)) resumes = [];
+    } catch(e) {
+        resumes = [];
+    }
+    sel.innerHTML = '<option value="">-- Saved --</option>';
     resumes.forEach((r, i) => {
         sel.innerHTML += `<option value="${i}">${r.name || 'Resume '+(i+1)}</option>`;
     });
@@ -1167,9 +1147,6 @@ async function analyzeJob() {
         careerStats.scores.push(analysisData.score || 0);
         saveStats();
         updateStatsDisplay();
-        
-        document.getElementById('step2Indicator').classList.add('completed');
-        document.getElementById('step2Indicator').textContent = 'OK';
         
         renderResults(analysisData);
         fetchMarketIntel(jobDescription, analysisData.job_title, analysisData.company);
@@ -1428,10 +1405,10 @@ async function sendChatMessage() {
     if (!analysisData) { showToast('Analyze a job first'); return; }
     
     const container = document.getElementById('chatMessages');
-    container.innerHTML += `<div class="chat-message user"><div class="chat-message-avatar">You</div><div class="chat-message-bubble">${esc(msg)}</div></div>`;
+    container.innerHTML += `<div class="user-message"><div class="user-bubble">${esc(msg)}</div></div>`;
     
     const loadingId = 'load-' + Date.now();
-    container.innerHTML += `<div class="chat-message coach" id="${loadingId}"><div class="chat-message-avatar"><img src="arti.png" alt="" style="width:100%;height:100%;border-radius:var(--radius);"></div><div class="chat-message-bubble">Thinking...</div></div>`;
+    container.innerHTML += `<div class="arti-message" id="${loadingId}"><img src="arti.png" alt="Arti" class="arti-avatar-small"><div class="arti-bubble">Thinking...</div></div>`;
     container.scrollTop = container.scrollHeight;
     input.value = '';
     document.getElementById('chatSuggestions').style.display = 'none';
@@ -1452,10 +1429,10 @@ async function sendChatMessage() {
         if (!response.ok) throw new Error('Failed');
         const data = await response.json();
         chatHistory.push({ role: 'user', content: msg }, { role: 'assistant', content: data.response });
-        document.getElementById(loadingId).querySelector('.chat-message-bubble').innerHTML = esc(data.response).replace(/\n/g, '<br>');
+        document.getElementById(loadingId).querySelector('.arti-bubble').innerHTML = esc(data.response).replace(/\n/g, '<br>');
         container.scrollTop = container.scrollHeight;
     } catch (e) {
-        document.getElementById(loadingId).querySelector('.chat-message-bubble').textContent = 'Sorry, please try again.';
+        document.getElementById(loadingId).querySelector('.arti-bubble').textContent = 'Sorry, please try again.';
     }
 }
 
@@ -1551,15 +1528,20 @@ function saveToTracker() {
 }
 
 function renderTracker() {
-    document.getElementById('trackerCount').textContent = trackedJobs.length + ' job' + (trackedJobs.length !== 1 ? 's' : '') + ' tracked';
-    if (trackedJobs.length === 0) {
-        document.getElementById('trackerEmpty').style.display = 'block';
-        document.getElementById('trackerTableContainer').style.display = 'none';
-        return;
+    const section = document.getElementById('trackerSection');
+    const countEl = document.getElementById('trackerCount');
+    const tbody = document.getElementById('trackerBody');
+    
+    if (!section || !tbody) return;
+    
+    // Show tracker section only if there are tracked jobs
+    section.style.display = trackedJobs.length > 0 ? 'block' : 'none';
+    
+    if (countEl) {
+        countEl.textContent = trackedJobs.length + ' job' + (trackedJobs.length !== 1 ? 's' : '');
     }
-    document.getElementById('trackerEmpty').style.display = 'none';
-    document.getElementById('trackerTableContainer').style.display = 'block';
-    document.getElementById('trackerBody').innerHTML = trackedJobs.map(job => `
+    
+    tbody.innerHTML = trackedJobs.map(job => `
         <tr>
             <td><strong>${esc(job.company)}</strong></td>
             <td>${esc(job.role)}</td>
@@ -1571,7 +1553,6 @@ function renderTracker() {
                 <option value="offered" ${job.status==='offered'?'selected':''}>Offered</option>
                 <option value="rejected" ${job.status==='rejected'?'selected':''}>Rejected</option>
             </select></td>
-            <td>${job.date}</td>
             <td><div class="tracker-actions"><button class="tracker-btn" onclick="loadTrackedJob(${job.id})">Load</button><button class="tracker-btn" onclick="deleteTrackedJob(${job.id})">X</button></div></td>
         </tr>
     `).join('');
@@ -1660,7 +1641,7 @@ Senior Account Executive | CloudTech Federal | 2014-2019
 CLEARANCE: TS/SCI with Full Scope Polygraph
 EDUCATION: MBA, Georgetown University | BS Computer Science, Virginia Tech`;
 
-    document.getElementById('jobDescription').value = `Principal, DoD Sales - Amazon Web Services
+    document.getElementById('jobDescription').value = `Principle, DoD Sales - Amazon Web Services
 
 Location: Reston, VA (Hybrid)
 Clearance: TS/SCI with Polygraph Required
