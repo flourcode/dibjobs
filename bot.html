@@ -3,401 +3,367 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Arti // Smart Career Agent</title>
+    <title>DIB Jobs // Defense Industrial Base</title>
     <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
 /* ==========================================================================
-   SMART STACK DESIGN SYSTEM (Slick Neo-Brutalist)
+   NEO-BRUTALIST THEME (Polished)
    ========================================================================== */
 :root {
     --ink: #1a1a2e;
     --paper: #ffffff;
-    --canvas: #f4f6f8;
-    --accent: #c8dae8; /* Pale Blue */
-    --success: #d4e8dc; /* Mint */
-    --warning: #f2cc8f; /* Gold */
-    --danger: #e07a5f; /* Clay */
+    --cream: #f8f6f1;
     
-    --border: 2px solid var(--ink);
-    --shadow: 4px 4px 0 var(--ink);
-    --radius: 16px;
-    --font-main: 'DM Sans', sans-serif;
-    --font-mono: 'Space Mono', monospace;
+    /* Your Palette */
+    --pale-blue: #c8dae8;
+    --soft-blue: #93b5d9;
+    --mint: #d4e8dc;
+    --clay: #e07a5f;
+    --gold: #f2cc8f;
+    
+    /* Construction */
+    --border: 3px solid var(--ink);
+    --shadow: 5px 5px 0 var(--ink);
+    --shadow-active: 2px 2px 0 var(--ink);
+    --radius: 12px;
 }
 
-* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-body { margin: 0; padding: 0; font-family: var(--font-main); background: var(--canvas); color: var(--ink); height: 100vh; overflow: hidden; }
-
-/* APP SHELL */
-.app-shell {
-    max-width: 500px; /* Tighter mobile frame */
-    margin: 0 auto;
-    height: 100vh;
-    background: var(--canvas);
-    border-left: var(--border);
-    border-right: var(--border);
-    display: flex; flex-direction: column;
-    position: relative;
-    box-shadow: 0 0 80px rgba(0,0,0,0.15);
+* { box-sizing: border-box; }
+body { 
+    margin: 0; padding: 0; 
+    font-family: 'DM Sans', sans-serif; 
+    background: var(--pale-blue); 
+    color: var(--ink); 
+    line-height: 1.6;
+    padding-bottom: 80px;
 }
-@media(max-width: 550px) { .app-shell { border: none; width: 100%; } }
+
+h1, h2, h3, .mono { font-family: 'Space Mono', monospace; }
 
 /* HEADER */
-.smart-header {
-    padding: 16px 24px; background: var(--paper); border-bottom: var(--border);
-    display: flex; justify-content: space-between; align-items: center; z-index: 20;
+header {
+    background: var(--paper);
+    border-bottom: var(--border);
+    padding: 18px 24px;
+    position: sticky; top: 0; z-index: 100;
+    display: flex; justify-content: space-between; align-items: center;
 }
-.brand-pill {
-    background: var(--ink); color: white; padding: 6px 12px; border-radius: 30px;
-    font-family: var(--font-mono); font-weight: 700; font-size: 12px; letter-spacing: 1px;
-    display: flex; align-items: center; gap: 8px;
+.brand { 
+    display: flex; align-items: center; gap: 12px; 
+    font-family: 'Space Mono'; font-weight: 700; font-size: 18px; 
+    text-transform: uppercase; letter-spacing: -0.5px;
 }
-.mode-badge {
-    font-size: 10px; background: var(--success); color: var(--ink); padding: 2px 6px; border-radius: 4px;
-}
+.brand-icon { width: 32px; height: 32px; background: var(--ink); color: white; display: grid; place-items: center; border-radius: 6px; }
 
-/* MAIN SCROLL AREA */
-.feed-container {
-    flex: 1; overflow-y: auto; padding: 20px;
-    scroll-behavior: smooth;
-    padding-bottom: 120px; /* Space for the "Smart Bar" */
-}
+/* LAYOUT */
+main { max-width: 1000px; margin: 40px auto; padding: 0 20px; }
 
-/* CARDS (The Building Blocks) */
-.stack-card {
-    background: var(--paper); border: var(--border); border-radius: var(--radius);
-    padding: 24px; margin-bottom: 20px; box-shadow: var(--shadow);
-    transition: transform 0.2s; animation: slideIn 0.4s ease;
+/* CARDS */
+.card {
+    background: var(--paper);
+    border: var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    margin-bottom: 32px;
+    overflow: hidden;
 }
-.stack-card.highlight { border-color: var(--ink); box-shadow: 6px 6px 0 var(--ink); }
-
+.card-header {
+    background: var(--cream);
+    border-bottom: var(--border);
+    padding: 16px 24px;
+    display: flex; justify-content: space-between; align-items: center;
+}
 .card-title {
-    font-family: var(--font-mono); font-weight: 700; font-size: 14px; text-transform: uppercase;
-    margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center;
-    color: var(--ink); opacity: 0.8; border-bottom: 2px dashed #eee; padding-bottom: 8px;
+    font-family: 'Space Mono'; font-weight: 700; font-size: 14px; 
+    text-transform: uppercase; letter-spacing: 0.5px;
+    display: flex; align-items: center; gap: 10px;
 }
-
-/* GURU QUIZ BUTTONS */
-.quiz-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
-.quiz-btn {
-    padding: 16px; background: var(--canvas); border: 2px solid var(--ink);
-    border-radius: 12px; text-align: left; font-weight: 700; cursor: pointer;
-    font-family: var(--font-main); font-size: 14px; transition: all 0.1s;
-    display: flex; align-items: center; justify-content: space-between;
-}
-.quiz-btn:active { transform: scale(0.98); background: var(--accent); }
-.quiz-btn span { font-size: 18px; }
+.card-body { padding: 32px; }
 
 /* INPUTS */
-.smart-input {
-    width: 100%; border: var(--border); border-radius: 12px; padding: 16px;
-    font-family: var(--font-main); font-size: 14px; background: #fff;
-    resize: none; min-height: 100px;
+textarea, input[type="text"], select {
+    width: 100%; padding: 16px;
+    border: 2px solid var(--ink);
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif; font-size: 14px;
+    background: #fafafa;
+    transition: all 0.2s;
 }
-.smart-input:focus { outline: none; box-shadow: var(--shadow); }
+textarea:focus, input:focus, select:focus {
+    outline: none; background: #fff;
+    box-shadow: 4px 4px 0 rgba(0,0,0,0.1);
+}
+textarea { min-height: 150px; resize: vertical; }
 
-/* DASHBOARD WIDGETS */
-.score-hero {
-    display: flex; align-items: center; gap: 20px;
-    background: var(--ink); color: white; padding: 20px; border-radius: 12px; margin-bottom: 16px;
+/* BUTTONS */
+.btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    padding: 14px 24px;
+    font-family: 'Space Mono'; font-weight: 700; font-size: 13px; text-transform: uppercase;
+    color: var(--ink); background: var(--paper);
+    border: var(--border); border-radius: 8px;
+    cursor: pointer; box-shadow: var(--shadow);
+    transition: all 0.1s;
 }
-.score-val { font-family: var(--font-mono); font-size: 42px; font-weight: 700; line-height: 1; }
-.score-meta div { font-size: 12px; opacity: 0.7; font-family: var(--font-mono); text-transform: uppercase; }
-.score-meta h3 { margin: 4px 0; font-size: 16px; }
+.btn:hover { transform: translate(-2px, -2px); box-shadow: 7px 7px 0 var(--ink); }
+.btn:active { transform: translate(2px, 2px); box-shadow: var(--shadow-active); }
+.btn-primary { background: var(--mint); }
+.btn-secondary { background: var(--paper); }
 
-.stat-row { display: flex; gap: 10px; margin-bottom: 16px; }
-.stat-pill {
-    flex: 1; background: var(--canvas); border: 2px solid var(--ink);
-    border-radius: 8px; padding: 10px; text-align: center;
+/* DASHBOARD GRID */
+.hero-grid {
+    display: grid; grid-template-columns: 220px 1fr;
+    border-bottom: var(--border);
 }
-.stat-lbl { font-size: 9px; font-family: var(--font-mono); text-transform: uppercase; display: block; margin-bottom: 4px; }
-.stat-num { font-weight: 700; font-size: 14px; }
+.score-box {
+    background: var(--ink); color: white;
+    padding: 40px; text-align: center;
+    display: flex; flex-direction: column; justify-content: center;
+}
+.score-val { font-family: 'Space Mono'; font-size: 80px; font-weight: 700; line-height: 1; }
+.score-label { font-family: 'Space Mono'; font-size: 12px; letter-spacing: 2px; opacity: 0.7; margin-top: 10px; text-transform: uppercase; }
+.verdict-box { padding: 32px; display: flex; flex-direction: column; justify-content: center; background: var(--cream); }
 
-/* AI ACTIONS (The "Smarts") */
-.action-row { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; margin-top: 12px; }
-.ai-action {
-    flex-shrink: 0; padding: 8px 12px;
-    background: var(--accent); border: 2px solid var(--ink); border-radius: 20px;
-    font-family: var(--font-mono); font-size: 10px; font-weight: 700; cursor: pointer;
-    display: flex; align-items: center; gap: 6px;
+/* LISTS */
+.analysis-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 12px; }
+.analysis-item {
+    padding: 16px 20px; border: 2px solid var(--ink); border-radius: 8px;
+    background: #fff; font-size: 14px; position: relative;
 }
-.ai-action:hover { transform: translateY(-2px); box-shadow: 2px 2px 0 var(--ink); }
-.ai-action svg { width: 12px; height: 12px; }
+.item-match { border-left: 8px solid var(--mint); }
+.item-gap { border-left: 8px solid var(--clay); }
 
-/* THE "SMART BAR" (Floating Bottom Chat) */
-.smart-bar {
-    position: absolute; bottom: 0; left: 0; right: 0;
-    background: var(--paper); border-top: var(--border);
-    padding: 12px 16px 20px 16px; z-index: 100;
-    box-shadow: 0 -4px 20px rgba(0,0,0,0.05);
+/* CHAT INTERFACE (Polished) */
+.recruiter-chat {
+    background: #f9f9f9; border: 2px solid var(--ink); border-radius: 8px;
+    padding: 20px; max-height: 400px; overflow-y: auto; margin-bottom: 20px;
 }
-.bar-header {
-    display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 11px; font-weight: 700; color: var(--ink); font-family: var(--font-mono); text-transform: uppercase;
+.chat-msg {
+    margin-bottom: 16px; padding: 14px 18px; border-radius: 12px; font-size: 14px; line-height: 1.5; max-width: 85%;
+    border: 2px solid var(--ink); box-shadow: 2px 2px 0 rgba(0,0,0,0.05);
 }
-.bar-input-wrap { display: flex; gap: 10px; }
-.bar-input {
-    flex: 1; border: 2px solid var(--ink); border-radius: 30px; padding: 12px 20px;
-    font-size: 14px; outline: none; transition: all 0.2s;
-}
-.bar-input:focus { border-color: var(--deep-blue); box-shadow: 0 0 0 2px var(--accent); }
-.bar-btn {
-    width: 46px; height: 46px; background: var(--ink); color: white;
-    border: none; border-radius: 50%; cursor: pointer; display: grid; place-items: center;
-}
+.chat-msg.user { background: var(--ink); color: white; margin-left: auto; border-radius: 12px 12px 0 12px; }
+.chat-msg.expert { background: white; margin-right: auto; border-radius: 12px 12px 12px 0; }
 
-/* Chat Overlay (Expands from bottom) */
-.chat-layer {
-    position: absolute; bottom: 85px; left: 10px; right: 10px;
-    max-height: 60vh; background: var(--paper);
-    border: var(--border); border-radius: var(--radius);
-    display: none; flex-direction: column; overflow: hidden;
-    box-shadow: 0 -10px 40px rgba(0,0,0,0.1); z-index: 90;
-}
-.chat-scroll { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
-.msg { padding: 10px 14px; border-radius: 12px; font-size: 13px; line-height: 1.4; max-width: 85%; }
-.msg.arti { background: var(--canvas); border: 2px solid var(--ink); border-top-left-radius: 2px; }
-.msg.user { background: var(--ink); color: white; align-self: flex-end; border-top-right-radius: 2px; }
+/* UTILS */
+.hidden { display: none; }
+.tag { display: inline-block; padding: 4px 10px; border: 1px solid var(--ink); border-radius: 20px; font-size: 11px; font-family: 'Space Mono'; font-weight: 700; margin: 0 4px 4px 0; background: white; }
+.tag.missing { background: rgba(224, 122, 95, 0.2); border-color: var(--clay); }
+.tag.match { background: var(--mint); }
 
-@keyframes slideIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+/* RESPONSIVE */
+@media(max-width: 768px) {
+    .hero-grid { grid-template-columns: 1fr; }
+    .score-box { padding: 20px; flex-direction: row; gap: 20px; align-items: center; }
+    .score-val { font-size: 48px; }
+    main { margin: 20px auto; padding: 0 16px; }
+}
 </style>
 </head>
 <body>
 
-<div class="app-shell">
-    
-    <div class="smart-header">
-        <div class="brand-pill">
-            <span>ARTI</span>
-            <span id="artiMode" class="mode-badge">CAREER GURU</span>
+<header>
+    <div class="brand">
+        <div class="brand-icon">D</div>
+        <span>DIB Jobs</span>
+    </div>
+</header>
+
+<main>
+    <div class="card">
+        <div class="card-header">
+            <span class="card-title">Job Data</span>
+            <div>
+                <button class="btn btn-secondary" onclick="loadSample()" style="padding: 8px 12px; font-size: 10px;">Load Sample</button>
+            </div>
         </div>
-        <button onclick="resetApp()" style="background:none; border:none; text-decoration:underline; font-family:var(--font-mono); font-size:10px; cursor:pointer;">RESET</button>
+        <div class="card-body">
+            <div style="display:grid; gap:20px;">
+                <div>
+                    <label class="mono" style="font-size:12px; font-weight:700; display:block; margin-bottom:8px;">JOB DESCRIPTION</label>
+                    <textarea id="jdInput" placeholder="Paste JD or URL..."></textarea>
+                </div>
+                <div>
+                    <label class="mono" style="font-size:12px; font-weight:700; display:block; margin-bottom:8px;">YOUR RESUME</label>
+                    <textarea id="resumeInput" placeholder="Paste Resume text..." style="min-height:100px;"></textarea>
+                </div>
+            </div>
+            <div style="margin-top:24px; display:flex; gap:12px;">
+                <button id="analyzeBtn" class="btn btn-primary" style="flex:1;" onclick="runAnalysis()">Analyze Match</button>
+            </div>
+        </div>
     </div>
 
-    <div id="feed" class="feed-container">
+    <div id="loadingView" class="card" style="display:none; text-align:center; padding:60px;">
+        <div class="mono" style="font-size:24px; font-weight:700; animation:blink 1s infinite;">ANALYZING...</div>
+    </div>
+
+    <div id="resultsView" style="display:none;">
         
-        <div id="cardGuru" class="stack-card">
-            <div class="card-title">Where do you fit?</div>
-            <p style="margin-bottom:20px; font-size:14px; opacity:0.8;">Let's find your archetype in the Defense Industrial Base.</p>
-            
-            <div id="quizStep1" class="quiz-grid">
-                <div class="quiz-btn" onclick="nextQuiz('money')">💰 Closing Deals <span>→</span></div>
-                <div class="quiz-btn" onclick="nextQuiz('people')">🤝 Leading Teams <span>→</span></div>
-                <div class="quiz-btn" onclick="nextQuiz('product')">🛠️ Building Tech <span>→</span></div>
-                <div class="quiz-btn" onclick="nextQuiz('puzzle')">🧩 Strategy & Intel <span>→</span></div>
+        <div class="card" style="padding:0;">
+            <div class="hero-grid">
+                <div class="score-box">
+                    <div id="scoreVal" class="score-val">--</div>
+                    <div class="score-label">Fit Score</div>
+                </div>
+                <div class="verdict-box">
+                    <h2 id="jobRole" style="margin:0 0 8px 0; font-size:20px;">Role Title</h2>
+                    <p id="jobCompany" style="margin:0 0 16px 0; opacity:0.7; font-family:'Space Mono'; font-size:12px;">Company</p>
+                    <p id="verdictText" style="margin:0; font-size:15px; font-weight:500;">Analysis verdict...</p>
+                </div>
             </div>
         </div>
 
-        <div id="cardLab" class="stack-card" style="display:none;">
-            <div class="card-title">Analysis Lab</div>
-            <p style="font-size:13px; margin-bottom:12px;">Paste your details to unlock the expert tools.</p>
-            <textarea id="jdInput" class="smart-input" placeholder="Paste Job Description here..." style="margin-bottom:12px;"></textarea>
-            <textarea id="resumeInput" class="smart-input" placeholder="Paste Resume here..." style="margin-bottom:16px;"></textarea>
-            <button class="quiz-btn" style="background:var(--ink); color:white; justify-content:center;" onclick="runAnalysis()">
-                RUN DEEP ANALYSIS
-            </button>
+        <div class="card">
+            <div class="card-header"><span class="card-title">Intel & Keywords</span></div>
+            <div class="card-body">
+                <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:16px; margin-bottom:24px;">
+                    <div style="border:2px solid var(--ink); padding:12px; border-radius:8px; text-align:center;">
+                        <div class="mono" style="font-size:10px; opacity:0.6;">SALARY</div>
+                        <div id="intelSalary" style="font-weight:700; font-size:18px;">--</div>
+                    </div>
+                    <div style="border:2px solid var(--ink); padding:12px; border-radius:8px; text-align:center;">
+                        <div class="mono" style="font-size:10px; opacity:0.6;">COMPETITION</div>
+                        <div id="intelComp" style="font-weight:700; font-size:18px;">--</div>
+                    </div>
+                    <div style="border:2px solid var(--ink); padding:12px; border-radius:8px; text-align:center;">
+                        <div class="mono" style="font-size:10px; opacity:0.6;">CLEARANCE</div>
+                        <div id="intelClearance" style="font-weight:700; font-size:18px;">--</div>
+                    </div>
+                </div>
+                <div id="keywordCloud"></div>
+            </div>
         </div>
 
-        <div id="cardDash" class="stack-card" style="display:none; border-color:var(--ink);">
-            <div class="score-hero">
-                <div class="score-val" id="scoreVal">--</div>
-                <div class="score-meta">
-                    <h3 id="roleVal">Analyzing...</h3>
-                    <div id="compVal">--</div>
+        <div class="card">
+            <div class="card-header"><span class="card-title">Gap Analysis</span></div>
+            <div class="card-body">
+                <ul id="analysisList" class="analysis-list"></ul>
+            </div>
+        </div>
+
+        <div class="card" style="border-color:var(--ink);">
+            <div class="card-header" style="background:var(--gold);">
+                <span class="card-title">Ask an Expert (Arti)</span>
+            </div>
+            <div class="card-body">
+                <p style="font-size:13px; margin-bottom:16px; opacity:0.8;">
+                    I can help you <strong>negotiate salary</strong>, <strong>rewrite bullets</strong>, or <strong>mock interview</strong> you.
+                </p>
+                <div id="chatHistory" class="recruiter-chat" style="display:none;"></div>
+                <div style="display:flex; gap:10px;">
+                    <input type="text" id="chatInput" placeholder="e.g. 'Help me fix my resume gap' or 'Practice interview question'" onkeydown="if(event.key==='Enter') sendChat()">
+                    <button class="btn btn-primary" onclick="sendChat()">Ask</button>
                 </div>
             </div>
-
-            <div class="stat-row">
-                <div class="stat-pill">
-                    <span class="stat-lbl">Salary Est.</span>
-                    <span class="stat-num" id="salaryVal">--</span>
-                </div>
-                <div class="stat-pill">
-                    <span class="stat-lbl">Competition</span>
-                    <span class="stat-num" id="compLvl">--</span>
-                </div>
-            </div>
-
-            <div class="card-title" style="margin-top:24px;">Arti's Toolkit</div>
-            
-            <div style="background:var(--canvas); padding:12px; border-radius:8px; margin-bottom:10px;">
-                <div style="font-weight:700; font-size:13px;">Resume Gaps Found</div>
-                <div id="gapCount" style="font-size:11px; opacity:0.7; margin-bottom:8px;">Analyzing...</div>
-                <div class="action-row">
-                    <button class="ai-action" onclick="triggerSmartAction('fix_resume')">✨ Fix Bullets</button>
-                    <button class="ai-action" onclick="triggerSmartAction('ats_check')">🤖 ATS Check</button>
-                </div>
-            </div>
-
-            <div style="background:var(--canvas); padding:12px; border-radius:8px; margin-bottom:10px;">
-                <div style="font-weight:700; font-size:13px;">Interview Prep</div>
-                <div class="action-row">
-                    <button class="ai-action" onclick="triggerSmartAction('mock_interview')">🎤 Mock Loop</button>
-                    <button class="ai-action" onclick="triggerSmartAction('negotiate')">💰 Negotiate</button>
-                </div>
-            </div>
-
         </div>
 
     </div>
-
-    <div class="chat-layer" id="chatLayer">
-        <div class="chat-scroll" id="chatScroll">
-            <div class="msg arti">I'm ready. Use the buttons above or type a question.</div>
-        </div>
-    </div>
-
-    <div class="smart-bar">
-        <div class="bar-header">
-            <span id="chatContext">General Chat</span>
-            <span style="cursor:pointer;" onclick="toggleChat()">Expand/Collapse</span>
-        </div>
-        <div class="bar-input-wrap">
-            <input type="text" id="chatInput" class="bar-input" placeholder="Ask Arti..." onkeydown="if(event.key==='Enter') sendChat()">
-            <button class="bar-btn" onclick="sendChat()">→</button>
-        </div>
-    </div>
-
-</div>
+</main>
 
 <script>
-// ==========================================================================
-// STATE
-// ==========================================================================
 const API_ENDPOINT = 'https://76unm1rlj0.execute-api.us-east-1.amazonaws.com/default/grumpy2';
-let state = {
-    mode: 'GURU', // GURU, ANALYZER, EXPERT
-    quiz: {},
-    analysis: null,
-    chatHistory: []
-};
+let analysisData = null;
+let chatLog = [];
 
-// ==========================================================================
-// 1. THE GURU FLOW
-// ==========================================================================
-function nextQuiz(val) {
-    // Determine Archetype (simplified logic)
-    let role = "Program Analyst";
-    if(val === 'money') role = "Capture Manager";
-    if(val === 'people') role = "Program Manager";
-    if(val === 'product') role = "Solutions Architect";
-    if(val === 'puzzle') role = "Intelligence Analyst";
-
-    // Update UI to Lab Mode
-    document.getElementById('cardGuru').style.display = 'none';
-    document.getElementById('cardLab').style.display = 'block';
-    document.getElementById('artiMode').innerText = "RESUME LAB";
-    document.getElementById('artiMode').style.background = "var(--warning)";
-    
-    // Inject "Smart Suggestion"
-    addMsg('arti', `Based on your choice, you fit the **${role}** archetype. Paste a ${role} job description and your resume above, and I'll run a deep fit analysis.`);
-    toggleChat(true); // Open chat to show the advice
-}
-
-// ==========================================================================
-// 2. THE ANALYZER
-// ==========================================================================
 async function runAnalysis() {
     const jd = document.getElementById('jdInput').value;
-    const res = document.getElementById('resumeInput').value;
+    const resume = document.getElementById('resumeInput').value;
     
-    if(!jd || !res) { alert("Please fill both fields."); return; }
+    if(!jd || !resume) { alert("Please enter both JD and Resume."); return; }
     
-    // UI Updates
-    const btn = document.querySelector('#cardLab button');
-    btn.innerHTML = "ANALYZING...";
-    btn.disabled = true;
+    document.getElementById('loadingView').style.display = 'block';
+    document.getElementById('resultsView').style.display = 'none';
+    document.getElementById('analyzeBtn').disabled = true;
     
     try {
-        const response = await fetch(API_ENDPOINT, {
+        const res = await fetch(API_ENDPOINT, {
             method: 'POST',
             body: JSON.stringify({
                 request_type: 'resume_match',
                 job_description: jd,
-                resume_text: res
+                resume_text: resume
             })
         });
-        const data = await response.json();
-        state.analysis = data;
+        const data = await res.json();
+        analysisData = data;
+        renderResults(data);
         
-        renderDashboard(data);
-        
-        // Transition to Dashboard
-        document.getElementById('cardLab').style.display = 'none';
-        document.getElementById('cardDash').style.display = 'block';
-        document.getElementById('artiMode').innerText = "EXPERT MODE";
-        document.getElementById('artiMode').style.background = "var(--accent)";
-        
-        addMsg('arti', `Analysis Complete. Score: **${data.score}%**. Use the Toolkit buttons above to fix gaps or prep for the interview.`);
-        
-        // Background fetch intel
+        // Fetch Intel in background
         fetchIntel(jd, data.job_title, data.company);
-
+        
     } catch(e) {
-        alert("Analysis failed.");
+        alert("Error: " + e.message);
     } finally {
-        btn.innerHTML = "RUN DEEP ANALYSIS";
-        btn.disabled = false;
+        document.getElementById('loadingView').style.display = 'none';
+        document.getElementById('analyzeBtn').disabled = false;
     }
 }
 
-function renderDashboard(data) {
-    document.getElementById('scoreVal').innerText = data.score + '%';
-    document.getElementById('roleVal').innerText = data.job_title || 'Role';
-    document.getElementById('compVal').innerText = data.company || 'Company';
+function renderResults(data) {
+    document.getElementById('resultsView').style.display = 'block';
     
-    const gaps = data.analysis.filter(x => x.startsWith('Gap')).length;
-    document.getElementById('gapCount').innerText = `${gaps} critical gaps found.`;
+    // Hero
+    document.getElementById('scoreVal').innerText = data.score + '%';
+    document.getElementById('jobRole').innerText = data.job_title || 'Role';
+    document.getElementById('jobCompany').innerText = data.company || 'Company';
+    document.getElementById('verdictText').innerText = data.verdict;
+    
+    // Style Score
+    const box = document.querySelector('.score-box');
+    box.style.background = data.score >= 80 ? 'var(--mint)' : data.score >= 60 ? 'var(--gold)' : 'var(--clay)';
+    box.style.color = 'var(--ink)';
+
+    // List
+    const list = document.getElementById('analysisList');
+    list.innerHTML = '';
+    
+    // Sort gaps first
+    const items = [...data.analysis].sort((a,b) => a.startsWith('Gap') ? -1 : 1);
+    
+    items.forEach(item => {
+        const isGap = item.startsWith('Gap') || item.startsWith('Risk');
+        const li = document.createElement('li');
+        li.className = `analysis-item ${isGap ? 'item-gap' : 'item-match'}`;
+        li.innerHTML = `<strong>${isGap ? 'GAP / RISK' : 'MATCH'}</strong> ${item.replace(/^(Match:|Gap:|Risk:)/, '')}`;
+        list.appendChild(li);
+    });
+
+    // Keywords
+    const cloud = document.getElementById('keywordCloud');
+    cloud.innerHTML = '';
+    (data.keywords || []).forEach(k => {
+        cloud.innerHTML += `<span class="tag ${k.in_resume ? 'match' : 'missing'}">${k.term}</span>`;
+    });
 }
 
 function fetchIntel(jd, title, company) {
     fetch(API_ENDPOINT, {
         method: 'POST',
-        body: JSON.stringify({request_type: 'market_intel', job_description: jd, job_title: title, company: company})
-    }).then(r=>r.json()).then(d => {
-        if(d.salary_intel) document.getElementById('salaryVal').innerText = `$${d.salary_intel.mid}k`;
-        if(d.competition) document.getElementById('compLvl').innerText = d.competition.level;
+        body: JSON.stringify({request_type:'market_intel', job_description:jd, job_title:title, company:company})
+    })
+    .then(r => r.json())
+    .then(d => {
+        if(d.salary_intel) document.getElementById('intelSalary').innerText = `$${d.salary_intel.mid}k`;
+        if(d.competition) document.getElementById('intelComp').innerText = d.competition.level;
     });
 }
 
-// ==========================================================================
-// 3. THE SMARTS (Chat & Tools)
-// ==========================================================================
-function triggerSmartAction(action) {
-    toggleChat(true);
-    let prompt = "";
-    
-    if(action === 'fix_resume') {
-        prompt = "Rewrite the bullet points in my resume to specifically address the gaps you found in the analysis. Make them high-impact.";
-        document.getElementById('chatContext').innerText = "RESUME EDITOR";
-    }
-    if(action === 'ats_check') {
-        prompt = "Analyze my resume for ATS readability. Which keywords from the JD are missing?";
-        document.getElementById('chatContext').innerText = "ATS CHECKER";
-    }
-    if(action === 'mock_interview') {
-        prompt = "Act as the Hiring Manager (Toni/Oliver). Ask me one tough behavioral question based on this job description.";
-        document.getElementById('chatContext').innerText = "MOCK INTERVIEW";
-    }
-    if(action === 'negotiate') {
-        prompt = "Based on the market salary data, script a negotiation counter-offer email for me.";
-        document.getElementById('chatContext').innerText = "NEGOTIATOR";
-    }
-    
-    // Simulate user sending this
-    sendChat(prompt);
-}
-
-async function sendChat(manualText = null) {
+async function sendChat() {
     const input = document.getElementById('chatInput');
-    const text = manualText || input.value.trim();
+    const text = input.value.trim();
     if(!text) return;
     
+    // UI Update
     input.value = '';
-    addMsg('user', text);
+    const chatDiv = document.getElementById('chatHistory');
+    chatDiv.style.display = 'block';
+    chatDiv.innerHTML += `<div class="chat-msg user">${text}</div>`;
+    chatDiv.scrollTop = chatDiv.scrollHeight;
     
-    // Loading state
-    const loadId = 'load-'+Date.now();
-    addMsg('arti', '<span id="'+loadId+'">Thinking...</span>');
+    // Add temporary loading bubble
+    const loadId = 'load-' + Date.now();
+    chatDiv.innerHTML += `<div id="${loadId}" class="chat-msg expert">Thinking...</div>`;
     
     try {
         const res = await fetch(API_ENDPOINT, {
@@ -407,37 +373,27 @@ async function sendChat(manualText = null) {
                 question: text,
                 job_description: document.getElementById('jdInput').value,
                 resume_text: document.getElementById('resumeInput').value,
-                analysis_data: state.analysis,
-                chat_history: state.chatHistory
+                analysis_data: analysisData,
+                chat_history: chatLog
             })
         });
         const data = await res.json();
         
-        document.getElementById(loadId).parentElement.innerHTML = data.response.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
-        state.chatHistory.push({role:'user',content:text}, {role:'assistant',content:data.response});
+        document.getElementById(loadId).remove();
+        chatDiv.innerHTML += `<div class="chat-msg expert">${data.response.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')}</div>`;
+        
+        chatLog.push({role:'user', content:text});
+        chatLog.push({role:'assistant', content:data.response});
+        chatDiv.scrollTop = chatDiv.scrollHeight;
         
     } catch(e) {
-        document.getElementById(loadId).innerText = "Error.";
+        document.getElementById(loadId).innerText = "Error connecting.";
     }
 }
 
-function addMsg(role, html) {
-    const div = document.createElement('div');
-    div.className = `msg ${role}`;
-    div.innerHTML = html;
-    const box = document.getElementById('chatScroll');
-    box.appendChild(div);
-    box.scrollTop = box.scrollHeight;
-}
-
-function toggleChat(forceOpen = false) {
-    const layer = document.getElementById('chatLayer');
-    if(forceOpen) layer.style.display = 'flex';
-    else layer.style.display = layer.style.display === 'flex' ? 'none' : 'flex';
-}
-
-function resetApp() {
-    location.reload();
+function loadSample() {
+    document.getElementById('jdInput').value = "Director of Federal Sales\n\nWe need a leader with TS/SCI clearance and 10 years of DoD sales experience...";
+    document.getElementById('resumeInput').value = "John Doe\nFederal Sales Manager with 12 years experience selling to Army and Navy...";
 }
 </script>
 </body>
