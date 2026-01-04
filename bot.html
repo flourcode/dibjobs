@@ -20,7 +20,7 @@
     --accent-olive: #81b29a;
     --accent-mint: #d4e8dc;
     
-    /* Chunky Tokens */
+    /* Tokens */
     --border: 3px solid var(--ink-black);
     --radius: 8px;
     --shadow: 6px 6px 0 var(--ink-black);
@@ -37,7 +37,7 @@ h1, h2, h3, h4, .mono { font-family: 'Space Mono', monospace; }
    ========================================================================== */
 .app-container {
     display: grid;
-    grid-template-columns: 380px 1fr; /* Fixed Chat, Fluid Workspace */
+    grid-template-columns: 380px 1fr;
     height: 100vh;
 }
 
@@ -51,7 +51,6 @@ h1, h2, h3, h4, .mono { font-family: 'Space Mono', monospace; }
     flex-direction: column;
     height: 100%;
     z-index: 10;
-    box-shadow: 10px 0 0 rgba(0,0,0,0.05);
 }
 
 .chat-header {
@@ -67,8 +66,6 @@ h1, h2, h3, h4, .mono { font-family: 'Space Mono', monospace; }
     display: grid; place-items: center; font-family: 'Space Mono'; font-weight: 700;
     border-radius: 4px; font-size: 20px;
 }
-.brand-text h1 { font-size: 16px; font-weight: 700; text-transform: uppercase; line-height: 1.1; margin: 0; }
-.brand-text span { font-size: 10px; opacity: 0.7; display: block; }
 
 .chat-thread {
     flex: 1;
@@ -80,7 +77,6 @@ h1, h2, h3, h4, .mono { font-family: 'Space Mono', monospace; }
     background: var(--warm-cream);
 }
 
-/* Chat Bubbles - Neo Brutalist Style */
 .msg-row { display: flex; gap: 10px; align-items: flex-start; }
 .msg-row.user { flex-direction: row-reverse; }
 .avatar { width: 32px; height: 32px; flex-shrink: 0; }
@@ -93,30 +89,11 @@ h1, h2, h3, h4, .mono { font-family: 'Space Mono', monospace; }
     border: 2px solid var(--ink-black);
     box-shadow: var(--shadow-sm);
     position: relative;
-}
-.msg-row.arti .bubble {
     background: var(--card-white);
-    border-radius: 12px;
-    border-top-left-radius: 2px;
 }
-.msg-row.user .bubble {
-    background: var(--ink-black);
-    color: white;
-    border-radius: 12px;
-    border-top-right-radius: 2px;
-}
-.chat-chips {
-    display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px;
-}
-.chip {
-    font-family: 'Space Mono'; font-size: 10px; font-weight: 700;
-    background: var(--accent-mint); border: 2px solid var(--ink-black);
-    padding: 6px 10px; border-radius: 20px; cursor: pointer;
-    transition: all 0.1s;
-}
-.chip:hover { transform: translate(-1px, -1px); box-shadow: 3px 3px 0 var(--ink-black); }
+.msg-row.arti .bubble { border-radius: 12px; border-top-left-radius: 2px; }
+.msg-row.user .bubble { background: var(--ink-black); color: white; border-radius: 12px; border-top-right-radius: 2px; }
 
-/* Chat Input */
 .chat-input-area {
     padding: 20px;
     background: var(--card-white);
@@ -132,7 +109,6 @@ textarea.chat-box:focus { outline: none; box-shadow: var(--shadow-sm); }
     width: 50px; background: var(--ink-black); color: white; border: none;
     border-radius: 6px; cursor: pointer; font-family: 'Space Mono'; font-weight: 700;
 }
-.send-btn:hover { background: var(--deep-blue); }
 
 /* ==========================================================================
    RIGHT PANEL: WORKSPACE
@@ -148,26 +124,15 @@ textarea.chat-box:focus { outline: none; box-shadow: var(--shadow-sm); }
 
 .workspace-container { max-width: 900px; margin: 0 auto; width: 100%; }
 
-/* --- INPUT STATE --- */
+/* STATES */
 #inputState { display: block; }
 #dashboardState { display: none; }
 
-.section-title {
-    font-family: 'Space Mono'; font-size: 14px; font-weight: 700; 
-    text-transform: uppercase; margin-bottom: 12px; 
-    display: flex; align-items: center; gap: 10px;
-}
-.section-title::after { content:''; flex:1; height:2px; background:var(--ink-black); opacity:0.1; }
-
-.input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+/* INPUTS */
+.input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px; }
 .input-card {
-    background: var(--card-white);
-    border: var(--border);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow);
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
+    background: var(--card-white); border: var(--border); border-radius: var(--radius);
+    box-shadow: var(--shadow); padding: 20px; display: flex; flex-direction: column;
 }
 .input-header {
     font-family: 'Space Mono'; font-size: 12px; font-weight: 700; text-transform: uppercase;
@@ -184,11 +149,11 @@ textarea.big-input:focus { outline: none; }
     border: var(--border); border-radius: var(--radius);
     font-family: 'Space Mono'; font-weight: 700; font-size: 16px;
     text-transform: uppercase; cursor: pointer; box-shadow: var(--shadow);
-    transition: all 0.1s; margin-top: 24px; display: flex; align-items: center; justify-content: center; gap: 12px;
+    transition: all 0.1s; display: flex; align-items: center; justify-content: center; gap: 12px;
 }
 .primary-action-btn:hover { transform: translate(-2px, -2px); box-shadow: var(--shadow-hover); }
 
-/* --- DASHBOARD STATE --- */
+/* DASHBOARD COMPONENTS */
 .hero-card {
     background: var(--ink-black); color: white;
     border: var(--border); border-radius: var(--radius);
@@ -202,11 +167,33 @@ textarea.big-input:focus { outline: none; }
     border-right: var(--border); padding: 30px;
 }
 .score-big { font-family: 'Space Mono'; font-size: 64px; font-weight: 700; line-height: 1; }
-.score-label { font-family: 'Space Mono'; font-size: 11px; text-transform: uppercase; margin-top: 8px; }
 .hero-details { padding: 30px; display: flex; flex-direction: column; justify-content: center; }
 .hero-role { font-family: 'Space Mono'; font-size: 20px; font-weight: 700; margin-bottom: 8px; }
-.hero-company { font-size: 16px; opacity: 0.8; }
 
+/* KEYWORD PILLS */
+.keywords-card {
+    background: var(--card-white);
+    border: var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 24px;
+    margin-bottom: 24px;
+}
+.keywords-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 16px; border-bottom: 2px dashed #eee; padding-bottom: 12px;
+}
+.pill-container { display: flex; flex-wrap: wrap; gap: 12px; }
+.pill {
+    font-family: 'Space Mono'; font-size: 11px; font-weight: 700;
+    padding: 8px 14px; border: 2px solid var(--ink-black); border-radius: 30px;
+    text-transform: uppercase; letter-spacing: 0.5px;
+    box-shadow: 3px 3px 0 rgba(0,0,0,0.1);
+}
+.pill.match { background: var(--accent-mint); color: var(--ink-black); }
+.pill.gap { background: var(--accent-clay); color: white; }
+
+/* STATS */
 .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 24px; }
 .stat-card {
     background: var(--card-white); border: var(--border); border-radius: var(--radius);
@@ -215,6 +202,7 @@ textarea.big-input:focus { outline: none; }
 .stat-val { font-family: 'Space Mono'; font-size: 24px; font-weight: 700; color: var(--ink-black); }
 .stat-lbl { font-size: 11px; text-transform: uppercase; opacity: 0.6; margin-top: 4px; }
 
+/* LISTS */
 .split-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px; }
 .list-card {
     background: var(--card-white); border: var(--border); border-radius: var(--radius);
@@ -227,132 +215,12 @@ textarea.big-input:focus { outline: none; }
 .list-item.match { border-left: 8px solid var(--accent-olive); }
 .list-item.gap { border-left: 8px solid var(--accent-clay); }
 
-/* --- TOOLS --- */
-.tool-card {
-    background: var(--card-white); border: var(--border); border-radius: var(--radius);
-    margin-bottom: 24px; box-shadow: var(--shadow);
-}
-.tool-header {
-    background: var(--warm-cream); padding: 14px 20px; border-bottom: 2px solid var(--ink-black);
-    display: flex; justify-content: space-between; align-items: center; cursor: pointer;
-}
-.tool-content { padding: 20px; display: none; }
-.tool-content.open { display: block; }
-
-.generated-text {
-    background: #fafafa; border: 1px dashed var(--ink-black); padding: 20px;
-    font-family: 'Space Mono'; font-size: 12px; white-space: pre-wrap; margin-bottom: 16px;
-}
-
 /* RESPONSIVE */
 @media (max-width: 900px) {
     .app-container { grid-template-columns: 1fr; grid-template-rows: 400px 1fr; overflow-y: auto; }
     .chat-panel { border-right: none; border-bottom: var(--border); }
     .hero-card { grid-template-columns: 1fr; text-align: center; }
     .hero-score { border-right: none; border-bottom: var(--border); padding: 20px; }
-}
-
-:root {
-    /* THE PALETTE (Extracted from your screenshots) */
-    --neo-black: #1a1a1a;       /* The distinct hard lines */
-    --neo-white: #ffffff;
-    --neo-cream: #FFFBF5;       /* The background color in Screenshot 3 */
-    
-    /* Accents */
-    --neo-mint: #C4E4D3;        /* The "Keywords" tags in Screenshot 2 */
-    --neo-blue: #C6D8FF;        /* "Account Manager" card in Screenshot 1 */
-    --neo-yellow: #FFE8A3;      /* "Reminder" card in Screenshot 1 */
-    --neo-clay: #FFB1B1;        /* "Analytics" bars in Screenshot 1 */
-    --neo-purple: #DBCDF0;      /* Search bar accent */
-
-    /* THE STRUCTURE */
-    --neo-border: 3px solid var(--neo-black);  /* Chunky borders */
-    --neo-radius: 12px;                        /* Slightly rounded, not circular */
-    --neo-shadow: 5px 5px 0px var(--neo-black);/* Hard shadow, no blur */
-    --neo-shadow-hover: 2px 2px 0px var(--neo-black); /* "Pressed" state */
-}
-
-body {
-    background-color: var(--neo-cream); /* Sets that warm beige tone */
-    color: var(--neo-black);
-    font-family: 'DM Sans', sans-serif; /* Clean sans-serif for body text */
-}
-
-h1, h2, h3, .mono {
-    font-family: 'Space Mono', monospace; /* The technical look from Screenshot 2 */
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: -0.5px;
-}
-.neo-card {
-    background: var(--neo-white);
-    border: var(--neo-border);
-    border-radius: var(--neo-radius);
-    box-shadow: var(--neo-shadow);
-    padding: 24px;
-    margin-bottom: 24px;
-    transition: all 0.2s ease;
-}
-
-/* Optional: Make cards wiggle or move on hover like in some neo-brutalist sites */
-.neo-card:hover {
-    transform: translate(-2px, -2px);
-    box-shadow: 7px 7px 0px var(--neo-black);
-}
-.neo-btn {
-    background: var(--neo-black); /* Black background like "Search" in Screenshot 1 */
-    color: var(--neo-white);
-    border: var(--neo-border);
-    padding: 14px 28px;
-    font-family: 'Space Mono', monospace;
-    font-weight: 700;
-    text-transform: uppercase;
-    cursor: pointer;
-    box-shadow: var(--neo-shadow);
-    border-radius: 8px; /* Slightly tighter radius for buttons */
-    transition: all 0.1s;
-}
-
-/* The "Click" Effect - Vital for this aesthetic */
-.neo-btn:active {
-    transform: translate(3px, 3px); /* Moves button down to meet the shadow */
-    box-shadow: 2px 2px 0px var(--neo-black); /* Shadow shrinks */
-}
-
-/* Variant: The "Secondary" colored button (like "Apply Now" in Screenshot 3) */
-.neo-btn.secondary {
-    background: var(--neo-clay);
-    color: var(--neo-black);
-}
-input[type="text"], textarea {
-    width: 100%;
-    padding: 16px;
-    border: var(--neo-border);
-    border-radius: 8px;
-    background: var(--neo-white);
-    font-family: 'Space Mono', monospace;
-    font-size: 14px;
-    outline: none;
-    box-shadow: 4px 4px 0px rgba(0,0,0,0.1); /* Subtler shadow for inputs */
-    transition: box-shadow 0.2s;
-}
-
-input[type="text"]:focus, textarea:focus {
-    box-shadow: var(--neo-shadow); /* Shadow pops out when typing */
-    background: #fff;
-}
-.neo-tag {
-    display: inline-block;
-    background: var(--neo-mint);
-    border: 2px solid var(--neo-black); /* Thinner border for small items */
-    padding: 6px 14px;
-    border-radius: 50px; /* Full pill shape */
-    font-family: 'Space Mono', monospace;
-    font-size: 12px;
-    font-weight: 700;
-    box-shadow: 3px 3px 0px var(--neo-black);
-    margin-right: 8px;
-    margin-bottom: 8px;
 }
 </style>
 </head>
@@ -363,14 +231,10 @@ input[type="text"]:focus, textarea:focus {
     <aside class="chat-panel">
         <header class="chat-header">
             <div class="brand-logo">A</div>
-            <div class="brand-text">
-                <h1>DIB Jobs</h1>
-                <span>Integrated Console</span>
-            </div>
+            <div style="font-family:'Space Mono'; font-weight:700;">DIB Jobs</div>
         </header>
         
-        <div id="chatThread" class="chat-thread">
-            </div>
+        <div id="chatThread" class="chat-thread"></div>
 
         <div class="chat-input-area">
             <div class="chat-input-wrapper">
@@ -387,7 +251,7 @@ input[type="text"]:focus, textarea:focus {
                 <div class="hero-card" style="background:var(--warm-cream); color:var(--ink-black); display:flex; align-items:center; padding:30px; text-align:left;">
                     <div style="flex:1;">
                         <h2 style="font-size:24px; margin-bottom:8px;">Ready to Analyze.</h2>
-                        <p style="font-size:14px; opacity:0.8;">Paste your details below. I'll generate your score, gap analysis, and application toolkit.</p>
+                        <p style="font-size:14px; opacity:0.8;">Paste your details below. I'll generate your score, gap analysis, and keyword breakdown.</p>
                     </div>
                     <div style="font-size:40px;">📂</div>
                 </div>
@@ -411,19 +275,28 @@ input[type="text"]:focus, textarea:focus {
 
             <div id="dashboardState">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-                    <div class="section-title" style="margin:0;">Analysis Results</div>
+                    <div class="mono" style="font-weight:700;">Analysis Results</div>
                     <button class="mono" onclick="resetApp()" style="background:none; border:none; text-decoration:underline; cursor:pointer;">Start Over</button>
                 </div>
 
                 <div class="hero-card">
                     <div class="hero-score" id="scoreBg">
                         <span class="score-big" id="scoreVal">--</span>
-                        <span class="score-label">Match Score</span>
+                        <span style="font-family:'Space Mono'; font-size:10px; text-transform:uppercase; margin-top:8px;">Match Score</span>
                     </div>
                     <div class="hero-details">
                         <div class="hero-role" id="roleText">Analyzing...</div>
-                        <div class="hero-company" id="companyText">--</div>
+                        <div style="opacity:0.8;" id="companyText">--</div>
                     </div>
+                </div>
+
+                <div class="keywords-card">
+                    <div class="keywords-header">
+                        <span class="mono" style="font-weight:700; font-size:12px;">KEYWORD SIGNALS</span>
+                        <span class="mono" style="font-size:11px; opacity:0.6;"><span id="kwMatchCount">0</span> matched / <span id="kwGapCount">0</span> gaps</span>
+                    </div>
+                    <div id="keywordPills" class="pill-container">
+                        </div>
                 </div>
 
                 <div class="stats-grid">
@@ -437,7 +310,7 @@ input[type="text"]:focus, textarea:focus {
                     </div>
                     <div class="stat-card">
                         <div class="stat-val" id="timelineVal">--</div>
-                        <div class="stat-lbl">Time to Hire</div>
+                        <div class="stat-lbl">Time to Offer</div>
                     </div>
                 </div>
 
@@ -452,29 +325,6 @@ input[type="text"]:focus, textarea:focus {
                     </div>
                 </div>
 
-                <div class="section-title">Toolkit</div>
-                
-                <div class="tool-card" id="emailTool">
-                    <div class="tool-header" onclick="toggleTool('emailContent')">
-                        <span class="mono" style="font-weight:700">// GENERATE INTRO EMAIL</span>
-                        <span class="mono">+</span>
-                    </div>
-                    <div id="emailContent" class="tool-content">
-                        <div id="emailOutput" class="generated-text" style="display:none;"></div>
-                        <button class="primary-action-btn" onclick="generateEmail()" style="font-size:14px; padding:12px;">Draft Email</button>
-                    </div>
-                </div>
-
-                <div class="tool-card">
-                    <div class="tool-header" onclick="toggleTool('interviewContent')">
-                        <span class="mono" style="font-weight:700">// INTERVIEW PREP</span>
-                        <span class="mono">+</span>
-                    </div>
-                    <div id="interviewContent" class="tool-content">
-                        <div id="interviewQuestions"></div>
-                    </div>
-                </div>
-
             </div>
 
         </div>
@@ -482,70 +332,29 @@ input[type="text"]:focus, textarea:focus {
 </div>
 
 <script>
-// ==========================================================================
-// CONFIG & STATE
-// ==========================================================================
 const API_ENDPOINT = 'https://76unm1rlj0.execute-api.us-east-1.amazonaws.com/default/grumpy2';
-let appState = {
-    step: 'INPUT', 
-    resume: '',
-    jd: '',
-    analysis: null,
-    chatHistory: []
-};
+let appState = { step: 'INPUT', resume: '', jd: '', analysis: null, chatHistory: [] };
 
-// ==========================================================================
-// INIT
-// ==========================================================================
 document.addEventListener('DOMContentLoaded', () => {
-    addMessage('arti', "Welcome to the console. I'm Arti. Paste your resume and JD to the right, and I'll analyze your fit.");
+    addMessage('arti', "Welcome. I'm Arti. Paste your resume and JD to get started.");
 });
 
-// ==========================================================================
-// CHAT LOGIC
-// ==========================================================================
-const chatThread = document.getElementById('chatThread');
-
-function addMessage(sender, text, chips = []) {
+// CHAT
+function addMessage(sender, text) {
     const div = document.createElement('div');
     div.className = `msg-row ${sender}`;
-    
     let avatar = sender === 'arti' ? `<div class="avatar"><img src="arti.png" alt="A"></div>` : '';
-    
-    // Formatting
-    let fmtText = text.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-    
-    // Chips
-    let chipsHtml = '';
-    if(chips.length > 0) {
-        chipsHtml = `<div class="chat-chips">
-            ${chips.map(c => `<div class="chip" onclick="${c.action}">${c.label}</div>`).join('')}
-        </div>`;
-    }
-
-    div.innerHTML = `
-        ${avatar}
-        <div class="bubble">
-            <div>${fmtText}</div>
-            ${chipsHtml}
-        </div>
-    `;
-    
-    chatThread.appendChild(div);
-    chatThread.scrollTop = chatThread.scrollHeight;
+    div.innerHTML = `${avatar}<div class="bubble">${text.replace(/\n/g, '<br>')}</div>`;
+    document.getElementById('chatThread').appendChild(div);
+    document.getElementById('chatThread').scrollTop = 9999;
 }
 
 function sendChat() {
     const input = document.getElementById('chatInput');
     const text = input.value.trim();
     if(!text) return;
-    
     input.value = '';
     addMessage('user', text);
-    
-    // Add "Thinking" bubble
-    const loadingId = 'load-' + Date.now();
-    addMessage('arti', `<span id="${loadingId}">Thinking...</span>`);
     
     // API Call
     fetch(API_ENDPOINT, {
@@ -556,103 +365,69 @@ function sendChat() {
             job_description: appState.jd,
             resume_text: appState.resume,
             analysis_data: appState.analysis,
-            chat_history: appState.chatHistory.slice(-6)
+            chat_history: appState.chatHistory
         })
     })
     .then(r => r.json())
     .then(data => {
-        document.getElementById(loadingId).closest('.msg-row').remove();
         addMessage('arti', data.response);
-        appState.chatHistory.push({role:'user', content:text}, {role:'assistant', content:data.response});
-    })
-    .catch(e => {
-        document.getElementById(loadingId).innerText = "Connection Error.";
+        appState.chatHistory.push({role:'user',content:text},{role:'assistant',content:data.response});
     });
 }
 
-// ==========================================================================
-// APP LOGIC
-// ==========================================================================
+// ANALYSIS
 function analyzeJob() {
     const r = document.getElementById('resumeText').value;
     const j = document.getElementById('jdText').value;
+    if(!r || !j) { addMessage('arti', "I need both inputs."); return; }
     
-    if(!r || !j) {
-        addMessage('arti', "I need both inputs to proceed.");
-        return;
-    }
+    appState.resume = r; appState.jd = j;
+    addMessage('arti', "Analyzing...");
     
-    appState.resume = r;
-    appState.jd = j;
-    
-    addMessage('arti', "Analyzing... give me a moment.");
-    
-    // Show Dashboard State (Loading)
     document.getElementById('inputState').style.display = 'none';
     document.getElementById('dashboardState').style.display = 'block';
     
     fetch(API_ENDPOINT, {
         method: 'POST',
-        body: JSON.stringify({
-            request_type: 'resume_match',
-            job_description: j,
-            resume_text: r
-        })
+        body: JSON.stringify({ request_type: 'resume_match', job_description: j, resume_text: r })
     })
     .then(r => r.json())
     .then(data => {
-        if(data.error) throw new Error(data.error);
         appState.analysis = data;
         renderDashboard(data);
-        
-        let msg = `Analysis complete. Score: **${data.score}%**. `;
-        if(data.score > 80) msg += "Strong fit!";
-        else if(data.score > 60) msg += "Good fit, check the gaps.";
-        else msg += "Stretch role.";
-        
-        addMessage('arti', msg, [
-            {label: "Draft Email", action: "triggerEmail()"},
-            {label: "Prep Interview", action: "toggleTool('interviewContent', true)"}
-        ]);
-        
-        // Fetch Intel
         fetchMarketIntel(j, data.job_title, data.company);
-    })
-    .catch(e => {
-        addMessage('arti', "Error during analysis. Please try again.");
-        document.getElementById('inputState').style.display = 'block';
-        document.getElementById('dashboardState').style.display = 'none';
+        addMessage('arti', `Analysis done. Score: ${data.score}%. Check the keyword breakdown.`);
     });
 }
 
 function renderDashboard(data) {
+    // Score
     document.getElementById('scoreVal').textContent = data.score + '%';
     document.getElementById('roleText').textContent = data.job_title;
     document.getElementById('companyText').textContent = data.company;
-    
-    // Color coding
     const bg = data.score >= 80 ? 'var(--accent-olive)' : data.score >= 60 ? 'var(--accent-gold)' : 'var(--accent-clay)';
     document.getElementById('scoreBg').style.background = bg;
+
+    // KEYWORDS (The visual clarity request)
+    const kwContainer = document.getElementById('keywordPills');
+    const keywords = data.keywords || [];
+    const matched = keywords.filter(k => k.in_resume);
+    const gaps = keywords.filter(k => !k.in_resume);
     
+    document.getElementById('kwMatchCount').textContent = matched.length;
+    document.getElementById('kwGapCount').textContent = gaps.length;
+
+    let html = '';
+    matched.forEach(k => html += `<div class="pill match">${k.term || k}</div>`);
+    gaps.forEach(k => html += `<div class="pill gap">${k.term || k}</div>`);
+    kwContainer.innerHTML = html;
+
     // Lists
-    const matches = data.analysis.filter(a => a.startsWith('Match:'));
-    const gaps = data.analysis.filter(a => a.startsWith('Gap:'));
+    document.getElementById('strengthsList').innerHTML = data.analysis.filter(a => a.startsWith('Match:')).map(m => 
+        `<div class="list-item match">${m.replace('Match:', '')}</div>`).join('');
     
-    document.getElementById('strengthsList').innerHTML = matches.map(m => 
-        `<div class="list-item match">${m.replace('Match:', '')}</div>`
-    ).join('');
-    
-    document.getElementById('gapsList').innerHTML = gaps.map(g => 
-        `<div class="list-item gap">${g.replace('Gap:', '')}</div>`
-    ).join('');
-    
-    // Interview
-    document.getElementById('interviewQuestions').innerHTML = (data.interview_questions || []).map((q,i) => `
-        <div style="margin-bottom:16px;">
-            <div style="font-weight:700; margin-bottom:4px;">Q${i+1}: ${q.question}</div>
-            <div style="font-size:13px; opacity:0.8;">${q.suggested_answer}</div>
-        </div>
-    `).join('');
+    document.getElementById('gapsList').innerHTML = data.analysis.filter(a => a.startsWith('Gap:')).map(g => 
+        `<div class="list-item gap">${g.replace('Gap:', '')}</div>`).join('');
 }
 
 function fetchMarketIntel(jd, title, company) {
@@ -668,44 +443,10 @@ function fetchMarketIntel(jd, title, company) {
     });
 }
 
-function generateEmail() {
-    addMessage('arti', "Drafting email...");
-    fetch(API_ENDPOINT, {
-        method: 'POST',
-        body: JSON.stringify({
-            request_type: 'generate_intro_email',
-            job_description: appState.jd,
-            resume_text: appState.resume,
-            analysis_data: appState.analysis
-        })
-    })
-    .then(r => r.json())
-    .then(data => {
-        const out = document.getElementById('emailOutput');
-        out.style.display = 'block';
-        out.textContent = data.intro_email;
-        addMessage('arti', "Email drafted in toolkit.");
-    });
-}
-
-function triggerEmail() {
-    toggleTool('emailContent', true);
-    generateEmail();
-}
-
-function toggleTool(id, forceOpen=false) {
-    const el = document.getElementById(id);
-    if(forceOpen) el.classList.add('open');
-    else el.classList.toggle('open');
-}
-
 function resetApp() {
     document.getElementById('inputState').style.display = 'block';
     document.getElementById('dashboardState').style.display = 'none';
-    appState.analysis = null;
-    addMessage('arti', "Resetting console. Ready for new inputs.");
 }
-
 </script>
 </body>
 </html>
