@@ -3,21 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Arti // DIB Career Coach</title>
+    <title>Arti // DIB Career Super-App</title>
     <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
 /* ==========================================================================
-   NEO-BRUTALIST TOKENS
+   NEO-BRUTALIST SYSTEM
    ========================================================================== */
 :root {
     --ink: #1a1a2e;
     --paper: #ffffff;
     --cream: #f8f6f1;
     --pale-blue: #c8dae8;
-    --soft-blue: #93b5d9;
     --mint: #d4e8dc;
     --clay: #e07a5f;
     --gold: #f2cc8f;
+    --olive: #81b29a;
     
     --border: 3px solid var(--ink);
     --shadow: 4px 4px 0 var(--ink);
@@ -41,288 +41,277 @@ h1, h2, h3, .mono { font-family: 'Space Mono', monospace; }
 .app-header {
     padding: 16px 20px; border-bottom: var(--border); background: var(--paper);
     display: flex; justify-content: space-between; align-items: center; z-index: 10;
-    flex-shrink: 0; /* Prevent header from shrinking */
+    flex-shrink: 0;
 }
-.brand { font-family: 'Space Mono'; font-weight: 700; font-size: 15px; display: flex; align-items: center; gap: 10px; text-transform: uppercase; letter-spacing: -0.5px; }
-.brand-avatar { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; }
+.brand { font-family: 'Space Mono'; font-weight: 700; font-size: 16px; display: flex; align-items: center; gap: 10px; text-transform: uppercase; }
+.brand-avatar { width: 36px; height: 36px; }
 .brand-avatar img { width: 100%; height: 100%; object-fit: contain; }
 
 /* ==========================================================================
-   CHAT STREAM (The Core UI)
+   VIEW CONTAINER (Swappable Tabs)
    ========================================================================== */
-.chat-container {
-    flex: 1; 
-    overflow-y: auto; 
-    padding: 20px;
-    display: flex; 
-    flex-direction: column; 
-    gap: 16px;
-    scroll-behavior: smooth;
-    padding-bottom: 40px;
+.view-container {
+    flex: 1; overflow-y: auto; padding: 20px;
+    display: none; /* Hidden by default */
+    padding-bottom: 100px; /* Space for Nav */
 }
+.view-container.active { display: block; }
 
-/* Messages */
-.msg-row { 
-    display: flex; gap: 12px; align-items: flex-start; 
-    opacity: 0; animation: slideUp 0.3s forwards; 
-    flex-shrink: 0; /* CRITICAL FIX: Prevents bubbles from collapsing */
-}
+/* --------------------------------------------------------------------------
+   VIEW 1: THE GURU (Chat)
+   -------------------------------------------------------------------------- */
+.chat-stream { display: flex; flex-direction: column; gap: 16px; }
+.msg-row { display: flex; gap: 12px; align-items: flex-start; opacity: 0; animation: slideUp 0.3s forwards; }
 .msg-row.user { flex-direction: row-reverse; }
-
 .avatar { width: 32px; height: 32px; flex-shrink: 0; }
-.avatar img { width: 100%; height: 100%; object-fit: contain; }
-
 .bubble {
     max-width: 85%; padding: 14px 18px; border-radius: 12px;
     font-size: 14px; line-height: 1.5; border: 2px solid var(--ink);
-    position: relative; box-shadow: 3px 3px 0 rgba(0,0,0,0.05);
+    background: var(--paper); box-shadow: 3px 3px 0 rgba(0,0,0,0.05);
 }
-.msg-row.arti .bubble { background: var(--paper); border-top-left-radius: 2px; }
-.msg-row.user .bubble { background: var(--ink); color: white; border-top-right-radius: 2px; box-shadow: 3px 3px 0 rgba(0,0,0,0.2); }
+.msg-row.user .bubble { background: var(--ink); color: white; box-shadow: 3px 3px 0 rgba(0,0,0,0.2); }
 
-/* Option Buttons (Chat Choices) */
-.chat-options {
-    display: flex; flex-wrap: wrap; gap: 8px; margin-left: 44px; /* Align with text */
-    animation: fadeIn 0.5s forwards;
-    flex-shrink: 0; /* Prevent collapse */
-}
+/* Chat Options */
+.chat-options { display: flex; flex-wrap: wrap; gap: 8px; margin-left: 44px; margin-top: 4px; }
 .chat-btn {
-    padding: 10px 16px; background: var(--paper); border: 2px solid var(--ink);
-    border-radius: 20px; font-family: 'Space Mono'; font-weight: 700; font-size: 12px;
-    cursor: pointer; transition: all 0.1s; box-shadow: 3px 3px 0 rgba(0,0,0,0.1);
+    padding: 8px 14px; background: var(--paper); border: 2px solid var(--ink);
+    border-radius: 20px; font-family: 'Space Mono'; font-weight: 700; font-size: 11px;
+    cursor: pointer; transition: all 0.1s; box-shadow: 2px 2px 0 rgba(0,0,0,0.1);
 }
-.chat-btn:hover { transform: translate(-2px, -2px); box-shadow: 5px 5px 0 var(--ink); background: var(--mint); }
-.chat-btn:active { transform: translate(1px, 1px); box-shadow: 2px 2px 0 var(--ink); }
-
-/* Selected/Disabled State for History Stability */
+.chat-btn:hover { transform: translate(-1px, -1px); box-shadow: 3px 3px 0 var(--ink); background: var(--mint); }
 .chat-btn.disabled { opacity: 0.5; pointer-events: none; border-color: #ccc; box-shadow: none; }
 .chat-btn.selected { background: var(--ink); color: white; opacity: 1; border-color: var(--ink); }
 
-/* Rich Widgets (Archetype Card inside Chat) */
-.chat-widget {
-    width: 100%; max-width: 340px; margin-left: 44px;
-    background: var(--paper); border: 2px solid var(--ink); border-radius: 12px;
-    overflow: hidden; box-shadow: 4px 4px 0 var(--ink); margin-bottom: 8px;
-    flex-shrink: 0; /* CRITICAL FIX */
-}
-.widget-header { background: var(--pale-blue); padding: 20px; text-align: center; border-bottom: 2px solid var(--ink); }
-.widget-icon { font-size: 40px; display: block; margin-bottom: 8px; }
-.widget-title { font-family: 'Space Mono'; font-weight: 700; font-size: 18px; text-transform: uppercase; }
-.widget-body { padding: 16px; font-size: 13px; line-height: 1.5; }
-.widget-link {
-    display: flex; justify-content: space-between; align-items: center;
-    padding: 12px; margin-top: 8px; background: var(--cream);
-    border: 2px solid var(--ink); border-radius: 8px; text-decoration: none;
-    color: var(--ink); font-weight: 700; font-size: 11px; font-family: 'Space Mono';
-    transition: all 0.1s;
-}
-.widget-link:hover { background: var(--mint); transform: translate(-1px,-1px); box-shadow: 2px 2px 0 var(--ink); }
+/* --------------------------------------------------------------------------
+   VIEW 2: THE LAB (Input)
+   -------------------------------------------------------------------------- */
+.lab-header { margin-bottom: 24px; text-align: center; }
+.lab-title { font-size: 24px; font-weight: 700; margin-bottom: 8px; line-height: 1.1; }
+.lab-sub { font-size: 13px; opacity: 0.7; }
 
-/* INPUT AREA (Sticky Footer) */
-.input-area {
-    padding: 16px; background: var(--paper); border-top: var(--border);
-    display: flex; gap: 10px; align-items: flex-end;
-    flex-shrink: 0; /* Keep footer stable */
+.input-card {
+    background: var(--paper); border: var(--border); border-radius: var(--radius);
+    padding: 20px; box-shadow: var(--shadow); margin-bottom: 20px;
 }
-.chat-input {
-    flex: 1; padding: 14px; border: 2px solid var(--ink); border-radius: 8px;
-    font-family: 'DM Sans'; font-size: 14px; resize: none; height: 52px; max-height: 120px;
-    transition: box-shadow 0.2s;
+.input-label { font-family: 'Space Mono'; font-size: 11px; font-weight: 700; text-transform: uppercase; margin-bottom: 10px; display: block; }
+.chunky-input {
+    width: 100%; height: 120px; padding: 14px; border: 2px solid var(--ink);
+    border-radius: 8px; font-family: 'DM Sans'; font-size: 13px; resize: none;
+    background: #fafafa; transition: all 0.2s;
 }
-.chat-input:focus { outline: none; box-shadow: 4px 4px 0 var(--pale-blue); }
-.send-btn {
-    width: 52px; height: 52px; background: var(--ink); color: white;
-    border: none; border-radius: 8px; cursor: pointer; font-weight: 700;
-    display: grid; place-items: center; box-shadow: 3px 3px 0 rgba(0,0,0,0.2);
+.chunky-input:focus { outline: none; background: #fff; box-shadow: 3px 3px 0 var(--pale-blue); }
+
+.analyze-btn {
+    width: 100%; padding: 18px; background: var(--ink); color: white;
+    font-family: 'Space Mono'; font-size: 16px; font-weight: 700; text-transform: uppercase;
+    border: none; border-radius: 12px; cursor: pointer; box-shadow: var(--shadow);
+    display: flex; justify-content: space-between; align-items: center;
+    transition: transform 0.1s;
 }
-.send-btn:active { transform: scale(0.95); box-shadow: none; }
+.analyze-btn:active { transform: translate(2px, 2px); box-shadow: none; }
+
+/* --------------------------------------------------------------------------
+   VIEW 3: THE REPORT (Results Dashboard)
+   -------------------------------------------------------------------------- */
+/* Score Hero */
+.score-card {
+    background: var(--ink); color: white; border: var(--border); border-radius: var(--radius);
+    padding: 24px; margin-bottom: 20px; box-shadow: var(--shadow);
+    display: flex; align-items: center; justify-content: space-between;
+}
+.score-circle {
+    width: 80px; height: 80px; background: var(--olive); color: var(--ink);
+    border-radius: 50%; display: grid; place-items: center;
+    font-family: 'Space Mono'; font-weight: 700; font-size: 28px; border: 2px solid var(--ink);
+}
+.score-text { flex: 1; margin-left: 20px; }
+.score-title { font-family: 'Space Mono'; font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+.score-sub { font-size: 12px; opacity: 0.8; }
+
+/* Stats Grid */
+.stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+.stat-box {
+    background: var(--paper); border: 2px solid var(--ink); border-radius: 8px;
+    padding: 16px; text-align: center; box-shadow: 2px 2px 0 rgba(0,0,0,0.1);
+}
+.stat-num { font-family: 'Space Mono'; font-size: 18px; font-weight: 700; display: block; margin-bottom: 4px; }
+.stat-lbl { font-size: 10px; text-transform: uppercase; opacity: 0.6; font-weight: 700; }
+
+/* Keyword Pills */
+.pill-area { margin-bottom: 24px; background: var(--paper); padding: 16px; border: 2px solid var(--ink); border-radius: 12px; }
+.pill-title { font-family: 'Space Mono'; font-size: 11px; font-weight: 700; text-transform: uppercase; margin-bottom: 12px; display: block; }
+.pills { display: flex; flex-wrap: wrap; gap: 8px; }
+.pill {
+    padding: 6px 12px; font-family: 'Space Mono'; font-size: 10px; font-weight: 700;
+    border: 2px solid var(--ink); border-radius: 20px; background: #fff;
+}
+.pill.match { background: var(--mint); }
+.pill.gap { background: var(--clay); color: white; border-color: var(--ink); }
+
+/* Lists */
+.list-group { margin-bottom: 20px; }
+.list-item {
+    background: var(--paper); border: 2px solid var(--ink); border-radius: 8px;
+    padding: 12px; margin-bottom: 8px; font-size: 13px; line-height: 1.4;
+    border-left-width: 6px;
+}
+.list-item.good { border-left-color: var(--olive); }
+.list-item.bad { border-left-color: var(--clay); }
+
+/* ==========================================================================
+   BOTTOM NAV
+   ========================================================================== */
+.bottom-nav {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    background: var(--paper); border-top: var(--border);
+    display: flex; padding: 12px; gap: 12px; z-index: 100;
+}
+.nav-item {
+    flex: 1; padding: 12px; text-align: center;
+    font-family: 'Space Mono'; font-weight: 700; font-size: 11px; text-transform: uppercase;
+    border: 2px solid transparent; border-radius: 8px; cursor: pointer; opacity: 0.5;
+    transition: all 0.2s;
+}
+.nav-item.active { opacity: 1; background: var(--pale-blue); border-color: var(--ink); box-shadow: 2px 2px 0 var(--ink); }
 
 /* Animations */
 @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-/* Typing Dot */
-.typing { display: flex; gap: 4px; padding: 4px 0; }
-.dot { width: 6px; height: 6px; background: var(--ink); border-radius: 50%; animation: bounce 1.4s infinite ease-in-out; }
-.dot:nth-child(1) { animation-delay: -0.32s; }
-.dot:nth-child(2) { animation-delay: -0.16s; }
-@keyframes bounce { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1.0); } }
-
 </style>
 </head>
 <body>
 
 <div class="app-frame">
+    
     <header class="app-header">
         <div class="brand">
-            <div class="brand-avatar"><img src="arti.png" alt="Arti"></div>
-            <div>Arti // Career Bot</div>
+            <div class="brand-avatar"><img src="arti.png" alt="A"></div>
+            <div>Arti // Super-App</div>
         </div>
-        <button class="mono" onclick="resetChat()" style="background:none; border:none; text-decoration:underline; font-size:11px; cursor:pointer;">Restart</button>
+        <div class="mono" style="font-size:10px;">BETA</div>
     </header>
 
-    <div id="chatContainer" class="chat-container">
+    <div id="viewGuru" class="view-container active">
+        <div id="chatStream" class="chat-stream">
+            </div>
+    </div>
+
+    <div id="viewLab" class="view-container">
+        <div class="lab-header">
+            <div class="lab-title">The Job Lab</div>
+            <div class="lab-sub">Paste your data. Get the stats.</div>
         </div>
 
-    <div class="input-area">
-        <textarea id="userInput" class="chat-input" placeholder="Type a message..." onkeydown="if(event.key==='Enter' && !event.shiftKey){event.preventDefault(); handleSend();}"></textarea>
-        <button class="send-btn" onclick="handleSend()">→</button>
+        <div class="input-card">
+            <span class="input-label">1. Job Description</span>
+            <textarea id="jdText" class="chunky-input" placeholder="Paste JD text here..."></textarea>
+        </div>
+
+        <div class="input-card">
+            <span class="input-label">2. Your Resume</span>
+            <textarea id="resumeText" class="chunky-input" placeholder="Paste Resume text here..."></textarea>
+        </div>
+
+        <button class="analyze-btn" onclick="runFullAnalysis()">
+            <span>Analyze Match</span>
+            <span>→</span>
+        </button>
     </div>
+
+    <div id="viewReport" class="view-container">
+        <div id="emptyReport" style="text-align:center; padding:40px; opacity:0.6;">
+            <div style="font-size:40px; margin-bottom:10px;">📊</div>
+            <p>No analysis yet.</p>
+            <button class="chat-btn" onclick="switchTab('lab')">Go to Lab</button>
+        </div>
+
+        <div id="reportContent" style="display:none;">
+            <div class="score-card">
+                <div class="score-text">
+                    <div class="score-title" id="resRole">Director of Sales</div>
+                    <div class="score-sub" id="resCompany">AWS Federal</div>
+                </div>
+                <div class="score-circle" id="resScore">78%</div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <span class="stat-num" id="resSalary">$250k</span>
+                    <span class="stat-lbl">Est. Salary</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-num" id="resComp">Med</span>
+                    <span class="stat-lbl">Competition</span>
+                </div>
+            </div>
+
+            <div class="pill-area">
+                <span class="pill-title">Keyword Signals</span>
+                <div class="pills" id="resPills"></div>
+            </div>
+
+            <div class="list-group">
+                <span class="pill-title" style="color:var(--olive);">Top Strengths</span>
+                <div id="resStrengths"></div>
+            </div>
+            
+            <div class="list-group">
+                <span class="pill-title" style="color:var(--clay);">Critical Gaps</span>
+                <div id="resGaps"></div>
+            </div>
+            
+            <div style="margin-top:30px; text-align:center;">
+                <button class="chat-btn" onclick="switchTab('guru'); addMessage('arti', 'I can help you draft an email for this. Just ask.');">Ask Arti for Help</button>
+            </div>
+        </div>
+    </div>
+
+    <nav class="bottom-nav">
+        <div class="nav-item active" id="tab-guru" onclick="switchTab('guru')">🧭 Guru</div>
+        <div class="nav-item" id="tab-lab" onclick="switchTab('lab')">🧪 The Lab</div>
+        <div class="nav-item" id="tab-report" onclick="switchTab('report')">📊 Report</div>
+    </nav>
+
 </div>
 
 <script>
 // ==========================================================================
-// CLIENT LOGIC
+// CONFIG
 // ==========================================================================
 const API_ENDPOINT = 'https://76unm1rlj0.execute-api.us-east-1.amazonaws.com/default/grumpy2';
-let chatState = { step: 'INIT', quizData: {} };
-const chatBox = document.getElementById('chatContainer');
+let appState = {
+    quiz: {},
+    analysis: null
+};
 
-// INIT
+// ==========================================================================
+// NAVIGATION
+// ==========================================================================
+function switchTab(tabName) {
+    // Hide all
+    document.querySelectorAll('.view-container').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+    
+    // Show Target
+    document.getElementById('view' + tabName.charAt(0).toUpperCase() + tabName.slice(1)).classList.add('active');
+    document.getElementById('tab-' + tabName).classList.add('active');
+}
+
+// ==========================================================================
+// VIEW 1: THE GURU (Chat Logic)
+// ==========================================================================
+const chatBox = document.getElementById('chatStream');
+
 document.addEventListener('DOMContentLoaded', () => {
     startGuruFlow();
 });
 
-// FLOW CONTROL
-function startGuruFlow() {
-    chatBox.innerHTML = '';
-    chatState = { step: 'Q1', quizData: {} };
-    
-    // Greeting
-    setTimeout(() => addMessage('arti', "Hi! I'm Arti. I help people find their path in the Defense Industrial Base."), 500);
-    setTimeout(() => addMessage('arti', "If you have a resume, paste it below. If not, I can help you find your role. **What drives you most?**"), 1200);
-    
-    // Question 1 Options
-    setTimeout(() => {
-        addOptions([
-            { label: "💰 Money / Deals", val: "money", next: "Q2" },
-            { label: "🤝 People / Leadership", val: "people", next: "Q2" },
-            { label: "🛠️ Tech / Building", val: "product", next: "Q2" },
-            { label: "🧩 Solving Puzzles", val: "puzzle", next: "Q2" }
-        ]);
-    }, 1800);
-}
-
-function handleOptionClick(btnElement, label, value, nextStep) {
-    // UI Stability: Don't remove buttons, just freeze them
-    const container = btnElement.parentElement;
-    const buttons = container.querySelectorAll('.chat-btn');
-    buttons.forEach(b => {
-        b.classList.add('disabled');
-        if (b === btnElement) b.classList.add('selected');
-    });
-    
-    // Add User Bubble (Visual Confirmation)
-    addMessage('user', label);
-    
-    // Save Data
-    if(chatState.step === 'Q1') chatState.quizData.driver = value;
-    if(chatState.step === 'Q2') chatState.quizData.skill = value;
-    if(chatState.step === 'Q3') chatState.quizData.clearance = value;
-    
-    // Trigger Next Step
-    showTyping();
-    setTimeout(() => {
-        removeTyping();
-        
-        if (nextStep === 'Q2') {
-            chatState.step = 'Q2';
-            addMessage('arti', "Got it. And what would you say is your **strongest skill**?");
-            addOptions([
-                { label: "🗣️ Persuasion", val: "talk", next: "Q3" },
-                { label: "📋 Organization", val: "org", next: "Q3" },
-                { label: "💻 Coding/Technical", val: "code", next: "Q3" },
-                { label: "♟️ Strategy", val: "strat", next: "Q3" }
-            ]);
-        } 
-        else if (nextStep === 'Q3') {
-            chatState.step = 'Q3';
-            addMessage('arti', "Last question: Do you have a **Security Clearance**?");
-            addOptions([
-                { label: "No / Public Trust", val: "none", next: "RESULT" },
-                { label: "Secret", val: "secret", next: "RESULT" },
-                { label: "TS / SCI", val: "ts", next: "RESULT" }
-            ]);
-        } 
-        else if (nextStep === 'RESULT') {
-            chatState.step = 'DONE';
-            calculateArchetype();
-        }
-    }, 800);
-}
-
-function calculateArchetype() {
-    const { driver, skill, clearance } = chatState.quizData;
-    let title = "The Generalist";
-    let icon = "🛡️";
-    let desc = "You have broad skills useful across the DIB.";
-    let roles = ["Program Analyst"];
-
-    // Simple Logic
-    if (driver === 'money' || skill === 'talk') {
-        title = "The Rainmaker"; icon = "🦁";
-        desc = "You belong in **Growth**. In the DIB, this means Capture Management or Federal Sales.";
-        roles = ["Capture Manager", "Federal Sales"];
-    } else if (driver === 'people' && skill === 'org') {
-        title = "The Commander"; icon = "🦅";
-        desc = "You are a natural **Program Manager**. You keep the mission on track.";
-        roles = ["Program Manager", "Project Lead"];
-    } else if (driver === 'product' || skill === 'code') {
-        title = "The Builder"; icon = "⚡";
-        desc = "You belong in **Technical Delivery**. Building the tools that protect the mission.";
-        roles = ["Solutions Architect", "Systems Engineer"];
-    } else if (driver === 'puzzle' || skill === 'strat') {
-        title = "The Strategist"; icon = "🧠";
-        desc = "You belong in **Operations & Intel**. Analyzing data to drive decisions.";
-        roles = ["Strategy Consultant", "Intelligence Analyst"];
-    }
-
-    addMessage('arti', "I've analyzed your profile. Here is where you fit:");
-    
-    // Render Widget
-    const div = document.createElement('div');
-    div.className = 'chat-widget';
-    div.innerHTML = `
-        <div class="widget-header">
-            <span class="widget-icon">${icon}</span>
-            <div class="widget-title">${title}</div>
-        </div>
-        <div class="widget-body">
-            <p style="margin-top:0;">${desc}</p>
-            <div class="mono" style="font-size:10px; font-weight:700; margin-top:12px; opacity:0.5;">LIVE JOB FEEDS</div>
-            ${roles.map(r => `
-                <a href="https://www.linkedin.com/jobs/search/?keywords=${encodeURIComponent(r)}" target="_blank" class="widget-link">
-                    <span>${r}</span><span>↗</span>
-                </a>
-            `).join('')}
-        </div>
-    `;
-    chatBox.appendChild(div);
-    scrollToBottom();
-    
-    setTimeout(() => {
-        addMessage('arti', "You can click those links to see live jobs. Or, **paste a job description** below and I can help you tailor your resume for it.");
-    }, 1500);
-}
-
-// ==========================================================================
-// UI HELPERS
-// ==========================================================================
 function addMessage(role, text) {
     const div = document.createElement('div');
     div.className = `msg-row ${role}`;
-    
-    let avatar = role === 'arti' ? 
-        `<div class="avatar"><img src="arti.png" alt="A"></div>` : '';
-        
-    div.innerHTML = `
-        ${avatar}
-        <div class="bubble">
-            ${text.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')}
-        </div>
-    `;
+    let avatar = role === 'arti' ? `<div class="avatar"><img src="arti.png" alt="A"></div>` : '';
+    div.innerHTML = `${avatar}<div class="bubble">${text}</div>`;
     chatBox.appendChild(div);
-    scrollToBottom();
+    chatBox.scrollTop = chatBox.scrollHeight;
 }
 
 function addOptions(options) {
@@ -332,93 +321,168 @@ function addOptions(options) {
         const btn = document.createElement('button');
         btn.className = 'chat-btn';
         btn.textContent = opt.label;
-        btn.onclick = () => handleOptionClick(btn, opt.label, opt.val, opt.next);
+        btn.onclick = () => handleOption(btn, opt);
         div.appendChild(btn);
     });
     chatBox.appendChild(div);
-    scrollToBottom();
+    chatBox.scrollTop = chatBox.scrollHeight;
 }
 
-function showTyping() {
-    const div = document.createElement('div');
-    div.id = 'typingIndicator';
-    div.className = 'msg-row arti';
-    div.innerHTML = `
-        <div class="avatar"><img src="arti.png" alt="A"></div>
-        <div class="bubble">
-            <div class="typing"><div class="dot"></div><div class="dot"></div></div>
-        </div>
-    `;
-    chatBox.appendChild(div);
-    scrollToBottom();
-}
+function handleOption(btn, opt) {
+    // Freeze UI
+    const parent = btn.parentElement;
+    Array.from(parent.children).forEach(b => {
+        b.classList.add('disabled');
+        if(b === btn) b.classList.add('selected');
+    });
 
-function removeTyping() {
-    const el = document.getElementById('typingIndicator');
-    if(el) el.remove();
-}
-
-function scrollToBottom() {
-    // Small timeout to allow DOM layout to settle before scrolling
-    setTimeout(() => {
-        chatBox.scrollTop = chatBox.scrollHeight;
-    }, 50);
-}
-
-function resetChat() {
-    startGuruFlow();
-}
-
-// ==========================================================================
-// TEXT INPUT LOGIC (The "Expert" Mode)
-// ==========================================================================
-async function handleSend() {
-    const input = document.getElementById('userInput');
-    const text = input.value.trim();
-    if(!text) return;
-    
-    // Clear options if they exist (user chose to type instead)
-    const existingOpts = document.querySelector('.chat-options:last-child');
-    if(existingOpts) {
-        // Just hide them so history looks clean
-        existingOpts.style.display = 'none';
+    // Logic
+    if (opt.val === 'start_quiz') {
+        addMessage('arti', "Great. First question: What drives you most in your career?");
+        setTimeout(() => addOptions([
+            {label: "Money / Deals", val: "money", next: "q2"},
+            {label: "Leadership", val: "people", next: "q2"},
+            {label: "Tech / Product", val: "product", next: "q2"},
+            {label: "Strategy", val: "puzzle", next: "q2"}
+        ]), 600);
+    } else if (opt.next === 'q2') {
+        appState.quiz.driver = opt.val;
+        addMessage('arti', "Got it. And what is your superpower?");
+        setTimeout(() => addOptions([
+            {label: "Persuasion", val: "talk", next: "q3"},
+            {label: "Organization", val: "org", next: "q3"},
+            {label: "Coding", val: "code", next: "q3"},
+            {label: "Analysis", val: "strat", next: "q3"}
+        ]), 600);
+    } else if (opt.next === 'q3') {
+        appState.quiz.skill = opt.val;
+        addMessage('arti', "Final check: What is your clearance status?");
+        setTimeout(() => addOptions([
+            {label: "None", val: "none", next: "result"},
+            {label: "Secret", val: "secret", next: "result"},
+            {label: "TS / SCI", val: "ts", next: "result"}
+        ]), 600);
+    } else if (opt.next === 'result') {
+        appState.quiz.clearance = opt.val;
+        showArchetype();
+    } else if (opt.val === 'goto_lab') {
+        switchTab('lab');
     }
+}
+
+function startGuruFlow() {
+    chatBox.innerHTML = '';
+    setTimeout(() => addMessage('arti', "Hi, I'm Arti. I can help you analyze a job match, or help you find your career path."), 500);
+    setTimeout(() => {
+        addOptions([
+            {label: "Analyze a Job", val: "goto_lab"},
+            {label: "Find My Path", val: "start_quiz"}
+        ]);
+    }, 1200);
+}
+
+function showArchetype() {
+    // Simple logic for demo
+    let role = "Program Analyst";
+    if (appState.quiz.driver === 'money') role = "Capture Manager";
+    if (appState.quiz.driver === 'product') role = "Solutions Architect";
     
-    input.value = '';
-    addMessage('user', text);
-    showTyping();
+    addMessage('arti', `Based on your answers, you are a natural **${role}**.`);
+    addMessage('arti', "I've unlocked the Analyzer tab for you. When you find a job description, paste it there.");
+    
+    // Add visual link
+    const div = document.createElement('div');
+    div.innerHTML = `<a href="https://www.linkedin.com/jobs/search/?keywords=${role}" target="_blank" style="display:block; margin:10px 0 10px 44px; padding:10px; background:white; border:2px solid #1a1a2e; border-radius:8px; text-decoration:none; color:#1a1a2e; font-family:'Space Mono'; font-size:12px;">Search ${role} Jobs ↗</a>`;
+    chatBox.appendChild(div);
+}
+
+// ==========================================================================
+// VIEW 2 & 3: ANALYZER & REPORT
+// ==========================================================================
+async function runFullAnalysis() {
+    const r = document.getElementById('resumeText').value;
+    const j = document.getElementById('jdText').value;
+    
+    if(!r || !j) { alert("Please paste both Resume and JD."); return; }
+    
+    const btn = document.querySelector('.analyze-btn');
+    const oldText = btn.innerHTML;
+    btn.innerHTML = "ANALYZING...";
+    btn.disabled = true;
     
     try {
-        // If text is long, assume Resume/JD context
-        let type = 'ask_expert';
-        if(text.length > 200) type = 'resume_match'; // Heuristic
-        
-        // This simulates the backend call - Connect to your Lambda URL
         const res = await fetch(API_ENDPOINT, {
             method: 'POST',
             body: JSON.stringify({
-                request_type: type,
-                question: text, // treated as resume/jd if long
-                job_description: text, // naive pass-through for demo
-                resume_text: text
+                request_type: 'resume_match',
+                job_description: j,
+                resume_text: r
             })
         });
         const data = await res.json();
-        removeTyping();
+        appState.analysis = data;
         
-        if(type === 'resume_match') {
-            addMessage('arti', `I see you pasted a resume/JD. **Match Score: ${data.score || 75}%**.`);
-            addMessage('arti', data.verdict || "This looks like a decent fit.");
-        } else {
-            addMessage('arti', data.response || "I can help with that. Could you provide the Job Description first?");
-        }
+        // Render Report
+        renderReport(data);
+        
+        // Switch Tab
+        switchTab('report');
+        
+        // Notify in Chat
+        addMessage('arti', `I finished the analysis. You scored **${data.score}%**. Check the Report tab.`);
+        
+        // Background fetch for intel
+        fetchIntel(j, data.job_title, data.company);
         
     } catch(e) {
-        removeTyping();
-        // Fallback for demo if API isn't live
-        setTimeout(() => addMessage('arti', "I'm analyzing that... (Connect Lambda to see real results)"), 500);
+        alert("Error analyzing. Try again.");
+    } finally {
+        btn.innerHTML = oldText;
+        btn.disabled = false;
     }
 }
+
+function renderReport(data) {
+    document.getElementById('emptyReport').style.display = 'none';
+    document.getElementById('reportContent').style.display = 'block';
+    
+    // Score
+    document.getElementById('resScore').textContent = data.score + '%';
+    document.getElementById('resRole').textContent = data.job_title;
+    document.getElementById('resCompany').textContent = data.company;
+    
+    // Pills
+    const pillBox = document.getElementById('resPills');
+    pillBox.innerHTML = '';
+    (data.keywords || []).forEach(k => {
+        const span = document.createElement('span');
+        span.className = `pill ${k.in_resume ? 'match' : 'gap'}`;
+        span.textContent = k.term;
+        pillBox.appendChild(span);
+    });
+    
+    // Lists
+    document.getElementById('resStrengths').innerHTML = data.analysis
+        .filter(x => x.startsWith('Match:'))
+        .map(x => `<div class="list-item good">${x.replace('Match:', '')}</div>`).join('');
+        
+    document.getElementById('resGaps').innerHTML = data.analysis
+        .filter(x => x.startsWith('Gap:'))
+        .map(x => `<div class="list-item bad">${x.replace('Gap:', '')}</div>`).join('');
+}
+
+function fetchIntel(jd, title, company) {
+    fetch(API_ENDPOINT, {
+        method: 'POST',
+        body: JSON.stringify({request_type:'market_intel', job_description:jd, job_title:title, company:company})
+    })
+    .then(r => r.json())
+    .then(d => {
+        if(d.salary_intel) document.getElementById('resSalary').textContent = `$${d.salary_intel.mid}k`;
+        if(d.competition) document.getElementById('resComp').textContent = d.competition.level;
+    });
+}
+
 </script>
 </body>
 </html>
