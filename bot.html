@@ -6,35 +6,57 @@
     <title>DIB Jobs // Defense Industrial Base Jobs</title>
     <meta name="description" content="A job matching and application toolkit built for Defense Industrial Base professionals.">
     <link rel="canonical" href="https://dibjobs.com/">
+    <!-- Open Graph / LinkedIn -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="DIB Jobs - Defense Industrial Base Job Matcher">
+    <meta property="og:description" content="A job matching and application toolkit for Defense Industrial Base professionals. Resume fit, gap analysis, interview prep, and job intel.">
+    <meta property="og:url" content="https://dibjobs.com/">
+    <meta property="og:image" content="https://dibjobs.com/dibjobs.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="DIB Jobs - Defense Industrial Base Job Matcher">
+    <meta name="twitter:description" content="See how your resume stacks up against real DIB roles. Match score, gaps, interview prep, and job intel.">
+    <meta name="twitter:image" content="https://dibjobs.com/dibjobs.png">
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-N10ZLNFZHE"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-N10ZLNFZHE');
+    </script>
 <style>
     :root {
-        --bg-cream: #f5f3ee;
-        --bg-beige: #ebe7de;
+        /* Palette - Soft Blue & Cream Theme */
+        --deep-blue: #4a6a8a;
+        --soft-blue: #93b5d9;
+        --pale-blue: #c8dae8;
+        --warm-cream: #f8f6f1;
+        
+        /* Mapped Colors */
+        --bg-cream: var(--warm-cream);
         --card-white: #FFFFFF;
-        --ink-black: #2d3748;
-        --accent-teal: #b8e0d4;
-        --accent-teal-dark: #7ec4b3;
-        --accent-coral: #f4a896;
-        --accent-coral-dark: #e07960;
-        --accent-gold: #f5d99a;
-        --accent-gold-dark: #e5c36e;
-        --accent-blue: #a8d4f0;
-        --accent-blue-dark: #4a90b8;
-        --score-excellent: #4a90b8;
-        --score-good: #7ec4b3;
-        --score-moderate: #f5d99a;
-        --score-low: #f4a896;
-        --border-thin: 1px;
+        --ink-black: #3d4f5f;
+        
+        /* Accents */
+        --accent-mint: var(--pale-blue);
+        --accent-olive: var(--soft-blue);
+        --accent-clay: #d4918a;
+        --accent-gold: #e8c992;
+        --accent-blue: var(--soft-blue);
+        
+        /* Spacing & Layout */
         --border-thick: 2px;
-        --shadow-soft: 0 2px 8px rgba(0,0,0,0.06);
-        --shadow-card: 0 4px 12px rgba(0,0,0,0.08);
-        --radius: 12px;
-        --radius-lg: 16px;
-        --radius-sm: 8px;
+        --shadow-hard: 5px 5px 0px var(--ink-black);
+        --shadow-hover: 2px 2px 0px var(--ink-black);
+        --radius: 6px;
     }
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
@@ -45,10 +67,12 @@
         min-height: 100vh;
         padding-bottom: 80px;
     }
+    /* TYPOGRAPHY */
     h1, h2, h3, .mono { font-family: 'Space Mono', monospace; }
+    /* HEADER */
     header {
         background: var(--card-white);
-        border-bottom: var(--border-thin) solid rgba(0,0,0,0.1);
+        border-bottom: var(--border-thick) solid var(--ink-black);
         padding: 16px 24px;
         display: flex;
         align-items: center;
@@ -56,82 +80,163 @@
         position: sticky;
         top: 0;
         z-index: 100;
-        box-shadow: var(--shadow-soft);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
     }
-    .brand { display: flex; align-items: center; gap: 14px; }
-    .logo-icon { width: 44px; height: 44px; flex-shrink: 0; }
-    .brand-text { display: flex; flex-direction: column; gap: 2px; }
-    .app-title { font-family: 'Space Mono', monospace; font-size: 22px; font-weight: 700; text-transform: uppercase; letter-spacing: -0.5px; line-height: 1.1; color: var(--ink-black); }
-    .app-subtitle { font-family: 'Space Mono', monospace; font-size: 9px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--ink-black); opacity: 0.6; }
+    .brand {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+    .logo-icon {
+        width: 44px;
+        height: 44px;
+        flex-shrink: 0;
+    }
+    .brand-text {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+    .app-title {
+        font-family: 'Space Mono', monospace;
+        font-size: 22px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: -0.5px;
+        line-height: 1.1;
+        color: var(--ink-black);
+    }
+    .app-subtitle {
+        font-family: 'Space Mono', monospace;
+        font-size: 9px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--ink-black);
+    }
     @media (max-width: 500px) {
-        header { padding: 12px 16px; }
-        .brand { gap: 10px; }
-        .logo-icon { width: 36px; height: 36px; }
-        .app-title { font-size: 18px; }
+        header {
+            padding: 12px 16px;
+        }
+        .brand {
+            gap: 10px;
+        }
+        .logo-icon {
+            width: 36px;
+            height: 36px;
+        }
+        .app-title {
+            font-size: 18px;
+        }
+        .app-subtitle {
+            font-size: 9px;
+            letter-spacing: 0.3px;
+        }
     }
-    main { max-width: 900px; margin: 24px auto; padding: 0 16px; }
+    .logo-box {
+        width: 48px;
+        height: 48px;
+        background: var(--ink-black);
+        color: var(--bg-cream);
+        display: grid;
+        place-items: center;
+        font-family: 'Space Mono', monospace;
+        font-weight: 700;
+        font-size: 28px;
+        border-radius: var(--radius);
+    }
+    /* MAIN CONTAINER */
+    main {
+        max-width: 1200px;
+        margin: 20px auto; /* Reduced from 40px */
+        padding: 0 20px;
+    }
+    /* CARDS */
     .card {
         background: var(--card-white);
-        border: var(--border-thin) solid rgba(0,0,0,0.08);
-        border-radius: var(--radius-lg);
-        box-shadow: var(--shadow-card);
-        margin-bottom: 20px;
+        border: var(--border-thick) solid var(--ink-black);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow-hard);
+        margin-bottom: 32px;
         overflow: hidden;
+        transition: transform 0.2s ease;
     }
     .card-header {
-        padding: 18px 24px;
+        background: var(--bg-cream);
+        border-bottom: var(--border-thick) solid var(--ink-black);
+        padding: 16px 24px;
         display: flex;
         justify-content: space-between;
         align-items: center;
-        border-bottom: var(--border-thin) solid rgba(0,0,0,0.06);
     }
     .card-title {
-        font-family: 'Space Mono', monospace;
-        font-size: 12px;
+        font-size: 14px;
         font-weight: 700;
         text-transform: uppercase;
-        letter-spacing: 1px;
+        letter-spacing: 0.05em;
         display: flex;
         align-items: center;
-        gap: 10px;
-        color: var(--ink-black);
+        gap: 8px;
     }
-    .card-title::before { content: '●'; font-size: 10px; color: var(--ink-black); }
-    .card-title.has-avatar::before { display: none; }
-    .card-body { padding: 24px; }
+    .card-title::before {
+        content: '';
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        background: var(--ink-black);
+        border-radius: 50%;
+    }
+    .card-title.has-avatar::before {
+        display: none;
+    }
+    /* Resume controls - responsive */
+    .resume-controls {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+    }
+    .resume-controls select {
+        padding: 6px 10px;
+        font-size: 11px;
+        font-family: 'Space Mono', monospace;
+        border: 2px solid var(--ink-black);
+        border-radius: var(--radius);
+        background: var(--card-white);
+        cursor: pointer;
+        max-width: 180px;
+    }
+    @media (max-width: 500px) {
+        .resume-controls {
+            width: 100%;
+            justify-content: flex-end;
+        }
+        .resume-controls select {
+            flex: 1;
+            max-width: none;
+        }
+    }
+    .card-body {
+        padding: 32px;
+    }
+    /* FORMS & INPUTS */
     textarea {
         width: 100%;
-        min-height: 140px;
-        padding: 16px;
+        min-height: 160px;
+        padding: 20px;
         font-family: 'Space Mono', monospace;
-        font-size: 14px;
-        border: var(--border-thin) solid rgba(0,0,0,0.15);
-        border-radius: var(--radius-sm);
-        background: #fafaf8;
+        font-size: 16px;
+        border: var(--border-thick) solid var(--ink-black);
+        border-radius: var(--radius);
+        background: #FAFAFA;
         resize: vertical;
         transition: all 0.2s;
     }
     textarea:focus {
         outline: none;
         background: #FFFFFF;
-        border-color: var(--accent-blue-dark);
-        box-shadow: 0 0 0 3px rgba(74, 144, 184, 0.1);
+        box-shadow: 4px 4px 0 rgba(0,0,0,0.1);
+        border-color: var(--ink-black);
     }
-    .resume-controls { display: flex; gap: 8px; align-items: center; }
-    .resume-controls select {
-        padding: 6px 10px;
-        font-size: 11px;
-        font-family: 'Space Mono', monospace;
-        border: 1px solid rgba(0,0,0,0.15);
-        border-radius: var(--radius-sm);
-        background: var(--card-white);
-        cursor: pointer;
-        max-width: 180px;
-    }
-    @media (max-width: 500px) {
-        .resume-controls { width: 100%; justify-content: flex-end; }
-        .resume-controls select { flex: 1; max-width: none; }
-    }
+    /* BUTTONS */
     .btn {
         display: inline-flex;
         align-items: center;
@@ -139,199 +244,1085 @@
         padding: 12px 24px;
         font-family: 'Space Mono', monospace;
         font-weight: 700;
-        font-size: 12px;
+        font-size: 14px;
         text-transform: uppercase;
-        letter-spacing: 0.5px;
         color: var(--ink-black);
         background: var(--card-white);
         border: var(--border-thick) solid var(--ink-black);
-        border-radius: var(--radius-sm);
+        border-radius: var(--radius);
         cursor: pointer;
-        transition: all 0.15s ease;
+        box-shadow: var(--shadow-hard);
+        transition: all 0.1s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        transform: translate(0, 0);
     }
-    .btn:hover:not(:disabled) { background: var(--ink-black); color: var(--card-white); }
-    .btn-primary { background: var(--accent-teal); border-color: var(--accent-teal-dark); }
-    .btn-primary:hover:not(:disabled) { background: var(--accent-teal-dark); color: var(--card-white); border-color: var(--accent-teal-dark); }
-    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-    .action-bar { margin-top: 16px; display: flex; gap: 12px; flex-wrap: wrap; }
-    .score-hero {
+    .btn:hover:not(:disabled) {
+        transform: translate(-2px, -2px);
+        box-shadow: 7px 7px 0 var(--ink-black);
+    }
+    .btn:active:not(:disabled) {
+        transform: translate(2px, 2px);
+        box-shadow: 1px 1px 0 var(--ink-black);
+    }
+    .btn-primary { background: var(--accent-mint); }
+    .btn-primary:hover:not(:disabled) { background: #96bb8d; }
+    .btn-secondary { background: var(--card-white); }
+    .btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        background: #eee;
+        box-shadow: none;
+        transform: none;
+    }
+    .action-bar {
+        margin-top: 20px;
+        display: flex;
+        gap: 16px;
+        flex-wrap: wrap;
+    }
+    /* INPUT GRID (for Hunter-Killer search) */
+    .input-grid {
         display: grid;
-        grid-template-columns: 140px 1fr;
-        border-radius: var(--radius-lg);
-        overflow: hidden;
-        border: var(--border-thin) solid rgba(0,0,0,0.08);
-        box-shadow: var(--shadow-card);
-        margin-bottom: 24px;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
     }
-    .score-hero .score-display {
-        background: var(--accent-blue-dark);
-        color: white;
-        padding: 32px 20px;
+    .input-grid input {
+        width: 100%;
+        padding: 10px;
+        border: 2px solid var(--ink-black);
+        border-radius: 4px;
+        font-family: 'Space Mono', monospace;
+        font-size: 14px;
+        background: #FAFAFA;
+        transition: all 0.2s;
+    }
+    .input-grid input:focus {
+        outline: none;
+        background: #FFFFFF;
+        box-shadow: 3px 3px 0 rgba(0,0,0,0.1);
+    }
+    @media (max-width: 768px) {
+        .input-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+    /* SEARCH SECTION STYLES */
+    .section-label {
+        font-family: 'Space Mono', monospace;
+        font-size: 13px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 4px;
+    }
+    .section-desc {
+        font-size: 13px;
+        opacity: 0.7;
+        margin-bottom: 8px;
+    }
+    .section-divider {
+        border: none;
+        border-top: 2px dashed var(--ink-black);
+        margin: 28px 0;
+        opacity: 0.3;
+    }
+    /* JOB SEARCH PANEL (Tag Cloud) */
+    .tag-cloud {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    .job-tag {
+        display: inline-block;
+        padding: 6px 14px;
+        font-size: 12px;
+        font-weight: 600;
+        text-decoration: none;
+        color: var(--ink-black);
+        background: var(--bg-cream);
+        border: 1px solid var(--ink-black);
+        border-radius: 20px;
+        transition: all 0.15s;
+        box-shadow: 2px 2px 0 rgba(0,0,0,0.1);
+    }
+    .job-tag:hover {
+        background: var(--ink-black);
+        color: var(--card-white);
+        transform: translateY(-2px);
+        box-shadow: 3px 3px 0 rgba(0,0,0,0.2);
+    }
+    .category-group { margin-bottom: 24px; }
+    .category-label {
+        font-family: 'Space Mono', monospace;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        opacity: 0.6;
+        margin-bottom: 12px;
+        display: block;
+    }
+    /* SCORE HERO */
+    .hero-grid {
+        display: grid;
+        grid-template-columns: 200px 1fr;
+        border-bottom: var(--border-thick) solid var(--ink-black);
+    }
+    .score-box {
+        background: var(--ink-black);
+        color: var(--card-white);
+        padding: 40px 20px;
+        text-align: center;
         display: flex;
         flex-direction: column;
-        align-items: center;
         justify-content: center;
+    }
+    .score-val {
+        font-family: 'Space Mono', monospace;
+        font-size: 80px;
+        line-height: 1;
+        font-weight: 700;
+    }
+    .score-label {
+        font-family: 'Space Mono', monospace;
+        text-transform: uppercase;
+        font-size: 12px;
+        letter-spacing: 2px;
+        opacity: 0.8;
+        margin-top: 10px;
+    }
+    .verdict-box {
+        padding: 32px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        background: var(--bg-cream);
+    }
+        .score-high .score-box { background: var(--accent-olive); color: #fff; }
+    .score-high .score-label { opacity: 0.9; }
+    .score-mid .score-box { background: var(--accent-gold); color: var(--ink-black); }
+    .score-low .score-box { background: var(--accent-clay); color: #fff; }
+    /* LISTS (Matches & Gaps) */
+    .analysis-list { list-style: none; display: flex; flex-direction: column; gap: 16px; }
+    .analysis-item {
+        padding: 16px 20px;
+        border: 2px solid var(--ink-black);
+        border-radius: var(--radius);
+        font-size: 14px;
+        background: #fff;
+        position: relative;
+    }
+    .analysis-item strong {
+        display: block;
+        font-family: 'Space Mono', monospace;
+        font-size: 11px;
+        text-transform: uppercase;
+        margin-bottom: 6px;
+    }
+    .item-match {
+        background: rgba(107, 155, 122, 0.12);
+        border-left: 8px solid var(--accent-olive);
+    }
+    .item-match strong { color: var(--deep-blue); }
+    .item-gap {
+        background: rgba(209, 143, 122, 0.12);
+        border-left: 8px solid var(--accent-clay);
+    }
+    .item-gap strong { color: #b5705e; }
+    /* Q&A STYLES */
+    .qa-card {
+        background: #fff;
+        border: 2px solid var(--ink-black);
+        margin-bottom: 20px;
+        box-shadow: 4px 4px 0 rgba(0,0,0,0.05);
+    }
+    .qa-q {
+        background: var(--accent-mint);
+        padding: 12px 20px;
+        font-family: 'Space Mono', monospace;
+        font-weight: 700;
+        font-size: 13px;
+        border-bottom: 2px solid var(--ink-black);
+    }
+    .qa-a {
+        padding: 20px;
+        font-size: 14px;
+        line-height: 1.6;
+    }
+    /* RESUME PREVIEW */
+    .resume-paper {
+        background: #fff;
+        padding: 40px;
+        border: 1px solid #ddd;
+        font-size: 14px;
+        line-height: 1.6;
+        box-shadow: inset 0 0 20px rgba(0,0,0,0.05);
+    }
+    .resume-paper h2 {
+        font-size: 14px;
+        border-bottom: 2px solid #000;
+        margin: 24px 0 12px 0;
+        padding-bottom: 4px;
+        text-transform: uppercase;
+    }
+    /* COPY TOAST */
+    .copy-notice {
+        position: fixed; 
+        bottom: 30px; 
+        right: 30px; 
+        background: var(--ink-black); 
+        color: var(--card-white); 
+        padding: 16px 24px; 
+        font-family: 'Space Mono'; 
+        font-weight: 700; 
+        border-radius: 6px; 
+        transform: translateY(100px); 
+        opacity: 0; 
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+        z-index: 999;
+    }
+    /* ERROR TOAST */
+    .error-toast {
+        position: fixed;
+        bottom: 30px;
+        left: 50%;
+        transform: translateX(-50%) translateY(100px);
+        background: var(--accent-clay);
+        color: var(--ink-black);
+        padding: 16px 24px;
+        font-family: 'Space Mono', monospace;
+        font-weight: 700;
+        font-size: 13px;
+        border-radius: var(--radius);
+        border: var(--border-thick) solid var(--ink-black);
+        box-shadow: var(--shadow-hard);
+        opacity: 0;
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        z-index: 1000;
+        max-width: 90%;
         text-align: center;
+        display: flex;
+        align-items: center;
+        gap: 12px;
     }
-    .score-hero .score-value { font-family: 'Space Mono', monospace; font-size: 56px; font-weight: 700; line-height: 1; }
-    .score-hero .score-label { font-family: 'Space Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 2px; opacity: 0.9; margin-top: 8px; }
-    .score-hero .job-info { background: var(--bg-beige); padding: 24px 28px; display: flex; flex-direction: column; justify-content: center; }
-    .score-hero .job-title { font-family: 'Space Mono', monospace; font-size: 18px; font-weight: 700; margin-bottom: 4px; color: var(--ink-black); }
-    .score-hero .job-company { font-size: 13px; color: var(--ink-black); opacity: 0.7; margin-bottom: 12px; }
-    .score-hero .job-verdict { font-size: 14px; color: var(--ink-black); font-weight: 500; }
-    .score-hero.score-excellent .score-display { background: var(--score-excellent); }
-    .score-hero.score-good .score-display { background: var(--score-good); }
-    .score-hero.score-moderate .score-display { background: var(--score-moderate); color: var(--ink-black); }
-    .score-hero.score-low .score-display { background: var(--score-low); }
-    @media (max-width: 600px) {
-        .score-hero { grid-template-columns: 1fr; }
-        .score-hero .score-display { flex-direction: row; gap: 16px; padding: 20px; justify-content: flex-start; }
-        .score-hero .score-value { font-size: 48px; }
-        .score-hero .score-label { margin-top: 0; }
+    .error-toast.show {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
     }
-    .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 24px; }
-    @media (min-width: 700px) { .stats-grid { grid-template-columns: repeat(4, 1fr); } }
+    .error-toast::before {
+        content: '⚠';
+        font-size: 18px;
+    }
+    .error-toast-close {
+        background: none;
+        border: none;
+        color: var(--ink-black);
+        font-size: 18px;
+        cursor: pointer;
+        padding: 0 0 0 12px;
+        font-family: 'Space Mono', monospace;
+        font-weight: 700;
+        opacity: 0.7;
+        transition: opacity 0.2s;
+    }
+    .error-toast-close:hover {
+        opacity: 1;
+    }
+    /* INLINE ERROR MESSAGE (for form validation) */
+    .inline-error {
+        background: rgba(209, 143, 122, 0.15);
+        border: 2px solid var(--accent-clay);
+        border-left: 6px solid var(--accent-clay);
+        border-radius: var(--radius);
+        padding: 16px 20px;
+        margin-top: 16px;
+        font-family: 'Space Mono', monospace;
+        font-size: 13px;
+        color: #b5705e;
+        display: none;
+        align-items: center;
+        gap: 12px;
+        animation: shake 0.4s ease-in-out;
+    }
+    .inline-error.show {
+        display: flex;
+    }
+    .inline-error::before {
+        content: '✕';
+        font-size: 16px;
+        font-weight: 700;
+        flex-shrink: 0;
+    }
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        20%, 60% { transform: translateX(-6px); }
+        40%, 80% { transform: translateX(6px); }
+    }
+    /* COPY BUTTON SUCCESS STATE */
+    .btn.copy-success {
+        background: var(--accent-olive) !important;
+        color: var(--ink-black);
+        pointer-events: none;
+    }
+    /* HOW TO STEPS (used in Quick Start card) */
+    .how-to-steps {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 24px;
+    }
+    .how-to-step {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+    .step-number {
+        width: 36px;
+        height: 36px;
+        background: var(--ink-black);
+        color: var(--card-white);
+        font-family: 'Space Mono', monospace;
+        font-weight: 700;
+        font-size: 16px;
+        display: grid;
+        place-items: center;
+        border-radius: 50%;
+        flex-shrink: 0;
+    }
+    .step-content h3 {
+        font-family: 'Space Mono', monospace;
+        font-size: 13px;
+        font-weight: 700;
+        text-transform: uppercase;
+        margin-bottom: 6px;
+    }
+    .step-content p {
+        font-size: 14px;
+        line-height: 1.5;
+        opacity: 0.8;
+    }
+    .how-to-tip {
+        margin-top: 20px;
+        padding: 16px 20px;
+        background: rgba(147, 181, 217, 0.3);
+        border-left: 4px solid var(--accent-mint);
+        border-radius: 0 var(--radius) var(--radius) 0;
+        font-size: 13px;
+    }
+    .how-to-tip strong {
+        font-family: 'Space Mono', monospace;
+        text-transform: uppercase;
+        font-size: 11px;
+        letter-spacing: 0.5px;
+    }
+    /* COLLAPSIBLE CARDS */
+    .collapsible-card {
+        overflow: hidden;
+    }
+    .collapsible-trigger {
+        cursor: pointer;
+        user-select: none;
+        transition: background 0.2s;
+    }
+    .collapsible-trigger:hover {
+        background: #fff;
+    }
+    .collapsible-content {
+        border-top: var(--border-thick) solid var(--ink-black);
+    }
+    .collapsible-card.collapsed .collapsible-content {
+        display: none;
+    }
+    .collapsible-card.collapsed .collapsible-trigger {
+        border-bottom: none;
+    }
+    @media (max-width: 768px) {
+        .how-to-steps {
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+        .how-to-step {
+            flex-direction: row;
+            align-items: flex-start;
+        }
+        .step-content {
+            flex: 1;
+        }
+    }
+    /* RESPONSIVE & MOBILE */
+    @media (max-width: 768px) {
+        /* General Mobile Adjustments */
+        .hero-grid { grid-template-columns: 1fr; }
+        .score-box { padding: 20px; flex-direction: row; gap: 20px; align-items: center; }
+        .score-val { font-size: 48px; }
+        .card-body { padding: 20px; }
+        /* HEADER MOBILE LAYOUT */
+        header { 
+            padding: 16px; 
+            position: static; /* Unstick header */
+            justify-content: center; /* Center horizontally */
+        }
+        .brand {
+            justify-content: center;
+            text-align: center;
+            width: 100%;
+        }
+    }
+    /* ANIMATIONS */
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    /* INTEL PANELS */
+    .intel-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+    .intel-panel {
+        background: var(--bg-cream);
+        border: 2px solid var(--ink-black);
+        padding: 20px;
+        border-radius: var(--radius);
+    }
+    .intel-panel-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 12px;
+        padding-bottom: 12px;
+        border-bottom: 2px dashed var(--ink-black);
+    }
+    .intel-panel-icon {
+        width: 32px;
+        height: 32px;
+        background: var(--ink-black);
+        color: var(--bg-cream);
+        display: grid;
+        place-items: center;
+        border-radius: 4px;
+        font-size: 16px;
+    }
+    .intel-panel-title {
+        font-family: 'Space Mono', monospace;
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .intel-value {
+        font-family: 'Space Mono', monospace;
+        font-size: 24px;
+        font-weight: 700;
+        color: var(--ink-black);
+        margin-bottom: 4px;
+    }
+    .intel-label {
+        font-size: 12px;
+        opacity: 0.7;
+    }
+    .intel-list {
+        list-style: none;
+        font-size: 13px;
+    }
+    .intel-list li {
+        padding: 6px 0;
+        border-bottom: 1px dashed rgba(0,0,0,0.1);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .intel-list li:last-child { border-bottom: none; }
+    .intel-badge {
+        font-family: 'Space Mono', monospace;
+        font-size: 10px;
+        padding: 3px 8px;
+        border-radius: 3px;
+        font-weight: 700;
+    }
+    .intel-badge.green { background: var(--accent-mint); color: var(--ink-black); }
+    .intel-badge.gold { background: var(--accent-gold); color: var(--ink-black); }
+    .intel-badge.clay { background: var(--accent-clay); color: #fff; }
+    
+    /* ============================================
+       NEW: STATS GRID (Neobrutalist Style)
+       ============================================ */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+    @media (min-width: 700px) {
+        .stats-grid { grid-template-columns: repeat(4, 1fr); }
+        .stats-grid.two-col { grid-template-columns: repeat(2, 1fr); }
+    }
     .stat-card {
         background: var(--card-white);
-        border: var(--border-thin) solid rgba(0,0,0,0.08);
+        border: var(--border-thick) solid var(--ink-black);
         border-radius: var(--radius);
-        padding: 20px;
+        padding: 20px 16px;
         text-align: center;
-        box-shadow: var(--shadow-soft);
+        box-shadow: var(--shadow-hard);
     }
-    .stat-card .stat-label { font-family: 'Space Mono', monospace; font-size: 9px; text-transform: uppercase; letter-spacing: 1px; color: var(--ink-black); opacity: 0.6; margin-bottom: 8px; }
-    .stat-card .stat-value { font-family: 'Space Mono', monospace; font-size: 32px; font-weight: 700; color: var(--ink-black); line-height: 1.1; }
-    .stat-card .stat-sub { font-size: 11px; color: var(--ink-black); opacity: 0.5; margin-top: 4px; }
-    .stat-card.teal { background: linear-gradient(145deg, #e8f6f3 0%, #d4ede7 100%); border-color: var(--accent-teal-dark); }
-    .stat-card.gold { background: linear-gradient(145deg, #fdf6e3 0%, #f5ecd0 100%); border-color: var(--accent-gold-dark); }
-    .stat-card.blue { background: linear-gradient(145deg, #e8f4fc 0%, #d4e8f5 100%); border-color: var(--accent-blue-dark); }
-    .stat-card.coral { background: linear-gradient(145deg, #fef0ec 0%, #fce4dc 100%); border-color: var(--accent-coral-dark); }
+    .stat-card .stat-label {
+        font-family: 'Space Mono', monospace;
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: var(--ink-black);
+        opacity: 0.7;
+        margin-bottom: 8px;
+    }
+    .stat-card .stat-value {
+        font-family: 'Space Mono', monospace;
+        font-size: 36px;
+        font-weight: 700;
+        color: var(--ink-black);
+        line-height: 1;
+    }
+    .stat-card .stat-sub {
+        font-size: 11px;
+        color: var(--ink-black);
+        opacity: 0.6;
+        margin-top: 6px;
+    }
+    /* Colored stat card variants - neobrutalist */
+    .stat-card.mint { background: var(--accent-mint); }
+    .stat-card.clay { background: rgba(212, 145, 138, 0.25); }
+    .stat-card.gold { background: rgba(232, 201, 146, 0.35); }
+    .stat-card.blue { background: var(--pale-blue); }
+    
+    /* ============================================
+       NEW: MASCOT INSIGHT BOX (Neobrutalist)
+       ============================================ */
     .mascot-insight {
         display: flex;
         gap: 16px;
         align-items: flex-start;
         background: var(--card-white);
-        border: var(--border-thin) solid rgba(0,0,0,0.08);
+        border: var(--border-thick) solid var(--ink-black);
         border-radius: var(--radius);
         padding: 20px;
         margin-bottom: 24px;
-        box-shadow: var(--shadow-soft);
+        box-shadow: var(--shadow-hard);
     }
-    .mascot-insight .mascot-avatar { width: 48px; height: 48px; flex-shrink: 0; }
-    .mascot-insight .insight-content { flex: 1; }
-    .mascot-insight .insight-text { font-size: 14px; line-height: 1.6; color: var(--ink-black); }
-    .mascot-insight .insight-text strong { color: var(--accent-teal-dark); }
-    .keywords-section {
+    .mascot-insight .mascot-avatar {
+        width: 48px;
+        height: 48px;
+        flex-shrink: 0;
+    }
+    .mascot-insight .insight-text {
+        font-size: 14px;
+        line-height: 1.6;
+        color: var(--ink-black);
+    }
+    .mascot-insight .insight-text strong {
+        color: var(--deep-blue);
+    }
+    
+    /* ============================================
+       NEW: KEYWORDS BOX (Neobrutalist)
+       ============================================ */
+    .keywords-box {
         background: var(--card-white);
-        border: var(--border-thin) solid rgba(0,0,0,0.08);
+        border: var(--border-thick) solid var(--ink-black);
         border-radius: var(--radius);
         padding: 24px;
         margin-bottom: 24px;
-        box-shadow: var(--shadow-soft);
+        box-shadow: var(--shadow-hard);
     }
-    .keywords-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
-    .keywords-title { font-family: 'Space Mono', monospace; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; gap: 8px; }
-    .keywords-title::before { content: '●'; font-size: 10px; }
-    .keywords-count { font-family: 'Space Mono', monospace; font-size: 11px; color: var(--ink-black); opacity: 0.6; }
-    .keyword-cloud { display: flex; flex-wrap: wrap; gap: 10px; }
-    .keyword-tag {
+    .keywords-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+        padding-bottom: 12px;
+        border-bottom: 2px dashed var(--ink-black);
+    }
+    .keywords-box-title {
+        font-family: 'Space Mono', monospace;
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .keywords-box-title::before {
+        content: '';
         display: inline-block;
-        padding: 8px 14px;
+        width: 10px;
+        height: 10px;
+        background: var(--ink-black);
+        border-radius: 50%;
+    }
+    .keywords-count {
+        font-family: 'Space Mono', monospace;
+        font-size: 11px;
+        color: var(--ink-black);
+        opacity: 0.6;
+    }
+    
+    /* ============================================
+       NEW: STRENGTHS BOX (Neobrutalist)
+       ============================================ */
+    .strengths-box {
+        background: var(--card-white);
+        border: var(--border-thick) solid var(--ink-black);
+        border-radius: var(--radius);
+        padding: 24px;
+        margin-bottom: 24px;
+        box-shadow: var(--shadow-hard);
+    }
+    .box-title {
+        font-family: 'Space Mono', monospace;
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .box-title::before {
+        content: '';
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        background: var(--ink-black);
+        border-radius: 50%;
+    }
+    .strength-item {
+        padding: 14px 18px;
+        background: rgba(147, 181, 217, 0.15);
+        border-left: 6px solid var(--soft-blue);
+        border-radius: 0 var(--radius) var(--radius) 0;
+        margin-bottom: 12px;
+        font-size: 14px;
+        line-height: 1.5;
+    }
+    .strength-item:last-child { margin-bottom: 0; }
+    .strength-item-header {
+        font-family: 'Space Mono', monospace;
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--deep-blue);
+        margin-bottom: 4px;
+    }
+    
+    /* KEYWORD EXTRACTION */
+    .keyword-cloud {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    .keyword-tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 12px;
+        background: var(--card-white);
+        border: 2px solid var(--ink-black);
+        border-radius: 20px;
         font-family: 'Space Mono', monospace;
         font-size: 11px;
         font-weight: 600;
-        border-radius: 20px;
-        border: var(--border-thin) solid;
+        cursor: pointer;
         transition: all 0.15s;
     }
-    .keyword-tag.matched { background: var(--accent-teal); border-color: var(--accent-teal-dark); color: var(--ink-black); }
-    .keyword-tag.missing { background: rgba(244, 168, 150, 0.2); border-color: var(--accent-coral); color: var(--accent-coral-dark); }
-    .analysis-section {
-        background: var(--card-white);
-        border: var(--border-thin) solid rgba(0,0,0,0.08);
-        border-radius: var(--radius);
-        padding: 24px;
-        margin-bottom: 24px;
-        box-shadow: var(--shadow-soft);
+    .keyword-tag:hover {
+        background: var(--ink-black);
+        color: var(--card-white);
     }
-    .analysis-section-title { font-family: 'Space Mono', monospace; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
-    .analysis-section-title::before { content: '●'; font-size: 10px; }
-    .analysis-item { padding: 16px 20px; border-radius: var(--radius-sm); margin-bottom: 12px; font-size: 14px; line-height: 1.6; }
-    .analysis-item:last-child { margin-bottom: 0; }
-    .analysis-item.strength { background: linear-gradient(135deg, #e8f6f3 0%, #f0faf7 100%); border-left: 4px solid var(--accent-teal-dark); }
-    .analysis-item.gap { background: linear-gradient(135deg, #fef5f2 0%, #fef9f7 100%); border-left: 4px solid var(--accent-coral); }
-    .analysis-item-header { font-family: 'Space Mono', monospace; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
-    .analysis-item.strength .analysis-item-header { color: var(--accent-teal-dark); }
-    .analysis-item.gap .analysis-item-header { color: var(--accent-coral-dark); }
-    .intel-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 20px; }
-    .intel-card { background: var(--card-white); border: var(--border-thin) solid rgba(0,0,0,0.08); border-radius: var(--radius); padding: 20px; text-align: center; box-shadow: var(--shadow-soft); }
-    .intel-card-label { font-family: 'Space Mono', monospace; font-size: 9px; text-transform: uppercase; letter-spacing: 1px; color: var(--ink-black); opacity: 0.5; margin-bottom: 8px; }
-    .intel-card-value { font-family: 'Space Mono', monospace; font-size: 24px; font-weight: 700; color: var(--ink-black); }
-    .intel-card-sub { font-size: 11px; color: var(--ink-black); opacity: 0.5; margin-top: 4px; }
-    .qa-card { background: var(--card-white); border: var(--border-thin) solid rgba(0,0,0,0.08); border-radius: var(--radius); margin-bottom: 16px; overflow: hidden; box-shadow: var(--shadow-soft); }
-    .qa-question { background: var(--accent-teal); padding: 14px 20px; font-family: 'Space Mono', monospace; font-weight: 700; font-size: 13px; border-bottom: var(--border-thin) solid rgba(0,0,0,0.08); }
-    .qa-answer { padding: 20px; font-size: 14px; line-height: 1.7; }
-    .collapsible-card.collapsed .collapsible-content { display: none; }
-    .collapsible-trigger { cursor: pointer; user-select: none; transition: background 0.2s; }
-    .collapsible-trigger:hover { background: rgba(0,0,0,0.02); }
-    .loading-card { text-align: center; padding: 60px 40px; }
-    .loading-spinner { width: 48px; height: 48px; border: 4px solid var(--bg-beige); border-top-color: var(--accent-blue-dark); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 20px; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .loading-text { font-family: 'Space Mono', monospace; font-size: 14px; font-weight: 700; margin-bottom: 16px; }
-    .loading-progress { height: 6px; background: var(--bg-beige); border-radius: 3px; overflow: hidden; max-width: 300px; margin: 0 auto; }
-    .loading-progress-bar { height: 100%; background: var(--accent-blue-dark); border-radius: 3px; transition: width 0.3s ease; width: 0%; }
-    .error-toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--ink-black); color: white; padding: 16px 24px; border-radius: var(--radius); font-family: 'Space Mono', monospace; font-size: 13px; display: flex; align-items: center; gap: 16px; box-shadow: 0 8px 32px rgba(0,0,0,0.2); opacity: 0; transition: all 0.3s ease; z-index: 1000; max-width: 90%; }
-    .error-toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
-    .error-toast-close { background: none; border: none; color: white; font-size: 20px; cursor: pointer; opacity: 0.7; padding: 0; line-height: 1; }
-    .error-toast-close:hover { opacity: 1; }
-    .inline-error { background: rgba(244, 168, 150, 0.15); border: 1px solid var(--accent-coral); border-left: 4px solid var(--accent-coral); border-radius: var(--radius-sm); padding: 16px 20px; margin-top: 16px; font-size: 13px; color: var(--accent-coral-dark); display: none; align-items: center; gap: 12px; }
-    .inline-error.show { display: flex; }
-    .inline-error::before { content: '✕'; font-weight: 700; flex-shrink: 0; }
-    .how-to-steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
-    .how-to-step { display: flex; flex-direction: column; gap: 12px; }
-    .step-number { width: 36px; height: 36px; background: var(--ink-black); color: white; font-family: 'Space Mono', monospace; font-weight: 700; font-size: 16px; display: grid; place-items: center; border-radius: 50%; }
-    .step-content h3 { font-family: 'Space Mono', monospace; font-size: 13px; font-weight: 700; text-transform: uppercase; margin-bottom: 6px; }
-    .step-content p { font-size: 14px; opacity: 0.7; }
-    @media (max-width: 768px) { .how-to-steps { grid-template-columns: 1fr; gap: 20px; } .how-to-step { flex-direction: row; align-items: flex-start; } }
-    .recruiter-message { padding: 20px; margin-bottom: 16px; border-radius: var(--radius); border: var(--border-thin) solid rgba(0,0,0,0.08); box-shadow: var(--shadow-soft); }
-    .recruiter-message.user { background: var(--bg-beige); margin-left: 60px; }
-    .recruiter-message.assistant { background: var(--card-white); margin-right: 60px; }
-    .recruiter-header { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; padding-bottom: 16px; border-bottom: var(--border-thin) solid rgba(0,0,0,0.08); }
-    .recruiter-avatar { width: 48px; height: 48px; }
-    .recruiter-name { font-family: 'Space Mono', monospace; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
-    .recruiter-title { font-size: 11px; opacity: 0.6; margin-top: 2px; }
-    .recruiter-thinking { display: flex; align-items: center; gap: 12px; padding: 20px; background: var(--bg-beige); border-radius: var(--radius); margin-right: 60px; margin-bottom: 16px; font-family: 'Space Mono', monospace; font-size: 12px; font-weight: 700; text-transform: uppercase; }
-    .recruiter-thinking::before { content: ''; width: 20px; height: 20px; border: 3px solid var(--ink-black); border-top-color: transparent; border-radius: 50%; animation: spin 0.8s linear infinite; }
-    @media (max-width: 768px) { .recruiter-message.user { margin-left: 20px; } .recruiter-message.assistant { margin-right: 20px; } .recruiter-thinking { margin-right: 20px; } }
-    .tracker-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-    .tracker-table th { font-family: 'Space Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.3px; text-align: left; padding: 12px 10px; background: var(--bg-beige); border-bottom: var(--border-thin) solid rgba(0,0,0,0.1); }
-    .tracker-table td { padding: 12px 10px; border-bottom: var(--border-thin) solid rgba(0,0,0,0.06); }
-    .tracker-table tr:hover td { background: rgba(0,0,0,0.02); }
+    .keyword-tag.in-resume {
+        background: var(--accent-mint);
+        border-color: var(--deep-blue);
+    }
+    .keyword-tag.missing {
+        background: rgba(209, 143, 122, 0.2);
+        border-color: var(--accent-clay);
+    }
+    /* KIT SECTIONS (collapsible grouped content) */
+    .kit-section {
+        padding: 20px 0;
+    }
+    .kit-section:first-child { padding-top: 24px; }
+    .kit-section-title {
+        font-family: 'Space Mono', monospace;
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 12px;
+        color: var(--ink-black);
+    }
+    .kit-divider {
+        border: none;
+        border-top: 1px dashed rgba(0,0,0,0.2);
+        margin: 0;
+    }
+    .resume-paper.compact {
+        font-size: 13px;
+        padding: 16px;
+        max-height: 300px;
+        overflow-y: auto;
+        white-space: pre-wrap;
+    }
+    /* NETWORK FINDER */
+    .network-links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    .network-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 16px;
+        background: var(--card-white);
+        border: 2px solid var(--ink-black);
+        border-radius: var(--radius);
+        font-family: 'Space Mono', monospace;
+        font-size: 12px;
+        font-weight: 600;
+        text-decoration: none;
+        color: var(--ink-black);
+        box-shadow: 3px 3px 0 rgba(0,0,0,0.1);
+        transition: all 0.15s;
+    }
+    .network-link:hover {
+        transform: translate(-2px, -2px);
+        box-shadow: 5px 5px 0 rgba(0,0,0,0.15);
+        background: var(--accent-mint);
+    }
+    /* JOB SEARCH GRID */
+    .job-search-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    .job-search-link {
+        display: inline-block;
+        padding: 8px 14px;
+        background: var(--card-white);
+        border: 2px solid var(--ink-black);
+        border-radius: var(--radius);
+        font-family: 'Space Mono', monospace;
+        font-size: 11px;
+        font-weight: 600;
+        text-decoration: none;
+        color: var(--ink-black);
+        transition: all 0.15s;
+    }
+    .job-search-link:hover {
+        background: var(--ink-black);
+        color: var(--card-white);
+        transform: translate(-1px, -1px);
+    }
+    /* APPLICATION TRACKER */
+    .tracker-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+    }
+    .tracker-table th {
+        font-family: 'Space Mono', monospace;
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+        text-align: left;
+        padding: 10px 8px;
+        background: var(--bg-cream);
+        border: 2px solid var(--ink-black);
+        white-space: nowrap;
+    }
+    .tracker-table td {
+        padding: 10px 8px;
+        border: 2px solid var(--ink-black);
+        vertical-align: middle;
+        font-size: 12px;
+    }
+    .tracker-table tr:hover td { background: rgba(147, 181, 217, 0.1); }
+    /* Hide less important columns on mobile */
+    @media (max-width: 600px) {
+        .tracker-table th:nth-child(5),
+        .tracker-table td:nth-child(5) { display: none; } /* Hide Date */
+        .tracker-table th, .tracker-table td { padding: 8px 6px; font-size: 11px; }
+        .tracker-table th { font-size: 9px; }
+    }
+    .status-pill {
+        display: inline-block;
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-family: 'Space Mono', monospace;
+        font-size: 9px;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+    .status-saved { background: var(--bg-cream); border: 1px solid var(--ink-black); }
+    .status-applied { background: var(--accent-mint); color: var(--ink-black); }
+    .status-interviewing { background: var(--accent-gold); color: var(--ink-black); }
+    .status-offered { background: var(--accent-olive); color: #fff; }
+    .status-rejected { background: var(--accent-clay); color: #fff; }
     .tracker-actions { display: flex; gap: 6px; }
-    .tracker-btn { padding: 6px 10px; font-size: 10px; border: 1px solid rgba(0,0,0,0.15); background: var(--card-white); cursor: pointer; border-radius: var(--radius-sm); font-family: 'Space Mono', monospace; transition: all 0.15s; }
-    .tracker-btn:hover { background: var(--ink-black); color: white; border-color: var(--ink-black); }
-    .empty-tracker { text-align: center; padding: 40px; background: var(--bg-beige); border-radius: var(--radius); }
-    .empty-tracker p { font-size: 14px; opacity: 0.6; margin-bottom: 16px; }
-    .job-search-grid { display: flex; flex-wrap: wrap; gap: 8px; }
-    .job-search-link { display: inline-block; padding: 8px 14px; background: var(--card-white); border: 1px solid rgba(0,0,0,0.15); border-radius: var(--radius-sm); font-family: 'Space Mono', monospace; font-size: 11px; font-weight: 600; text-decoration: none; color: var(--ink-black); transition: all 0.15s; }
-    .job-search-link:hover { background: var(--ink-black); color: white; border-color: var(--ink-black); }
-    .kit-section-title { font-family: 'Space Mono', monospace; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; opacity: 0.7; }
-    .network-links { display: flex; flex-wrap: wrap; gap: 10px; }
-    .network-link { display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px; background: var(--card-white); border: 1px solid rgba(0,0,0,0.15); border-radius: var(--radius-sm); font-family: 'Space Mono', monospace; font-size: 12px; font-weight: 600; text-decoration: none; color: var(--ink-black); transition: all 0.15s; }
-    .network-link:hover { background: var(--accent-teal); border-color: var(--accent-teal-dark); }
-    .template-tabs { display: flex; gap: 0; }
-    .template-tab { padding: 12px 20px; font-family: 'Space Mono', monospace; font-size: 11px; font-weight: 700; text-transform: uppercase; background: var(--bg-beige); border: 1px solid rgba(0,0,0,0.1); border-bottom: none; cursor: pointer; margin-right: -1px; border-radius: var(--radius-sm) var(--radius-sm) 0 0; }
+    .tracker-btn {
+        padding: 4px 8px;
+        font-size: 10px;
+        border: 1px solid var(--ink-black);
+        background: var(--card-white);
+        cursor: pointer;
+        border-radius: 3px;
+        font-family: 'Space Mono', monospace;
+    }
+    .tracker-btn:hover { background: var(--ink-black); color: var(--card-white); }
+    /* FOLLOW-UP TEMPLATES */
+    .template-tabs { display: flex; gap: 0; border-bottom: none; }
+    .template-tab {
+        padding: 12px 20px;
+        font-family: 'Space Mono', monospace;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        background: var(--bg-cream);
+        border: 2px solid var(--ink-black);
+        border-bottom: none;
+        cursor: pointer;
+        margin-right: -2px;
+        position: relative;
+    }
     .template-tab.active { background: var(--card-white); z-index: 1; }
-    .template-content { border: 1px solid rgba(0,0,0,0.1); padding: 20px; background: var(--card-white); border-radius: 0 var(--radius-sm) var(--radius-sm) var(--radius-sm); }
-    .template-text { font-size: 14px; line-height: 1.7; white-space: pre-wrap; background: #fafaf8; padding: 20px; border: 1px dashed rgba(0,0,0,0.15); border-radius: var(--radius-sm); }
-    .resume-paper { background: #fff; padding: 24px; font-size: 14px; line-height: 1.6; border: 1px solid rgba(0,0,0,0.1); border-radius: var(--radius-sm); }
-    .intel-badge { font-family: 'Space Mono', monospace; font-size: 10px; padding: 4px 10px; border-radius: 4px; font-weight: 700; }
-    .intel-badge.green { background: var(--accent-teal); }
-    .intel-badge.gold { background: var(--accent-gold); }
-    .intel-badge.clay { background: var(--accent-coral); color: white; }
-    .user-label { display: inline-block; font-family: 'Space Mono', monospace; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; background: var(--ink-black); color: white; padding: 4px 10px; border-radius: 4px; margin-bottom: 12px; }
-    #analysisResults { display: none; }
-    #loadingCard { display: none; }
+    .template-content {
+        border: 2px solid var(--ink-black);
+        padding: 20px;
+        background: var(--card-white);
+        margin-top: -2px;
+    }
+    .template-text {
+        font-family: 'DM Sans', sans-serif;
+        font-size: 14px;
+        line-height: 1.7;
+        white-space: pre-wrap;
+        background: #fafafa;
+        padding: 20px;
+        border: 1px dashed var(--ink-black);
+        border-radius: var(--radius);
+    }
+    /* SALARY INTEL */
+    .salary-range-bar {
+        height: 24px;
+        background: linear-gradient(90deg, var(--accent-clay) 0%, var(--accent-gold) 50%, var(--accent-mint) 100%);
+        border-radius: 12px;
+        position: relative;
+        margin: 20px 0 30px;
+        border: 2px solid var(--ink-black);
+    }
+    .salary-marker {
+        position: absolute;
+        top: -8px;
+        width: 4px;
+        height: 40px;
+        background: var(--ink-black);
+        transform: translateX(-50%);
+    }
+    .salary-marker::after {
+        content: attr(data-label);
+        position: absolute;
+        top: 44px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-family: 'Space Mono', monospace;
+        font-size: 10px;
+        white-space: nowrap;
+    }
+    .salary-labels {
+        display: flex;
+        justify-content: space-between;
+        font-family: 'Space Mono', monospace;
+        font-size: 12px;
+        margin-top: 8px;
+    }
+    /* TIMELINE */
+    .timeline-estimate {
+        display: flex;
+        align-items: flex-start;
+        gap: 0;
+        margin: 16px 0;
+        padding: 0 10px;
+    }
+    .timeline-step {
+        flex: 1;
+        text-align: center;
+        position: relative;
+    }
+    .timeline-step::after {
+        content: '';
+        position: absolute;
+        top: 12px;
+        left: 50%;
+        width: 100%;
+        height: 2px;
+        background: var(--ink-black);
+    }
+    .timeline-step:last-child::after { display: none; }
+    .timeline-dot {
+        width: 26px;
+        height: 26px;
+        background: var(--card-white);
+        border: 2px solid var(--ink-black);
+        border-radius: 50%;
+        margin: 0 auto 6px;
+        position: relative;
+        z-index: 1;
+        display: grid;
+        place-items: center;
+        font-size: 12px;
+        font-weight: 700;
+    }
+    .timeline-label {
+        font-family: 'Space Mono', monospace;
+        font-size: 9px;
+        text-transform: uppercase;
+        letter-spacing: -0.5px;
+    }
+    .timeline-days { font-size: 10px; opacity: 0.6; margin-top: 2px; }
+    /* EMPTY STATE */
+    .empty-tracker {
+        text-align: center;
+        padding: 40px;
+        background: var(--bg-cream);
+        border: 2px dashed var(--ink-black);
+        border-radius: var(--radius);
+    }
+    .empty-tracker p { font-size: 14px; opacity: 0.7; margin-bottom: 16px; }
+    @media (max-width: 768px) {
+        .intel-grid { grid-template-columns: 1fr; }
+        /* Timeline stays horizontal but smaller */
+        .timeline-estimate { padding: 0 5px; margin: 12px 0; }
+        .timeline-dot { width: 22px; height: 22px; font-size: 10px; }
+        .timeline-label { font-size: 8px; }
+        .timeline-days { font-size: 9px; }
+        .timeline-step::after { top: 10px; }
+    }
+    /* ASK A RECRUITER CHAT - Neo Brutalist Style */
+    .recruiter-message {
+        padding: 20px;
+        margin-bottom: 20px;
+        font-size: 14px;
+        line-height: 1.7;
+        border: var(--border-thick) solid var(--ink-black);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow-hard);
+    }
+    .recruiter-message p {
+        margin-bottom: 12px;
+    }
+    .recruiter-message p:last-child {
+        margin-bottom: 0;
+    }
+    .recruiter-message.user {
+        background: var(--card-white);
+        margin-left: 60px;
+    }
+    .user-label {
+        display: inline-block;
+        font-family: 'Space Mono', monospace;
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        background: var(--ink-black);
+        color: var(--card-white);
+        padding: 4px 10px;
+        border-radius: 3px;
+        margin-bottom: 12px;
+    }
+    .recruiter-message.assistant {
+        background: var(--card-white);
+        margin-right: 60px;
+    }
+    .recruiter-header {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        margin-bottom: 16px;
+        padding-bottom: 16px;
+        border-bottom: var(--border-thick) solid var(--ink-black);
+    }
+    .recruiter-avatar {
+        width: 56px;
+        height: 56px;
+        object-fit: cover;
+    }
+    .recruiter-info {
+        flex: 1;
+    }
+    .recruiter-name {
+        font-family: 'Space Mono', monospace;
+        font-size: 13px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--ink-black);
+    }
+    .recruiter-title {
+        font-size: 11px;
+        opacity: 0.7;
+        margin-top: 3px;
+    }
+    .recruiter-badge {
+        display: inline-block;
+        font-family: 'Space Mono', monospace;
+        font-size: 9px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        background: var(--accent-mint);
+        color: var(--ink-black);
+        padding: 4px 8px;
+        border-radius: 3px;
+        border: 1px solid var(--ink-black);
+    }
+    .recruiter-thinking {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 20px;
+        background: var(--bg-cream);
+        border: var(--border-thick) dashed var(--ink-black);
+        border-radius: var(--radius);
+        margin-right: 60px;
+        margin-bottom: 20px;
+        font-family: 'Space Mono', monospace;
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--ink-black);
+    }
+    .recruiter-thinking::before {
+        content: '';
+        width: 20px;
+        height: 20px;
+        border: 3px solid var(--ink-black);
+        border-top-color: transparent;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+    }
+    @media (max-width: 768px) {
+        .recruiter-message.user {
+            margin-left: 20px;
+        }
+        .recruiter-message.assistant {
+            margin-right: 20px;
+        }
+        .recruiter-thinking {
+            margin-right: 20px;
+        }
+        .recruiter-avatar {
+            width: 48px;
+            height: 48px;
+        }
+    }
 </style>
 </head>
 <body>
@@ -348,225 +1339,1887 @@
     </div>
 </header>
 <main>
+    <!-- QUICK START CARD (Collapsible, starts collapsed) -->
     <div id="quickStartCard" class="card collapsible-card collapsed">
-        <div class="card-header collapsible-trigger" onclick="toggleQuickStart()">
+        <div class="card-header collapsible-trigger" onclick="toggleQuickStart()" role="button" tabindex="0" aria-expanded="false" aria-controls="quickStartContent" aria-label="Toggle quick start guide" onkeydown="if(event.key==='Enter'||event.key===' '){toggleQuickStart();event.preventDefault();}">
             <span class="card-title">How It Works</span>
-            <span id="quickStartToggleIcon" class="mono" style="font-weight: 700; font-size: 20px;">+</span>
+            <span id="quickStartToggleIcon" class="mono" style="font-weight: 700; font-size: 20px;" aria-hidden="true">+</span>
         </div>
         <div id="quickStartContent" class="collapsible-content">
             <div class="card-body">
                 <div class="how-to-steps">
-                    <div class="how-to-step"><div class="step-number">1</div><div class="step-content"><h3>Add Your Resume</h3><p>Paste your resume text or upload a file.</p></div></div>
-                    <div class="how-to-step"><div class="step-number">2</div><div class="step-content"><h3>Add a Job Description</h3><p>Paste the job description or enter a URL.</p></div></div>
-                    <div class="how-to-step"><div class="step-number">3</div><div class="step-content"><h3>Get Your Analysis</h3><p>Receive match score, gap analysis, and more.</p></div></div>
+                    <div class="how-to-step">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <h3>Add Your Resume</h3>
+                            <p>Paste your resume text or upload a file. Your resume stays in your browser and is not stored.</p>
+                        </div>
+                    </div>
+                    <div class="how-to-step">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <h3>Add a Job Description</h3>
+                            <p>Paste the job description text or enter a URL and we'll fetch it for you.</p>
+                        </div>
+                    </div>
+                    <div class="how-to-step">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <h3>Get Your Analysis</h3>
+                            <p>Receive a match score, gap analysis, interview prep, and tailored application materials.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="how-to-tip">
+                    <strong>Features:</strong>
+                    <ul style="margin: 12px 0 0 20px; line-height: 1.8;">
+                        <li><strong>Match Score:</strong> AI analyzes the job against your resume with a 0-100 fit score.</li>
+                        <li><strong>Gap Analysis:</strong> Identifies your strongest matches and potential gaps.</li>
+                        <li><strong>Job Intel:</strong> Salary estimates, hiring timeline, competition level, and company intel.</li>
+                        <li><strong>Keywords:</strong> Important terms from the JD with a check on which are in your resume.</li>
+                        <li><strong>Tailored Summary:</strong> AI-rewritten executive summary optimized for this role.</li>
+                        <li><strong>Intro Email:</strong> Generate a professional intro email to send with your application.</li>
+                        <li><strong>Interview Prep:</strong> Likely interview questions with suggested answers from your experience.</li>
+                        <li><strong>Expert Q&A:</strong> Ask questions about the role, salary, gaps, or application strategy.</li>
+                        <li><strong>Application Tracker:</strong> Save jobs locally and track your application status.</li>
+                    </ul>
                 </div>
             </div>
         </div>
     </div>
+    
+    <!-- JOB SEARCH CARD (Collapsible) -->
+    <div id="jobSearchCard" class="card collapsible-card collapsed">
+        <div class="card-header collapsible-trigger" onclick="toggleJobSearch()" role="button" tabindex="0" aria-expanded="false">
+            <span class="card-title">LinkedIn Job Boards</span>
+            <span id="jobSearchToggle" class="mono" style="font-weight: 700; font-size: 20px;">+</span>
+        </div>
+        <div id="jobSearchContent" class="collapsible-content">
+            <div class="card-body">
+                <p style="margin-bottom: 16px; font-size: 13px; opacity: 0.8;">Quick links to Company Linkedin Job Boards.</p>
+                
+                <!-- Federal Primes -->
+                <div style="margin-bottom: 20px;">
+                    <div class="kit-section-title" style="margin-bottom: 10px;">Federal Primes</div>
+                    <div class="job-search-grid">
+                        <a href="https://www.linkedin.com/company/lockheed-martin/jobs/" target="_blank" class="job-search-link">Lockheed Martin</a>
+                        <a href="https://www.linkedin.com/company/rtx/jobs/" target="_blank" class="job-search-link">RTX (Raytheon)</a>
+                        <a href="https://www.linkedin.com/company/gdit/jobs/" target="_blank" class="job-search-link">GDIT</a>
+                        <a href="https://www.linkedin.com/company/northrop-grumman-corporation/jobs/" target="_blank" class="job-search-link">Northrop Grumman</a>
+                        <a href="https://www.linkedin.com/company/boeing/jobs/" target="_blank" class="job-search-link">Boeing</a>
+                        <a href="https://www.linkedin.com/company/leidos/jobs/" target="_blank" class="job-search-link">Leidos</a>
+                        <a href="https://www.linkedin.com/company/bae-systems/jobs/" target="_blank" class="job-search-link">BAE Systems</a>
+                        <a href="https://www.linkedin.com/company/l3harris-technologies/jobs/" target="_blank" class="job-search-link">L3Harris</a>
+                        <a href="https://www.linkedin.com/company/booz-allen-hamilton/jobs/" target="_blank" class="job-search-link">Booz Allen</a>
+                        <a href="https://www.linkedin.com/company/saicinc/jobs/" target="_blank" class="job-search-link">SAIC</a>
+                        <a href="https://www.linkedin.com/company/caci-international-inc/jobs/" target="_blank" class="job-search-link">CACI</a>
+                        <a href="https://www.linkedin.com/company/mantech/jobs/" target="_blank" class="job-search-link">ManTech</a>
+                        <a href="https://www.linkedin.com/company/peraton/jobs/" target="_blank" class="job-search-link">Peraton</a>
+                        <a href="https://www.linkedin.com/company/anduril/jobs/" target="_blank" class="job-search-link">Anduril</a>
+                        <a href="https://www.linkedin.com/company/palantir-technologies/jobs/" target="_blank" class="job-search-link">Palantir</a>
+                        <a href="https://www.linkedin.com/company/shield-ai/jobs/" target="_blank" class="job-search-link">Shield AI</a>
+                    </div>
+                </div>
+                
+                <!-- CSPs -->
+                <div style="margin-bottom: 20px;">
+                    <div class="kit-section-title" style="margin-bottom: 10px;">Cloud Service Providers</div>
+                    <div class="job-search-grid">
+                        <a href="https://www.linkedin.com/company/amazon-web-services/jobs/" target="_blank" class="job-search-link">Amazon / AWS</a>
+                        <a href="https://www.linkedin.com/company/microsoft/jobs/" target="_blank" class="job-search-link">Microsoft / Azure</a>
+                        <a href="https://www.linkedin.com/company/google-cloud/jobs/" target="_blank" class="job-search-link">Google Cloud</a>
+                        <a href="https://www.linkedin.com/company/oracle/jobs/" target="_blank" class="job-search-link">Oracle Cloud</a>
+                        <a href="https://www.linkedin.com/company/ibm/jobs/" target="_blank" class="job-search-link">IBM Cloud</a>
+                    </div>
+                </div>
+                
+                <!-- SaaS -->
+                <div style="margin-bottom: 20px;">
+                    <div class="kit-section-title" style="margin-bottom: 10px;">SaaS & Platforms</div>
+                    <div class="job-search-grid">
+                        <a href="https://www.linkedin.com/company/salesforce/jobs/" target="_blank" class="job-search-link">Salesforce</a>
+                        <a href="https://www.linkedin.com/company/servicenow/jobs/" target="_blank" class="job-search-link">ServiceNow</a>
+                        <a href="https://www.linkedin.com/company/snowflake-computing/jobs/" target="_blank" class="job-search-link">Snowflake</a>
+                        <a href="https://www.linkedin.com/company/databricks/jobs/" target="_blank" class="job-search-link">Databricks</a>
+                        <a href="https://www.linkedin.com/company/atlassian/jobs/" target="_blank" class="job-search-link">Atlassian</a>
+                        <a href="https://www.linkedin.com/company/palo-alto-networks/jobs/" target="_blank" class="job-search-link">Palo Alto Networks</a>
+                        <a href="https://www.linkedin.com/company/crowdstrike/jobs/" target="_blank" class="job-search-link">CrowdStrike</a>
+                        <a href="https://www.linkedin.com/company/zscaler/jobs/" target="_blank" class="job-search-link">Zscaler</a>
+                        <a href="https://www.linkedin.com/company/tenableinc/jobs/" target="_blank" class="job-search-link">Tenable</a>
+                        <a href="https://www.linkedin.com/company/okta-inc-/jobs/" target="_blank" class="job-search-link">Okta</a>
+                        <a href="https://www.linkedin.com/company/splunk/jobs/" target="_blank" class="job-search-link">Splunk</a>
+                    </div>
+                </div>
+                
+                <!-- Systems Integrators -->
+                <div style="margin-bottom: 20px;">
+                    <div class="kit-section-title" style="margin-bottom: 10px;">Systems Integrators</div>
+                    <div class="job-search-grid">
+                        <a href="https://www.linkedin.com/company/accenturefederalservices/jobs/" target="_blank" class="job-search-link">Accenture Federal</a>
+                        <a href="https://www.linkedin.com/company/deloitte/jobs/" target="_blank" class="job-search-link">Deloitte</a>
+                        <a href="https://www.linkedin.com/company/pwc/jobs/" target="_blank" class="job-search-link">PwC</a>
+                        <a href="https://www.linkedin.com/company/ernstandyoung/jobs/" target="_blank" class="job-search-link">EY</a>
+                        <a href="https://www.linkedin.com/company/kpmg-us/jobs/" target="_blank" class="job-search-link">KPMG</a>
+                        <a href="https://www.linkedin.com/company/capgemini/jobs/" target="_blank" class="job-search-link">Capgemini</a>
+                    </div>
+                </div>
+                
+                <!-- VARs & Resellers -->
+                <div>
+                    <div class="kit-section-title" style="margin-bottom: 10px;">VARs & Resellers</div>
+                    <div class="job-search-grid">
+                        <a href="https://www.linkedin.com/company/carahsoft/jobs/" target="_blank" class="job-search-link">Carahsoft</a>
+                        <a href="https://www.linkedin.com/company/world-wide-technology/jobs/" target="_blank" class="job-search-link">WWT</a>
+                        <a href="https://www.linkedin.com/company/iron-bow-technologies/jobs/" target="_blank" class="job-search-link">Iron Bow</a>
+                        <a href="https://www.linkedin.com/company/presidio-/jobs/" target="_blank" class="job-search-link">Presidio</a>
+                        <a href="https://www.linkedin.com/company/dxctechnology/jobs/" target="_blank" class="job-search-link">DXC Technology</a>
+                        <a href="https://www.linkedin.com/company/cgi/jobs/" target="_blank" class="job-search-link">CGI Federal</a>
+                        <a href="https://www.linkedin.com/company/red-river-technology/jobs/" target="_blank" class="job-search-link">Red River</a>
+                        <a href="https://www.linkedin.com/company/thundercat-technology/jobs/" target="_blank" class="job-search-link">ThunderCat</a>
+                    </div>
+                </div>
+                
+                <!-- Job Boards -->
+                <hr style="margin: 24px 0; border: none; border-top: 1px dashed var(--ink-black); opacity: 0.3;">
+                <div>
+                    <div class="kit-section-title" style="margin-bottom: 10px;">Cleared Job Boards</div>
+                    <div class="job-search-grid">
+                        <a href="https://www.clearancejobs.com/jobs?keywords=sales" target="_blank" class="job-search-link">ClearanceJobs</a>
+                        <a href="https://www.linkedin.com/jobs/search/?keywords=director&f_TPR=r604800" target="_blank" class="job-search-link">LinkedIn</a>
+                        <a href="https://www.indeed.com/jobs?q=federal+sales" target="_blank" class="job-search-link">Indeed</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- RESUME INPUT CARD -->
     <div class="card">
-        <div class="card-header">
+        <div class="card-header" style="flex-wrap: wrap; gap: 12px;">
             <span class="card-title">Your Resume</span>
             <div class="resume-controls">
-                <select id="resumeSelector" onchange="loadSavedResume()"><option value="">Select saved...</option><option value="__delete__">🗑️ Delete...</option></select>
+                <select id="resumeSelector" onchange="loadSavedResume()" aria-label="Select saved resume">
+                    <option value="">-- Saved Resumes --</option>
+                </select>
+                <button class="btn btn-secondary" onclick="saveCurrentResume()" style="padding: 6px 12px; font-size: 11px;">Save</button>
+                <button class="btn btn-secondary" onclick="clearResume()" style="padding: 6px 12px; font-size: 11px;">Clear</button>
             </div>
         </div>
         <div class="card-body">
-            <textarea id="resumeText" placeholder="Paste your resume text here..."></textarea>
-            <div class="action-bar">
-                <button class="btn" onclick="saveResume()">Save Resume</button>
-                <label class="btn" style="cursor: pointer;">Upload File<input type="file" accept=".txt,.pdf,.doc,.docx" onchange="handleFileUpload(event)" style="display: none;"></label>
+            <textarea id="resumeText" placeholder="Paste your resume text here..." aria-label="Resume input" style="min-height: 150px;"></textarea>
+            <div style="margin-top: 12px; padding: 12px; background: rgba(0,0,0,0.03); border-radius: var(--radius); font-size: 12px; line-height: 1.6;">
+                <strong style="font-family: 'Space Mono', monospace; text-transform: uppercase; font-size: 10px; letter-spacing: 0.5px;">Privacy Notice:</strong>
+                <ul style="margin: 8px 0 0 16px; opacity: 0.8;">
+                    <li>Your resume is <strong>not stored</strong> on our servers</li>
+                    <li>Data is sent to Google Gemini AI for analysis</li>
+                    <li>Google's API does not use your data for model training</li>
+                    <li>Saved resumes are stored locally in your browser only</li>
+                </ul>
             </div>
         </div>
     </div>
+    
+    <!-- JOB DESCRIPTION CARD -->
     <div class="card">
-        <div class="card-header"><span class="card-title">Job Description</span></div>
+        <div class="card-header">
+            <span class="card-title">Job Description</span>
+        </div>
         <div class="card-body">
-            <textarea id="jobDescription" placeholder="Paste the job description or enter a URL..."></textarea>
-            <div id="inlineError" class="inline-error"><span id="inlineErrorText"></span></div>
+            <textarea id="jobDescription" placeholder="Paste job description text or a URL..." aria-label="Job description input"></textarea>
             <div class="action-bar">
-                <button id="analyzeBtn" class="btn btn-primary" onclick="analyzeJob()"><span id="analyzeBtnText">Analyze Match</span></button>
+                <button id="analyzeBtn" class="btn btn-primary" onclick="analyzeJob()" aria-label="Analyze job match">
+                    <span id="btnText">Analyze Match</span>
+                </button>
+                <button class="btn btn-secondary" onclick="clearAll()" aria-label="Reset form and clear results">Reset</button>
+                <button class="btn btn-secondary" onclick="loadSampleData()" aria-label="Load sample resume and job description">Load Sample</button>
+            </div>
+            <div id="inlineError" class="inline-error" role="alert" aria-live="polite">
+                <span id="inlineErrorText"></span>
             </div>
         </div>
     </div>
-    <div id="loadingCard" class="card">
-        <div class="loading-card">
-            <div class="loading-spinner"></div>
-            <div id="loadingStep" class="loading-text">Analyzing...</div>
-            <div class="loading-progress"><div id="loadingProgress" class="loading-progress-bar"></div></div>
+<div id="loadingCard" class="card" style="display:none; text-align:center; padding: 48px 24px; background: var(--bg-cream); border: 2px dashed var(--ink-black);">
+        <div class="spinner-box" style="margin-bottom: 24px;">
+            <div style="display:inline-block; width: 40px; height: 40px; border: 4px solid var(--ink-black); border-top-color: transparent; border-radius: 50%; animation: spin 1s linear infinite;"></div>
         </div>
+        <h2 id="loadingStep" style="font-size: 18px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px;">
+            Initializing Neural Net...
+        </h2>
+        <div style="max-width: 400px; margin: 0 auto; border: 2px solid var(--ink-black); height: 24px; border-radius: 12px; background: #fff; overflow: hidden; position: relative;">
+            <div id="loadingProgress" style="width: 5%; height: 100%; background: var(--accent-mint); border-right: 2px solid var(--ink-black); transition: width 0.3s ease;"></div>
+        </div>
+        <p style="margin-top: 16px; font-family: 'Space Mono'; font-size: 11px; opacity: 0.6;">
+            Analyzing your resume against job requirements...
+        </p>
     </div>
-    <div id="analysisResults">
-        <div id="scoreHero" class="score-hero score-good">
-            <div class="score-display">
-                <div class="score-value" id="scoreValue">78%</div>
-                <div class="score-label">Fit Score</div>
-            </div>
-            <div class="job-info">
-                <div class="job-title" id="jobTitle">Role Title</div>
-                <div class="job-company" id="jobCompany">Company</div>
-                <div class="job-verdict" id="jobVerdict">Match Status</div>
-            </div>
+    <div id="analysisResults" style="display: none;">
+        <!-- 1. SCORE/VERDICT -->
+        <div class="card" style="padding:0;">
+            <div id="matchScoreContainer" class="hero-grid">
+                </div>
         </div>
+        
+        <!-- NEW: STATS GRID -->
         <div class="stats-grid">
-            <div class="stat-card teal"><div class="stat-label">Strengths</div><div class="stat-value" id="strengthsCount">0</div><div class="stat-sub">alignment points</div></div>
-            <div class="stat-card coral"><div class="stat-label">Gaps</div><div class="stat-value" id="gapsCount">0</div><div class="stat-sub">to address</div></div>
-            <div class="stat-card gold"><div class="stat-label">Keywords</div><div class="stat-value" id="keywordsPercent">0%</div><div class="stat-sub" id="keywordsSub">0 of 0 matched</div></div>
-            <div class="stat-card blue"><div class="stat-label">Salary Estimate</div><div class="stat-value" id="salaryEstimate">$---K</div><div class="stat-sub" id="salarySub">Loading...</div></div>
+            <div class="stat-card mint">
+                <div class="stat-label">Strengths</div>
+                <div class="stat-value" id="strengthsCount">0</div>
+                <div class="stat-sub">alignment points</div>
+            </div>
+            <div class="stat-card clay">
+                <div class="stat-label">Gaps</div>
+                <div class="stat-value" id="gapsCount">0</div>
+                <div class="stat-sub">to address</div>
+            </div>
+            <div class="stat-card gold">
+                <div class="stat-label">Keywords</div>
+                <div class="stat-value" id="keywordsPercent">0%</div>
+                <div class="stat-sub" id="keywordsSub">0 of 0 matched</div>
+            </div>
+            <div class="stat-card blue">
+                <div class="stat-label">Salary Estimate</div>
+                <div class="stat-value" id="salaryEstimate">$---K</div>
+                <div class="stat-sub" id="salarySub">Loading...</div>
+            </div>
         </div>
-        <div class="stats-grid" style="margin-bottom: 24px;">
-            <div class="stat-card"><div class="stat-label">Competition</div><div class="stat-value" id="competitionValue" style="font-size: 20px;">---</div><div class="stat-sub" id="competitionSub">Analyzing...</div></div>
-            <div class="stat-card"><div class="stat-label">Time to Offer</div><div class="stat-value" id="timelineValue" style="font-size: 20px;">---</div><div class="stat-sub">estimated timeline</div></div>
+        
+        <!-- NEW: SECONDARY STATS -->
+        <div class="stats-grid two-col">
+            <div class="stat-card">
+                <div class="stat-label">Competition</div>
+                <div class="stat-value" id="competitionValue" style="font-size: 24px;">---</div>
+                <div class="stat-sub" id="competitionSub">Analyzing...</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Time to Offer</div>
+                <div class="stat-value" id="timelineValue" style="font-size: 24px;">---</div>
+                <div class="stat-sub">estimated timeline</div>
+            </div>
         </div>
+        
+        <!-- NEW: MASCOT INSIGHT -->
         <div class="mascot-insight">
             <img src="arti.png" alt="Expert" class="mascot-avatar">
-            <div class="insight-content"><div class="insight-text" id="insightText"><strong>Analyzing...</strong> Your personalized insight will appear here.</div></div>
+            <div class="insight-text" id="insightText">
+                <strong>Analyzing...</strong> Your personalized insight will appear here.
+            </div>
         </div>
-        <div class="keywords-section">
-            <div class="keywords-header"><div class="keywords-title">Keywords</div><div class="keywords-count" id="keywordsCount">0 matched</div></div>
-            <div class="keyword-cloud" id="keywordCloud"></div>
+        
+        <!-- NEW: KEYWORDS BOX -->
+        <div class="keywords-box">
+            <div class="keywords-header">
+                <div class="keywords-box-title">Keywords</div>
+                <div class="keywords-count" id="keywordsCountLabel">0 matched, 0 missing</div>
+            </div>
+            <div class="keyword-cloud" id="keywordCloudNew"></div>
         </div>
-        <div class="analysis-section" id="strengthsSection"><div class="analysis-section-title">Your Strengths</div><div id="strengthsList"></div></div>
-        <div class="analysis-section" id="gapsSection"><div class="analysis-section-title">Gap Analysis</div><div id="gapsList"></div></div>
-        <div id="askRecruiterSection" class="card">
-            <div class="card-header"><span class="card-title has-avatar" style="gap: 12px;"><img src="arti.png" alt="Expert" style="width: 40px; height: 40px;">Ask a Simulated Recruiter</span></div>
+        
+        <!-- NEW: STRENGTHS BOX -->
+        <div id="strengthsBox" class="strengths-box">
+            <div class="box-title">Your Strengths</div>
+            <div id="strengthsList"></div>
+        </div>
+        
+        <!-- 3. JOB INTEL (Combined: salary, timeline, competition, flags, company) -->
+        <div id="jobIntelSection" class="card" style="display:none;">
+            <div class="card-header">
+                <span class="card-title">Job Intel</span>
+            </div>
             <div class="card-body">
-                <p style="margin-bottom: 16px; font-size: 14px; opacity: 0.7;">Questions about salary, fit, gaps, or strategy?</p>
-                <textarea id="recruiterQuestion" placeholder="e.g. 'Is this salary competitive?'" style="min-height: 80px;"></textarea>
+                <div class="intel-grid">
+                    <div class="intel-panel">
+                        <div class="intel-panel-header">
+                            <div class="intel-panel-title">Salary Estimate</div>
+                        </div>
+                        <div id="salaryIntel">
+                            <div class="intel-value" id="salaryRange">Loading...</div>
+                            <div class="intel-label">Based on role level & market</div>
+                            <div class="salary-range-bar">
+                                <div class="salary-marker" style="left: 60%;" data-label="Target"></div>
+                            </div>
+                            <div class="salary-labels">
+                                <span id="salaryLow">$0K</span>
+                                <span id="salaryHigh">$0K</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="intel-panel">
+                        <div class="intel-panel-header">
+                            <div class="intel-panel-title">Hiring Timeline</div>
+                        </div>
+                        <div class="timeline-estimate" id="hiringTimeline">
+                            <div class="timeline-step">
+                                <div class="timeline-dot">1</div>
+                                <div class="timeline-label">Apply</div>
+                                <div class="timeline-days">Today</div>
+                            </div>
+                            <div class="timeline-step">
+                                <div class="timeline-dot">2</div>
+                                <div class="timeline-label">Screen</div>
+                                <div class="timeline-days">...</div>
+                            </div>
+                            <div class="timeline-step">
+                                <div class="timeline-dot">3</div>
+                                <div class="timeline-label">Interview</div>
+                                <div class="timeline-days">...</div>
+                            </div>
+                            <div class="timeline-step">
+                                <div class="timeline-dot">4</div>
+                                <div class="timeline-label">Offer</div>
+                                <div class="timeline-days">...</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="intel-panel">
+                        <div class="intel-panel-header">
+                            <div class="intel-panel-title">Competition Level</div>
+                        </div>
+                        <div id="competitionIntel">
+                            <div class="intel-value" id="competitionLevel">Loading...</div>
+                            <div class="intel-label" id="competitionDesc">Analyzing competition...</div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Company Intel (rendered by JS if available) -->
+                <div id="companyIntelContainer" style="margin-top: 24px;"></div>
+                
+                <!-- Quick Links (always visible when company is known) -->
+                <div id="quickLinksContainer" style="margin-top: 24px; display: none;">
+                    <div class="kit-section-title" style="margin-bottom: 12px;">Research This Company</div>
+                    <div id="quickLinksButtons" class="network-links"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 4. ASK AN EXPERT -->
+        <div id="askRecruiterSection" class="card">
+            <div class="card-header">
+                <span class="card-title has-avatar" style="gap: 12px;">
+                    <img src="arti.png" alt="Expert" style="width: 48px; height: 48px; border-radius: var(--radius);">
+                    Ask a Simulated Recruiter
+                </span>
+            </div>
+            <div class="card-body">
+                <p style="margin-bottom: 16px; font-size: 14px; opacity: 0.8;">Questions about salary, fit, gaps, or application strategy? Get answers from a federal recruiting expert.</p>
+                <textarea id="recruiterQuestion" placeholder="e.g. 'Is this salary competitive?' or 'How should I address that gap?'" style="min-height: 80px;" aria-label="Your question"></textarea>
                 <div class="action-bar">
-                    <button id="askRecruiterBtn" class="btn btn-primary" onclick="askExpert()"><span id="askRecruiterBtnText">Ask</span></button>
-                    <button class="btn" onclick="clearExpertChat()">Clear</button>
+                    <button id="askRecruiterBtn" class="btn btn-primary" onclick="askExpert()" aria-label="Ask the expert">
+                        <span id="askRecruiterBtnText">Ask</span>
+                    </button>
+                    <button class="btn btn-secondary" onclick="clearExpertChat()" aria-label="Clear conversation">Clear</button>
                 </div>
                 <div id="recruiterChatHistory" style="margin-top: 24px; display: none;"></div>
             </div>
         </div>
-        <div id="interviewQuestionsSection" class="card">
-            <div class="card-header"><span class="card-title">Interview Prep</span></div>
-            <div class="card-body"><div id="interviewQuestionsList"></div></div>
+        <!-- 2. GAP ANALYSIS -->
+        <div class="card">
+            <div class="card-header"><span class="card-title">Gap Analysis</span></div>
+            <div class="card-body">
+                <ul id="analysisList" class="analysis-list"></ul>
+            </div>
         </div>
-        <div id="gapStrategiesSection" class="card" style="display: none;">
-            <div class="card-header"><span class="card-title">Gap Strategies</span></div>
-            <div class="card-body"><div id="gapStrategiesList"></div></div>
-        </div>
+        <!-- 5. APPLICATION KIT (Collapsible: keywords, resume, intro email) -->
         <div id="applicationKitCard" class="card collapsible-card collapsed">
-            <div class="card-header collapsible-trigger" onclick="toggleKit('application')">
+            <div class="card-header collapsible-trigger" onclick="toggleKit('application')" role="button" tabindex="0" aria-expanded="false">
                 <span class="card-title">Application Kit</span>
                 <span id="applicationKitToggle" class="mono" style="font-weight: 700; font-size: 20px;">+</span>
             </div>
             <div id="applicationKitContent" class="collapsible-content">
-                <div class="card-body">
-                    <div style="margin-bottom: 24px;">
-                        <div class="kit-section-title">Tailored Executive Summary</div>
-                        <div id="resumeOutput" class="resume-paper"></div>
-                        <div class="action-bar"><button class="btn" onclick="copySummary()">Copy Summary</button></div>
+                <div class="card-body" style="padding-top: 0;">
+                    <!-- Keywords -->
+                    <div id="keywordSection" class="kit-section">
+                        <h4 class="kit-section-title">Keywords to Add</h4>
+                        <p style="margin-bottom: 12px; font-size: 13px; opacity: 0.7;"><span style="background: var(--accent-mint); padding: 2px 6px; border-radius: 3px;">Green</span> = in resume. <span style="background: rgba(209, 143, 122, 0.3); padding: 2px 6px; border-radius: 3px;">Orange</span> = missing.</p>
+                        <div class="keyword-cloud" id="keywordCloud"></div>
+                        <button class="btn btn-secondary" onclick="copyKeywords()" style="margin-top: 12px; padding: 6px 12px; font-size: 11px;">Copy Keywords</button>
                     </div>
-                    <div>
-                        <div class="kit-section-title">Intro Email</div>
-                        <div id="coverLetterPlaceholder" style="padding: 20px; background: var(--bg-beige); border-radius: var(--radius-sm); text-align: center;">
-                            <p style="margin-bottom: 12px; opacity: 0.7;">Generate a professional intro email.</p>
-                            <button id="generateCoverLetterBtn" class="btn btn-primary" onclick="generateCoverLetter()">Generate Email</button>
+                    
+                    <hr class="kit-divider">
+                    
+                    <!-- Tailored Resume -->
+                    <div class="kit-section">
+                        <h4 class="kit-section-title">Tailored Executive Summary</h4>
+                        <div id="resumeOutput" class="resume-paper compact" role="region" aria-label="Tailored resume preview"></div>
+                        <button class="btn btn-secondary" onclick="copyResume()" style="margin-top: 12px; padding: 6px 12px; font-size: 11px;">Copy Summary</button>
+                    </div>
+                    
+                    <hr class="kit-divider">
+                    
+                    <!-- Intro Email -->
+                    <div class="kit-section">
+                        <h4 class="kit-section-title">Intro Email</h4>
+                        <div id="coverLetterPlaceholder">
+                            <button class="btn btn-primary" onclick="generateCoverLetter()" id="generateCoverLetterBtn" aria-label="Generate intro email">
+                                Generate Intro Email
+                            </button>
                         </div>
-                        <div id="coverLetterDisplay" class="resume-paper" style="display: none;"></div>
-                        <button id="copyCLBtn" class="btn" onclick="copyCoverLetter()" style="display: none; margin-top: 12px;">Copy Email</button>
+                        <div id="coverLetterDisplay" style="display:none; white-space: pre-wrap; font-family: 'DM Sans'; font-size: 14px; line-height: 1.6; background: #fff; padding: 16px; border: 1px solid #ddd; border-radius: var(--radius);" role="region"></div>
+                        <button id="copyCLBtn" class="btn btn-secondary" onclick="copyCoverLetter()" style="display:none; margin-top: 12px; padding: 6px 12px; font-size: 11px;">Copy Email</button>
                     </div>
                 </div>
             </div>
         </div>
+        
+        <!-- 6. INTERVIEW KIT (Collapsible: interview prep, gap strategies) -->
+        <div id="interviewKitCard" class="card collapsible-card collapsed">
+            <div class="card-header collapsible-trigger" onclick="toggleKit('interview')" role="button" tabindex="0" aria-expanded="false">
+                <span class="card-title">Interview Kit</span>
+                <span id="interviewKitToggle" class="mono" style="font-weight: 700; font-size: 20px;">+</span>
+            </div>
+            <div id="interviewKitContent" class="collapsible-content">
+                <div class="card-body" style="padding-top: 0;">
+                    <!-- Interview Questions -->
+                    <div id="interviewQuestionsSection" class="kit-section">
+                        <h4 class="kit-section-title">Likely Interview Questions</h4>
+                        <div id="interviewQuestionsList"></div>
+                    </div>
+                    
+                    <hr class="kit-divider">
+                    
+                    <!-- Gap Strategies -->
+                    <div id="gapStrategiesSection" class="kit-section">
+                        <h4 class="kit-section-title">Gap Mitigation Strategies</h4>
+                        <div id="gapStrategiesList"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 7. OUTREACH KIT (Collapsible: network, templates) -->
         <div id="outreachKitCard" class="card collapsible-card collapsed">
-            <div class="card-header collapsible-trigger" onclick="toggleKit('outreach')">
+            <div class="card-header collapsible-trigger" onclick="toggleKit('outreach')" role="button" tabindex="0" aria-expanded="false">
                 <span class="card-title">Outreach Kit</span>
                 <span id="outreachKitToggle" class="mono" style="font-weight: 700; font-size: 20px;">+</span>
             </div>
             <div id="outreachKitContent" class="collapsible-content">
-                <div class="card-body">
-                    <div style="margin-bottom: 24px;">
-                        <div class="kit-section-title">Find Connections</div>
-                        <div id="networkLinksContainer" class="network-links"></div>
+                <div class="card-body" style="padding-top: 0;">
+                    <!-- Network Intel -->
+                    <div id="networkSection" class="kit-section">
+                        <h4 class="kit-section-title">Find Connections at <span id="networkCompany">This Company</span></h4>
+                        <div class="network-links" id="networkLinks"></div>
                     </div>
-                    <div>
-                        <div class="kit-section-title">Follow-up Templates</div>
+                    
+                    <hr class="kit-divider">
+                    
+                    <!-- Follow-up Templates -->
+                    <div id="templatesSection" class="kit-section">
+                        <h4 class="kit-section-title">Follow-Up Templates</h4>
                         <div class="template-tabs">
-                            <div class="template-tab active" onclick="showTemplate('applied')">Applied</div>
-                            <div class="template-tab" onclick="showTemplate('interview')">Interview</div>
-                            <div class="template-tab" onclick="showTemplate('followup')">Follow-up</div>
-                            <div class="template-tab" onclick="showTemplate('negotiate')">Negotiate</div>
+                            <button class="template-tab active" onclick="showTemplate('applied')">After Applying</button>
+                            <button class="template-tab" onclick="showTemplate('interview')">Post-Interview</button>
+                            <button class="template-tab" onclick="showTemplate('followup')">Check-In</button>
+                            <button class="template-tab" onclick="showTemplate('negotiate')">Negotiation</button>
                         </div>
                         <div class="template-content">
-                            <pre id="templateApplied" class="template-text"></pre>
-                            <pre id="templateInterview" class="template-text" style="display: none;"></pre>
-                            <pre id="templateFollowup" class="template-text" style="display: none;"></pre>
-                            <pre id="templateNegotiate" class="template-text" style="display: none;"></pre>
+                            <div id="templateApplied" class="template-text"></div>
+                            <div id="templateInterview" class="template-text" style="display:none;"></div>
+                            <div id="templateFollowup" class="template-text" style="display:none;"></div>
+                            <div id="templateNegotiate" class="template-text" style="display:none;"></div>
+                            <button class="btn btn-secondary" onclick="copyCurrentTemplate()" style="margin-top: 12px; padding: 6px 12px; font-size: 11px;">Copy Template</button>
                         </div>
-                        <div class="action-bar"><button class="btn" onclick="copyCurrentTemplate()">Copy Template</button></div>
                     </div>
                 </div>
             </div>
         </div>
-        <div id="saveToTrackerSection" style="display: none; text-align: center; margin: 24px 0;">
-            <button id="saveToTrackerBtn" class="btn btn-primary" onclick="saveToTracker()">Save to Tracker</button>
+        
+        <!-- 8. SAVE TO TRACKER -->
+        <div id="saveToTrackerSection" class="card" style="display:none; background: var(--accent-mint);">
+            <div class="card-body" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
+                <div>
+                    <strong style="font-family: 'Space Mono', monospace; text-transform: uppercase; letter-spacing: 0.5px;">Save This Analysis</strong>
+                    <p style="font-size: 13px; opacity: 0.8; margin-top: 4px;">Track your application status over time.</p>
+                </div>
+                <button class="btn btn-primary" onclick="saveToTracker()" id="saveToTrackerBtn">Save to Tracker</button>
+            </div>
         </div>
     </div>
-    <div class="card">
+    
+    <!-- APPLICATION TRACKER - NEW (Always visible) -->
+    <div id="trackerCard" class="card">
         <div class="card-header">
             <span class="card-title">Application Tracker</span>
-            <span id="trackerCount" class="mono" style="font-size: 11px; opacity: 0.6;">0 jobs tracked</span>
+            <span id="trackerCount" style="font-family: 'Space Mono', monospace; font-size: 12px; opacity: 0.7;">0 jobs tracked</span>
         </div>
         <div class="card-body">
-            <div id="trackerEmpty" class="empty-tracker"><p>No jobs tracked yet. Analyze a job and click "Save to Tracker" to start.</p></div>
+            <div id="trackerEmpty" class="empty-tracker">
+                <p>No applications tracked yet. Analyze a job and click "Save to Tracker" to start tracking.</p>
+            </div>
             <div id="trackerTableContainer" style="display: none; overflow-x: auto;">
                 <table class="tracker-table">
-                    <thead><tr><th>Company</th><th>Role</th><th>Score</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead>
+                    <thead>
+                        <tr>
+                            <th>Company</th>
+                            <th>Role</th>
+                            <th>Score</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
                     <tbody id="trackerBody"></tbody>
                 </table>
             </div>
         </div>
     </div>
 </main>
-<div id="errorToast" class="error-toast"><span id="errorToastText"></span><button class="error-toast-close" onclick="hideErrorToast()">×</button></div>
-<div id="copyNotice" class="error-toast" style="background: var(--accent-teal-dark);">Copied to clipboard!</div>
 <script>
+    // ==========================================================================
+    // CONFIGURATION
+    // ==========================================================================
     const API_ENDPOINT = 'https://76unm1rlj0.execute-api.us-east-1.amazonaws.com/default/grumpy2';
-let analysisData = null, resumeText = '', loadingInterval = null, currentTemplate = 'applied', chatHistory = [];
-const RESUME_STORAGE_KEY = 'dibJobsResumes';
+    const MAX_RETRIES = 3;
+    const RETRY_DELAY_MS = 2000;
+    const RESUME_STORAGE_KEY = 'dib_jobs_resumes';
+    let analysisData = null;
+    let loadingInterval = null;
+    let resumeText = ''; // Store resume text for API calls
+    
+    // ==========================================================================
+    // RESUME MANAGEMENT (localStorage)
+    // ==========================================================================
+    function getSavedResumes() {
+        try {
+            const saved = localStorage.getItem(RESUME_STORAGE_KEY);
+            return saved ? JSON.parse(saved) : {};
+        } catch (e) {
+            console.error('Error reading saved resumes:', e);
+            return {};
+        }
+    }
+    
+    function updateResumeSelector() {
+        const selector = document.getElementById('resumeSelector');
+        const resumes = getSavedResumes();
+        const names = Object.keys(resumes);
+        
+        selector.innerHTML = '<option value="">-- Saved Resumes --</option>';
+        if (names.length === 0) {
+            selector.innerHTML += '<option value="" disabled>No saved resumes yet</option>';
+        } else {
+            names.forEach(name => {
+                const option = document.createElement('option');
+                option.value = name;
+                option.textContent = name;
+                selector.appendChild(option);
+            });
+            selector.innerHTML += '<option value="__delete__" style="color: #999;">Delete a resume...</option>';
+        }
+    }
+    
+    function saveCurrentResume() {
+        const textarea = document.getElementById('resumeText');
+        const text = textarea.value.trim();
+        
+        if (!text || text.length < 100) {
+            showErrorToast('Please paste a resume first (at least 100 characters).');
+            return;
+        }
+        
+        const resumes = getSavedResumes();
+        const existingNames = Object.keys(resumes);
+        
+        // Suggest a default name
+        let defaultName = 'My Resume';
+        if (existingNames.includes(defaultName)) {
+            defaultName = `Resume ${existingNames.length + 1}`;
+        }
+        
+        const name = prompt('Name this resume version:', defaultName);
+        if (!name) return;
+        
+        const trimmedName = name.trim().substring(0, 50);
+        if (!trimmedName) return;
+        
+        resumes[trimmedName] = {
+            text: text,
+            savedAt: new Date().toISOString()
+        };
+        
+        try {
+            localStorage.setItem(RESUME_STORAGE_KEY, JSON.stringify(resumes));
+            updateResumeSelector();
+            document.getElementById('resumeSelector').value = trimmedName;
+            showErrorToast(`Resume "${trimmedName}" saved to browser.`, 3000);
+        } catch (e) {
+            showErrorToast('Could not save resume. Browser storage may be full.');
+        }
+    }
+    
+    function loadSavedResume() {
+        const selector = document.getElementById('resumeSelector');
+        const selectedName = selector.value;
+        
+        if (!selectedName) return;
+        
+        if (selectedName === '__delete__') {
+            selector.value = '';
+            deleteResumePrompt();
+            return;
+        }
+        
+        const resumes = getSavedResumes();
+        if (resumes[selectedName]) {
+            document.getElementById('resumeText').value = resumes[selectedName].text;
+            showErrorToast(`Loaded "${selectedName}"`, 2000);
+        }
+    }
+    
+    function deleteResumePrompt() {
+        const resumes = getSavedResumes();
+        const names = Object.keys(resumes);
+        
+        if (names.length === 0) {
+            showErrorToast('No saved resumes to delete.');
+            return;
+        }
+        
+        const name = prompt('Enter the exact name of the resume to delete:\n\nSaved resumes: ' + names.join(', '));
+        if (!name) return;
+        
+        if (resumes[name]) {
+            delete resumes[name];
+            localStorage.setItem(RESUME_STORAGE_KEY, JSON.stringify(resumes));
+            updateResumeSelector();
+            showErrorToast(`Deleted "${name}"`, 3000);
+        } else {
+            showErrorToast(`Resume "${name}" not found.`);
+        }
+    }
+    
+    function loadLastUsedResume() {
+        const resumes = getSavedResumes();
+        const names = Object.keys(resumes);
+        
+        if (names.length > 0) {
+            // Load the most recently saved resume
+            let mostRecent = names[0];
+            let mostRecentTime = resumes[names[0]].savedAt || '';
+            
+            names.forEach(name => {
+                if (resumes[name].savedAt > mostRecentTime) {
+                    mostRecent = name;
+                    mostRecentTime = resumes[name].savedAt;
+                }
+            });
+            
+            document.getElementById('resumeText').value = resumes[mostRecent].text;
+            document.getElementById('resumeSelector').value = mostRecent;
+        }
+    }
+    
+    // ==========================================================================
+    // UTILITIES
+    // ==========================================================================
+    const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>"']/g, m => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;' })[m]);
+    }
+    function startLoadingAnim() {
+        const card = document.getElementById('loadingCard');
+        const stepText = document.getElementById('loadingStep');
+        const bar = document.getElementById('loadingProgress');
+        // Show Card, Hide Results
+        card.style.display = 'block';
+        document.getElementById('analysisResults').style.display = 'none';
+        // --- NEW: Scroll the loading card into view (centered) ---
+        card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        // Animation Sequence
+        let progress = 5;
+        const steps = [
+            { pct: 15, msg: "Reading Job Description..." },
+            { pct: 35, msg: "Extracting Key Requirements..." },
+            { pct: 55, msg: "Comparing Against Profile..." },
+            { pct: 75, msg: "Identifying Strategic Gaps..." },
+            { pct: 90, msg: "Drafting Interview Questions..." },
+            { pct: 95, msg: "Finalizing Strategy..." }
+        ];
+        let stepIndex = 0;
+        bar.style.width = '5%';
+        stepText.innerText = steps[0].msg;
+        loadingInterval = setInterval(() => {
+            if (stepIndex < steps.length) {
+                const step = steps[stepIndex];
+                progress = step.pct;
+                bar.style.width = `${progress}%`;
+                stepText.innerText = step.msg;
+                stepIndex++;
+            }
+        }, 800);
+    }
+    function stopLoadingAnim() {
+        clearInterval(loadingInterval);
+        const bar = document.getElementById('loadingProgress');
+        const stepText = document.getElementById('loadingStep');
+        bar.style.width = '100%';
+        stepText.innerText = "Analysis Complete!";
+        setTimeout(() => {
+            document.getElementById('loadingCard').style.display = 'none';
+        }, 500);
+    }
+    function showCopyNotice() {
+        const el = document.getElementById('copyNotice');
+        if(el) {
+            el.style.opacity = '1';
+            el.style.transform = 'translateY(0)';
+            setTimeout(() => {
+                el.style.opacity = '0';
+                el.style.transform = 'translateY(100px)';
+            }, 2000);
+        }
+    }
+    // ==========================================================================
+    // ERROR HANDLING (Styled inline messages instead of alert())
+    // ==========================================================================
+    let errorToastTimeout = null;
+    /**
+     * Show inline error (for form validation errors - appears below the form)
+     */
+    function showInlineError(message) {
+        const errorDiv = document.getElementById('inlineError');
+        const errorText = document.getElementById('inlineErrorText');
+        errorText.textContent = message;
+        errorDiv.classList.remove('show');
+        // Force reflow to restart animation
+        void errorDiv.offsetWidth;
+        errorDiv.classList.add('show');
+        // Auto-hide after 8 seconds
+        setTimeout(() => {
+            hideInlineError();
+        }, 8000);
+    }
+    function hideInlineError() {
+        const errorDiv = document.getElementById('inlineError');
+        errorDiv.classList.remove('show');
+    }
+    /**
+     * Show error toast (for API/network errors - appears at bottom of screen)
+     */
+    function showErrorToast(message, duration = 6000) {
+        const toast = document.getElementById('errorToast');
+        const toastText = document.getElementById('errorToastText');
+        // Clear any existing timeout
+        if (errorToastTimeout) {
+            clearTimeout(errorToastTimeout);
+        }
+        toastText.textContent = message;
+        toast.classList.add('show');
+        // Auto-hide after duration
+        errorToastTimeout = setTimeout(() => {
+            hideErrorToast();
+        }, duration);
+    }
+    function hideErrorToast() {
+        const toast = document.getElementById('errorToast');
+        toast.classList.remove('show');
+        if (errorToastTimeout) {
+            clearTimeout(errorToastTimeout);
+            errorToastTimeout = null;
+        }
+    }
+    function toggleQuickStart() {
+        const card = document.getElementById('quickStartCard');
+        const icon = document.getElementById('quickStartToggleIcon');
+        const trigger = card.querySelector('.collapsible-trigger');
+        if (card.classList.contains('collapsed')) {
+            card.classList.remove('collapsed');
+            icon.textContent = '−';
+            trigger.setAttribute('aria-expanded', 'true');
+        } else {
+            card.classList.add('collapsed');
+            icon.textContent = '+';
+            trigger.setAttribute('aria-expanded', 'false');
+        }
+    }
+    function toggleJobSearch() {
+        const card = document.getElementById('jobSearchCard');
+        const icon = document.getElementById('jobSearchToggle');
+        const trigger = card.querySelector('.collapsible-trigger');
+        if (card.classList.contains('collapsed')) {
+            card.classList.remove('collapsed');
+            icon.textContent = '−';
+            trigger.setAttribute('aria-expanded', 'true');
+        } else {
+            card.classList.add('collapsed');
+            icon.textContent = '+';
+            trigger.setAttribute('aria-expanded', 'false');
+        }
+    }
+    function collapseAllCards() {
+        // Collapse Quick Start
+        const quickStartCard = document.getElementById('quickStartCard');
+        const quickStartIcon = document.getElementById('quickStartToggleIcon');
+        if (quickStartCard && !quickStartCard.classList.contains('collapsed')) {
+            quickStartCard.classList.add('collapsed');
+            quickStartIcon.textContent = '+';
+            quickStartCard.querySelector('.collapsible-trigger').setAttribute('aria-expanded', 'false');
+        }
+        // Collapse Job Search
+        const jobSearchCard = document.getElementById('jobSearchCard');
+        const jobSearchIcon = document.getElementById('jobSearchToggle');
+        if (jobSearchCard && !jobSearchCard.classList.contains('collapsed')) {
+            jobSearchCard.classList.add('collapsed');
+            jobSearchIcon.textContent = '+';
+            jobSearchCard.querySelector('.collapsible-trigger').setAttribute('aria-expanded', 'false');
+        }
+    }
+    
+    // Toggle kit cards (Application Kit, Interview Kit, Outreach Kit)
+    function toggleKit(kitName) {
+        const card = document.getElementById(kitName + 'KitCard');
+        const icon = document.getElementById(kitName + 'KitToggle');
+        const trigger = card.querySelector('.collapsible-trigger');
+        if (card.classList.contains('collapsed')) {
+            card.classList.remove('collapsed');
+            icon.textContent = '−';
+            trigger.setAttribute('aria-expanded', 'true');
+        } else {
+            card.classList.add('collapsed');
+            icon.textContent = '+';
+            trigger.setAttribute('aria-expanded', 'false');
+        }
+    }
+    // ==========================================================================
+    // MAIN ANALYSIS LOGIC (Two-call architecture)
+    // ==========================================================================
+    async function analyzeJob() {
+        const jd = document.getElementById('jobDescription').value.trim();
+        // Hide any previous inline error
+        hideInlineError();
+        // Collapse both helper cards
+        collapseAllCards();
+        
+        // Get resume text
+        resumeText = document.getElementById('resumeText').value.trim();
+        if (!resumeText) { 
+            showInlineError("Please paste your resume first.");
+            return; 
+        }
+        if (resumeText.length < 100) { 
+            showInlineError("Resume is too short. Please provide more details.");
+            return; 
+        }
+        if (!jd) { 
+            showInlineError("Please paste a job description.");
+            return; 
+        }
+        // UI Reset
+        document.getElementById('analysisResults').style.display = 'none';
+        const btn = document.getElementById('analyzeBtn');
+        const btnText = document.getElementById('btnText');
+        btn.disabled = true;
+        btnText.textContent = "Analyzing...";
+        // START THE NEW ANIMATION (Auto-Scrolls now!)
+        startLoadingAnim(); 
+        let lastError = null;
+        
+        // === CALL 1: Resume Fit Analysis ===
+        for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+            try {
+                if (attempt > 1) {
+                    btnText.textContent = `Retry ${attempt}/${MAX_RETRIES}...`;
+                    await sleep(RETRY_DELAY_MS);
+                }
+                const response = await fetch(API_ENDPOINT, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        job_description: jd,
+                        resume_text: resumeText,
+                        request_type: 'resume_match' 
+                    })
+                });
+                const data = await response.json();
+                // Handle rate limiting (429) - don't retry, just inform user
+                if (response.status === 429) {
+                    stopLoadingAnim();
+                    const retryMinutes = data.retryAfter ? Math.ceil(data.retryAfter / 60) : 5;
+                    showErrorToast(data.error || `Rate limit exceeded. Please try again in ${retryMinutes} minutes.`, 10000);
+                    btn.disabled = false;
+                    btnText.textContent = "Analyze Match";
+                    return;
+                }
+                if (!response.ok) {
+                    throw new Error(data.error || `Server Error ${response.status}`);
+                }
+                // Success - Call 1 complete
+                analysisData = data;
+                // STOP ANIMATION
+                stopLoadingAnim();
+                // Wait 500ms for the animation to finish closing, then show results
+                setTimeout(() => {
+                    renderResults(data);
+                }, 500);
+                btn.disabled = false;
+                btnText.textContent = "Analyze Match";
+                
+                // === CALL 2: Market Intel (runs in background, non-blocking) ===
+                fetchMarketIntel(jd, data.job_title, data.company);
+                
+                return;
+            } catch (error) {
+                console.error(`Attempt ${attempt} failed:`, error);
+                lastError = error;
+                // Don't retry for non-transient errors
+                if (!error.message.includes('fetch') && !error.message.includes('timed out') && !error.message.includes('unavailable')) {
+                    break;
+                }
+            }
+        }
+        // Failure
+        stopLoadingAnim();
+        showErrorToast(`Analysis failed after ${MAX_RETRIES} attempts: ${lastError?.message || 'Unknown error'}`, 8000);
+        btn.disabled = false;
+        btnText.textContent = "Analyze Match";
+    }
+    
+    // === CALL 2: Market Intel (Background fetch) ===
+    async function fetchMarketIntel(jobDescription, jobTitle, company) {
+        // Show loading state in intel panels
+        const intelSection = document.getElementById('jobIntelSection');
+        if (intelSection) {
+            intelSection.style.display = 'block';
+            document.getElementById('salaryRange').textContent = 'Loading...';
+            document.getElementById('competitionLevel').textContent = 'Loading...';
+        }
+        
+        try {
+            const response = await fetch(API_ENDPOINT, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    request_type: 'market_intel',
+                    job_description: jobDescription,
+                    job_title: jobTitle,
+                    company: company
+                })
+            });
+            
+            if (!response.ok) {
+                throw new Error('Market intel request failed');
+            }
+            
+            const intelData = await response.json();
+            
+            // Merge intel data into analysisData
+            if (analysisData) {
+                analysisData.salary_intel = intelData.salary_intel;
+                analysisData.competition = intelData.competition;
+                analysisData.flags = intelData.flags;
+                analysisData.company_intel = intelData.company_intel;
+                analysisData.timeline = intelData.timeline;
+            }
+            
+            // Render the intel sections
+            renderJobIntel(analysisData);
+            renderCompanyIntel(analysisData);
+            
+            console.log('[MARKET INTEL] Successfully loaded');
+        } catch (error) {
+            console.error('[MARKET INTEL] Failed:', error.message);
+            // Hide intel section on failure - don't show fake data
+            if (intelSection) {
+                intelSection.style.display = 'none';
+            }
+        }
+    }
+    // ==========================================================================
+    // RENDER RESULTS
+    // ==========================================================================
+    function renderResults(data) {
+        document.getElementById('analysisResults').style.display = 'block';
+        // 1. Score Hero
+        const scoreClass = data.score >= 80 ? 'score-high' : (data.score >= 60 ? 'score-mid' : 'score-low');
+        const scoreHTML = `
+            <div class="score-box">
+                <div class="score-val">${data.score}%</div>
+                <div class="score-label">Match Score</div>
+            </div>
+            <div class="verdict-box">
+                <h3 style="margin-bottom: 8px;">${escapeHtml(data.verdict)}</h3>
+                <p style="opacity: 0.7; font-size: 14px;">
+                    <strong>Role:</strong> ${escapeHtml(data.job_title)}<br>
+                    <strong>Company:</strong> ${escapeHtml(data.company)}
+                </p>
+            </div>
+        `;
+        const scoreContainer = document.getElementById('matchScoreContainer');
+        scoreContainer.className = `hero-grid ${scoreClass}`;
+        scoreContainer.innerHTML = scoreHTML;
+        
+        // NEW: Count strengths and gaps for stats
+        const gaps = data.analysis ? data.analysis.filter(x => /gap|risk|missing/i.test(x)) : [];
+        const matches = data.analysis ? data.analysis.filter(x => !/gap|risk|missing/i.test(x)) : [];
+        
+        // NEW: Update stats grid
+        document.getElementById('strengthsCount').textContent = matches.length;
+        document.getElementById('gapsCount').textContent = gaps.length;
+        
+        // NEW: Keywords stats
+        const keywords = data.keywords || [];
+        const matchedKeywords = keywords.filter(k => k.in_resume);
+        const keywordsPercent = keywords.length > 0 ? Math.round((matchedKeywords.length / keywords.length) * 100) : 0;
+        document.getElementById('keywordsPercent').textContent = `${keywordsPercent}%`;
+        document.getElementById('keywordsSub').textContent = `${matchedKeywords.length} of ${keywords.length} matched`;
+        document.getElementById('keywordsCountLabel').textContent = `${matchedKeywords.length} matched, ${keywords.length - matchedKeywords.length} missing`;
+        
+        // NEW: Salary/competition placeholders (will be updated by market intel)
+        document.getElementById('salaryEstimate').textContent = '$---K';
+        document.getElementById('salarySub').textContent = 'Loading...';
+        document.getElementById('competitionValue').textContent = '---';
+        document.getElementById('competitionSub').textContent = 'Analyzing...';
+        document.getElementById('timelineValue').textContent = '---';
+        
+        // NEW: Mascot Insight
+        const insightText = document.getElementById('insightText');
+        if (data.score >= 80) {
+            insightText.innerHTML = `<strong>Strong fit.</strong> You hit most of their requirements. Focus on your wins in the interview and you should be competitive.`;
+        } else if (data.score >= 60) {
+            insightText.innerHTML = `<strong>Good match with gaps.</strong> You have solid alignment but there are a few areas to address. Prepare talking points for the gaps below.`;
+        } else {
+            insightText.innerHTML = `<strong>Some gaps to consider.</strong> Review the analysis below to understand where you align and where you might need to strengthen your pitch.`;
+        }
+        
+        // NEW: Render keywords in new box
+        const keywordCloudNew = document.getElementById('keywordCloudNew');
+        keywordCloudNew.innerHTML = '';
+        keywords.forEach(k => {
+            const tag = document.createElement('span');
+            tag.className = `keyword-tag ${k.in_resume ? 'in-resume' : 'missing'}`;
+            tag.textContent = k.keyword || k;
+            keywordCloudNew.appendChild(tag);
+        });
+        
+        // NEW: Render strengths in new box
+        const strengthsList = document.getElementById('strengthsList');
+        strengthsList.innerHTML = '';
+        matches.forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'strength-item';
+            div.innerHTML = `<div class="strength-item-header">Strategic Match</div>${escapeHtml(item.replace(/^(Match:|Strength:)/i, '').trim())}`;
+            strengthsList.appendChild(div);
+        });
+        document.getElementById('strengthsBox').style.display = matches.length > 0 ? 'block' : 'none';
+        
+        // 2. Analysis List (gaps only now)
+        const list = document.getElementById('analysisList');
+        list.innerHTML = '';
+        gaps.forEach(item => {
+            const li = document.createElement('li');
+            li.className = 'analysis-item item-gap';
+            li.innerHTML = `<strong>Gap / Risk</strong> ${escapeHtml(item.replace(/^(Match:|Gap:|Risk:)/i, ''))}`;
+            list.appendChild(li);
+        });
+        
+        // 3. Interview Questions
+        const qList = document.getElementById('interviewQuestionsList');
+        qList.innerHTML = '';
+        if (data.interview_questions && data.interview_questions.length > 0) {
+            data.interview_questions.forEach((q, i) => {
+                qList.innerHTML += `
+                    <div class="qa-card">
+                        <div class="qa-q">Q${i+1}: ${escapeHtml(q.question)}</div>
+                        <div class="qa-a">${escapeHtml(q.suggested_answer)}</div>
+                    </div>`;
+            });
+        } else {
+             document.getElementById('interviewQuestionsSection').style.display = 'none';
+        }
+        // 4. Gap Strategies
+        const gList = document.getElementById('gapStrategiesList');
+        gList.innerHTML = '';
+        if (data.gap_strategies && data.gap_strategies.length > 0) {
+            document.getElementById('gapStrategiesSection').style.display = 'block';
+            data.gap_strategies.forEach(s => {
+                gList.innerHTML += `
+                    <div class="qa-card" style="border-left: 6px solid var(--accent-clay);">
+                        <div class="qa-q" style="background:#fff; border-bottom:1px solid #eee;">Gap: ${escapeHtml(s.gap)}</div>
+                        <div class="qa-a">
+                            <strong>Strategy:</strong> ${escapeHtml(s.strategy)}<br><br>
+                            <em>"${escapeHtml(s.talking_points)}"</em>
+                        </div>
+                    </div>`;
+            });
+        } else {
+            document.getElementById('gapStrategiesSection').style.display = 'none';
+        }
+        // 5. Generate Resume Preview (now inside Application Kit)
+        generateResumeHTML(data.tailored_summary);
+        // Reset Intro Email
+        document.getElementById('coverLetterDisplay').style.display = 'none';
+        document.getElementById('coverLetterPlaceholder').style.display = 'block';
+        document.getElementById('copyCLBtn').style.display = 'none';
+        
+        // 6. Render Keywords (inside Application Kit) - keep for backward compat
+        renderKeywords(data);
+        
+        // 7. Render Network Finder (inside Outreach Kit)
+        renderNetworkFinder(data);
+        
+        // 8. Render Follow-up Templates (inside Outreach Kit)
+        renderTemplates(data);
+        
+        // 9. Show save to tracker button
+        document.getElementById('saveToTrackerSection').style.display = 'block';
+        
+        // NOTE: Job Intel (salary, competition, timeline) and Flags are rendered 
+        // by fetchMarketIntel() when Call 2 completes (runs in background)
+        // Hide intel section initially - it'll show when data arrives
+        document.getElementById('jobIntelSection').style.display = 'none';
+    }
+    // ==========================================================================
+    // TAILORED SUMMARY DISPLAY
+    // ==========================================================================
+    function generateResumeHTML(aiSummary) {
+        const out = document.getElementById('resumeOutput');
+        out.innerHTML = `<h3 style="font-size: 14px; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Tailored Executive Summary</h3>
+            <p style="line-height: 1.7;">${escapeHtml(aiSummary)}</p>
+            <p style="margin-top: 16px; font-size: 12px; opacity: 0.6;">Copy this summary and paste it into your resume, replacing your current executive summary.</p>`;
+    }
+    // ==========================================================================
+    // INTRO EMAIL & UTILS
+    // ==========================================================================
+    async function generateCoverLetter() {
+        if (!analysisData || !resumeText) return;
+        const btn = document.getElementById('generateCoverLetterBtn');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = "Writing Email..."; 
+        btn.disabled = true;
+        try {
+            const res = await fetch(API_ENDPOINT, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    request_type: "generate_intro_email", 
+                    job_description: document.getElementById("jobDescription").value,
+                    resume_text: resumeText,
+                    analysis_data: analysisData 
+                })
+            });
+            const data = await res.json();
+            if(data.intro_email) {
+                let cleanLetter = data.intro_email.replace(/\[.*?\]/g, '').trim();
+                document.getElementById('coverLetterDisplay').textContent = cleanLetter;
+                document.getElementById('coverLetterDisplay').style.display = 'block';
+                document.getElementById('coverLetterPlaceholder').style.display = 'none';
+                document.getElementById('copyCLBtn').style.display = 'inline-block';
+            } else {
+                throw new Error("No intro email returned");
+            }
+        } catch(e) { 
+            showErrorToast("Error generating email: " + e.message); 
+        } finally { 
+            btn.innerHTML = originalText; 
+            btn.disabled = false; 
+        }
+    }
+    function copyResume() { 
+        const btn = event.currentTarget;
+        const originalText = btn.textContent;
+        const text = document.getElementById('resumeOutput').innerText;
+        navigator.clipboard.writeText(text).then(() => {
+            btn.textContent = '✓ Copied!';
+            btn.classList.add('copy-success');
+            setTimeout(() => {
+                btn.textContent = originalText;
+                btn.classList.remove('copy-success');
+            }, 1500);
+        });
+    }
+    function copyCoverLetter() { 
+        const btn = event.currentTarget;
+        const originalText = btn.textContent;
+        const text = document.getElementById('coverLetterDisplay').innerText;
+        navigator.clipboard.writeText(text).then(() => {
+            btn.textContent = '✓ Copied!';
+            btn.classList.add('copy-success');
+            setTimeout(() => {
+                btn.textContent = originalText;
+                btn.classList.remove('copy-success');
+            }, 1500);
+        });
+    }
+    function clearAll() { 
+        // Clear job description and results, but KEEP the resume
+        document.getElementById('jobDescription').value = ''; 
+        document.getElementById('analysisResults').style.display = 'none';
+        analysisData = null;
+        // Note: resumeText and resumeText textarea are preserved for the next job
+        clearExpertChat();
+    }
+    
+    function clearEverything() {
+        // Full reset including resume
+        document.getElementById('resumeText').value = '';
+        document.getElementById('resumeSelector').value = '';
+        document.getElementById('jobDescription').value = ''; 
+        document.getElementById('analysisResults').style.display = 'none';
+        analysisData = null;
+        resumeText = '';
+        clearExpertChat();
+    }
+    
+    function clearResume() {
+        document.getElementById('resumeText').value = '';
+        document.getElementById('resumeSelector').value = '';
+        resumeText = '';
+    }
+    
+    function loadSampleData() {
+        // Sample resume - John Doe, federal sales professional
+        const sampleResume = `JOHN DOE
+Arlington, VA | johndoe@email.com | (703) 555-1234
 
-function toggleQuickStart() { const c = document.getElementById('quickStartCard'), i = document.getElementById('quickStartToggleIcon'); c.classList.toggle('collapsed'); i.textContent = c.classList.contains('collapsed') ? '+' : '−'; }
-function toggleKit(t) { const c = document.getElementById(t + 'KitCard'), i = document.getElementById(t + 'KitToggle'); c.classList.toggle('collapsed'); i.textContent = c.classList.contains('collapsed') ? '+' : '−'; }
-function getSavedResumes() { try { return JSON.parse(localStorage.getItem(RESUME_STORAGE_KEY) || '{}'); } catch (e) { return {}; } }
-function updateResumeSelector() { const r = getSavedResumes(), s = document.getElementById('resumeSelector'), n = Object.keys(r); s.innerHTML = '<option value="">Select saved...</option>'; n.forEach(name => { s.innerHTML += `<option value="${escapeHtml(name)}">${escapeHtml(name)}</option>`; }); s.innerHTML += '<option value="__delete__">🗑️ Delete...</option>'; }
-function saveResume() { const t = document.getElementById('resumeText').value.trim(); if (!t) { showErrorToast('Please enter resume text first.'); return; } const n = prompt('Name this resume:'); if (!n) return; const r = getSavedResumes(); r[n.trim()] = { text: t, savedAt: new Date().toISOString() }; try { localStorage.setItem(RESUME_STORAGE_KEY, JSON.stringify(r)); updateResumeSelector(); document.getElementById('resumeSelector').value = n.trim(); showErrorToast(`Resume "${n.trim()}" saved.`, 3000); } catch (e) { showErrorToast('Could not save resume.'); } }
-function loadSavedResume() { const s = document.getElementById('resumeSelector'), v = s.value; if (!v) return; if (v === '__delete__') { s.value = ''; deleteResumePrompt(); return; } const r = getSavedResumes(); if (r[v]) { document.getElementById('resumeText').value = r[v].text; showErrorToast(`Loaded "${v}"`, 2000); } }
-function deleteResumePrompt() { const r = getSavedResumes(), n = Object.keys(r); if (n.length === 0) { showErrorToast('No saved resumes to delete.'); return; } const name = prompt('Enter the exact name of the resume to delete:\n\nSaved: ' + n.join(', ')); if (!name) return; if (r[name]) { delete r[name]; localStorage.setItem(RESUME_STORAGE_KEY, JSON.stringify(r)); updateResumeSelector(); showErrorToast(`Deleted "${name}"`, 3000); } else { showErrorToast(`Resume "${name}" not found.`); } }
-function loadLastUsedResume() { const r = getSavedResumes(), n = Object.keys(r); if (n.length > 0) { let m = n[0], t = r[n[0]].savedAt || ''; n.forEach(name => { if (r[name].savedAt > t) { m = name; t = r[name].savedAt; } }); document.getElementById('resumeText').value = r[m].text; document.getElementById('resumeSelector').value = m; } }
-function handleFileUpload(e) { const f = e.target.files[0]; if (!f) return; const r = new FileReader(); r.onload = (ev) => { document.getElementById('resumeText').value = ev.target.result; showErrorToast('File uploaded!', 2000); }; r.readAsText(f); }
-function escapeHtml(s) { if (!s) return ''; return s.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'})[m]); }
-function startLoadingAnim() { const c = document.getElementById('loadingCard'), s = document.getElementById('loadingStep'), b = document.getElementById('loadingProgress'); c.style.display = 'block'; document.getElementById('analysisResults').style.display = 'none'; c.scrollIntoView({ behavior: 'smooth', block: 'center' }); let i = 0; const steps = [{pct:15,msg:"Reading Job Description..."},{pct:35,msg:"Extracting Key Requirements..."},{pct:55,msg:"Comparing Against Profile..."},{pct:75,msg:"Identifying Strategic Gaps..."},{pct:90,msg:"Drafting Interview Questions..."},{pct:95,msg:"Finalizing Strategy..."}]; b.style.width = '5%'; s.innerText = steps[0].msg; loadingInterval = setInterval(() => { if (i < steps.length) { b.style.width = `${steps[i].pct}%`; s.innerText = steps[i].msg; i++; } }, 800); }
-function stopLoadingAnim() { clearInterval(loadingInterval); document.getElementById('loadingProgress').style.width = '100%'; document.getElementById('loadingStep').innerText = "Analysis Complete!"; setTimeout(() => { document.getElementById('loadingCard').style.display = 'none'; }, 500); }
-let errorToastTimeout = null;
-function showInlineError(m) { const e = document.getElementById('inlineError'), t = document.getElementById('inlineErrorText'); t.textContent = m; e.classList.remove('show'); void e.offsetWidth; e.classList.add('show'); setTimeout(() => e.classList.remove('show'), 8000); }
-function showErrorToast(m, d = 6000) { const t = document.getElementById('errorToast'), txt = document.getElementById('errorToastText'); if (errorToastTimeout) clearTimeout(errorToastTimeout); txt.textContent = m; t.classList.add('show'); errorToastTimeout = setTimeout(() => t.classList.remove('show'), d); }
-function hideErrorToast() { document.getElementById('errorToast').classList.remove('show'); }
-function showCopyNotice() { const e = document.getElementById('copyNotice'); e.classList.add('show'); setTimeout(() => e.classList.remove('show'), 2000); }
-async function analyzeJob() { const jd = document.getElementById('jobDescription').value.trim(); resumeText = document.getElementById('resumeText').value.trim(); document.getElementById('inlineError').classList.remove('show'); if (!jd) { showInlineError('Please enter a job description or URL.'); return; } if (!resumeText) { showInlineError('Please enter your resume text first.'); return; } const btn = document.getElementById('analyzeBtn'), btnText = document.getElementById('analyzeBtnText'); btn.disabled = true; btnText.textContent = "Analyzing..."; startLoadingAnim(); try { const res = await fetch(API_ENDPOINT, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ request_type: 'resume_match', job_description: jd, resume_text: resumeText }) }); if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.error || `Request failed (${res.status})`); } const data = await res.json(); if (data.error) throw new Error(data.error); stopLoadingAnim(); analysisData = data; renderResults(data); fetchMarketIntel(jd, data.job_title, data.company); } catch (e) { stopLoadingAnim(); showErrorToast(`Analysis failed: ${e.message}`, 8000); } btn.disabled = false; btnText.textContent = "Analyze Match"; }
-async function fetchMarketIntel(jd, jt, co) { try { const res = await fetch(API_ENDPOINT, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ request_type: 'market_intel', job_description: jd, job_title: jt, company: co }) }); if (!res.ok) throw new Error('Failed'); const d = await res.json(); if (analysisData) { analysisData.salary_intel = d.salary_intel; analysisData.competition = d.competition; analysisData.timeline = d.timeline; } renderJobIntel(analysisData); } catch (e) { console.error('[MARKET INTEL]', e.message); } }
-function renderResults(d) { document.getElementById('analysisResults').style.display = 'block'; const sh = document.getElementById('scoreHero'); const sc = d.score >= 85 ? 'score-excellent' : d.score >= 70 ? 'score-good' : d.score >= 50 ? 'score-moderate' : 'score-low'; sh.className = `score-hero ${sc}`; document.getElementById('scoreValue').textContent = `${d.score}%`; document.getElementById('jobTitle').textContent = d.job_title || 'Unknown Role'; document.getElementById('jobCompany').textContent = d.company || 'Unknown Company'; document.getElementById('jobVerdict').textContent = d.verdict || 'Analysis Complete'; const gaps = d.analysis?.filter(x => /gap|risk|missing/i.test(x)) || []; const strengths = d.analysis?.filter(x => !/gap|risk|missing/i.test(x)) || []; document.getElementById('strengthsCount').textContent = strengths.length; document.getElementById('gapsCount').textContent = gaps.length; const kw = d.keywords || []; const matched = kw.filter(k => k.in_resume); const pct = kw.length > 0 ? Math.round((matched.length / kw.length) * 100) : 0; document.getElementById('keywordsPercent').textContent = `${pct}%`; document.getElementById('keywordsSub').textContent = `${matched.length} of ${kw.length} matched`; document.getElementById('keywordsCount').textContent = `${matched.length} matched, ${kw.length - matched.length} missing`; document.getElementById('salaryEstimate').textContent = '$---K'; document.getElementById('salarySub').textContent = 'Loading...'; document.getElementById('competitionValue').textContent = '---'; document.getElementById('competitionSub').textContent = 'Analyzing...'; document.getElementById('timelineValue').textContent = '---'; const it = document.getElementById('insightText'); if (d.score >= 80) it.innerHTML = `<strong>Strong fit.</strong> You hit most of their requirements. Focus on your wins in the interview.`; else if (d.score >= 60) it.innerHTML = `<strong>Good match with gaps.</strong> You have solid alignment but some areas to address.`; else it.innerHTML = `<strong>Some gaps to consider.</strong> Review the analysis to understand where to strengthen your pitch.`; renderKeywords(d); const sl = document.getElementById('strengthsList'); sl.innerHTML = ''; strengths.forEach(item => { const div = document.createElement('div'); div.className = 'analysis-item strength'; div.innerHTML = `<div class="analysis-item-header">Strategic Match</div><div>${escapeHtml(item.replace(/^(Match:|Strength:)/i, '').trim())}</div>`; sl.appendChild(div); }); document.getElementById('strengthsSection').style.display = strengths.length ? 'block' : 'none'; const gl = document.getElementById('gapsList'); gl.innerHTML = ''; gaps.forEach(item => { const div = document.createElement('div'); div.className = 'analysis-item gap'; div.innerHTML = `<div class="analysis-item-header">Gap / Risk</div><div>${escapeHtml(item.replace(/^(Gap:|Risk:|Missing:)/i, '').trim())}</div>`; gl.appendChild(div); }); document.getElementById('gapsSection').style.display = gaps.length ? 'block' : 'none'; const ql = document.getElementById('interviewQuestionsList'); ql.innerHTML = ''; if (d.interview_questions?.length > 0) { d.interview_questions.forEach((q, i) => { ql.innerHTML += `<div class="qa-card"><div class="qa-question">Q${i+1}: ${escapeHtml(q.question)}</div><div class="qa-answer">${escapeHtml(q.suggested_answer)}</div></div>`; }); document.getElementById('interviewQuestionsSection').style.display = 'block'; } else { document.getElementById('interviewQuestionsSection').style.display = 'none'; } const gsl = document.getElementById('gapStrategiesList'); gsl.innerHTML = ''; if (d.gap_strategies?.length > 0) { document.getElementById('gapStrategiesSection').style.display = 'block'; d.gap_strategies.forEach(s => { gsl.innerHTML += `<div class="qa-card"><div class="qa-question" style="background: var(--accent-coral);">Gap: ${escapeHtml(s.gap)}</div><div class="qa-answer"><strong>Strategy:</strong> ${escapeHtml(s.strategy)}<br><br><em>"${escapeHtml(s.talking_points)}"</em></div></div>`; }); } else { document.getElementById('gapStrategiesSection').style.display = 'none'; } document.getElementById('resumeOutput').innerHTML = `<p style="line-height: 1.8;">${escapeHtml(d.tailored_summary || 'Summary will appear here.')}</p>`; document.getElementById('coverLetterDisplay').style.display = 'none'; document.getElementById('coverLetterPlaceholder').style.display = 'block'; document.getElementById('copyCLBtn').style.display = 'none'; renderNetworkFinder(d); renderTemplates(d); document.getElementById('saveToTrackerSection').style.display = 'block'; document.getElementById('scoreHero').scrollIntoView({ behavior: 'smooth', block: 'start' }); }
-function renderKeywords(d) { const c = document.getElementById('keywordCloud'); c.innerHTML = ''; (d.keywords || []).forEach(k => { const t = document.createElement('span'); t.className = `keyword-tag ${k.in_resume ? 'matched' : 'missing'}`; t.textContent = k.keyword || k; c.appendChild(t); }); }
-function renderJobIntel(d) { if (d.salary_intel) { const s = d.salary_intel; document.getElementById('salaryEstimate').textContent = `$${s.mid || s.low}K`; document.getElementById('salarySub').textContent = `$${s.low}K - $${s.high}K`; } if (d.competition) { document.getElementById('competitionValue').textContent = d.competition.level || 'Unknown'; document.getElementById('competitionSub').textContent = d.competition.reasoning || ''; } if (d.timeline) { const t = d.timeline; document.getElementById('timelineValue').textContent = `${t.total_weeks_low || 4}-${t.total_weeks_high || 8} wks`; } }
-function renderNetworkFinder(d) { const c = document.getElementById('networkLinksContainer'); const co = encodeURIComponent(d.company || ''); c.innerHTML = `<a href="https://www.linkedin.com/search/results/people/?keywords=${co}" target="_blank" class="network-link">Find People at ${escapeHtml(d.company || 'Company')}</a><a href="https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent(d.job_title || '')}" target="_blank" class="network-link">Find Others in Role</a>`; }
-function renderTemplates(d) { const co = d.company || '[Company]', ro = d.job_title || '[Role]', mh = d.analysis?.filter(x => !/gap|risk/i.test(x)).slice(0, 2).join(', ') || 'relevant experience', st = d.salary_intel ? `$${d.salary_intel.mid}K` : '[Target Salary]'; document.getElementById('templateApplied').textContent = `Subject: Application for ${ro}\n\nHi [Recruiter Name],\n\nI recently applied for the ${ro} position at ${co} and wanted to reach out directly.\n\nMy background in ${mh} aligns well with what you're looking for.\n\nBest regards,\n[Your Name]`; document.getElementById('templateInterview').textContent = `Subject: Thank You – ${ro} Interview\n\nHi [Interviewer Name],\n\nThank you for taking the time to meet with me today regarding the ${ro} position.\n\nBest regards,\n[Your Name]`; document.getElementById('templateFollowup').textContent = `Subject: Checking In – ${ro} Position\n\nHi [Recruiter Name],\n\nI wanted to check in on the status of the ${ro} position at ${co}.\n\nBest regards,\n[Your Name]`; document.getElementById('templateNegotiate').textContent = `Subject: RE: ${ro} Offer Discussion\n\nHi [Recruiter/Hiring Manager],\n\nThank you for extending the offer for the ${ro} position.\n\nBased on my experience, I believe a base salary of ${st} would be appropriate.\n\nBest regards,\n[Your Name]`; showTemplate('applied'); }
-function showTemplate(t) { currentTemplate = t; ['applied', 'interview', 'followup', 'negotiate'].forEach(x => { const e = document.getElementById('template' + x.charAt(0).toUpperCase() + x.slice(1)); if (e) e.style.display = x === t ? 'block' : 'none'; }); document.querySelectorAll('.template-tab').forEach((tab, i) => { tab.classList.toggle('active', ['applied', 'interview', 'followup', 'negotiate'][i] === t); }); }
-function copyCurrentTemplate() { const e = document.getElementById('template' + currentTemplate.charAt(0).toUpperCase() + currentTemplate.slice(1)); if (e) { navigator.clipboard.writeText(e.textContent).then(() => showCopyNotice()); } }
-async function generateCoverLetter() { if (!analysisData || !resumeText) return; const btn = document.getElementById('generateCoverLetterBtn'); btn.innerHTML = "Writing..."; btn.disabled = true; try { const res = await fetch(API_ENDPOINT, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ request_type: 'generate_intro_email', job_description: document.getElementById('jobDescription').value, resume_text: resumeText, analysis_data: analysisData }) }); if (!res.ok) throw new Error('Failed'); const d = await res.json(); document.getElementById('coverLetterDisplay').textContent = d.intro_email || 'Error.'; document.getElementById('coverLetterDisplay').style.display = 'block'; document.getElementById('coverLetterPlaceholder').style.display = 'none'; document.getElementById('copyCLBtn').style.display = 'inline-flex'; } catch (e) { showErrorToast('Failed: ' + e.message); } btn.innerHTML = "Generate Email"; btn.disabled = false; }
-function copyCoverLetter() { navigator.clipboard.writeText(document.getElementById('coverLetterDisplay').textContent).then(() => showCopyNotice()); }
-function copySummary() { navigator.clipboard.writeText(document.getElementById('resumeOutput').textContent).then(() => showCopyNotice()); }
-async function askExpert() { const q = document.getElementById('recruiterQuestion').value.trim(); if (!q) { showErrorToast('Please enter a question.'); return; } if (!analysisData) { showErrorToast('Please analyze a job first.'); return; } const btn = document.getElementById('askRecruiterBtn'), btnText = document.getElementById('askRecruiterBtnText'); btn.disabled = true; btnText.textContent = "Thinking..."; const ch = document.getElementById('recruiterChatHistory'); ch.style.display = 'block'; ch.innerHTML += `<div class="recruiter-message user"><div class="user-label">You</div><p>${escapeHtml(q)}</p></div><div id="thinkingIndicator" class="recruiter-thinking">Thinking...</div>`; document.getElementById('recruiterQuestion').value = ''; chatHistory.push({ role: 'user', content: q }); try { const res = await fetch(API_ENDPOINT, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ request_type: 'ask_expert', question: q, job_description: document.getElementById('jobDescription').value, resume_text: resumeText, analysis_data: analysisData, chat_history: chatHistory }) }); if (!res.ok) throw new Error('Failed'); const d = await res.json(); const r = d.response || 'Sorry, I could not generate a response.'; const th = document.getElementById('thinkingIndicator'); if (th) th.remove(); ch.innerHTML += `<div class="recruiter-message assistant"><div class="recruiter-header"><img src="arti.png" alt="Expert" class="recruiter-avatar"><div><div class="recruiter-name">Expert</div><div class="recruiter-title">Federal Recruiting Specialist</div></div></div><p>${r.replace(/\n/g, '</p><p>')}</p></div>`; chatHistory.push({ role: 'assistant', content: r }); } catch (e) { const th = document.getElementById('thinkingIndicator'); if (th) th.remove(); showErrorToast('Failed: ' + e.message); } btn.disabled = false; btnText.textContent = "Ask"; }
-function clearExpertChat() { document.getElementById('recruiterChatHistory').innerHTML = ''; document.getElementById('recruiterChatHistory').style.display = 'none'; chatHistory = []; }
-let trackedJobs = [];
-function initTracker() { const s = localStorage.getItem('dougOMaticTracker'); if (s) { try { trackedJobs = JSON.parse(s); renderTracker(); } catch (e) { trackedJobs = []; } } }
-function saveToTracker() { if (!analysisData) return; const j = { id: Date.now(), company: analysisData.company || 'Unknown', role: analysisData.job_title || 'Unknown', score: analysisData.score || 0, status: 'saved', date: new Date().toLocaleDateString(), jd: document.getElementById('jobDescription').value.substring(0, 500), analysis: analysisData }; if (trackedJobs.some(x => x.company === j.company && x.role === j.role)) { showErrorToast('Already in tracker!'); return; } trackedJobs.unshift(j); localStorage.setItem('dougOMaticTracker', JSON.stringify(trackedJobs)); renderTracker(); const btn = document.getElementById('saveToTrackerBtn'); btn.textContent = '✓ Saved!'; btn.disabled = true; setTimeout(() => { btn.textContent = 'Save to Tracker'; btn.disabled = false; }, 2000); }
-function renderTracker() { const cnt = document.getElementById('trackerCount'), emp = document.getElementById('trackerEmpty'), tbl = document.getElementById('trackerTableContainer'), tb = document.getElementById('trackerBody'); cnt.textContent = `${trackedJobs.length} job${trackedJobs.length !== 1 ? 's' : ''} tracked`; if (trackedJobs.length === 0) { emp.style.display = 'block'; tbl.style.display = 'none'; return; } emp.style.display = 'none'; tbl.style.display = 'block'; tb.innerHTML = trackedJobs.map(j => `<tr><td><strong>${escapeHtml(j.company)}</strong></td><td>${escapeHtml(j.role)}</td><td><span class="intel-badge ${j.score >= 75 ? 'green' : j.score >= 50 ? 'gold' : 'clay'}">${j.score}%</span></td><td><select onchange="updateJobStatus(${j.id}, this.value)" style="padding: 4px 8px; font-size: 11px; border-radius: 4px; border: 1px solid rgba(0,0,0,0.15);"><option value="saved" ${j.status === 'saved' ? 'selected' : ''}>Saved</option><option value="applied" ${j.status === 'applied' ? 'selected' : ''}>Applied</option><option value="interviewing" ${j.status === 'interviewing' ? 'selected' : ''}>Interviewing</option><option value="offered" ${j.status === 'offered' ? 'selected' : ''}>Offered</option><option value="rejected" ${j.status === 'rejected' ? 'selected' : ''}>Rejected</option></select></td><td>${j.date}</td><td><div class="tracker-actions"><button class="tracker-btn" onclick="loadTrackedJob(${j.id})">Load</button><button class="tracker-btn" onclick="deleteTrackedJob(${j.id})">×</button></div></td></tr>`).join(''); }
-function updateJobStatus(id, s) { const j = trackedJobs.find(x => x.id === id); if (j) { j.status = s; localStorage.setItem('dougOMaticTracker', JSON.stringify(trackedJobs)); } }
-function loadTrackedJob(id) { const j = trackedJobs.find(x => x.id === id); if (j && j.analysis) { document.getElementById('jobDescription').value = j.jd || ''; analysisData = j.analysis; renderResults(j.analysis); window.scrollTo({ top: 0, behavior: 'smooth' }); } }
-function deleteTrackedJob(id) { if (confirm('Remove this job from tracker?')) { trackedJobs = trackedJobs.filter(x => x.id !== id); localStorage.setItem('dougOMaticTracker', JSON.stringify(trackedJobs)); renderTracker(); } }
-document.addEventListener('DOMContentLoaded', () => { initTracker(); updateResumeSelector(); loadLastUsedResume(); });
+CLEARANCE: Top Secret/SCI with Full Scope Polygraph
+
+SUMMARY
+Senior Federal Sales Executive with 15+ years driving revenue growth across Department of Defense and Intelligence Community accounts. Proven track record of closing $500M+ in federal cloud and IT contracts. Deep relationships with DoD CIOs, program executives, and acquisition leaders. Expert in navigating complex federal procurement cycles and building strategic partner ecosystems.
+
+EXPERIENCE
+
+Principal Federal Sales Manager | Major Cloud Provider | 2019-Present
+- Lead DoD sales territory generating $180M+ annual revenue
+- Closed $95M multi-year enterprise license agreement with Army customer
+- Built partner ecosystem of 25+ defense contractors driving 40% of pipeline
+- Achieved 145% of quota in FY23, 138% in FY22, President's Club both years
+- Manage relationships with DISA, Army, Navy, and Air Force accounts
+- Coordinate with solutions architects on technical requirements and ATO support
+
+Senior Account Executive, Defense | Enterprise Software Company | 2015-2019
+- Grew DoD territory from $12M to $67M in annual recurring revenue
+- Led capture of $45M IDIQ contract with Navy customer
+- Developed strategic account plans for top 15 DoD accounts
+- Partnered with Lockheed Martin, Northrop Grumman, and GDIT on joint pursuits
+- Consistently exceeded quota: 112%, 128%, 135%, 141% over four years
+
+Federal Account Manager | Defense Contractor | 2010-2015
+- Managed $35M book of business across Army and Intel Community accounts
+- Supported $200M program capture as sales lead
+- Built relationships with contracting officers and program managers
+- Transitioned 8 accounts from on-premise to cloud solutions
+
+Sales Representative | Technology Reseller | 2007-2010
+- Developed new business in federal civilian and DoD markets
+- Achieved Rookie of the Year, promoted twice in three years
+
+EDUCATION
+MBA, Georgetown University McDonough School of Business
+B.S. Business Administration, Penn State University
+
+CERTIFICATIONS
+- AWS Cloud Practitioner
+- Salesforce Certified Administrator
+- MEDDIC Sales Methodology Certified
+
+SKILLS
+Federal Sales, DoD Procurement, Cloud Solutions, Strategic Partnerships,
+Account Planning, Contract Negotiations, IDIQ/GWAC, FAR/DFARS,
+Executive Relationships, Pipeline Management, Salesforce, Quota Achievement`;
+
+        // Sample job description - AWS DoD Sales
+        const sampleJD = `Principal DoD Sales Representative
+Amazon Web Services (AWS) - Arlington, VA
+
+About the Role:
+AWS is seeking an experienced Principal DoD Sales Representative to drive adoption of cloud services across Department of Defense customers. You will be responsible for developing and executing sales strategies for a portfolio of DoD accounts, working closely with solutions architects, partners, and AWS leadership to accelerate cloud adoption.
+
+Basic Qualifications:
+- 10+ years of enterprise sales experience, with 7+ years selling to DoD customers
+- Active Top Secret/SCI clearance with Full Scope Polygraph
+- Track record of exceeding sales quotas of $50M+ annually
+- Experience selling cloud, SaaS, or enterprise software solutions
+- Bachelor's degree required
+
+Preferred Qualifications:
+- Experience selling cloud infrastructure (AWS, Azure, GCP)
+- Established relationships with DoD CIOs and program executives
+- Experience with DoD procurement vehicles (IDIQ, BPA, GWACs)
+- Understanding of FedRAMP, IL4/IL5/IL6 requirements
+- MBA or advanced degree
+- AWS certifications
+- Experience working with defense prime contractors and system integrators
+- MEDDIC or similar sales methodology experience
+
+Responsibilities:
+- Own full sales cycle for assigned DoD accounts
+- Develop account strategies and territory plans to exceed revenue targets
+- Build and maintain executive relationships with DoD customers
+- Collaborate with solutions architects on technical requirements
+- Coordinate with partners to drive joint opportunities
+- Provide accurate forecasting and pipeline management
+- Support ATO and security accreditation processes
+- Represent AWS at DoD industry events and conferences
+
+Compensation: $200,000 - $280,000 OTE (base + variable)
+Location: Arlington, VA (customer site visits required)
+
+Amazon is an Equal Opportunity Employer.`;
+
+        document.getElementById('resumeText').value = sampleResume;
+        document.getElementById('jobDescription').value = sampleJD;
+        document.getElementById('resumeSelector').value = '';
+        showErrorToast('Sample data loaded. Click "Analyze Match" to see how it works.', 4000);
+    }
+    // ==========================================================================
+    // ASK AN EXPERT
+    // ==========================================================================
+    let recruiterChatHistory = [];
+    async function askExpert() {
+        const questionInput = document.getElementById('recruiterQuestion');
+        const question = questionInput.value.trim();
+        if (!question) {
+            showErrorToast('Please enter a question.');
+            return;
+        }
+        if (!analysisData || !resumeText) {
+            showErrorToast('Please analyze a job first before asking questions.');
+            return;
+        }
+        const btn = document.getElementById('askRecruiterBtn');
+        const btnText = document.getElementById('askRecruiterBtnText');
+        const originalText = btnText.textContent;
+        const chatContainer = document.getElementById('recruiterChatHistory');
+        // Show chat container
+        chatContainer.style.display = 'block';
+        // Add user message to UI
+        const userMsg = document.createElement('div');
+        userMsg.className = 'recruiter-message user';
+        userMsg.innerHTML = `<span class="user-label">You</span><p>${escapeHtml(question)}</p>`;
+        chatContainer.appendChild(userMsg);
+        // Add to history
+        recruiterChatHistory.push({ role: 'user', content: question });
+        // Clear input
+        questionInput.value = '';
+        // Show thinking indicator
+        const thinkingEl = document.createElement('div');
+        thinkingEl.className = 'recruiter-thinking';
+        thinkingEl.textContent = 'Thinking...';
+        chatContainer.appendChild(thinkingEl);
+        // Scroll to bottom
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+        // Disable button
+        btnText.textContent = 'Asking...';
+        btn.disabled = true;
+        try {
+            const res = await fetch(API_ENDPOINT, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    request_type: 'ask_expert',
+                    question: question,
+                    job_description: document.getElementById('jobDescription').value,
+                    resume_text: resumeText,
+                    analysis_data: analysisData,
+                    chat_history: recruiterChatHistory.slice(-10)
+                })
+            });
+            const data = await res.json();
+            // Remove thinking indicator
+            thinkingEl.remove();
+            if (data.error) {
+                throw new Error(data.error);
+            }
+            if (data.response) {
+                // Add expert response to UI
+                const assistantMsg = document.createElement('div');
+                assistantMsg.className = 'recruiter-message assistant';
+                assistantMsg.innerHTML = formatExpertResponse(data.response);
+                chatContainer.appendChild(assistantMsg);
+                // Add to history
+                recruiterChatHistory.push({ role: 'assistant', content: data.response });
+                // Scroll to bottom
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            } else {
+                throw new Error('No response received');
+            }
+        } catch (e) {
+            thinkingEl.remove();
+            showErrorToast('Error: ' + e.message);
+        } finally {
+            btnText.textContent = originalText;
+            btn.disabled = false;
+        }
+    }
+    function formatExpertResponse(text) {
+        // Convert markdown-style formatting to HTML with proper paragraphs
+        let formatted = escapeHtml(text)
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\*(.*?)\*/g, '<em>$1</em>');
+        // Split into paragraphs and wrap each
+        const paragraphs = formatted.split(/\n\n+/).filter(p => p.trim());
+        const bodyHtml = paragraphs.map(p => `<p>${p.replace(/\n/g, '<br>')}</p>`).join('');
+        const headerHtml = `
+            <div class="recruiter-header">
+                <img src="arti.png" alt="Expert" class="recruiter-avatar">
+                <div class="recruiter-info">
+                    <div class="recruiter-name">Expert</div>
+                    <div class="recruiter-title">Federal Recruiting Specialist</div>
+                </div>
+            </div>
+        `;
+        return headerHtml + bodyHtml;
+    }
+    function clearExpertChat() {
+        recruiterChatHistory = [];
+        const chatContainer = document.getElementById('recruiterChatHistory');
+        if (chatContainer) {
+            chatContainer.innerHTML = '';
+            chatContainer.style.display = 'none';
+        }
+        const questionInput = document.getElementById('recruiterQuestion');
+        if (questionInput) {
+            questionInput.value = '';
+        }
+    }
+    
+    // ==========================================================================
+    // NEW: JOB INTEL DASHBOARD (Using AI-generated data)
+    // ==========================================================================
+    function renderJobIntel(data) {
+        // Only show if we have the new AI-generated intel fields
+        if (!data.salary_intel && !data.competition && !data.timeline) {
+            document.getElementById('jobIntelSection').style.display = 'none';
+            return;
+        }
+        
+        document.getElementById('jobIntelSection').style.display = 'block';
+        
+        // Salary Intelligence (from AI)
+        if (data.salary_intel) {
+            const sal = data.salary_intel;
+            document.getElementById('salaryRange').textContent = `$${sal.low}K - $${sal.high}K`;
+            document.getElementById('salaryLow').textContent = `$${sal.low}K`;
+            document.getElementById('salaryHigh').textContent = `$${sal.high}K`;
+            
+            // NEW: Update stat card
+            document.getElementById('salaryEstimate').textContent = `$${sal.mid}K`;
+            document.getElementById('salarySub').textContent = `$${sal.low}K - $${sal.high}K`;
+            
+            // Position the target marker
+            const range = sal.high - sal.low;
+            const targetPos = ((sal.mid - sal.low) / range) * 100;
+            const marker = document.querySelector('.salary-marker');
+            if (marker) {
+                marker.style.left = `${targetPos}%`;
+                marker.setAttribute('data-label', `Target: $${sal.mid}K`);
+            }
+            
+            // Add notes if available
+            const salaryIntel = document.getElementById('salaryIntel');
+            const existingNotes = salaryIntel.querySelector('.salary-notes');
+            if (existingNotes) existingNotes.remove();
+            if (sal.notes) {
+                const notesDiv = document.createElement('div');
+                notesDiv.className = 'salary-notes';
+                notesDiv.style.cssText = 'font-size: 12px; opacity: 0.7; margin-top: 8px; font-style: italic;';
+                notesDiv.textContent = sal.notes;
+                salaryIntel.appendChild(notesDiv);
+            }
+        }
+        
+        // Competition Level (from AI)
+        if (data.competition) {
+            document.getElementById('competitionLevel').textContent = data.competition.level;
+            document.getElementById('competitionDesc').textContent = data.competition.reasoning;
+            
+            // NEW: Update stat card
+            document.getElementById('competitionValue').textContent = data.competition.level;
+            document.getElementById('competitionSub').textContent = data.competition.reasoning;
+            
+            // Update the intel list based on competition analysis
+            const competitionIntel = document.getElementById('competitionIntel');
+            const existingList = competitionIntel.querySelector('.intel-list');
+            if (existingList) existingList.remove();
+        }
+        
+        // Hiring Timeline (from AI)
+        if (data.timeline) {
+            const tl = data.timeline;
+            
+            // NEW: Update stat card
+            document.getElementById('timelineValue').textContent = `${tl.total_weeks_low || 4}-${tl.total_weeks_high || 8} wks`;
+            
+            const timelineContainer = document.getElementById('hiringTimeline');
+            timelineContainer.innerHTML = `
+                <div class="timeline-step">
+                    <div class="timeline-dot">1</div>
+                    <div class="timeline-label">Apply</div>
+                    <div class="timeline-days">Today</div>
+                </div>
+                <div class="timeline-step">
+                    <div class="timeline-dot">2</div>
+                    <div class="timeline-label">Screen</div>
+                    <div class="timeline-days">${tl.screen_weeks} wks</div>
+                </div>
+                <div class="timeline-step">
+                    <div class="timeline-dot">3</div>
+                    <div class="timeline-label">Interview</div>
+                    <div class="timeline-days">${tl.interview_weeks} wks</div>
+                </div>
+                <div class="timeline-step">
+                    <div class="timeline-dot">4</div>
+                    <div class="timeline-label">Offer</div>
+                    <div class="timeline-days">${tl.offer_weeks} wks</div>
+                </div>
+            `;
+            
+            // Add timeline notes if available
+            if (tl.notes) {
+                const notesP = document.createElement('p');
+                notesP.style.cssText = 'font-size: 12px; opacity: 0.7; margin-top: 12px; text-align: center; font-style: italic;';
+                notesP.textContent = tl.notes;
+                timelineContainer.parentElement.appendChild(notesP);
+            }
+        }
+    }
+    
+    // ==========================================================================
+    // NEW: KEYWORD EXTRACTION (Using AI-generated data)
+    // ==========================================================================
+    function renderKeywords(data) {
+        const cloud = document.getElementById('keywordCloud');
+        cloud.innerHTML = '';
+        
+        // If no keywords, show message
+        if (!data.keywords || data.keywords.length === 0) {
+            cloud.innerHTML = '<span style="opacity: 0.6; font-size: 13px;">No keywords extracted</span>';
+            return;
+        }
+        
+        data.keywords.forEach(kw => {
+            const tag = document.createElement('span');
+            tag.className = `keyword-tag ${kw.in_resume ? 'in-resume' : 'missing'}`;
+            tag.innerHTML = `${escapeHtml(kw.term)}`;
+            
+            // Add importance indicator
+            if (kw.importance === 'critical') {
+                tag.innerHTML += ' <span style="font-size:9px; opacity:0.7;">★</span>';
+                tag.title = `CRITICAL: ${kw.in_resume ? 'Already in your resume' : 'Should add to resume'}`;
+            } else {
+                tag.title = kw.in_resume ? 'In your resume' : 'Consider adding';
+            }
+            
+            cloud.appendChild(tag);
+        });
+    }
+    
+    function copyKeywords() {
+        if (!analysisData || !analysisData.keywords) return;
+        const keywords = analysisData.keywords.map(k => k.term);
+        navigator.clipboard.writeText(keywords.join(', ')).then(() => {
+            showErrorToast('Keywords copied to clipboard!', 2000);
+        });
+    }
+    
+    // ==========================================================================
+    // COMPANY INTEL (renders inside Job Intel card)
+    // ==========================================================================
+    function renderCompanyIntel(data) {
+        const container = document.getElementById('companyIntelContainer');
+        container.innerHTML = '';
+        
+        // Only render if we have company intel
+        if (!data.company_intel || !data.company_intel.known) {
+            return;
+        }
+        
+        const ci = data.company_intel;
+        container.innerHTML = `
+            <div class="intel-panel" style="background: rgba(0,0,0,0.02);">
+                <div class="intel-panel-header">
+                    <div class="intel-panel-title">Company: ${escapeHtml(data.company || 'Unknown')}</div>
+                </div>
+                <ul class="intel-list">
+                    <li><span>Type</span><span>${escapeHtml(ci.type)}</span></li>
+                    <li><span>Size</span><span>${escapeHtml(ci.size)}</span></li>
+                    <li><span>Reputation</span><span style="text-align:right; max-width:55%;">${escapeHtml(ci.reputation)}</span></li>
+                    ${ci.recent_news && ci.recent_news !== 'None known' ? `<li><span>Recent News</span><span style="text-align:right; max-width:55%;">${escapeHtml(ci.recent_news)}</span></li>` : ''}
+                    ${ci.culture_notes && ci.culture_notes !== 'Unknown' ? `<li><span>Culture</span><span style="text-align:right; max-width:55%;">${escapeHtml(ci.culture_notes)}</span></li>` : ''}
+                </ul>
+            </div>
+        `;
+    }
+    
+    // ==========================================================================
+    // NEW: NETWORK FINDER (generates search URLs based on AI-identified company)
+    // ==========================================================================
+    function renderNetworkFinder(data) {
+        const company = data.company;
+        const container = document.getElementById('networkLinks');
+        const quickLinksContainer = document.getElementById('quickLinksContainer');
+        const quickLinksButtons = document.getElementById('quickLinksButtons');
+        
+        // If company is not specified, show message and hide quick links
+        if (!company || company === 'Not Specified' || company.toLowerCase().includes('not specified')) {
+            document.getElementById('networkCompany').textContent = 'Unknown Company';
+            container.innerHTML = '<span style="opacity: 0.6; font-size: 13px;">Company not identified - network search unavailable</span>';
+            if (quickLinksContainer) quickLinksContainer.style.display = 'none';
+            return;
+        }
+        
+        document.getElementById('networkCompany').textContent = company;
+        
+        const companyEncoded = encodeURIComponent(company);
+        
+        const linksHTML = `
+            <a href="https://www.linkedin.com/search/results/people/?keywords=${companyEncoded}%20AND%20(recruiter%20OR%20talent%20OR%20HR)" target="_blank" class="network-link">
+                Find Recruiters
+            </a>
+            <a href="https://www.linkedin.com/search/results/people/?keywords=${companyEncoded}%20AND%20(director%20OR%20VP%20OR%20executive)" target="_blank" class="network-link">
+                Find Executives
+            </a>
+            <a href="https://www.linkedin.com/search/results/people/?keywords=${companyEncoded}%20AND%20(army%20OR%20military%20OR%20veteran%20OR%20special%20operations)" target="_blank" class="network-link">
+                Find Veterans
+            </a>
+            <a href="https://www.glassdoor.com/Search/results.htm?keyword=${companyEncoded}" target="_blank" class="network-link">
+                Glassdoor
+            </a>
+            <a href="https://www.google.com/search?q=${companyEncoded}+federal+contracts+awards" target="_blank" class="network-link">
+                Contract News
+            </a>
+        `;
+        
+        // Populate both locations
+        container.innerHTML = linksHTML;
+        
+        if (quickLinksButtons && quickLinksContainer) {
+            quickLinksButtons.innerHTML = linksHTML;
+            quickLinksContainer.style.display = 'block';
+        }
+    }
+    
+    // ==========================================================================
+    // NEW: FOLLOW-UP TEMPLATES (Personalized with AI data)
+    // ==========================================================================
+    let currentTemplate = 'applied';
+    
+    function renderTemplates(data) {
+        const company = data.company && data.company !== 'Not Specified' ? data.company : '[Company]';
+        const role = data.job_title || '[Role]';
+        
+        // Get salary target for negotiation template
+        const salaryTarget = data.salary_intel ? `$${data.salary_intel.mid}K - $${data.salary_intel.high}K` : '[TARGET SALARY]';
+        const salaryReasoning = data.salary_intel ? data.salary_intel.notes : 'market research and role requirements';
+        
+        // Get top matches for the intro email
+        const topMatches = data.analysis ? data.analysis.filter(a => a.toLowerCase().startsWith('match:')).slice(0, 2) : [];
+        const matchHighlights = topMatches.length > 0 
+            ? topMatches.map(m => m.replace(/^match:\s*/i, '').split('→')[0].trim()).join(' and ')
+            : 'relevant federal market experience';
+        
+        document.getElementById('templateApplied').textContent = `Subject: Following Up – ${role} Application
+
+Hi [Recruiter Name],
+
+I recently submitted my application for the ${role} position at ${company} and wanted to follow up to express my continued interest.
+
+My background in ${matchHighlights} aligns well with what you're looking for, and I'm confident I can contribute to your team's success.
+
+I'd welcome the opportunity to discuss how my experience can contribute to ${company}'s mission. Would you have 15-20 minutes for a brief call this week?
+
+Best regards,
+[Your Name]
+[Your Phone]`;
+        
+        document.getElementById('templateInterview').textContent = `Subject: Thank You – ${role} Interview
+
+Hi [Interviewer Name],
+
+Thank you for taking the time to meet with me today regarding the ${role} position. I enjoyed learning more about ${company}'s priorities and challenges.
+
+Our conversation reinforced my enthusiasm for this opportunity. I was particularly interested in [specific topic discussed], and I'm confident my experience with ${matchHighlights} would allow me to contribute immediately.
+
+Please don't hesitate to reach out if you need any additional information. I look forward to hearing about next steps.
+
+Best regards,
+[Your Name]
+[Your Phone]`;
+        
+        document.getElementById('templateFollowup').textContent = `Subject: Checking In – ${role} Position
+
+Hi [Recruiter Name],
+
+I hope this message finds you well. I wanted to check in on the status of the ${role} position at ${company}.
+
+I remain very interested in this opportunity and am happy to provide any additional information that would be helpful for your decision-making process.
+
+Is there an updated timeline you can share for next steps?
+
+Best regards,
+[Your Name]
+[Your Phone]`;
+        
+        document.getElementById('templateNegotiate').textContent = `Subject: RE: ${role} Offer Discussion
+
+Hi [Recruiter/Hiring Manager],
+
+Thank you for extending the offer for the ${role} position. I'm excited about the opportunity to join ${company}.
+
+After reviewing the offer and considering ${salaryReasoning}, I'd like to discuss the compensation package. Based on my background and the value I'll bring, I believe a base salary in the range of ${salaryTarget} would be appropriate.
+
+I'm also interested in discussing [signing bonus / equity / PTO / start date flexibility].
+
+I'm committed to making this work and look forward to finding a package that reflects the mutual fit.
+
+Best regards,
+[Your Name]
+[Your Phone]`;
+        
+        showTemplate('applied');
+    }
+    
+    function showTemplate(type) {
+        currentTemplate = type;
+        const templates = ['applied', 'interview', 'followup', 'negotiate'];
+        templates.forEach(t => {
+            const el = document.getElementById('template' + t.charAt(0).toUpperCase() + t.slice(1));
+            if (el) el.style.display = t === type ? 'block' : 'none';
+        });
+        document.querySelectorAll('.template-tab').forEach((tab, i) => {
+            tab.classList.toggle('active', templates[i] === type);
+        });
+    }
+    
+    function copyCurrentTemplate() {
+        const templateId = 'template' + currentTemplate.charAt(0).toUpperCase() + currentTemplate.slice(1);
+        const el = document.getElementById(templateId);
+        if (el) {
+            navigator.clipboard.writeText(el.textContent).then(() => {
+                showErrorToast('Template copied to clipboard!', 2000);
+            });
+        }
+    }
+    
+    // ==========================================================================
+    // NEW: APPLICATION TRACKER (localStorage)
+    // ==========================================================================
+    let trackedJobs = [];
+    
+    function initTracker() {
+        const stored = localStorage.getItem('dougOMaticTracker');
+        if (stored) {
+            try {
+                trackedJobs = JSON.parse(stored);
+                renderTracker();
+            } catch (e) {
+                trackedJobs = [];
+            }
+        }
+    }
+    
+    function saveToTracker() {
+        if (!analysisData) return;
+        
+        const job = {
+            id: Date.now(),
+            company: analysisData.company || 'Unknown',
+            role: analysisData.job_title || 'Unknown Role',
+            score: analysisData.score || 0,
+            status: 'saved',
+            date: new Date().toLocaleDateString(),
+            jd: document.getElementById('jobDescription').value.substring(0, 500),
+            analysis: analysisData
+        };
+        
+        // Check for duplicates
+        const exists = trackedJobs.some(j => j.company === job.company && j.role === job.role);
+        if (exists) {
+            showErrorToast('This job is already in your tracker!', 3000);
+            return;
+        }
+        
+        trackedJobs.unshift(job);
+        localStorage.setItem('dougOMaticTracker', JSON.stringify(trackedJobs));
+        renderTracker();
+        
+        const btn = document.getElementById('saveToTrackerBtn');
+        btn.textContent = '✓ Saved!';
+        btn.disabled = true;
+        setTimeout(() => {
+            btn.textContent = 'Save to Tracker';
+            btn.disabled = false;
+        }, 2000);
+    }
+    
+    function renderTracker() {
+        const count = document.getElementById('trackerCount');
+        const empty = document.getElementById('trackerEmpty');
+        const table = document.getElementById('trackerTableContainer');
+        const tbody = document.getElementById('trackerBody');
+        
+        count.textContent = `${trackedJobs.length} job${trackedJobs.length !== 1 ? 's' : ''} tracked`;
+        
+        if (trackedJobs.length === 0) {
+            empty.style.display = 'block';
+            table.style.display = 'none';
+            return;
+        }
+        
+        empty.style.display = 'none';
+        table.style.display = 'block';
+        
+        tbody.innerHTML = trackedJobs.map(job => `
+            <tr>
+                <td><strong>${escapeHtml(job.company)}</strong></td>
+                <td>${escapeHtml(job.role)}</td>
+                <td><span class="intel-badge ${job.score >= 75 ? 'green' : job.score >= 50 ? 'gold' : 'clay'}">${job.score}%</span></td>
+                <td>
+                    <select class="status-select" onchange="updateJobStatus(${job.id}, this.value)" style="padding: 4px 8px; font-size: 12px; border: 1px solid var(--ink-black); border-radius: 4px;">
+                        <option value="saved" ${job.status === 'saved' ? 'selected' : ''}>Saved</option>
+                        <option value="applied" ${job.status === 'applied' ? 'selected' : ''}>Applied</option>
+                        <option value="interviewing" ${job.status === 'interviewing' ? 'selected' : ''}>Interviewing</option>
+                        <option value="offered" ${job.status === 'offered' ? 'selected' : ''}>Offered</option>
+                        <option value="rejected" ${job.status === 'rejected' ? 'selected' : ''}>Rejected</option>
+                    </select>
+                </td>
+                <td>${job.date}</td>
+                <td>
+                    <div class="tracker-actions">
+                        <button class="tracker-btn" onclick="loadTrackedJob(${job.id})">Load</button>
+                        <button class="tracker-btn" onclick="deleteTrackedJob(${job.id})">×</button>
+                    </div>
+                </td>
+            </tr>
+        `).join('');
+    }
+    
+    function updateJobStatus(id, status) {
+        const job = trackedJobs.find(j => j.id === id);
+        if (job) {
+            job.status = status;
+            localStorage.setItem('dougOMaticTracker', JSON.stringify(trackedJobs));
+        }
+    }
+    
+    function loadTrackedJob(id) {
+        const job = trackedJobs.find(j => j.id === id);
+        if (job && job.analysis) {
+            document.getElementById('jobDescription').value = job.jd || '';
+            analysisData = job.analysis;
+            renderResults(job.analysis);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    }
+    
+    function deleteTrackedJob(id) {
+        if (confirm('Remove this job from tracker?')) {
+            trackedJobs = trackedJobs.filter(j => j.id !== id);
+            localStorage.setItem('dougOMaticTracker', JSON.stringify(trackedJobs));
+            renderTracker();
+        }
+    }
+    
+    // Initialize tracker on page load
+    document.addEventListener('DOMContentLoaded', () => {
+        initTracker();
+        updateResumeSelector();
+        loadLastUsedResume();
+    });
 </script>
+<!-- Error Toast (for API/network errors) -->
+<div id="errorToast" class="error-toast" role="alert" aria-live="assertive">
+    <span id="errorToastText"></span>
+    <button class="error-toast-close" onclick="hideErrorToast()" aria-label="Dismiss error message">×</button>
+</div>
 </body>
 </html>
