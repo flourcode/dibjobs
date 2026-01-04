@@ -755,10 +755,9 @@
     .stat-card {
         background: var(--card-white);
         border: var(--border-thick) solid var(--ink-black);
-        border-radius: var(--radius);
-        padding: 20px 16px;
+        border-radius: 16px;
+        padding: 24px 16px;
         text-align: center;
-        box-shadow: var(--shadow-hard);
     }
     .stat-card .stat-label {
         font-family: 'Space Mono', monospace;
@@ -767,11 +766,11 @@
         letter-spacing: 1px;
         color: var(--ink-black);
         opacity: 0.7;
-        margin-bottom: 8px;
+        margin-bottom: 10px;
     }
     .stat-card .stat-value {
         font-family: 'Space Mono', monospace;
-        font-size: 36px;
+        font-size: 42px;
         font-weight: 700;
         color: var(--ink-black);
         line-height: 1;
@@ -780,13 +779,21 @@
         font-size: 11px;
         color: var(--ink-black);
         opacity: 0.6;
-        margin-top: 6px;
+        margin-top: 8px;
     }
-    /* Colored stat card variants - neobrutalist */
-    .stat-card.mint { background: var(--accent-mint); }
-    .stat-card.clay { background: rgba(212, 145, 138, 0.25); }
-    .stat-card.gold { background: rgba(232, 201, 146, 0.35); }
-    .stat-card.blue { background: var(--pale-blue); }
+    /* Colored stat card variants */
+    .stat-card.mint { 
+        background: var(--pale-blue);
+    }
+    .stat-card.clay { 
+        background: rgba(212, 145, 138, 0.3);
+    }
+    .stat-card.gold { 
+        background: rgba(232, 201, 146, 0.4);
+    }
+    .stat-card.blue { 
+        background: var(--pale-blue);
+    }
     
     /* ============================================
        NEW: MASCOT INSIGHT BOX (Neobrutalist)
@@ -2386,7 +2393,7 @@
         keywords.forEach(k => {
             const tag = document.createElement('span');
             tag.className = `keyword-tag ${k.in_resume ? 'in-resume' : 'missing'}`;
-            tag.textContent = k.keyword || k;
+            tag.textContent = k.term || k;
             keywordCloudNew.appendChild(tag);
         });
         
