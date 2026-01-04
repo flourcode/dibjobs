@@ -3,367 +3,453 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Arti // DIB Career Coach</title>
+    <title>DIB Jobs // Arti</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
 /* ==========================================================================
-   ARTI - CHAT FIRST UI
+   NEO-BRUTALIST CHAT WORKSPACE
    ========================================================================== */
 :root {
+    /* Colors */
     --ink-black: #1a1a2e;
-    --off-white: #f8f6f1;
-    --pure-white: #ffffff;
-    --accent-blue: #4a6a8a;
-    --accent-mint: #d4e8dc; /* Arti's Color */
+    --deep-blue: #4a6a8a;
+    --warm-cream: #f8f6f1;
+    --card-white: #ffffff;
+    --bg-blue: #e8f0f6;
     --accent-clay: #e07a5f;
+    --accent-gold: #f2cc8f;
     --accent-olive: #81b29a;
-    --border: 2px solid var(--ink-black);
+    --accent-mint: #d4e8dc;
+    
+    /* Tokens */
+    --border: 3px solid var(--ink-black);
     --radius: 12px;
-    --shadow: 4px 4px 0 var(--ink-black);
+    --shadow: 6px 6px 0 var(--ink-black);
+    --shadow-sm: 3px 3px 0 var(--ink-black);
 }
 
 * { box-sizing: border-box; }
-body { margin: 0; padding: 0; font-family: 'Inter', sans-serif; background: var(--off-white); height: 100vh; display: flex; overflow: hidden; color: var(--ink-black); }
+body { margin: 0; padding: 0; font-family: 'DM Sans', sans-serif; background: var(--bg-blue); color: var(--ink-black); height: 100vh; overflow: hidden; }
+h1, h2, h3, h4, .mono { font-family: 'Space Mono', monospace; }
 
-/* LAYOUT */
-.app-container { display: flex; width: 100%; height: 100%; }
-
-/* SIDEBAR DASHBOARD (Hidden initially) */
-.dashboard-panel {
-    width: 0;
-    background: #e8f0f6;
-    border-right: var(--border);
-    overflow-y: auto;
-    transition: width 0.3s ease;
-    flex-shrink: 0;
+/* LAYOUT GRID */
+.app-layout {
+    display: grid;
+    grid-template-columns: 400px 1fr; /* Chat fixed, Workspace fluid */
+    height: 100vh;
+    overflow: hidden;
 }
-.dashboard-panel.open { width: 400px; }
-.dashboard-content { padding: 20px; width: 400px; display: none; }
-.dashboard-panel.open .dashboard-content { display: block; }
 
-/* CHAT AREA */
-.chat-main { flex: 1; display: flex; flex-direction: column; position: relative; }
-
-/* HEADER */
-header {
-    padding: 16px 24px;
-    border-bottom: var(--border);
-    background: var(--pure-white);
+/* ==========================================================================
+   LEFT PANEL: CHAT STREAM
+   ========================================================================== */
+.chat-panel {
+    background: var(--warm-cream);
+    border-right: var(--border);
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    flex-direction: column;
+    height: 100%;
     z-index: 10;
 }
-.brand { display: flex; align-items: center; gap: 12px; font-family: 'Space Mono', monospace; font-weight: 700; font-size: 18px; }
-.brand img { width: 32px; height: 32px; border-radius: 6px; border: 2px solid var(--ink-black); }
-.dash-toggle { 
-    display: none; /* Hidden until data exists */
-    cursor: pointer; 
-    font-family: 'Space Mono', monospace; 
-    font-size: 12px; 
-    background: var(--ink-black); 
-    color: white; 
-    padding: 8px 16px; 
-    border-radius: 20px; 
+
+.chat-header {
+    padding: 16px 20px;
+    border-bottom: var(--border);
+    background: var(--card-white);
+    display: flex;
+    align-items: center;
+    gap: 12px;
 }
 
-/* MESSAGES */
-.messages-container {
+.brand-text { font-family: 'Space Mono'; font-weight: 700; font-size: 16px; letter-spacing: -0.5px; }
+
+.chat-messages {
     flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.message { display: flex; gap: 12px; animation: slideUp 0.3s ease; }
+.message.user { flex-direction: row-reverse; }
+
+/* Avatar - No Border as requested */
+.avatar { 
+    width: 36px; height: 36px; flex-shrink: 0; 
+}
+.avatar img { width: 100%; height: 100%; object-fit: contain; border-radius: 6px; }
+
+.bubble {
+    background: var(--card-white);
+    border: 2px solid var(--ink-black);
+    border-radius: var(--radius);
+    border-top-left-radius: 2px;
+    padding: 14px 18px;
+    font-size: 14px;
+    line-height: 1.5;
+    box-shadow: var(--shadow-sm);
+    max-width: 85%;
+}
+
+.message.user .bubble {
+    background: var(--ink-black);
+    color: white;
+    border-radius: var(--radius);
+    border-top-right-radius: 2px;
+    box-shadow: -3px 3px 0 rgba(0,0,0,0.2);
+}
+
+.chat-input-area {
+    padding: 16px;
+    background: var(--card-white);
+    border-top: var(--border);
+}
+
+.input-wrapper { display: flex; gap: 10px; }
+
+textarea {
+    flex: 1;
+    border: 2px solid var(--ink-black);
+    border-radius: 8px;
+    padding: 12px;
+    font-family: inherit;
+    font-size: 14px;
+    resize: none;
+    height: 50px;
+    outline: none;
+    transition: box-shadow 0.2s;
+}
+textarea:focus { box-shadow: var(--shadow-sm); }
+
+.send-btn {
+    background: var(--ink-black);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    width: 50px;
+    cursor: pointer;
+    font-family: 'Space Mono';
+    font-weight: bold;
+}
+.send-btn:hover { background: var(--accent-blue); }
+
+/* ==========================================================================
+   RIGHT PANEL: WORKSPACE (Rich Tools)
+   ========================================================================== */
+.workspace-panel {
+    background: var(--bg-blue);
     overflow-y: auto;
     padding: 24px;
     display: flex;
     flex-direction: column;
-    gap: 20px;
-    scroll-behavior: smooth;
+    gap: 24px;
 }
 
-.message { display: flex; gap: 16px; max-width: 800px; margin: 0 auto; width: 100%; animation: fadeIn 0.3s ease; }
-.message.user { flex-direction: row-reverse; }
-
-.avatar { width: 40px; height: 40px; border-radius: 8px; border: 2px solid var(--ink-black); flex-shrink: 0; overflow: hidden; }
-.avatar img { width: 100%; height: 100%; object-fit: cover; }
-.avatar.user-av { background: var(--ink-black); display: grid; place-items: center; color: white; font-family: 'Space Mono'; }
-
-.bubble {
-    background: var(--pure-white);
-    border: var(--border);
-    border-radius: var(--radius);
-    padding: 16px 20px;
-    font-size: 15px;
-    line-height: 1.6;
-    box-shadow: var(--shadow);
-    max-width: 80%;
-    position: relative;
-}
-
-.message.arti .bubble { background: var(--pure-white); border-top-left-radius: 2px; }
-.message.user .bubble { background: var(--ink-black); color: white; border-top-right-radius: 2px; border-color: var(--ink-black); }
-
-/* SYSTEM/WIDGET MESSAGE */
-.message.widget .bubble {
-    background: var(--off-white);
-    width: 100%;
-    max-width: 100%;
-    border-style: dashed;
-    box-shadow: none;
-}
-
-/* INPUT AREA */
-.input-area {
-    padding: 20px;
-    background: var(--pure-white);
-    border-top: var(--border);
+/* Empty State */
+.empty-state {
     display: flex;
+    flex-direction: column;
+    align-items: center;
     justify-content: center;
+    height: 100%;
+    opacity: 0.5;
+    text-align: center;
 }
-.input-wrapper {
-    max-width: 800px;
-    width: 100%;
-    position: relative;
-    display: flex;
-    gap: 10px;
-}
-textarea {
-    width: 100%;
-    padding: 16px;
-    border: var(--border);
-    border-radius: 12px;
-    font-family: inherit;
-    font-size: 15px;
-    resize: none;
-    height: 60px;
-    outline: none;
-    box-shadow: 4px 4px 0 rgba(0,0,0,0.1);
-}
-textarea:focus { box-shadow: 4px 4px 0 var(--accent-mint); }
 
-.send-btn {
-    width: 60px;
-    height: 60px;
+/* Workspace Components (Hidden initially) */
+.workspace-content { display: none; max-width: 1000px; margin: 0 auto; width: 100%; }
+.workspace-content.visible { display: block; }
+
+/* Score Hero */
+.score-hero {
     background: var(--ink-black);
     color: white;
-    border: none;
-    border-radius: 12px;
-    cursor: pointer;
-    font-weight: bold;
-    display: grid;
-    place-items: center;
-    transition: transform 0.1s;
-}
-.send-btn:active { transform: scale(0.95); }
-.send-btn svg { width: 24px; height: 24px; fill: white; }
-
-/* QUICK ACTIONS */
-.quick-actions {
+    border-radius: var(--radius);
+    padding: 32px;
     display: flex;
-    gap: 8px;
-    margin-top: 12px;
-    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: var(--shadow);
+    margin-bottom: 24px;
+    border: var(--border);
 }
-.chip {
+.score-val { font-family: 'Space Mono'; font-size: 64px; font-weight: 700; line-height: 1; }
+.score-meta h2 { margin: 0 0 4px 0; color: var(--accent-mint); font-size: 20px; }
+.score-meta p { margin: 0; font-size: 14px; opacity: 0.8; }
+
+/* Grid Cards */
+.dash-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin-bottom: 24px;
+}
+
+.card {
+    background: var(--card-white);
+    border: var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+.card h3 { font-size: 12px; text-transform: uppercase; margin: 0 0 12px 0; opacity: 0.6; }
+.big-stat { font-family: 'Space Mono'; font-size: 28px; font-weight: 700; margin-bottom: 4px; }
+.stat-sub { font-size: 12px; }
+
+/* Lists (Strengths/Gaps) */
+.fit-list { list-style: none; padding: 0; margin: 0; }
+.fit-item {
+    padding: 10px;
+    border: 2px solid var(--ink-black);
+    margin-bottom: 8px;
+    border-radius: 6px;
+    font-size: 13px;
+    background: white;
+}
+.fit-item.match { border-left: 8px solid var(--accent-olive); }
+.fit-item.gap { border-left: 8px solid var(--accent-clay); }
+
+/* Tool Cards (Email, Interview) */
+.tool-card {
+    background: var(--warm-cream);
+    border: var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    margin-bottom: 24px;
+}
+.tool-header {
+    padding: 14px 20px;
+    border-bottom: 2px solid var(--ink-black);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    background: white;
+    border-radius: 10px 10px 0 0;
+}
+.tool-body { padding: 20px; display: none; }
+.tool-body.open { display: block; }
+
+.email-box {
+    background: white;
+    border: 2px solid var(--ink-black);
+    padding: 20px;
     font-family: 'Space Mono', monospace;
     font-size: 12px;
-    background: var(--accent-mint);
+    white-space: pre-wrap;
+    margin-bottom: 12px;
+}
+
+.action-btn {
+    background: var(--deep-blue);
+    color: white;
+    font-family: 'Space Mono';
     border: 2px solid var(--ink-black);
-    padding: 6px 12px;
-    border-radius: 20px;
+    padding: 10px 20px;
     cursor: pointer;
-    transition: all 0.2s;
+    box-shadow: 4px 4px 0 var(--ink-black);
+    transition: transform 0.1s;
+}
+.action-btn:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0 var(--ink-black); }
+
+/* Quick Chips in Chat */
+.chip-container { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.chip {
+    font-family: 'Space Mono'; font-size: 11px;
+    background: var(--accent-mint); border: 2px solid var(--ink-black);
+    padding: 6px 12px; border-radius: 20px; cursor: pointer;
 }
 .chip:hover { background: var(--ink-black); color: white; }
 
-/* TYPING INDICATOR */
-.typing { display: flex; gap: 4px; padding: 10px 14px; }
-.dot { width: 6px; height: 6px; background: var(--ink-black); border-radius: 50%; animation: bounce 1.4s infinite ease-in-out; }
-.dot:nth-child(1) { animation-delay: -0.32s; }
-.dot:nth-child(2) { animation-delay: -0.16s; }
+@keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-/* DASHBOARD COMPONENTS */
-.score-card { text-align: center; margin-bottom: 24px; padding: 20px; background: var(--ink-black); color: white; border-radius: var(--radius); }
-.score-big { font-family: 'Space Mono'; font-size: 48px; font-weight: 700; line-height: 1; display: block; }
-.score-label { font-family: 'Space Mono'; font-size: 10px; opacity: 0.7; letter-spacing: 2px; text-transform: uppercase; }
-
-.section-title { font-family: 'Space Mono'; font-size: 12px; font-weight: 700; text-transform: uppercase; margin-bottom: 12px; margin-top: 24px; border-bottom: 2px solid rgba(0,0,0,0.1); padding-bottom: 5px; }
-
-.list-item { 
-    background: white; border: 2px solid var(--ink-black); 
-    padding: 10px; margin-bottom: 8px; border-radius: 8px; font-size: 13px;
-    box-shadow: 2px 2px 0 rgba(0,0,0,0.1);
-}
-.list-item.good { border-left: 6px solid var(--accent-olive); }
-.list-item.bad { border-left: 6px solid var(--accent-clay); }
-
-@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-@keyframes bounce { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1.0); } }
-
-/* UTILS */
-.hidden { display: none !important; }
-.markdown-body p { margin-top: 0; margin-bottom: 10px; }
-.markdown-body p:last-child { margin-bottom: 0; }
-.markdown-body ul { padding-left: 20px; margin: 0; }
-
-/* MOBILE */
-@media(max-width: 768px) {
-    .dashboard-panel { position: absolute; right: 0; top: 0; bottom: 0; width: 85%; z-index: 20; transform: translateX(100%); transition: transform 0.3s; box-shadow: -10px 0 20px rgba(0,0,0,0.2); }
-    .dashboard-panel.open { transform: translateX(0); width: 85%; }
-    .message { max-width: 100%; }
-    .bubble { padding: 12px 16px; font-size: 14px; }
+/* Responsive */
+@media (max-width: 900px) {
+    .app-layout { grid-template-columns: 1fr; grid-template-rows: 50% 50%; }
+    .dash-grid { grid-template-columns: 1fr 1fr; }
 }
 </style>
 </head>
 <body>
 
-<div class="app-container">
+<div class="app-layout">
     
-    <div id="dashboard" class="dashboard-panel">
-        <div class="dashboard-content">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-                <span class="brand">Analysis Data</span>
-                <button onclick="toggleDashboard()" style="background:none; border:none; font-size:20px; cursor:pointer;">×</button>
-            </div>
-
-            <div class="score-card">
-                <span class="score-big" id="dashScore">--</span>
-                <span class="score-label">Match Score</span>
-            </div>
-
-            <div class="section-title">Details</div>
-            <div style="font-size:13px; margin-bottom:10px;">
-                <strong>Role:</strong> <span id="dashRole">--</span><br>
-                <strong>Company:</strong> <span id="dashCompany">--</span>
-            </div>
-
-            <div class="section-title">Top Strengths</div>
-            <div id="dashMatches"></div>
-
-            <div class="section-title">Critical Gaps</div>
-            <div id="dashGaps"></div>
-
-            <div class="section-title">Market Intel</div>
-            <div id="dashIntel" class="list-item">Loading market data...</div>
-            
-            <div class="section-title">Tools</div>
-            <button onclick="triggerAction('Generate Email')" class="chip" style="width:100%; text-align:center; margin-bottom:8px;">Generate Intro Email</button>
-            <button onclick="triggerAction('Interview Prep')" class="chip" style="width:100%; text-align:center;">Interview Prep</button>
+    <section class="chat-panel">
+        <div class="chat-header">
+            <div class="avatar"><img src="arti.png" alt="A"></div>
+            <div class="brand-text">DIB Jobs // Arti</div>
         </div>
-    </div>
-
-    <div class="chat-main">
-        <header>
-            <div class="brand">
-                <img src="arti.png" alt="A">
-                <span>DIB Jobs / Arti</span>
-            </div>
-            <div id="dashToggle" class="dash-toggle" onclick="toggleDashboard()">View Dashboard</div>
-        </header>
-
-        <div id="messages" class="messages-container">
+        
+        <div id="messages" class="chat-messages">
             </div>
 
-        <div class="input-area">
+        <div class="chat-input-area">
             <div class="input-wrapper">
-                <textarea id="userInput" placeholder="Type a message..." onkeydown="handleEnter(event)"></textarea>
-                <button class="send-btn" onclick="handleSend()">
-                    <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
-                </button>
+                <textarea id="userInput" placeholder="Type here..." onkeydown="handleEnter(event)"></textarea>
+                <button class="send-btn" onclick="handleSend()">-></button>
             </div>
         </div>
-    </div>
+    </section>
+
+    <section class="workspace-panel" id="workspacePanel">
+        
+        <div id="emptyState" class="empty-state">
+            <div style="font-family:'Space Mono'; font-size:60px; margin-bottom:10px;">?</div>
+            <h3>Ready to Work</h3>
+            <p>Chat with Arti to analyze a job.<br>Your tools will appear here.</p>
+        </div>
+
+        <div id="dashboardContent" class="workspace-content">
+            
+            <div class="score-hero">
+                <div>
+                    <div class="score-val"><span id="scoreValue">--</span>%</div>
+                    <div class="mono" style="font-size:12px; opacity:0.6; letter-spacing:2px;">MATCH SCORE</div>
+                </div>
+                <div class="score-meta" style="text-align:right;">
+                    <h2 id="jobVerdict">Analyzing...</h2>
+                    <p><strong id="jobTitle">--</strong></p>
+                    <p id="jobCompany">--</p>
+                </div>
+            </div>
+
+            <div class="dash-grid">
+                <div class="card">
+                    <h3>Market Salary</h3>
+                    <div class="big-stat" id="salaryStat">--</div>
+                    <div class="stat-sub" id="salarySub">Loading intel...</div>
+                </div>
+                <div class="card">
+                    <h3>Keywords</h3>
+                    <div class="big-stat" id="kwStat">--</div>
+                    <div class="stat-sub"><span id="kwMissing">0</span> missing criticals</div>
+                </div>
+                <div class="card">
+                    <h3>Competition</h3>
+                    <div class="big-stat" id="compStat">--</div>
+                    <div class="stat-sub" id="compSub">Loading intel...</div>
+                </div>
+            </div>
+
+            <div class="dash-grid" style="grid-template-columns: 1fr 1fr;">
+                <div class="card">
+                    <h3>Top Strengths</h3>
+                    <div id="strengthsList"></div>
+                </div>
+                <div class="card">
+                    <h3>Critical Gaps</h3>
+                    <div id="gapsList"></div>
+                </div>
+            </div>
+
+            <div class="mono" style="margin: 20px 0 10px 0; font-weight:700; opacity:0.5;">APPLICATION TOOLKIT</div>
+
+            <div class="tool-card">
+                <div class="tool-header" onclick="toggleTool('emailTool')">
+                    <span class="mono" style="font-weight:700;">// INTRO EMAIL GENERATOR</span>
+                    <span>+</span>
+                </div>
+                <div id="emailTool" class="tool-body">
+                    <p style="font-size:13px; margin-bottom:10px;">A tailored email to the hiring manager highlighting your specific fit.</p>
+                    <div id="emailOutput" class="email-box" style="display:none;"></div>
+                    <button id="genEmailBtn" class="action-btn" onclick="generateEmail()">Generate Email</button>
+                    <button id="copyEmailBtn" class="action-btn" style="display:none; background:white; color:black;" onclick="copyEmail()">Copy Text</button>
+                </div>
+            </div>
+
+            <div class="tool-card">
+                <div class="tool-header" onclick="toggleTool('interviewTool')">
+                    <span class="mono" style="font-weight:700;">// INTERVIEW PREP</span>
+                    <span>+</span>
+                </div>
+                <div id="interviewTool" class="tool-body">
+                    <div id="interviewQuestions"></div>
+                </div>
+            </div>
+
+        </div>
+    </section>
 </div>
 
 <script>
 // ==========================================================================
-// ARTI - CHATBOT LOGIC
+// CONFIG & STATE
 // ==========================================================================
 const API_ENDPOINT = 'https://76unm1rlj0.execute-api.us-east-1.amazonaws.com/default/grumpy2';
-const STORAGE_KEY = 'arti_context_v1';
-
-// State Management
 let appState = {
-    step: 'INIT', // INIT, RESUME, JD, CHAT
+    step: 'INIT', // INIT -> RESUME -> JD -> DASHBOARD
     resumeText: '',
     jdText: '',
     analysis: null,
     chatHistory: []
 };
 
-// DOM Elements
-const msgContainer = document.getElementById('messages');
-const userInput = document.getElementById('userInput');
-const dashPanel = document.getElementById('dashboard');
-const dashToggle = document.getElementById('dashToggle');
-
-// Init
+// ==========================================================================
+// INIT
+// ==========================================================================
 document.addEventListener('DOMContentLoaded', () => {
-    // Check for saved state (optional persistence)
-    // For now, clean start
+    // Initial Greeting
     setTimeout(() => {
-        addMessage('arti', "Hi, I'm Arti, your DIB career coach. I can help you analyze a job fit, find salary data, and write your application.");
+        addMessage('arti', "Welcome to the DIB Jobs workspace. I'm Arti.");
         setTimeout(() => {
-            addMessage('arti', "To get started, please **paste your resume** text here.");
+            addMessage('arti', "I'll help you analyze fit, generate emails, and prep for interviews. To start, please **paste your resume**.");
             appState.step = 'RESUME';
-        }, 600);
+        }, 800);
     }, 500);
 });
 
 // ==========================================================================
-// UI FUNCTIONS
+// CHAT LOGIC
 // ==========================================================================
+const msgContainer = document.getElementById('messages');
+const userInput = document.getElementById('userInput');
 
-function addMessage(sender, text, isWidget = false) {
+function addMessage(sender, text, chips = []) {
     const div = document.createElement('div');
-    div.className = `message ${sender} ${isWidget ? 'widget' : ''}`;
+    div.className = `message ${sender}`;
     
-    let avatarHtml = '';
-    if (!isWidget) {
-        if (sender === 'arti') avatarHtml = `<div class="avatar"><img src="arti.png" alt="A"></div>`;
-        else avatarHtml = `<div class="avatar user-av">ME</div>`;
+    let avatar = sender === 'arti' ? '<div class="avatar"><img src="arti.png" alt="A"></div>' : '';
+    
+    // Formatting
+    let htmlContent = text.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    
+    // Add Chips if provided
+    let chipsHtml = '';
+    if (chips.length > 0) {
+        chipsHtml = `<div class="chip-container">
+            ${chips.map(c => `<div class="chip" onclick="handleChip('${c.action}')">${c.label}</div>`).join('')}
+        </div>`;
     }
 
-    // Parse simple markdown (bold/links/newlines)
-    let formattedText = text
-        .replace(/\n/g, '<br>')
-        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-
     div.innerHTML = `
-        ${avatarHtml}
+        ${avatar}
         <div class="bubble">
-            <div class="markdown-body">${formattedText}</div>
-            ${isWidget ? '<div class="quick-actions" id="last-actions"></div>' : ''}
+            <div>${htmlContent}</div>
+            ${chipsHtml}
         </div>
     `;
     
     msgContainer.appendChild(div);
-    scrollToBottom();
+    msgContainer.scrollTop = msgContainer.scrollHeight;
     return div;
 }
 
 function showTyping() {
-    const id = 'typing-' + Date.now();
-    const div = document.createElement('div');
-    div.id = id;
-    div.className = 'message arti';
-    div.innerHTML = `
-        <div class="avatar"><img src="arti.png" alt="A"></div>
-        <div class="bubble">
-            <div class="typing"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
-        </div>
-    `;
-    msgContainer.appendChild(div);
-    scrollToBottom();
+    const id = 'typ_' + Date.now();
+    addMessage('arti', `<span id="${id}">Thinking...</span>`);
     return id;
 }
 
 function removeTyping(id) {
     const el = document.getElementById(id);
-    if (el) el.remove();
-}
-
-function scrollToBottom() {
-    msgContainer.scrollTop = msgContainer.scrollHeight;
+    if (el) el.closest('.message').remove();
 }
 
 function handleEnter(e) {
@@ -372,14 +458,6 @@ function handleEnter(e) {
         handleSend();
     }
 }
-
-function toggleDashboard() {
-    dashPanel.classList.toggle('open');
-}
-
-// ==========================================================================
-// CORE LOGIC FLOW
-// ==========================================================================
 
 async function handleSend() {
     const text = userInput.value.trim();
@@ -391,112 +469,111 @@ async function handleSend() {
     // STATE MACHINE
     if (appState.step === 'RESUME') {
         if (text.length < 50) {
-            addMessage('arti', "That looks a bit short for a resume. Can you paste the full text?");
+            addMessage('arti', "That looks too short. Please paste the full text.");
             return;
         }
         appState.resumeText = text;
         appState.step = 'JD';
-        const loadId = showTyping();
-        setTimeout(() => {
-            removeTyping(loadId);
-            addMessage('arti', "Got it. Now, please **paste the Job Description** (or a URL) you want to analyze.");
-        }, 800);
+        addMessage('arti', "Got it. Now **paste the Job Description**.");
         
     } else if (appState.step === 'JD') {
         if (text.length < 20) {
-            addMessage('arti', "That seems too short. Please paste the job description.");
+            addMessage('arti', "Please paste a valid job description.");
             return;
         }
         appState.jdText = text;
-        appState.step = 'ANALYZING'; // Prevent double submit
-        
+        appState.step = 'ANALYZING';
         await performAnalysis();
         
-    } else if (appState.step === 'CHAT') {
+    } else if (appState.step === 'DASHBOARD') {
+        // Normal chat mode
         await handleChatQuery(text);
     }
 }
 
 // ==========================================================================
-// API INTERACTIONS
+// CORE ANALYSIS
 // ==========================================================================
-
 async function performAnalysis() {
-    const typingId = showTyping();
-    
+    const tid = showTyping();
     try {
         const response = await fetch(API_ENDPOINT, {
             method: 'POST',
-            headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({
                 request_type: 'resume_match',
                 job_description: appState.jdText,
                 resume_text: appState.resumeText
             })
         });
-        
         const data = await response.json();
-        removeTyping(typingId);
+        removeTyping(tid);
         
-        if (data.error) throw new Error(data.error);
-
         appState.analysis = data;
-        appState.step = 'CHAT';
-
-        // Render Results
-        renderAnalysisResult(data);
+        appState.step = 'DASHBOARD';
         
-        // Fetch Market Intel in background
+        renderDashboard(data);
+        
+        let verdict = data.score >= 75 ? "Strong match." : "Some gaps found.";
+        addMessage('arti', `${verdict} I've populated your **Toolkit** on the right. What would you like to do?`, [
+            {label: "Draft Intro Email", action: "email"},
+            {label: "Explain Gaps", action: "gaps"},
+            {label: "Salary Check", action: "salary"}
+        ]);
+        
+        // Fetch Intel in background
         fetchMarketIntel(data.job_title, data.company);
-
+        
     } catch (e) {
-        removeTyping(typingId);
-        addMessage('arti', "Sorry, I had trouble analyzing that. " + e.message);
-        appState.step = 'JD'; // Go back a step
+        removeTyping(tid);
+        addMessage('arti', "Error analyzing job. Please try again.");
+        appState.step = 'JD';
     }
 }
 
-function renderAnalysisResult(data) {
-    // Populate Dashboard
-    document.getElementById('dashScore').textContent = data.score + '%';
-    document.getElementById('dashRole').textContent = data.job_title || 'Role';
-    document.getElementById('dashCompany').textContent = data.company || 'Company';
+// ==========================================================================
+// DASHBOARD RENDERING
+// ==========================================================================
+function renderDashboard(data) {
+    document.getElementById('emptyState').style.display = 'none';
+    document.getElementById('dashboardContent').classList.add('visible');
     
+    // Hero
+    document.getElementById('scoreValue').textContent = data.score;
+    document.getElementById('jobTitle').textContent = data.job_title;
+    document.getElementById('jobCompany').textContent = data.company;
+    document.getElementById('jobVerdict').textContent = data.verdict;
+    
+    // Strengths
     const matches = data.analysis.filter(a => a.startsWith('Match:'));
+    document.getElementById('strengthsList').innerHTML = matches.slice(0, 4).map(m => 
+        `<div class="fit-item match">${m.replace('Match:', '').trim()}</div>`
+    ).join('');
+    
+    // Gaps
     const gaps = data.analysis.filter(a => a.startsWith('Gap:'));
-    
-    document.getElementById('dashMatches').innerHTML = matches.slice(0,3).map(m => 
-        `<div class="list-item good">${m.replace('Match:', '').trim()}</div>`
+    document.getElementById('gapsList').innerHTML = gaps.slice(0, 3).map(g => 
+        `<div class="fit-item gap">${g.replace('Gap:', '').trim()}</div>`
     ).join('');
     
-    document.getElementById('dashGaps').innerHTML = gaps.slice(0,3).map(g => 
-        `<div class="list-item bad">${g.replace('Gap:', '').trim()}</div>`
+    // Stats
+    const kw = data.keywords || [];
+    const missing = kw.filter(k => !k.in_resume).length;
+    document.getElementById('kwStat').textContent = Math.round(((kw.length - missing)/kw.length)*100) + '%';
+    document.getElementById('kwMissing').textContent = missing;
+    
+    // Interview Qs
+    const qs = data.interview_questions || [];
+    document.getElementById('interviewQuestions').innerHTML = qs.map(q => 
+        `<div style="margin-bottom:12px; font-size:13px;">
+            <strong>Q: ${q.question}</strong><br>
+            <em style="opacity:0.7">Tip: ${q.suggested_answer}</em>
+        </div>`
     ).join('');
-
-    // Show Dashboard Toggle
-    dashToggle.style.display = 'block';
-
-    // Chat Message
-    let verdict = "";
-    if (data.score >= 80) verdict = "You are a **strong match** for this role!";
-    else if (data.score >= 60) verdict = "This is a **solid opportunity**, but there are some gaps we need to address.";
-    else verdict = "This is a **stretch role**. We'll need a strong strategy to win this.";
-
-    addMessage('arti', `${verdict} I've generated a full breakdown in the dashboard.`);
-    
-    // Add Buttons to the chat stream
-    const controls = addMessage('arti', "How would you like to proceed?", true);
-    const actions = controls.querySelector('.quick-actions');
-    actions.innerHTML = `
-        <div class="chip" onclick="triggerAction('Generate Email')">Draft Intro Email</div>
-        <div class="chip" onclick="triggerAction('Salary')">Salary Estimate</div>
-        <div class="chip" onclick="triggerAction('Gap Strategy')">Fix My Gaps</div>
-    `;
-    
-    // Auto-open dashboard on mobile/desktop appropriately
-    if(window.innerWidth > 768) dashPanel.classList.add('open');
 }
 
+// ==========================================================================
+// MARKET INTEL & TOOLS
+// ==========================================================================
 async function fetchMarketIntel(title, company) {
     try {
         const response = await fetch(API_ENDPOINT, {
@@ -510,20 +587,63 @@ async function fetchMarketIntel(title, company) {
         });
         const data = await response.json();
         
-        // Update Dashboard
         if (data.salary_intel) {
-            document.getElementById('dashIntel').innerHTML = `
-                <strong>Est. Salary:</strong> $${data.salary_intel.low}k - $${data.salary_intel.high}k<br>
-                <strong>Competition:</strong> ${data.competition?.level || 'Unknown'}
-            `;
-            // Save to state for chat context
-            if(appState.analysis) appState.analysis.market_intel = data;
+            document.getElementById('salaryStat').textContent = `$${data.salary_intel.mid}k`;
+            document.getElementById('salarySub').textContent = `$${data.salary_intel.low}k - $${data.salary_intel.high}k`;
+            appState.analysis.market_intel = data.salary_intel;
         }
-    } catch(e) { console.log("Intel failed", e); }
+        if (data.competition) {
+            document.getElementById('compStat').textContent = data.competition.level;
+            document.getElementById('compSub').textContent = "Competition Level";
+        }
+    } catch(e) {}
+}
+
+async function generateEmail() {
+    const btn = document.getElementById('genEmailBtn');
+    btn.textContent = "Generating...";
+    try {
+        const response = await fetch(API_ENDPOINT, {
+            method: 'POST',
+            body: JSON.stringify({
+                request_type: 'generate_intro_email',
+                job_description: appState.jdText,
+                resume_text: appState.resumeText,
+                analysis_data: appState.analysis
+            })
+        });
+        const data = await response.json();
+        document.getElementById('emailOutput').style.display = 'block';
+        document.getElementById('emailOutput').textContent = data.intro_email;
+        btn.style.display = 'none';
+        document.getElementById('copyEmailBtn').style.display = 'inline-block';
+        
+        // Open the card if closed
+        document.getElementById('emailTool').classList.add('open');
+        
+    } catch(e) { btn.textContent = "Error. Try again."; }
+}
+
+// ==========================================================================
+// CHIP & INTERACTION
+// ==========================================================================
+function handleChip(action) {
+    if (action === 'email') {
+        toggleTool('emailTool');
+        document.getElementById('workspacePanel').scrollTop = document.querySelector('.tool-card').offsetTop;
+        if(document.getElementById('emailOutput').style.display === 'none') generateEmail();
+    }
+    else if (action === 'gaps') handleChatQuery("How do I fix my gaps?");
+    else if (action === 'salary') handleChatQuery("Is the salary fair?");
+}
+
+function toggleTool(id) {
+    document.getElementById(id).classList.toggle('open');
 }
 
 async function handleChatQuery(text) {
-    const typingId = showTyping();
+    addMessage('user', text); // Ensure user sees their click as a message
+    const tid = showTyping();
     try {
         const response = await fetch(API_ENDPOINT, {
             method: 'POST',
@@ -537,55 +657,16 @@ async function handleChatQuery(text) {
             })
         });
         const data = await response.json();
-        removeTyping(typingId);
-        
+        removeTyping(tid);
         addMessage('arti', data.response);
-        
-        // Update History
-        appState.chatHistory.push({role: 'user', content: text});
-        appState.chatHistory.push({role: 'assistant', content: data.response});
-        
-    } catch (e) {
-        removeTyping(typingId);
-        addMessage('arti', "I'm having trouble connecting. Try again?");
-    }
+        appState.chatHistory.push({role:'user', content:text}, {role:'assistant', content:data.response});
+    } catch(e) { removeTyping(tid); }
 }
 
-// ==========================================================================
-// QUICK ACTIONS
-// ==========================================================================
-
-function triggerAction(action) {
-    if (action === 'Generate Email') {
-        const loadId = showTyping();
-        fetch(API_ENDPOINT, {
-            method: 'POST',
-            body: JSON.stringify({
-                request_type: 'generate_intro_email',
-                job_description: appState.jdText,
-                resume_text: appState.resumeText,
-                analysis_data: appState.analysis
-            })
-        }).then(r => r.json()).then(data => {
-            removeTyping(loadId);
-            addMessage('arti', "**Here is a draft intro email for you:**");
-            addMessage('arti', `<div style="white-space:pre-wrap; font-family:monospace; font-size:12px; background:#f0f0f0; padding:10px;">${data.intro_email}</div>`);
-        });
-    }
-    
-    if (action === 'Salary') {
-        handleChatQuery("What is the estimated salary for this role and is it fair?");
-    }
-    
-    if (action === 'Gap Strategy') {
-        handleChatQuery("How should I address the biggest gaps in my resume for this specific job?");
-    }
-    
-    if (action === 'Interview Prep') {
-        handleChatQuery("Give me 3 tough interview questions they will ask me and bullet points on how to answer them.");
-    }
+function copyEmail() {
+    navigator.clipboard.writeText(document.getElementById('emailOutput').textContent);
+    alert("Copied!");
 }
-
 </script>
 </body>
 </html>
