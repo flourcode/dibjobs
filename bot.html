@@ -171,6 +171,275 @@ textarea:focus { outline: none; background: #FFFFFF; box-shadow: 4px 4px 0 rgba(
 .chat-suggestion { padding: 8px 14px; font-size: 12px; font-family: 'Space Mono', monospace; background: white; border: 1px solid var(--ink-black); border-radius: var(--radius); cursor: pointer; }
 .chat-suggestion:hover { background: var(--ink-black); color: white; }
 
+/* SCORE DASHBOARD */
+.dashboard-hero {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    padding: 32px;
+    background: var(--ink-black);
+    color: white;
+}
+
+.score-circle {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    border: 4px solid white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    position: relative;
+}
+
+.score-number {
+    font-family: 'Space Mono', monospace;
+    font-size: 42px;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.score-percent {
+    font-family: 'Space Mono', monospace;
+    font-size: 16px;
+    position: absolute;
+    top: 32px;
+    right: 18px;
+}
+
+.score-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    opacity: 0.8;
+    margin-top: 4px;
+}
+
+.dashboard-hero.score-high { background: var(--accent-olive); }
+.dashboard-hero.score-mid { background: var(--accent-gold); color: var(--ink-black); }
+.dashboard-hero.score-mid .score-circle { border-color: var(--ink-black); }
+.dashboard-hero.score-low { background: var(--accent-clay); }
+
+.job-info { flex: 1; }
+
+.job-title {
+    font-family: 'Space Mono', monospace;
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+.job-company {
+    font-size: 14px;
+    opacity: 0.9;
+    margin-bottom: 8px;
+}
+
+.job-verdict {
+    font-size: 13px;
+    opacity: 0.85;
+    line-height: 1.4;
+}
+
+.dashboard-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    border-bottom: 2px solid var(--ink-black);
+}
+
+.dash-stat {
+    padding: 16px;
+    text-align: center;
+    border-right: 1px solid rgba(0,0,0,0.1);
+}
+
+.dash-stat:last-child { border-right: none; }
+
+.dash-stat-value {
+    display: block;
+    font-family: 'Space Mono', monospace;
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--deep-blue);
+}
+
+.dash-stat-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    opacity: 0.6;
+}
+
+.dashboard-coach {
+    display: flex;
+    gap: 16px;
+    padding: 20px 24px;
+    background: var(--bg-cream);
+    border-bottom: 2px solid var(--ink-black);
+    align-items: flex-start;
+}
+
+.coach-thumb {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius);
+    flex-shrink: 0;
+}
+
+.coach-take {
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.dashboard-keywords {
+    padding: 20px 24px;
+    border-bottom: 2px solid var(--ink-black);
+}
+
+.keywords-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.keywords-title {
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.keywords-meta {
+    font-size: 12px;
+    opacity: 0.7;
+}
+
+.keywords-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.kw-tag {
+    padding: 4px 10px;
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    border-radius: 3px;
+    border: 1px solid;
+}
+
+.kw-tag.matched {
+    background: var(--accent-mint);
+    border-color: var(--deep-blue);
+    color: var(--ink-black);
+}
+
+.kw-tag.missing {
+    background: rgba(212, 145, 138, 0.2);
+    border-color: var(--accent-clay);
+    color: #b5705e;
+}
+
+.dashboard-analysis {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    border-bottom: 2px solid var(--ink-black);
+}
+
+.analysis-col {
+    padding: 20px 24px;
+}
+
+.analysis-col.matches {
+    border-right: 1px solid rgba(0,0,0,0.1);
+}
+
+.col-header {
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.analysis-col.matches .col-header::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    background: var(--accent-olive);
+    border-radius: 50%;
+}
+
+.analysis-col.gaps .col-header::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    background: var(--accent-clay);
+    border-radius: 50%;
+}
+
+.analysis-col ul {
+    list-style: none;
+    font-size: 13px;
+}
+
+.analysis-col li {
+    padding: 8px 0;
+    border-bottom: 1px dashed rgba(0,0,0,0.1);
+    line-height: 1.4;
+}
+
+.analysis-col li:last-child { border-bottom: none; }
+
+.dashboard-actions {
+    padding: 20px 24px;
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    background: var(--bg-cream);
+}
+
+.intel-preview {
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    color: var(--deep-blue);
+}
+
+@media (max-width: 768px) {
+    .dashboard-hero {
+        flex-direction: column;
+        text-align: center;
+        padding: 24px;
+    }
+    .score-circle {
+        width: 100px;
+        height: 100px;
+    }
+    .score-number { font-size: 36px; }
+    .dashboard-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .dash-stat:nth-child(2) { border-right: none; }
+    .dashboard-analysis {
+        grid-template-columns: 1fr;
+    }
+    .analysis-col.matches {
+        border-right: none;
+        border-bottom: 1px solid rgba(0,0,0,0.1);
+    }
+    .dashboard-actions {
+        flex-direction: column;
+    }
+    .dashboard-actions .btn {
+        width: 100%;
+    }
+}
+
 /* ANALYSIS */
 .analysis-list { list-style: none; display: flex; flex-direction: column; gap: 16px; }
 .analysis-item { padding: 16px 20px; border: 2px solid var(--ink-black); border-radius: var(--radius); font-size: 14px; background: #fff; }
@@ -445,102 +714,29 @@ textarea:focus { outline: none; background: #FFFFFF; box-shadow: 4px 4px 0 rgba(
         </div>
         <div id="jobSearchContent" class="collapsible-content">
             <div class="card-body">
-                <p style="margin-bottom: 16px; font-size: 13px; opacity: 0.8;">Quick links to Company Linkedin Job Boards.</p>
-                
-                <!-- Federal Primes -->
                 <div style="margin-bottom: 20px;">
-                    <div class="kit-section-title" style="margin-bottom: 10px;">Federal Primes</div>
+                    <div class="kit-section-title">Federal Primes</div>
                     <div class="job-search-grid">
                         <a href="https://www.linkedin.com/company/lockheed-martin/jobs/" target="_blank" class="job-search-link">Lockheed Martin</a>
-                        <a href="https://www.linkedin.com/company/rtx/jobs/" target="_blank" class="job-search-link">RTX (Raytheon)</a>
-                        <a href="https://www.linkedin.com/company/gdit/jobs/" target="_blank" class="job-search-link">GDIT</a>
+                        <a href="https://www.linkedin.com/company/rtx/jobs/" target="_blank" class="job-search-link">RTX</a>
                         <a href="https://www.linkedin.com/company/northrop-grumman-corporation/jobs/" target="_blank" class="job-search-link">Northrop Grumman</a>
                         <a href="https://www.linkedin.com/company/boeing/jobs/" target="_blank" class="job-search-link">Boeing</a>
                         <a href="https://www.linkedin.com/company/leidos/jobs/" target="_blank" class="job-search-link">Leidos</a>
-                        <a href="https://www.linkedin.com/company/bae-systems/jobs/" target="_blank" class="job-search-link">BAE Systems</a>
-                        <a href="https://www.linkedin.com/company/l3harris-technologies/jobs/" target="_blank" class="job-search-link">L3Harris</a>
                         <a href="https://www.linkedin.com/company/booz-allen-hamilton/jobs/" target="_blank" class="job-search-link">Booz Allen</a>
-                        <a href="https://www.linkedin.com/company/saicinc/jobs/" target="_blank" class="job-search-link">SAIC</a>
-                        <a href="https://www.linkedin.com/company/caci-international-inc/jobs/" target="_blank" class="job-search-link">CACI</a>
-                        <a href="https://www.linkedin.com/company/mantech/jobs/" target="_blank" class="job-search-link">ManTech</a>
-                        <a href="https://www.linkedin.com/company/peraton/jobs/" target="_blank" class="job-search-link">Peraton</a>
                         <a href="https://www.linkedin.com/company/anduril/jobs/" target="_blank" class="job-search-link">Anduril</a>
                         <a href="https://www.linkedin.com/company/palantir-technologies/jobs/" target="_blank" class="job-search-link">Palantir</a>
-                        <a href="https://www.linkedin.com/company/shield-ai/jobs/" target="_blank" class="job-search-link">Shield AI</a>
                     </div>
                 </div>
-                
-                <!-- CSPs -->
-                <div style="margin-bottom: 20px;">
-                    <div class="kit-section-title" style="margin-bottom: 10px;">Cloud Service Providers</div>
-                    <div class="job-search-grid">
-                        <a href="https://www.linkedin.com/company/amazon-web-services/jobs/" target="_blank" class="job-search-link">Amazon / AWS</a>
-                        <a href="https://www.linkedin.com/company/microsoft/jobs/" target="_blank" class="job-search-link">Microsoft / Azure</a>
-                        <a href="https://www.linkedin.com/company/google-cloud/jobs/" target="_blank" class="job-search-link">Google Cloud</a>
-                        <a href="https://www.linkedin.com/company/oracle/jobs/" target="_blank" class="job-search-link">Oracle Cloud</a>
-                        <a href="https://www.linkedin.com/company/ibm/jobs/" target="_blank" class="job-search-link">IBM Cloud</a>
-                    </div>
-                </div>
-                
-                <!-- SaaS -->
-                <div style="margin-bottom: 20px;">
-                    <div class="kit-section-title" style="margin-bottom: 10px;">SaaS & Platforms</div>
-                    <div class="job-search-grid">
-                        <a href="https://www.linkedin.com/company/salesforce/jobs/" target="_blank" class="job-search-link">Salesforce</a>
-                        <a href="https://www.linkedin.com/company/servicenow/jobs/" target="_blank" class="job-search-link">ServiceNow</a>
-                        <a href="https://www.linkedin.com/company/snowflake-computing/jobs/" target="_blank" class="job-search-link">Snowflake</a>
-                        <a href="https://www.linkedin.com/company/databricks/jobs/" target="_blank" class="job-search-link">Databricks</a>
-                        <a href="https://www.linkedin.com/company/atlassian/jobs/" target="_blank" class="job-search-link">Atlassian</a>
-                        <a href="https://www.linkedin.com/company/palo-alto-networks/jobs/" target="_blank" class="job-search-link">Palo Alto Networks</a>
-                        <a href="https://www.linkedin.com/company/crowdstrike/jobs/" target="_blank" class="job-search-link">CrowdStrike</a>
-                        <a href="https://www.linkedin.com/company/zscaler/jobs/" target="_blank" class="job-search-link">Zscaler</a>
-                        <a href="https://www.linkedin.com/company/tenableinc/jobs/" target="_blank" class="job-search-link">Tenable</a>
-                        <a href="https://www.linkedin.com/company/okta-inc-/jobs/" target="_blank" class="job-search-link">Okta</a>
-                        <a href="https://www.linkedin.com/company/splunk/jobs/" target="_blank" class="job-search-link">Splunk</a>
-                    </div>
-                </div>
-                
-                <!-- Systems Integrators -->
-                <div style="margin-bottom: 20px;">
-                    <div class="kit-section-title" style="margin-bottom: 10px;">Systems Integrators</div>
-                    <div class="job-search-grid">
-                        <a href="https://www.linkedin.com/company/accenturefederalservices/jobs/" target="_blank" class="job-search-link">Accenture Federal</a>
-                        <a href="https://www.linkedin.com/company/deloitte/jobs/" target="_blank" class="job-search-link">Deloitte</a>
-                        <a href="https://www.linkedin.com/company/pwc/jobs/" target="_blank" class="job-search-link">PwC</a>
-                        <a href="https://www.linkedin.com/company/ernstandyoung/jobs/" target="_blank" class="job-search-link">EY</a>
-                        <a href="https://www.linkedin.com/company/kpmg-us/jobs/" target="_blank" class="job-search-link">KPMG</a>
-                        <a href="https://www.linkedin.com/company/capgemini/jobs/" target="_blank" class="job-search-link">Capgemini</a>
-                    </div>
-                </div>
-                
-                <!-- VARs & Resellers -->
                 <div>
-                    <div class="kit-section-title" style="margin-bottom: 10px;">VARs & Resellers</div>
+                    <div class="kit-section-title">Cleared Job Boards</div>
                     <div class="job-search-grid">
-                        <a href="https://www.linkedin.com/company/carahsoft/jobs/" target="_blank" class="job-search-link">Carahsoft</a>
-                        <a href="https://www.linkedin.com/company/world-wide-technology/jobs/" target="_blank" class="job-search-link">WWT</a>
-                        <a href="https://www.linkedin.com/company/iron-bow-technologies/jobs/" target="_blank" class="job-search-link">Iron Bow</a>
-                        <a href="https://www.linkedin.com/company/presidio-/jobs/" target="_blank" class="job-search-link">Presidio</a>
-                        <a href="https://www.linkedin.com/company/dxctechnology/jobs/" target="_blank" class="job-search-link">DXC Technology</a>
-                        <a href="https://www.linkedin.com/company/cgi/jobs/" target="_blank" class="job-search-link">CGI Federal</a>
-                        <a href="https://www.linkedin.com/company/red-river-technology/jobs/" target="_blank" class="job-search-link">Red River</a>
-                        <a href="https://www.linkedin.com/company/thundercat-technology/jobs/" target="_blank" class="job-search-link">ThunderCat</a>
-                    </div>
-                </div>
-                
-                <!-- Job Boards -->
-                <hr style="margin: 24px 0; border: none; border-top: 1px dashed var(--ink-black); opacity: 0.3;">
-                <div>
-                    <div class="kit-section-title" style="margin-bottom: 10px;">Cleared Job Boards</div>
-                    <div class="job-search-grid">
-                        <a href="https://www.clearancejobs.com/jobs?keywords=sales" target="_blank" class="job-search-link">ClearanceJobs</a>
-                        <a href="https://www.linkedin.com/jobs/search/?keywords=director&f_TPR=r604800" target="_blank" class="job-search-link">LinkedIn</a>
-                        <a href="https://www.indeed.com/jobs?q=federal+sales" target="_blank" class="job-search-link">Indeed</a>
+                        <a href="https://www.clearancejobs.com/" target="_blank" class="job-search-link">ClearanceJobs</a>
+                        <a href="https://www.linkedin.com/jobs/" target="_blank" class="job-search-link">LinkedIn</a>
+                        <a href="https://www.indeed.com/jobs?q=federal" target="_blank" class="job-search-link">Indeed</a>
                     </div>
                 </div>
             </div>
-        
-		</div>
+        </div>
     </div>
 
     <!-- RESUME INPUT -->
@@ -592,20 +788,94 @@ textarea:focus { outline: none; background: #FFFFFF; box-shadow: 4px 4px 0 rgba(
     <!-- RESULTS -->
     <div id="analysisResults" style="display: none;">
 
-        <!-- SCORE + INTEL COMBINED -->
-        <div class="card" style="padding: 0;">
-            <div id="matchScoreContainer" class="hero-grid"></div>
-            <div id="coachCommentary" class="coach-commentary" style="display: none;">
-                <img src="arti.png" alt="Arti">
-                <p id="coachCommentaryText"></p>
+        <!-- SCORE DASHBOARD - Everything important at a glance -->
+        <div class="card" id="scoreDashboard" style="padding: 0;">
+            <!-- Top: Score + Job Info -->
+            <div class="dashboard-hero" id="dashboardHero">
+                <div class="score-circle">
+                    <div class="score-number" id="scoreValue">--</div>
+                    <div class="score-percent">%</div>
+                    <div class="score-label">MATCH</div>
+                </div>
+                <div class="job-info">
+                    <div class="job-title" id="jobTitle">Role Title</div>
+                    <div class="job-company" id="jobCompany">Company</div>
+                    <div class="job-verdict" id="jobVerdict">Analyzing...</div>
+                </div>
             </div>
-            <div class="card-body">
-                <div class="intel-grid">
-                    <div class="intel-panel">
-                        <div class="intel-panel-header">
-                            <div class="intel-panel-title">Salary Estimate</div>
-                        </div>
-                        <div id="salaryIntel">
+
+            <!-- Quick Stats Row -->
+            <div class="dashboard-stats">
+                <div class="dash-stat">
+                    <span class="dash-stat-value" id="matchCount">0</span>
+                    <span class="dash-stat-label">Strengths</span>
+                </div>
+                <div class="dash-stat">
+                    <span class="dash-stat-value" id="gapCount">0</span>
+                    <span class="dash-stat-label">Gaps</span>
+                </div>
+                <div class="dash-stat">
+                    <span class="dash-stat-value" id="keywordHitRate">--%</span>
+                    <span class="dash-stat-label">Keywords</span>
+                </div>
+                <div class="dash-stat">
+                    <span class="dash-stat-value" id="salaryQuick">--</span>
+                    <span class="dash-stat-label">Salary Est.</span>
+                </div>
+            </div>
+
+            <!-- Coach Take -->
+            <div class="dashboard-coach" id="dashboardCoach">
+                <img src="arti.png" alt="Arti" class="coach-thumb">
+                <div class="coach-take" id="coachTake">Analyzing your fit...</div>
+            </div>
+
+            <!-- Keywords at a glance -->
+            <div class="dashboard-keywords">
+                <div class="keywords-header">
+                    <span class="keywords-title">Keywords</span>
+                    <span class="keywords-meta"><span id="kwMatched">0</span> matched, <span id="kwMissing">0</span> missing</span>
+                </div>
+                <div class="keywords-grid" id="dashboardKeywords"></div>
+            </div>
+
+            <!-- Top Matches & Gaps side by side -->
+            <div class="dashboard-analysis">
+                <div class="analysis-col matches">
+                    <div class="col-header">Top Strengths</div>
+                    <ul id="topMatches"></ul>
+                </div>
+                <div class="analysis-col gaps">
+                    <div class="col-header">Key Gaps</div>
+                    <ul id="topGaps"></ul>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="dashboard-actions">
+                <button class="btn btn-primary" onclick="document.getElementById('chatSection').scrollIntoView({behavior:'smooth'})">Ask Arti</button>
+                <button class="btn btn-secondary" onclick="toggleKit('applicationKit')">Application Kit</button>
+                <button class="btn btn-secondary" onclick="toggleKit('interviewKit')">Interview Prep</button>
+                <button class="btn btn-secondary" onclick="saveToTracker()" id="saveToTrackerBtn">Save to Tracker</button>
+            </div>
+        </div>
+
+        <!-- SALARY & MARKET INTEL (collapsed by default but visible) -->
+        <div class="card collapsible-card" id="marketIntelCard">
+            <div class="card-header collapsible-trigger" onclick="toggleKit('marketIntel')">
+                <span class="card-title">Market Intel</span>
+                <div style="display: flex; align-items: center; gap: 16px;">
+                    <span id="salaryPreview" class="intel-preview">Loading...</span>
+                    <span id="marketIntelToggle" class="mono" style="font-weight: 700; font-size: 20px;">+</span>
+                </div>
+            </div>
+            <div id="marketIntelContent" class="collapsible-content">
+                <div class="card-body">
+                    <div class="intel-grid">
+                        <div class="intel-panel">
+                            <div class="intel-panel-header">
+                                <div class="intel-panel-title">Salary Estimate</div>
+                            </div>
                             <div class="intel-value" id="salaryRange">Loading...</div>
                             <div class="intel-label">Based on role level & market</div>
                             <div class="salary-range-bar">
@@ -616,47 +886,47 @@ textarea:focus { outline: none; background: #FFFFFF; box-shadow: 4px 4px 0 rgba(
                                 <span id="salaryHigh">$0K</span>
                             </div>
                         </div>
-                    </div>
-                    <div class="intel-panel">
-                        <div class="intel-panel-header">
-                            <div class="intel-panel-title">Hiring Timeline</div>
+                        <div class="intel-panel">
+                            <div class="intel-panel-header">
+                                <div class="intel-panel-title">Competition Level</div>
+                            </div>
+                            <div class="intel-value" id="competitionLevel">--</div>
+                            <div class="intel-label" id="competitionDesc">Analyzing...</div>
                         </div>
-                        <div class="timeline-estimate">
-                            <div class="timeline-step">
-                                <div class="timeline-dot">1</div>
-                                <div class="timeline-label">Apply</div>
-                                <div class="timeline-days">Today</div>
+                        <div class="intel-panel">
+                            <div class="intel-panel-header">
+                                <div class="intel-panel-title">Hiring Timeline</div>
                             </div>
-                            <div class="timeline-step">
-                                <div class="timeline-dot">2</div>
-                                <div class="timeline-label">Screen</div>
-                                <div class="timeline-days" id="screenDays">...</div>
-                            </div>
-                            <div class="timeline-step">
-                                <div class="timeline-dot">3</div>
-                                <div class="timeline-label">Interview</div>
-                                <div class="timeline-days" id="interviewDays">...</div>
-                            </div>
-                            <div class="timeline-step">
-                                <div class="timeline-dot">4</div>
-                                <div class="timeline-label">Offer</div>
-                                <div class="timeline-days" id="offerDays">...</div>
+                            <div class="timeline-estimate">
+                                <div class="timeline-step">
+                                    <div class="timeline-dot">1</div>
+                                    <div class="timeline-label">Apply</div>
+                                    <div class="timeline-days">Today</div>
+                                </div>
+                                <div class="timeline-step">
+                                    <div class="timeline-dot">2</div>
+                                    <div class="timeline-label">Screen</div>
+                                    <div class="timeline-days" id="screenDays">--</div>
+                                </div>
+                                <div class="timeline-step">
+                                    <div class="timeline-dot">3</div>
+                                    <div class="timeline-label">Interview</div>
+                                    <div class="timeline-days" id="interviewDays">--</div>
+                                </div>
+                                <div class="timeline-step">
+                                    <div class="timeline-dot">4</div>
+                                    <div class="timeline-label">Offer</div>
+                                    <div class="timeline-days" id="offerDays">--</div>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="intel-panel">
-                        <div class="intel-panel-header">
-                            <div class="intel-panel-title">Competition Level</div>
-                        </div>
-                        <div class="intel-value" id="competitionLevel">Loading...</div>
-                        <div class="intel-label" id="competitionDesc">Analyzing...</div>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- ASK ARTI -->
-        <div class="chat-section">
+        <div class="chat-section" id="chatSection">
             <div class="chat-header">
                 <img src="arti.png" alt="Arti">
                 <div class="chat-header-text">
@@ -681,14 +951,6 @@ textarea:focus { outline: none; background: #FFFFFF; box-shadow: 4px 4px 0 rgba(
             </div>
         </div>
 
-        <!-- GAP ANALYSIS -->
-        <div class="card">
-            <div class="card-header"><span class="card-title">Gap Analysis</span></div>
-            <div class="card-body">
-                <ul id="analysisList" class="analysis-list"></ul>
-            </div>
-        </div>
-
         <!-- APPLICATION KIT -->
         <div class="card collapsible-card collapsed" id="applicationKitCard">
             <div class="card-header collapsible-trigger" onclick="toggleKit('applicationKit')">
@@ -698,10 +960,10 @@ textarea:focus { outline: none; background: #FFFFFF; box-shadow: 4px 4px 0 rgba(
             <div id="applicationKitContent" class="collapsible-content">
                 <div class="card-body" style="padding-top: 0;">
                     <div class="kit-section">
-                        <h4 class="kit-section-title">Keywords to Add</h4>
-                        <p style="margin-bottom: 12px; font-size: 13px; opacity: 0.7;"><span style="background: var(--accent-mint); padding: 2px 6px; border-radius: 3px;">Green</span> = in resume. <span style="background: rgba(209, 143, 122, 0.3); padding: 2px 6px; border-radius: 3px;">Orange</span> = missing.</p>
+                        <h4 class="kit-section-title">All Keywords</h4>
+                        <p style="margin-bottom: 12px; font-size: 13px; opacity: 0.7;"><span style="background: var(--accent-mint); padding: 2px 6px; border-radius: 3px;">Blue</span> = in resume. <span style="background: rgba(209, 143, 122, 0.3); padding: 2px 6px; border-radius: 3px;">Orange</span> = missing.</p>
                         <div class="keyword-cloud" id="keywordCloud"></div>
-                        <button class="btn btn-secondary" onclick="copyKeywords()" style="margin-top: 12px; padding: 6px 12px; font-size: 11px;">Copy Keywords</button>
+                        <button class="btn btn-secondary" onclick="copyKeywords()" style="margin-top: 12px; padding: 6px 12px; font-size: 11px;">Copy Missing Keywords</button>
                     </div>
                     <hr class="kit-divider">
                     <div class="kit-section">
@@ -773,17 +1035,6 @@ textarea:focus { outline: none; background: #FFFFFF; box-shadow: 4px 4px 0 rgba(
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
-
-        <!-- SAVE TO TRACKER -->
-        <div class="card" style="background: var(--accent-mint);">
-            <div class="card-body" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
-                <div>
-                    <strong style="font-family: 'Space Mono', monospace; text-transform: uppercase;">Save This Analysis</strong>
-                    <p style="font-size: 13px; opacity: 0.8; margin-top: 4px;">Track your application status over time.</p>
-                </div>
-                <button class="btn btn-primary" onclick="saveToTracker()" id="saveToTrackerBtn">Save to Tracker</button>
             </div>
         </div>
     </div>
@@ -1080,7 +1331,7 @@ async function analyzeJob() {
             </div>`;
         document.getElementById('chatSuggestions').style.display = 'flex';
         
-        document.getElementById('matchScoreContainer').scrollIntoView({ behavior: 'smooth' });
+        document.getElementById('scoreDashboard').scrollIntoView({ behavior: 'smooth' });
         
     } catch (error) {
         clearInterval(loadingInterval);
@@ -1104,54 +1355,75 @@ function getInitialChatMessage(score) {
 function renderResults(data) {
     const score = data.score || 0;
     
-    // Score card
-    let scoreClass = score >= 75 ? 'score-high' : score >= 50 ? 'score-mid' : 'score-low';
-    document.getElementById('matchScoreContainer').className = 'hero-grid ' + scoreClass;
-    document.getElementById('matchScoreContainer').innerHTML = `
-        <div class="score-box">
-            <div class="score-val">${score}</div>
-            <div class="score-label">Match Score</div>
-        </div>
-        <div class="verdict-box">
-            <h2 style="font-size: 20px; margin-bottom: 8px;">${esc(data.job_title || 'Role')} at ${esc(data.company || 'Company')}</h2>
-            <p style="font-size: 14px; opacity: 0.85;">${esc(data.one_liner || '')}</p>
-        </div>
-    `;
+    // Score dashboard hero
+    const hero = document.getElementById('dashboardHero');
+    hero.classList.remove('score-high', 'score-mid', 'score-low');
+    hero.classList.add(score >= 75 ? 'score-high' : score >= 50 ? 'score-mid' : 'score-low');
     
-    // Coach commentary
-    const commentary = document.getElementById('coachCommentary');
-    const commentaryText = document.getElementById('coachCommentaryText');
+    document.getElementById('scoreValue').textContent = score;
+    document.getElementById('jobTitle').textContent = data.job_title || 'Role';
+    document.getElementById('jobCompany').textContent = data.company || 'Company';
+    document.getElementById('jobVerdict').textContent = data.verdict || data.one_liner || '';
+    
+    // Parse matches and gaps
+    const matches = (data.analysis || []).filter(a => a.startsWith('Match:'));
+    const gaps = (data.analysis || []).filter(a => a.startsWith('Gap:'));
+    
+    // Quick stats
+    document.getElementById('matchCount').textContent = matches.length;
+    document.getElementById('gapCount').textContent = gaps.length;
+    
+    // Keywords processing
+    const keywords = data.keywords || [];
+    const kwMatched = keywords.filter(kw => typeof kw === 'object' ? kw.in_resume : false).length;
+    const kwMissing = keywords.length - kwMatched;
+    const kwHitRate = keywords.length > 0 ? Math.round((kwMatched / keywords.length) * 100) : 0;
+    
+    document.getElementById('keywordHitRate').textContent = kwHitRate + '%';
+    document.getElementById('kwMatched').textContent = kwMatched;
+    document.getElementById('kwMissing').textContent = kwMissing;
+    
+    // Coach take
+    let coachTake = '';
     if (score >= 80) {
-        commentaryText.textContent = "This is a great fit. You have the experience they're looking for. I'd prioritize this application.";
+        coachTake = "Strong fit. You match most requirements and should be competitive. Focus on highlighting your relevant wins in the interview.";
     } else if (score >= 65) {
-        commentaryText.textContent = "Solid match. The gaps aren't deal-breakers. Check the Interview Kit for strategies to address them.";
+        coachTake = "Good opportunity with some gaps to address. Review the missing keywords below and prepare talking points for your gaps.";
     } else if (score >= 50) {
-        commentaryText.textContent = "This is a reach, but not impossible. You'll need to work harder to stand out. Consider networking.";
+        coachTake = "Stretch role. You'll need to work harder to stand out. Consider networking into this one and addressing gaps head-on.";
     } else {
-        commentaryText.textContent = "Significant gaps here. Consider using this as a target to work toward, or focus on transferable skills.";
+        coachTake = "Significant gaps. This role may require skills or experience you're still building. Consider it a target to work toward.";
     }
-    commentary.style.display = 'flex';
+    document.getElementById('coachTake').textContent = coachTake;
     
-    // Analysis list
-    const list = document.getElementById('analysisList');
-    list.innerHTML = '';
-    (data.analysis || []).forEach(item => {
-        if (item.startsWith('Match:')) {
-            const parts = item.replace('Match:', '').trim().split(' - ');
-            list.innerHTML += `<li class="analysis-item item-match"><strong>${esc(parts[0])}</strong>${parts[1] ? esc(parts[1]) : ''}</li>`;
-        } else if (item.startsWith('Gap:')) {
-            const parts = item.replace('Gap:', '').trim().split(' - ');
-            list.innerHTML += `<li class="analysis-item item-gap"><strong>${esc(parts[0])}</strong>${parts[1] ? esc(parts[1]) : ''}</li>`;
-        }
-    });
-    
-    // Keywords
-    const cloud = document.getElementById('keywordCloud');
-    cloud.innerHTML = (data.keywords || []).map(kw => {
-        // Handle both object format {term, in_resume} and string format
+    // Dashboard keywords (compact view)
+    const dashKw = document.getElementById('dashboardKeywords');
+    dashKw.innerHTML = keywords.slice(0, 12).map(kw => {
         const term = typeof kw === 'string' ? kw : (kw.term || kw.keyword || '');
-        const inResume = typeof kw === 'object' ? (kw.in_resume || kw.matched) : false;
+        const inResume = typeof kw === 'object' ? kw.in_resume : false;
+        return `<span class="kw-tag ${inResume ? 'matched' : 'missing'}">${esc(term)}</span>`;
+    }).join('');
+    
+    // Full keyword cloud
+    const cloud = document.getElementById('keywordCloud');
+    cloud.innerHTML = keywords.map(kw => {
+        const term = typeof kw === 'string' ? kw : (kw.term || kw.keyword || '');
+        const inResume = typeof kw === 'object' ? kw.in_resume : false;
         return `<span class="keyword-tag ${inResume ? 'in-resume' : 'missing'}">${esc(term)}</span>`;
+    }).join('');
+    
+    // Top matches (first 3)
+    document.getElementById('topMatches').innerHTML = matches.slice(0, 3).map(m => {
+        const text = m.replace('Match:', '').trim();
+        const parts = text.split('→');
+        return `<li><strong>${esc(parts[0].trim())}</strong>${parts[1] ? ' - ' + esc(parts[1].trim()) : ''}</li>`;
+    }).join('');
+    
+    // Top gaps (first 3)
+    document.getElementById('topGaps').innerHTML = gaps.slice(0, 3).map(g => {
+        const text = g.replace('Gap:', '').trim();
+        const parts = text.split('→');
+        return `<li><strong>${esc(parts[0].trim())}</strong>${parts[1] ? ' - ' + esc(parts[1].trim()) : ''}</li>`;
     }).join('');
     
     // Resume output
@@ -1273,6 +1545,11 @@ async function fetchMarketIntel(jobDescription, jobTitle, company) {
             document.getElementById('salaryHigh').textContent = '$' + s.high + 'K';
             document.getElementById('salaryMarker').style.left = ((s.mid - s.low) / (s.high - s.low) * 100) + '%';
             document.getElementById('salaryMarker').setAttribute('data-label', '$' + s.mid + 'K Target');
+            
+            // Update quick displays
+            document.getElementById('salaryQuick').textContent = '$' + s.mid + 'K';
+            document.getElementById('salaryPreview').textContent = '$' + s.low + 'K - $' + s.high + 'K';
+            
             if (analysisData) analysisData.salary_intel = s;
         }
         
