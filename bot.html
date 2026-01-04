@@ -3,362 +3,134 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Arti // Federal Career Pathfinder</title>
+    <title>Arti // DIB Career Coach</title>
     <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
 /* ==========================================================================
    NEO-BRUTALIST TOKENS
    ========================================================================== */
 :root {
-    --ink: #1a1a2e;        
-    --paper: #ffffff;      
-    --cream: #f8f6f1;      
-    
-    /* Palette */
-    --pale-blue: #c8dae8;  
-    --soft-blue: #93b5d9;  
-    --deep-blue: #4a6a8a;  
-
-    /* Signals */
+    --ink: #1a1a2e;
+    --paper: #ffffff;
+    --cream: #f8f6f1;
+    --pale-blue: #c8dae8;
+    --soft-blue: #93b5d9;
     --mint: #d4e8dc;
     --clay: #e07a5f;
     --gold: #f2cc8f;
     
-    /* The "Chunky" Look */
     --border: 3px solid var(--ink);
-    --shadow: 5px 5px 0 var(--ink);
-    --shadow-sm: 3px 3px 0 var(--ink);
+    --shadow: 4px 4px 0 var(--ink);
     --radius: 12px;
 }
 
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-
-body { 
-    margin: 0; padding: 0; 
-    font-family: 'DM Sans', sans-serif; 
-    background: var(--pale-blue); 
-    color: var(--ink);
-    height: 100vh; overflow: hidden;
-}
-
+body { margin: 0; padding: 0; font-family: 'DM Sans', sans-serif; background: var(--pale-blue); color: var(--ink); height: 100vh; overflow: hidden; }
 h1, h2, h3, .mono { font-family: 'Space Mono', monospace; }
 
-/* ==========================================================================
-   APP FRAME
-   ========================================================================== */
+/* APP FRAME */
 .app-frame {
-    max-width: 600px; 
-    margin: 0 auto; 
-    height: 100vh;
-    background: var(--cream); 
-    border-left: var(--border); 
-    border-right: var(--border);
-    display: flex; 
-    flex-direction: column; 
-    position: relative;
-    box-shadow: 0 0 50px rgba(0,0,0,0.1);
+    max-width: 600px; margin: 0 auto; height: 100vh;
+    background: var(--cream); border-left: var(--border); border-right: var(--border);
+    display: flex; flex-direction: column; position: relative;
+    box-shadow: 0 0 60px rgba(0,0,0,0.1);
 }
-
-@media(max-width: 650px) { 
-    .app-frame { border: none; width: 100%; } 
-}
+@media(max-width: 650px) { .app-frame { border: none; width: 100%; } }
 
 /* HEADER */
 .app-header {
-    padding: 18px 24px; 
-    border-bottom: var(--border); 
-    background: var(--paper);
-    display: flex; 
-    justify-content: space-between; 
-    align-items: center;
-    z-index: 10;
+    padding: 16px 20px; border-bottom: var(--border); background: var(--paper);
+    display: flex; justify-content: space-between; align-items: center; z-index: 10;
 }
-
-.brand { 
-    font-family: 'Space Mono'; 
-    font-weight: 700; 
-    font-size: 16px; 
-    display: flex; 
-    align-items: center; 
-    gap: 12px; 
-    text-transform: uppercase;
-    letter-spacing: -0.5px;
-}
-
-/* Clean Avatar */
-.brand-avatar { 
-    width: 40px; 
-    height: 40px; 
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
+.brand { font-family: 'Space Mono'; font-weight: 700; font-size: 15px; display: flex; align-items: center; gap: 10px; text-transform: uppercase; letter-spacing: -0.5px; }
+.brand-avatar { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; }
 .brand-avatar img { width: 100%; height: 100%; object-fit: contain; }
 
 /* ==========================================================================
-   VIEWS & CARDS
+   CHAT STREAM (The Core UI)
    ========================================================================== */
-.view-container { 
-    flex: 1; 
-    overflow-y: auto; 
-    padding: 24px; 
-    display: none; 
-    background: var(--cream);
-    padding-bottom: 100px; /* Space for Chat FAB */
-}
-.view-container.active { display: block; }
-
-/* Typography */
-.hero-title { 
-    font-family: 'Space Mono'; 
-    font-size: 24px; 
-    font-weight: 700; 
-    line-height: 1.2; 
-    margin-bottom: 12px; 
-    text-transform: uppercase;
-}
-.hero-sub { 
-    font-size: 15px; 
-    opacity: 0.8; 
-    margin-bottom: 32px; 
-    max-width: 90%;
-    line-height: 1.5;
+.chat-container {
+    flex: 1; overflow-y: auto; padding: 20px;
+    display: flex; flex-direction: column; gap: 16px;
+    scroll-behavior: smooth;
+    padding-bottom: 40px;
 }
 
-/* Chunky Cards */
-.quiz-card {
-    background: var(--paper); 
-    border: var(--border); 
-    border-radius: var(--radius);
-    padding: 24px; 
-    box-shadow: var(--shadow); 
-    margin-bottom: 24px;
+/* Messages */
+.msg-row { display: flex; gap: 12px; align-items: flex-start; opacity: 0; animation: slideUp 0.3s forwards; }
+.msg-row.user { flex-direction: row-reverse; }
+
+.avatar { width: 32px; height: 32px; flex-shrink: 0; }
+.avatar img { width: 100%; height: 100%; object-fit: contain; }
+
+.bubble {
+    max-width: 85%; padding: 14px 18px; border-radius: 12px;
+    font-size: 14px; line-height: 1.5; border: 2px solid var(--ink);
+    position: relative; box-shadow: 3px 3px 0 rgba(0,0,0,0.05);
 }
+.msg-row.arti .bubble { background: var(--paper); border-top-left-radius: 2px; }
+.msg-row.user .bubble { background: var(--ink); color: white; border-top-right-radius: 2px; box-shadow: 3px 3px 0 rgba(0,0,0,0.2); }
 
-.quiz-question { 
-    font-family: 'Space Mono'; 
-    font-weight: 700; 
-    font-size: 13px; 
-    margin-bottom: 20px; 
-    text-transform: uppercase; 
-    border-bottom: 2px solid #eee;
-    padding-bottom: 12px;
+/* Option Buttons (Chat Choices) */
+.chat-options {
+    display: flex; flex-wrap: wrap; gap: 8px; margin-left: 44px; /* Align with text */
+    animation: fadeIn 0.5s forwards;
 }
-
-/* Options */
-.quiz-options { display: flex; flex-direction: column; gap: 12px; }
-
-.option-btn {
-    padding: 16px 20px; 
-    text-align: left;
-    background: var(--paper); 
-    border: 2px solid var(--ink); 
-    border-radius: 8px;
-    font-family: 'Space Mono'; 
-    font-weight: 700; 
-    font-size: 13px; 
-    cursor: pointer;
-    transition: all 0.1s;
-    box-shadow: var(--shadow-sm);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+.chat-btn {
+    padding: 10px 16px; background: var(--paper); border: 2px solid var(--ink);
+    border-radius: 20px; font-family: 'Space Mono'; font-weight: 700; font-size: 12px;
+    cursor: pointer; transition: all 0.1s; box-shadow: 3px 3px 0 rgba(0,0,0,0.1);
 }
+.chat-btn:hover { transform: translate(-2px, -2px); box-shadow: 5px 5px 0 var(--ink); background: var(--mint); }
+.chat-btn:active { transform: translate(1px, 1px); box-shadow: 2px 2px 0 var(--ink); }
 
-.option-btn:hover { 
-    background: var(--pale-blue); 
-    transform: translate(-2px, -2px); 
-    box-shadow: 5px 5px 0 var(--ink); 
+/* Rich Widgets (Archetype Card inside Chat) */
+.chat-widget {
+    width: 100%; max-width: 320px; margin-left: 44px;
+    background: var(--paper); border: 2px solid var(--ink); border-radius: 12px;
+    overflow: hidden; box-shadow: 4px 4px 0 var(--ink); margin-bottom: 8px;
 }
-.option-btn:active {
-    transform: translate(2px, 2px);
-    box-shadow: 1px 1px 0 var(--ink);
-}
-
-/* ARCHETYPE RESULT */
-.archetype-card {
-    background: var(--paper); 
-    border: var(--border); 
-    border-radius: var(--radius);
-    padding: 0; 
-    overflow: hidden; 
-    box-shadow: var(--shadow); 
-    margin-bottom: 24px;
-    text-align: center;
-}
-
-.arch-header { 
-    padding: 40px 20px; 
-    background: var(--pale-blue);
-    border-bottom: var(--border); 
-}
-
-.arch-icon { font-size: 64px; margin-bottom: 16px; display: block; filter: drop-shadow(4px 4px 0 rgba(0,0,0,0.2)); }
-
-.arch-name { 
-    font-family: 'Space Mono'; 
-    font-weight: 700; 
-    font-size: 22px; 
-    text-transform: uppercase; 
-    display: block; 
-    letter-spacing: -0.5px;
-    background: var(--paper);
-    border: 2px solid var(--ink);
-    display: inline-block;
-    padding: 8px 16px;
-    border-radius: 50px;
-    box-shadow: 3px 3px 0 rgba(0,0,0,0.1);
-}
-
-.arch-body { padding: 24px; text-align: left; }
-.arch-desc { font-size: 14px; margin-bottom: 24px; line-height: 1.6; }
-
-/* Job Links */
-.job-link-btn {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 16px; margin-bottom: 12px;
-    background: var(--paper); 
-    border: 2px solid var(--ink); 
-    border-radius: 8px;
-    text-decoration: none; 
-    color: var(--ink); 
-    font-family: 'Space Mono';
-    font-weight: 700; font-size: 12px;
-    box-shadow: 3px 3px 0 rgba(0,0,0,0.1); 
+.widget-header { background: var(--pale-blue); padding: 20px; text-align: center; border-bottom: 2px solid var(--ink); }
+.widget-icon { font-size: 40px; display: block; margin-bottom: 8px; }
+.widget-title { font-family: 'Space Mono'; font-weight: 700; font-size: 18px; text-transform: uppercase; }
+.widget-body { padding: 16px; font-size: 13px; line-height: 1.5; }
+.widget-link {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 12px; margin-top: 8px; background: var(--cream);
+    border: 2px solid var(--ink); border-radius: 8px; text-decoration: none;
+    color: var(--ink); font-weight: 700; font-size: 11px; font-family: 'Space Mono';
     transition: all 0.1s;
 }
-.job-link-btn:hover { 
-    transform: translate(-2px, -2px); 
-    box-shadow: 4px 4px 0 var(--ink); 
-    background: var(--mint); 
-}
+.widget-link:hover { background: var(--mint); transform: translate(-1px,-1px); box-shadow: 2px 2px 0 var(--ink); }
 
-/* ANALYZER INPUTS */
-.form-group { margin-bottom: 20px; }
-.label { 
-    font-family: 'Space Mono'; font-size: 11px; font-weight: 700; 
-    text-transform: uppercase; margin-bottom: 8px; display: block; 
-}
-
-textarea.chunky-input {
-    width: 100%; height: 140px; padding: 16px; 
-    border: var(--border); border-radius: 8px;
-    font-family: 'DM Sans'; font-size: 14px; resize: none; 
-    background: var(--paper);
-    box-shadow: 4px 4px 0 rgba(0,0,0,0.05);
-}
-textarea.chunky-input:focus {
-    outline: none;
-    box-shadow: var(--shadow-sm);
-    background: #fff;
-}
-
-/* Primary Button */
-.btn-main {
-    width: 100%; padding: 18px; 
-    background: var(--ink); color: white;
-    font-family: 'Space Mono'; font-weight: 700; font-size: 14px;
-    text-transform: uppercase;
-    border: none; border-radius: 8px;
-    cursor: pointer; display: flex; justify-content: space-between;
-    box-shadow: var(--shadow-sm);
-    transition: all 0.1s;
-}
-.btn-main:active { transform: translate(2px, 2px); box-shadow: none; }
-
-/* Secondary Button (Retake Quiz) */
-.btn-secondary {
-    width: 100%; padding: 14px;
-    background: var(--paper); color: var(--ink);
-    font-family: 'Space Mono'; font-weight: 700; font-size: 12px;
-    text-transform: uppercase;
-    border: 2px solid var(--ink); border-radius: 8px;
-    cursor: pointer; text-align: center;
-    box-shadow: 3px 3px 0 rgba(0,0,0,0.1);
-    transition: all 0.1s;
-}
-.btn-secondary:hover {
-    box-shadow: 4px 4px 0 var(--ink);
-    background: #f4f4f4;
-}
-.btn-secondary:active { transform: translate(2px, 2px); box-shadow: none; }
-
-/* ==========================================================================
-   FLOATING CHAT (The "Expert" Widget)
-   ========================================================================== */
-.fab-chat {
-    position: fixed; bottom: 85px; right: 24px;
-    width: 56px; height: 56px;
-    background: var(--ink);
-    border-radius: 50%;
-    box-shadow: 4px 4px 0 rgba(0,0,0,0.3);
-    cursor: pointer; display: grid; place-items: center; z-index: 900;
-    transition: transform 0.2s;
-}
-.fab-chat:hover { transform: scale(1.1); }
-.fab-chat svg { width: 28px; height: 28px; fill: white; }
-
-.chat-overlay {
-    position: fixed; bottom: 150px; right: 24px;
-    width: 340px; height: 450px;
-    background: var(--paper);
-    border: var(--border); border-radius: var(--radius);
-    box-shadow: 8px 8px 0 rgba(0,0,0,0.5);
-    display: flex; flex-direction: column;
-    z-index: 999;
-    transform: translateY(20px); opacity: 0; pointer-events: none;
-    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-.chat-overlay.open { transform: translateY(0); opacity: 1; pointer-events: all; }
-@media(max-width: 480px) {
-    .chat-overlay { width: auto; left: 10px; right: 10px; bottom: 150px; }
-}
-
-.chat-header {
-    padding: 14px; border-bottom: var(--border); background: var(--gold);
-    border-radius: 9px 9px 0 0; display: flex; justify-content: space-between; align-items: center;
-}
-.chat-messages {
-    flex: 1; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 10px;
-}
-.chat-input-row {
-    padding: 10px; border-top: var(--border); background: #fff; display: flex; gap: 8px; border-radius: 0 0 9px 9px;
+/* INPUT AREA (Sticky Footer) */
+.input-area {
+    padding: 16px; background: var(--paper); border-top: var(--border);
+    display: flex; gap: 10px; align-items: flex-end;
 }
 .chat-input {
-    flex: 1; border: 2px solid var(--ink); border-radius: 6px; padding: 10px; font-family: 'DM Sans'; font-size: 13px;
+    flex: 1; padding: 14px; border: 2px solid var(--ink); border-radius: 8px;
+    font-family: 'DM Sans'; font-size: 14px; resize: none; height: 52px; max-height: 120px;
+    transition: box-shadow 0.2s;
 }
+.chat-input:focus { outline: none; box-shadow: 4px 4px 0 var(--pale-blue); }
+.send-btn {
+    width: 52px; height: 52px; background: var(--ink); color: white;
+    border: none; border-radius: 8px; cursor: pointer; font-weight: 700;
+    display: grid; place-items: center; box-shadow: 3px 3px 0 rgba(0,0,0,0.2);
+}
+.send-btn:active { transform: scale(0.95); box-shadow: none; }
 
-/* Bubbles */
-.msg { max-width: 85%; padding: 10px 12px; border-radius: 10px; font-size: 13px; line-height: 1.4; border: 2px solid var(--ink); }
-.msg.arti { background: #fff; align-self: flex-start; border-top-left-radius: 2px; box-shadow: 2px 2px 0 rgba(0,0,0,0.1); }
-.msg.user { background: var(--ink); color: white; align-self: flex-end; border-top-right-radius: 2px; }
+/* Animations */
+@keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-/* ==========================================================================
-   BOTTOM NAV
-   ========================================================================== */
-.bottom-nav {
-    border-top: var(--border); 
-    background: var(--paper); 
-    padding: 16px;
-    display: flex; gap: 16px;
-    position: fixed; bottom: 0; left: 0; right: 0;
-    max-width: 600px; margin: 0 auto;
-    z-index: 1000;
-}
-
-.nav-item {
-    flex: 1; padding: 14px; text-align: center;
-    font-family: 'Space Mono'; font-size: 12px; font-weight: 700; text-transform: uppercase;
-    border: 2px solid transparent; border-radius: 8px; cursor: pointer; opacity: 0.6;
-    transition: all 0.2s;
-}
-.nav-item:hover { opacity: 1; background: #f4f4f4; }
-.nav-item.active { 
-    opacity: 1; 
-    border: 2px solid var(--ink); 
-    background: var(--pale-blue); 
-    box-shadow: 3px 3px 0 var(--ink);
-}
+/* Typing Dot */
+.typing { display: flex; gap: 4px; padding: 4px 0; }
+.dot { width: 6px; height: 6px; background: var(--ink); border-radius: 50%; animation: bounce 1.4s infinite ease-in-out; }
+.dot:nth-child(1) { animation-delay: -0.32s; }
+.dot:nth-child(2) { animation-delay: -0.16s; }
+@keyframes bounce { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1.0); } }
 
 </style>
 </head>
@@ -368,278 +140,257 @@ textarea.chunky-input:focus {
     <header class="app-header">
         <div class="brand">
             <div class="brand-avatar"><img src="arti.png" alt="Arti"></div>
-            <div>Arti // Fed Sales Bot</div>
+            <div>Arti // Career Bot</div>
         </div>
-        <div style="width:10px; height:10px; background:#00ff00; border:1px solid black; border-radius:50%; box-shadow:1px 1px 0 black;"></div>
+        <button class="mono" onclick="resetChat()" style="background:none; border:none; text-decoration:underline; font-size:11px; cursor:pointer;">Restart</button>
     </header>
 
-    <div id="viewPathfinder" class="view-container active">
-        <div id="quizIntro">
-            <div class="hero-title">Where do you fit?</div>
-            <div class="hero-sub">I'll help you find your ideal role in the Defense Industrial Base in 3 steps.</div>
-            
-            <div class="quiz-card">
-                <div class="quiz-question">1. What drives you most?</div>
-                <div class="quiz-options">
-                    <div class="option-btn" onclick="selectOption(1, 'money')">Closing Deals & Making Money <span>→</span></div>
-                    <div class="option-btn" onclick="selectOption(1, 'people')">Leading People & Teams <span>→</span></div>
-                    <div class="option-btn" onclick="selectOption(1, 'product')">Building Tech & Products <span>→</span></div>
-                    <div class="option-btn" onclick="selectOption(1, 'puzzle')">Solving Complex Problems <span>→</span></div>
-                </div>
-            </div>
+    <div id="chatContainer" class="chat-container">
         </div>
 
-        <div id="quizQ2" style="display:none;">
-            <div class="quiz-card">
-                <div class="quiz-question">2. What is your strongest skill?</div>
-                <div class="quiz-options">
-                    <div class="option-btn" onclick="selectOption(2, 'talk')">Persuasion & Storytelling <span>→</span></div>
-                    <div class="option-btn" onclick="selectOption(2, 'org')">Organization & Process <span>→</span></div>
-                    <div class="option-btn" onclick="selectOption(2, 'code')">Technical Deep Dives <span>→</span></div>
-                    <div class="option-btn" onclick="selectOption(2, 'strat')">Strategy & Big Picture <span>→</span></div>
-                </div>
-            </div>
-        </div>
-
-        <div id="quizQ3" style="display:none;">
-            <div class="quiz-card">
-                <div class="quiz-question">3. Clearance Status?</div>
-                <div class="quiz-options">
-                    <div class="option-btn" onclick="selectOption(3, 'none')">None / Public Trust <span>→</span></div>
-                    <div class="option-btn" onclick="selectOption(3, 'secret')">Secret <span>→</span></div>
-                    <div class="option-btn" onclick="selectOption(3, 'ts')">Top Secret / SCI <span>→</span></div>
-                </div>
-            </div>
-        </div>
-
-        <div id="archetypeResult" style="display:none;">
-            <div class="archetype-card">
-                <div class="arch-header">
-                    <span class="arch-icon" id="archIcon">🦁</span>
-                    <span class="arch-name" id="archName">The Rainmaker</span>
-                </div>
-                <div class="arch-body">
-                    <p class="arch-desc" id="archDesc">You thrive on relationships and closing deals. In the DIB, this means Capture Management or Federal Sales.</p>
-                    
-                    <div class="label">Recommended Job Feeds</div>
-                    <div id="jobLinks"></div>
-                    
-                    <button class="btn-main" onclick="switchTab('analyzer')" style="margin-top:24px; background:white; color:var(--ink); border:2px solid var(--ink);">
-                        <span>Have a resume? Check Fit</span>
-                        <span>→</span>
-                    </button>
-                    
-                    <div style="margin-top: 16px;">
-                        <button class="btn-secondary" onclick="resetQuiz()">Retake Quiz</button>
-                    </div>
-                </div>
-            </div>
-        </div>
+    <div class="input-area">
+        <textarea id="userInput" class="chat-input" placeholder="Type a message..." onkeydown="if(event.key==='Enter' && !event.shiftKey){event.preventDefault(); handleSend();}"></textarea>
+        <button class="send-btn" onclick="handleSend()">→</button>
     </div>
-
-    <div id="viewAnalyzer" class="view-container">
-        <div class="hero-title">Job Fit Analyzer</div>
-        <div class="hero-sub">Deep dive comparison of your resume vs. a specific JD.</div>
-
-        <div class="form-group">
-            <span class="label">Job Description</span>
-            <textarea id="jdText" class="chunky-input" placeholder="Paste JD or URL..."></textarea>
-        </div>
-        <div class="form-group">
-            <span class="label">Resume</span>
-            <textarea id="resumeText" class="chunky-input" placeholder="Paste resume..."></textarea>
-        </div>
-        <button class="btn-main" onclick="runAnalysis()">
-            <span>ANALYZE MATCH</span>
-            <span>→</span>
-        </button>
-        
-        <div id="analysisOutput" style="margin-top:24px; display:none;">
-            <div class="quiz-card" style="background:var(--pale-blue);">
-                <div class="label">Match Score</div>
-                <div style="font-size:56px; font-weight:700; font-family:'Space Mono'; line-height:1;" id="scoreVal">--</div>
-                <div id="scoreMsg" style="font-size:13px; margin-top:12px; line-height:1.5;"></div>
-            </div>
-        </div>
-    </div>
-
-    <div class="fab-chat" onclick="toggleChat()">
-        <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
-    </div>
-
-    <div class="chat-overlay" id="chatOverlay">
-        <div class="chat-header">
-            <span class="mono" style="font-weight:700;">Arti // Coach</span>
-            <span style="cursor:pointer; font-size:20px;" onclick="toggleChat()">×</span>
-        </div>
-        <div class="chat-messages" id="chatMessages">
-            <div class="msg arti">Hi! Use me to prep for interviews, negotiate salary, or fix your resume bullets.</div>
-        </div>
-        <div class="chat-input-row">
-            <input type="text" id="chatInput" class="chat-input" placeholder="Ask expert advice..." onkeydown="if(event.key==='Enter') sendChat()">
-            <button style="background:var(--ink); color:white; border:none; border-radius:4px; padding:0 12px; font-weight:bold; cursor:pointer;" onclick="sendChat()">></button>
-        </div>
-    </div>
-
-    <nav class="bottom-nav">
-        <div class="nav-item active" onclick="switchTab('pathfinder')" id="tab-pathfinder">Pathfinder</div>
-        <div class="nav-item" onclick="switchTab('analyzer')" id="tab-analyzer">Fit Analyzer</div>
-    </nav>
 </div>
 
 <script>
+// ==========================================================================
+// CLIENT LOGIC
+// ==========================================================================
 const API_ENDPOINT = 'https://76unm1rlj0.execute-api.us-east-1.amazonaws.com/default/grumpy2';
-let quizState = { q1: null, q2: null, q3: null };
-let appState = { analysis: null, chatHistory: [] };
+let chatState = { step: 'INIT', quizData: {} };
+const chatBox = document.getElementById('chatContainer');
 
-function switchTab(tab) {
-    document.querySelectorAll('.view-container').forEach(el => el.classList.remove('active'));
-    document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-    document.getElementById(`view${tab.charAt(0).toUpperCase() + tab.slice(1)}`).classList.add('active');
-    document.getElementById(`tab-${tab}`).classList.add('active');
+// INIT
+document.addEventListener('DOMContentLoaded', () => {
+    startGuruFlow();
+});
+
+// FLOW CONTROL
+function startGuruFlow() {
+    chatBox.innerHTML = '';
+    chatState = { step: 'Q1', quizData: {} };
+    
+    // Greeting
+    setTimeout(() => addMessage('arti', "Hi! I'm Arti. I help people find their path in the Defense Industrial Base."), 500);
+    setTimeout(() => addMessage('arti', "If you have a resume, paste it below. If not, I can help you find your role. **What drives you most?**"), 1200);
+    
+    // Question 1 Options
+    setTimeout(() => {
+        addOptions([
+            { label: "💰 Money / Deals", val: "money", next: "Q2" },
+            { label: "🤝 People / Leadership", val: "people", next: "Q2" },
+            { label: "🛠️ Tech / Building", val: "product", next: "Q2" },
+            { label: "🧩 Solving Puzzles", val: "puzzle", next: "Q2" }
+        ]);
+    }, 1800);
 }
 
-// PATHFINDER LOGIC
-function selectOption(qIndex, value) {
-    quizState['q' + qIndex] = value;
-    if (qIndex === 1) {
-        document.getElementById('quizIntro').style.display = 'none';
-        document.getElementById('quizQ2').style.display = 'block';
-    } else if (qIndex === 2) {
-        document.getElementById('quizQ2').style.display = 'none';
-        document.getElementById('quizQ3').style.display = 'block';
-    } else if (qIndex === 3) {
-        document.getElementById('quizQ3').style.display = 'none';
-        calculateArchetype();
-    }
+function handleOptionClick(btnElement, label, value, nextStep) {
+    // Remove options
+    btnElement.parentElement.remove();
+    
+    // Add User Bubble
+    addMessage('user', label);
+    
+    // Save Data
+    if(chatState.step === 'Q1') chatState.quizData.driver = value;
+    if(chatState.step === 'Q2') chatState.quizData.skill = value;
+    if(chatState.step === 'Q3') chatState.quizData.clearance = value;
+    
+    // Trigger Next Step
+    showTyping();
+    setTimeout(() => {
+        removeTyping();
+        
+        if (nextStep === 'Q2') {
+            chatState.step = 'Q2';
+            addMessage('arti', "Got it. And what would you say is your **strongest skill**?");
+            addOptions([
+                { label: "🗣️ Persuasion", val: "talk", next: "Q3" },
+                { label: "📋 Organization", val: "org", next: "Q3" },
+                { label: "💻 Coding/Technical", val: "code", next: "Q3" },
+                { label: "♟️ Strategy", val: "strat", next: "Q3" }
+            ]);
+        } 
+        else if (nextStep === 'Q3') {
+            chatState.step = 'Q3';
+            addMessage('arti', "Last question: Do you have a **Security Clearance**?");
+            addOptions([
+                { label: "No / Public Trust", val: "none", next: "RESULT" },
+                { label: "Secret", val: "secret", next: "RESULT" },
+                { label: "TS / SCI", val: "ts", next: "RESULT" }
+            ]);
+        } 
+        else if (nextStep === 'RESULT') {
+            chatState.step = 'DONE';
+            calculateArchetype();
+        }
+    }, 1000);
 }
 
 function calculateArchetype() {
-    const { q1, q2, q3 } = quizState;
+    const { driver, skill, clearance } = chatState.quizData;
     let title = "The Generalist";
     let icon = "🛡️";
     let desc = "You have broad skills useful across the DIB.";
-    let queries = ["Program Analyst", "Operations Manager"];
+    let roles = ["Program Analyst"];
 
-    if (q1 === 'money' || q2 === 'talk') {
-        title = "The Rainmaker";
-        icon = "🦁";
-        desc = "You belong in **Growth**. Look for roles like 'Capture Manager', 'Federal Sales Director', or 'Business Development'.";
-        queries = ["Capture Manager", "Federal Sales", "Business Development"];
-    } else if (q1 === 'people' && q2 === 'org') {
-        title = "The Commander";
-        icon = "🦅";
-        desc = "You are a natural **Program Manager**. Look for 'Program Manager', 'Project Lead', or 'Chief of Staff' roles.";
-        queries = ["Program Manager", "Project Manager", "Site Lead"];
-    } else if (q1 === 'product' || q2 === 'code') {
-        title = "The Builder";
-        icon = "⚡";
-        desc = "You belong in **Technical Delivery**. Look for 'Solutions Architect', 'Product Manager', or 'DevSecOps' roles.";
-        queries = ["Solutions Architect", "Product Manager", "Systems Engineer"];
-    } else if (q1 === 'puzzle' || q2 === 'strat') {
-        title = "The Strategist";
-        icon = "🧠";
-        desc = "You belong in **Operations & Strategy**. Look for 'Strategy Consultant', 'Operations Director', or 'Analyst' roles.";
-        queries = ["Strategy Consultant", "Operations Manager", "Intelligence Analyst"];
+    // Simple Logic
+    if (driver === 'money' || skill === 'talk') {
+        title = "The Rainmaker"; icon = "🦁";
+        desc = "You belong in **Growth**. In the DIB, this means Capture Management or Federal Sales.";
+        roles = ["Capture Manager", "Federal Sales"];
+    } else if (driver === 'people' && skill === 'org') {
+        title = "The Commander"; icon = "🦅";
+        desc = "You are a natural **Program Manager**. You keep the mission on track.";
+        roles = ["Program Manager", "Project Lead"];
+    } else if (driver === 'product' || skill === 'code') {
+        title = "The Builder"; icon = "⚡";
+        desc = "You belong in **Technical Delivery**. Building the tools that protect the mission.";
+        roles = ["Solutions Architect", "Systems Engineer"];
+    } else if (driver === 'puzzle' || skill === 'strat') {
+        title = "The Strategist"; icon = "🧠";
+        desc = "You belong in **Operations & Intel**. Analyzing data to drive decisions.";
+        roles = ["Strategy Consultant", "Intelligence Analyst"];
     }
 
-    document.getElementById('archName').textContent = title;
-    document.getElementById('archIcon').textContent = icon;
-    document.getElementById('archDesc').innerHTML = desc;
+    addMessage('arti', "I've analyzed your profile. Here is where you fit:");
     
-    const container = document.getElementById('jobLinks');
-    container.innerHTML = '';
+    // Render Widget
+    const div = document.createElement('div');
+    div.className = 'chat-widget';
+    div.innerHTML = `
+        <div class="widget-header">
+            <span class="widget-icon">${icon}</span>
+            <div class="widget-title">${title}</div>
+        </div>
+        <div class="widget-body">
+            <p style="margin-top:0;">${desc}</p>
+            <div class="mono" style="font-size:10px; font-weight:700; margin-top:12px; opacity:0.5;">LIVE JOB FEEDS</div>
+            ${roles.map(r => `
+                <a href="https://www.linkedin.com/jobs/search/?keywords=${encodeURIComponent(r)}" target="_blank" class="widget-link">
+                    <span>${r}</span><span>↗</span>
+                </a>
+            `).join('')}
+        </div>
+    `;
+    chatBox.appendChild(div);
+    scrollToBottom();
     
-    queries.forEach(q => {
-        const liUrl = `https://www.linkedin.com/jobs/search/?keywords=${encodeURIComponent(q)}`;
-        const cjUrl = `https://www.clearancejobs.com/jobs?keywords=${encodeURIComponent(q)}`;
-        
-        container.innerHTML += `
-            <a href="${liUrl}" target="_blank" class="job-link-btn">
-                <span>LinkedIn: ${q}</span>
-                <span>↗</span>
-            </a>
-            ${q3 !== 'none' ? `<a href="${cjUrl}" target="_blank" class="job-link-btn" style="border-color:#003366; color:#003366; background:#f0f4f8;">
-                <span>ClearanceJobs: ${q}</span>
-                <span>↗</span>
-            </a>` : ''}
-        `;
-    });
-
-    document.getElementById('archetypeResult').style.display = 'block';
+    setTimeout(() => {
+        addMessage('arti', "You can click those links to see live jobs. Or, **paste a job description** below and I can help you tailor your resume for it.");
+    }, 1500);
 }
 
-function resetQuiz() {
-    quizState = { q1: null, q2: null, q3: null };
-    document.getElementById('archetypeResult').style.display = 'none';
-    document.getElementById('quizIntro').style.display = 'block';
-}
-
-// ANALYZER LOGIC
-function runAnalysis() {
-    const r = document.getElementById('resumeText').value;
-    const j = document.getElementById('jdText').value;
-    if(!r || !j) return alert("Please fill both fields");
-
-    const btn = document.querySelector('#viewAnalyzer .btn-main');
-    const oldText = btn.innerHTML;
-    btn.innerHTML = "ANALYZING...";
-    btn.disabled = true;
-    
-    fetch(API_ENDPOINT, {
-        method: 'POST',
-        body: JSON.stringify({ request_type: 'resume_match', job_description: j, resume_text: r })
-    })
-    .then(r => r.json())
-    .then(data => {
-        appState.analysis = data;
-        document.getElementById('analysisOutput').style.display = 'block';
-        document.getElementById('scoreVal').textContent = data.score + '%';
-        document.getElementById('scoreMsg').textContent = data.verdict;
-        addMessage('arti', `Analysis done. Score: **${data.score}%**. I can now help you draft emails or prep for interviews for this role.`);
-    })
-    .finally(() => {
-        btn.innerHTML = oldText;
-        btn.disabled = false;
-    });
-}
-
-// CHAT LOGIC
-function toggleChat() { document.getElementById('chatOverlay').classList.toggle('open'); }
-
+// ==========================================================================
+// UI HELPERS
+// ==========================================================================
 function addMessage(role, text) {
     const div = document.createElement('div');
-    div.className = `msg ${role}`;
-    div.innerHTML = text.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
-    document.getElementById('chatMessages').appendChild(div);
-    document.getElementById('chatMessages').scrollTop = 9999;
+    div.className = `msg-row ${role}`;
+    
+    let avatar = role === 'arti' ? 
+        `<div class="avatar"><img src="arti.png" alt="A"></div>` : '';
+        
+    div.innerHTML = `
+        ${avatar}
+        <div class="bubble">
+            ${text.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')}
+        </div>
+    `;
+    chatBox.appendChild(div);
+    scrollToBottom();
 }
 
-function sendChat() {
-    const input = document.getElementById('chatInput');
+function addOptions(options) {
+    const div = document.createElement('div');
+    div.className = 'chat-options';
+    options.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.className = 'chat-btn';
+        btn.textContent = opt.label;
+        btn.onclick = () => handleOptionClick(btn, opt.label, opt.val, opt.next);
+        div.appendChild(btn);
+    });
+    chatBox.appendChild(div);
+    scrollToBottom();
+}
+
+function showTyping() {
+    const div = document.createElement('div');
+    div.id = 'typingIndicator';
+    div.className = 'msg-row arti';
+    div.innerHTML = `
+        <div class="avatar"><img src="arti.png" alt="A"></div>
+        <div class="bubble">
+            <div class="typing"><div class="dot"></div><div class="dot"></div></div>
+        </div>
+    `;
+    chatBox.appendChild(div);
+    scrollToBottom();
+}
+
+function removeTyping() {
+    const el = document.getElementById('typingIndicator');
+    if(el) el.remove();
+}
+
+function scrollToBottom() {
+    chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+function resetChat() {
+    startGuruFlow();
+}
+
+// ==========================================================================
+// TEXT INPUT LOGIC (The "Expert" Mode)
+// ==========================================================================
+async function handleSend() {
+    const input = document.getElementById('userInput');
     const text = input.value.trim();
     if(!text) return;
     
+    // Clear options if they exist (user chose to type instead)
+    const existingOpts = document.querySelector('.chat-options');
+    if(existingOpts) existingOpts.remove();
+    
     input.value = '';
     addMessage('user', text);
-    addMessage('arti', 'Thinking...');
+    showTyping();
     
-    fetch(API_ENDPOINT, {
-        method: 'POST',
-        body: JSON.stringify({
-            request_type: 'ask_expert',
-            question: text,
-            job_description: document.getElementById('jdText').value,
-            resume_text: document.getElementById('resumeText').value,
-            analysis_data: appState.analysis,
-            chat_history: appState.chatHistory
-        })
-    })
-    .then(r => r.json())
-    .then(data => {
-        document.querySelector('.msg.arti:last-child').innerHTML = data.response.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
-        appState.chatHistory.push({role:'user',content:text},{role:'assistant',content:data.response});
-    });
+    try {
+        // If text is long, assume Resume/JD context
+        let type = 'ask_expert';
+        if(text.length > 200) type = 'resume_match'; // Heuristic
+        
+        // This simulates the backend call - Connect to your Lambda URL
+        const res = await fetch(API_ENDPOINT, {
+            method: 'POST',
+            body: JSON.stringify({
+                request_type: type,
+                question: text, // treated as resume/jd if long
+                job_description: text, // naive pass-through for demo
+                resume_text: text
+            })
+        });
+        const data = await res.json();
+        removeTyping();
+        
+        if(type === 'resume_match') {
+            addMessage('arti', `I see you pasted a resume/JD. **Match Score: ${data.score || 75}%**.`);
+            addMessage('arti', data.verdict || "This looks like a decent fit.");
+        } else {
+            addMessage('arti', data.response || "I can help with that. Could you provide the Job Description first?");
+        }
+        
+    } catch(e) {
+        removeTyping();
+        // Fallback for demo if API isn't live
+        setTimeout(() => addMessage('arti', "I'm analyzing that text... (Connect Lambda to see real results)"), 500);
+    }
 }
 </script>
 </body>
