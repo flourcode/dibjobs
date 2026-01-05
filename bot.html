@@ -650,8 +650,8 @@
     @media (max-width: 768px) {
         /* General Mobile Adjustments */
         .hero-grid { grid-template-columns: 1fr; }
-        .score-box { padding: 20px; flex-direction: row; gap: 20px; align-items: center; }
-        .score-val { font-size: 48px; }
+        .score-box { padding: 30px 20px; flex-direction: column; gap: 10px; align-items: center; }
+        .score-val { font-size: 96px; }
         .card-body { padding: 20px; }
         /* HEADER MOBILE LAYOUT */
         header { 
@@ -1586,69 +1586,17 @@
                     </div>
                 </div>
                 
-                <!-- SECONDARY STATS -->
-                <div class="stats-grid two-col" style="margin-bottom: 20px;">
-                    <div class="stat-card">
-                        <div class="stat-label">Competition</div>
-                        <div class="stat-value" id="competitionValue" style="font-size: 20px;">---</div>
-                        <div class="stat-sub" id="competitionSub">Analyzing...</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-label">Time to Offer</div>
-                        <div class="stat-value" id="timelineValue" style="font-size: 20px;">---</div>
-                        <div class="stat-sub">estimated timeline</div>
-                    </div>
-                </div>
-                
-                <!-- KEYWORDS SECTION -->
-                <div style="border-top: 2px dashed var(--ink-black); padding-top: 16px; margin-bottom: 16px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                        <div class="card-title" style="margin: 0;">Keywords to Add</div>
-                        <div class="keywords-count" id="keywordsCountLabel">0 matched, 0 missing</div>
-                    </div>
-                    <p style="margin-bottom: 10px; font-size: 12px; opacity: 0.7;"><span style="background: var(--accent-mint); padding: 2px 6px; border-radius: 3px;">Green</span> = in resume. <span style="background: rgba(212, 145, 138, 0.4); padding: 2px 6px; border-radius: 3px;">Orange</span> = missing.</p>
-                    <div class="keyword-cloud" id="keywordCloudNew"></div>
-                    <button class="btn" onclick="copyKeywordsNew()" style="margin-top: 12px; padding: 8px 16px; font-size: 11px;">Copy Keywords</button>
-                </div>
-                
-                <!-- RESEARCH THIS COMPANY -->
-                <div id="researchCompanySection" style="border-top: 2px dashed var(--ink-black); padding-top: 16px;">
-                    <div class="card-title" style="margin-bottom: 12px;">Research This Company</div>
-                    <div id="researchLinks" class="network-links"></div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- MASCOT INSIGHT -->
-        <div class="mascot-insight">
-            <img src="arti.png" alt="Expert" class="mascot-avatar">
-            <div class="insight-text" id="insightText">
-                <strong>Analyzing...</strong> Your personalized insight will appear here.
-            </div>
-        </div>
-        
-        <!-- STRENGTHS BOX -->
-        <div id="strengthsBox" class="strengths-box">
-            <div class="box-title">Your Strengths</div>
-            <div id="strengthsList"></div>
-        </div>
-        
-        <!-- 3. JOB INTEL (Combined: salary, timeline, competition, flags, company) -->
-        <div id="jobIntelSection" class="card" style="display:none;">
-            <div class="card-header">
-                <span class="card-title">Job Intel</span>
-            </div>
-            <div class="card-body">
-                <div class="intel-grid">
+                <!-- SALARY & TIMELINE DIAGRAMS -->
+                <div class="intel-grid" style="margin-bottom: 20px;">
                     <div class="intel-panel">
                         <div class="intel-panel-header">
-                            <div class="intel-panel-title">Salary Estimate</div>
+                            <div class="intel-panel-title">Salary Range</div>
                         </div>
                         <div id="salaryIntel">
                             <div class="intel-value" id="salaryRange">Loading...</div>
                             <div class="intel-label">Based on role level & market</div>
                             <div class="salary-range-bar">
-                                <div class="salary-marker" style="left: 60%;" data-label="Target"></div>
+                                <div class="salary-marker" style="left: 50%;" data-label="Target"></div>
                             </div>
                             <div class="salary-labels">
                                 <span id="salaryLow">$0K</span>
@@ -1683,25 +1631,31 @@
                             </div>
                         </div>
                     </div>
-                    <div class="intel-panel">
-                        <div class="intel-panel-header">
-                            <div class="intel-panel-title">Competition Level</div>
-                        </div>
-                        <div id="competitionIntel">
-                            <div class="intel-value" id="competitionLevel">Loading...</div>
-                            <div class="intel-label" id="competitionDesc">Analyzing competition...</div>
-                        </div>
-                    </div>
                 </div>
-                <!-- Company Intel (rendered by JS if available) -->
-                <div id="companyIntelContainer" style="margin-top: 24px;"></div>
                 
-                <!-- Quick Links (always visible when company is known) -->
-                <div id="quickLinksContainer" style="margin-top: 24px; display: none;">
-                    <div class="kit-section-title" style="margin-bottom: 12px;">Research This Company</div>
-                    <div id="quickLinksButtons" class="network-links"></div>
+                <!-- KEYWORDS SECTION -->
+                <div style="border-top: 2px dashed var(--ink-black); padding-top: 16px; margin-bottom: 16px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                        <div class="card-title" style="margin: 0;">Keywords to Add</div>
+                        <div class="keywords-count" id="keywordsCountLabel">0 matched, 0 missing</div>
+                    </div>
+                    <p style="margin-bottom: 10px; font-size: 12px; opacity: 0.7;"><span style="background: var(--accent-mint); padding: 2px 6px; border-radius: 3px;">Green</span> = in resume. <span style="background: rgba(212, 145, 138, 0.4); padding: 2px 6px; border-radius: 3px;">Orange</span> = missing.</p>
+                    <div class="keyword-cloud" id="keywordCloudNew"></div>
+                    <button class="btn" onclick="copyKeywordsNew()" style="margin-top: 12px; padding: 8px 16px; font-size: 11px;">Copy Keywords</button>
+                </div>
+                
+                <!-- RESEARCH THIS COMPANY -->
+                <div id="researchCompanySection" style="border-top: 2px dashed var(--ink-black); padding-top: 16px;">
+                    <div class="card-title" style="margin-bottom: 12px;">Research This Company</div>
+                    <div id="researchLinks" class="network-links"></div>
                 </div>
             </div>
+        </div>
+        
+        <!-- STRENGTHS BOX -->
+        <div id="strengthsBox" class="strengths-box">
+            <div class="box-title">Your Strengths</div>
+            <div id="strengthsList"></div>
         </div>
         
         <!-- 4. ASK AN EXPERT -->
@@ -2288,13 +2242,8 @@
     
     // === CALL 2: Market Intel (Background fetch) ===
     async function fetchMarketIntel(jobDescription, jobTitle, company) {
-        // Show loading state in intel panels
-        const intelSection = document.getElementById('jobIntelSection');
-        if (intelSection) {
-            intelSection.style.display = 'block';
-            document.getElementById('salaryRange').textContent = 'Loading...';
-            document.getElementById('competitionLevel').textContent = 'Loading...';
-        }
+        // Show loading state in diagrams
+        document.getElementById('salaryRange').textContent = 'Loading...';
         
         try {
             const response = await fetch(API_ENDPOINT, {
@@ -2349,11 +2298,16 @@
                 <div class="score-label">Match Score</div>
             </div>
             <div class="verdict-box">
-                <h3 style="margin-bottom: 8px;">${escapeHtml(data.verdict)}</h3>
-                <p style="opacity: 0.7; font-size: 14px;">
-                    <strong>Role:</strong> ${escapeHtml(data.job_title)}<br>
-                    <strong>Company:</strong> ${escapeHtml(data.company)}
-                </p>
+                <div style="display: flex; align-items: flex-start; gap: 14px;">
+                    <img src="arti.png" alt="Arti" style="width: 48px; height: 48px; flex-shrink: 0;">
+                    <div>
+                        <h3 style="margin-bottom: 8px;">${escapeHtml(data.verdict)}</h3>
+                        <p style="opacity: 0.7; font-size: 14px; margin: 0;">
+                            <strong>Role:</strong> ${escapeHtml(data.job_title)}<br>
+                            <strong>Company:</strong> ${escapeHtml(data.company)}
+                        </p>
+                    </div>
+                </div>
             </div>
         `;
         const scoreContainer = document.getElementById('matchScoreContainer');
@@ -2376,24 +2330,11 @@
         document.getElementById('keywordsSub').textContent = `${matchedKeywords.length} of ${keywords.length} matched`;
         document.getElementById('keywordsCountLabel').textContent = `${matchedKeywords.length} matched, ${keywords.length - matchedKeywords.length} missing`;
         
-        // NEW: Salary/competition placeholders (will be updated by market intel)
+        // Salary placeholder (will be updated by market intel)
         document.getElementById('salaryEstimate').textContent = '$---K';
         document.getElementById('salarySub').textContent = 'Loading...';
-        document.getElementById('competitionValue').textContent = '---';
-        document.getElementById('competitionSub').textContent = 'Analyzing...';
-        document.getElementById('timelineValue').textContent = '---';
         
-        // NEW: Mascot Insight
-        const insightText = document.getElementById('insightText');
-        if (data.score >= 80) {
-            insightText.innerHTML = `<strong>Strong fit.</strong> You hit most of their requirements. Focus on your wins in the interview and you should be competitive.`;
-        } else if (data.score >= 60) {
-            insightText.innerHTML = `<strong>Good match with gaps.</strong> You have solid alignment but there are a few areas to address. Prepare talking points for the gaps below.`;
-        } else {
-            insightText.innerHTML = `<strong>Some gaps to consider.</strong> Review the analysis below to understand where you align and where you might need to strengthen your pitch.`;
-        }
-        
-        // NEW: Render keywords in new box
+        // Render keywords in new box
         const keywordCloudNew = document.getElementById('keywordCloudNew');
         keywordCloudNew.innerHTML = '';
         keywords.forEach(k => {
@@ -2478,10 +2419,8 @@
         // 10. Render Research Links in super card
         renderResearchLinks(data);
         
-        // NOTE: Job Intel (salary, competition, timeline) and Flags are rendered 
-        // by fetchMarketIntel() when Call 2 completes (runs in background)
-        // Hide intel section initially - it'll show when data arrives
-        document.getElementById('jobIntelSection').style.display = 'none';
+        // NOTE: Salary and timeline diagrams are populated by fetchMarketIntel() 
+        // when Call 2 completes (runs in background)
     }
     
     function renderResearchLinks(data) {
@@ -2814,14 +2753,6 @@ Amazon is an Equal Opportunity Employer.`;
     // NEW: JOB INTEL DASHBOARD (Using AI-generated data)
     // ==========================================================================
     function renderJobIntel(data) {
-        // Only show if we have the new AI-generated intel fields
-        if (!data.salary_intel && !data.competition && !data.timeline) {
-            document.getElementById('jobIntelSection').style.display = 'none';
-            return;
-        }
-        
-        document.getElementById('jobIntelSection').style.display = 'block';
-        
         // Salary Intelligence (from AI)
         if (data.salary_intel) {
             const sal = data.salary_intel;
@@ -2829,7 +2760,7 @@ Amazon is an Equal Opportunity Employer.`;
             document.getElementById('salaryLow').textContent = `$${sal.low}K`;
             document.getElementById('salaryHigh').textContent = `$${sal.high}K`;
             
-            // NEW: Update stat card
+            // Update stat card
             document.getElementById('salaryEstimate').textContent = `$${sal.mid}K`;
             document.getElementById('salarySub').textContent = `$${sal.low}K - $${sal.high}K`;
             
@@ -2844,41 +2775,26 @@ Amazon is an Equal Opportunity Employer.`;
             
             // Add notes if available
             const salaryIntel = document.getElementById('salaryIntel');
-            const existingNotes = salaryIntel.querySelector('.salary-notes');
-            if (existingNotes) existingNotes.remove();
-            if (sal.notes) {
-                const notesDiv = document.createElement('div');
-                notesDiv.className = 'salary-notes';
-                notesDiv.style.cssText = 'font-size: 12px; opacity: 0.7; margin-top: 8px; font-style: italic;';
-                notesDiv.textContent = sal.notes;
-                salaryIntel.appendChild(notesDiv);
+            if (salaryIntel) {
+                const existingNotes = salaryIntel.querySelector('.salary-notes');
+                if (existingNotes) existingNotes.remove();
+                if (sal.notes) {
+                    const notesDiv = document.createElement('div');
+                    notesDiv.className = 'salary-notes';
+                    notesDiv.style.cssText = 'font-size: 12px; opacity: 0.7; margin-top: 8px; font-style: italic;';
+                    notesDiv.textContent = sal.notes;
+                    salaryIntel.appendChild(notesDiv);
+                }
             }
-        }
-        
-        // Competition Level (from AI)
-        if (data.competition) {
-            document.getElementById('competitionLevel').textContent = data.competition.level;
-            document.getElementById('competitionDesc').textContent = data.competition.reasoning;
-            
-            // NEW: Update stat card
-            document.getElementById('competitionValue').textContent = data.competition.level;
-            document.getElementById('competitionSub').textContent = data.competition.reasoning;
-            
-            // Update the intel list based on competition analysis
-            const competitionIntel = document.getElementById('competitionIntel');
-            const existingList = competitionIntel.querySelector('.intel-list');
-            if (existingList) existingList.remove();
         }
         
         // Hiring Timeline (from AI)
         if (data.timeline) {
             const tl = data.timeline;
             
-            // NEW: Update stat card
-            document.getElementById('timelineValue').textContent = `${tl.total_weeks_low || 4}-${tl.total_weeks_high || 8} wks`;
-            
             const timelineContainer = document.getElementById('hiringTimeline');
-            timelineContainer.innerHTML = `
+            if (timelineContainer) {
+                timelineContainer.innerHTML = `
                 <div class="timeline-step">
                     <div class="timeline-dot">1</div>
                     <div class="timeline-label">Apply</div>
@@ -2900,13 +2816,6 @@ Amazon is an Equal Opportunity Employer.`;
                     <div class="timeline-days">${tl.offer_weeks} wks</div>
                 </div>
             `;
-            
-            // Add timeline notes if available
-            if (tl.notes) {
-                const notesP = document.createElement('p');
-                notesP.style.cssText = 'font-size: 12px; opacity: 0.7; margin-top: 12px; text-align: center; font-style: italic;';
-                notesP.textContent = tl.notes;
-                timelineContainer.parentElement.appendChild(notesP);
             }
         }
     }
