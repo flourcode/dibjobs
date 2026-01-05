@@ -8,7 +8,7 @@
     <link rel="canonical" href="https://dibjobs.com/">
     <!-- Open Graph / LinkedIn -->
     <meta property="og:type" content="website">
-    <meta property="og:title" content="DIB Jobs - Defense Industrial Base Job Matcher">
+    <meta property="og:title" content="DIB Jobs - Defense Industrial Base Job Fit">
     <meta property="og:description" content="A job matching and application toolkit for Defense Industrial Base professionals. Resume fit, gap analysis, interview prep, and job intel.">
     <meta property="og:url" content="https://dibjobs.com/">
     <meta property="og:image" content="https://dibjobs.com/dibjobs.png">
@@ -16,7 +16,7 @@
     <meta property="og:image:height" content="630">
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="DIB Jobs - Defense Industrial Base Job Matcher">
+    <meta name="twitter:title" content="DIB Jobs - Defense Industrial Base Job Fit">
     <meta name="twitter:description" content="See how your resume stacks up against real DIB roles. Match score, gaps, interview prep, and job intel.">
     <meta name="twitter:image" content="https://dibjobs.com/dibjobs.png">
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
@@ -1277,10 +1277,7 @@
 <body>
 <header>
     <div class="brand">
-        <svg class="logo-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-            <polygon points="55,8 90,35 77,78 33,78 20,35" fill="var(--ink-black)"/>
-            <polygon points="50,12 82,37 70,76 30,76 18,37" fill="#fff" stroke="var(--ink-black)" stroke-width="4"/>
-        </svg>
+               <svg class="logo-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 125"><path d="M93.764,38.143l-42-30.515c-1.053-0.764-2.475-0.764-3.527,0l-42,30.515c-1.051,0.764-1.491,2.118-1.09,3.354l16.043,49.374  c0.402,1.236,1.554,2.073,2.854,2.073h51.914c1.3,0,2.451-0.837,2.854-2.073l16.043-49.374  C95.255,40.261,94.814,38.907,93.764,38.143z M73.777,86.944H26.223L11.526,41.716L50,13.764l38.474,27.953L73.777,86.944z" fill="var(--ink-black)" stroke="var(--ink-black)" stroke-width="6"/>/><path d="M48.236,32.35L29.748,45.782c-1.051,0.764-1.491,2.118-1.09,3.354l7.062,21.735c0.402,1.236,1.554,2.073,2.854,2.073h22.854  c1.3,0,2.451-0.837,2.854-2.073l7.062-21.735c0.401-1.236-0.039-2.59-1.09-3.354L51.764,32.35  C50.711,31.586,49.289,31.586,48.236,32.35z M64.962,49.355l-5.715,17.589H40.753l-5.715-17.589L50,38.485L64.962,49.355z" stroke="var(--ink-black)" stroke-width="6"/></svg>
         <div class="brand-text">
             <div class="app-title">DIB Jobs</div>
             <div class="app-subtitle">Defense Industrial Base Jobs</div>
@@ -1291,7 +1288,7 @@
     <!-- QUICK START CARD (Collapsible, starts collapsed) -->
     <div id="quickStartCard" class="card collapsible-card collapsed">
         <div class="card-header collapsible-trigger" onclick="toggleQuickStart()" role="button" tabindex="0" aria-expanded="false" aria-controls="quickStartContent" aria-label="Toggle quick start guide" onkeydown="if(event.key==='Enter'||event.key===' '){toggleQuickStart();event.preventDefault();}">
-            <span class="card-title">How It Works</span>
+            <span class="card-title">Quick Start</span>
             <span id="quickStartToggleIcon" class="mono" style="font-weight: 700; font-size: 20px;" aria-hidden="true">+</span>
         </div>
         <div id="quickStartContent" class="collapsible-content">
@@ -1315,14 +1312,14 @@
                         <div class="step-number">3</div>
                         <div class="step-content">
                             <h3>Get Your Analysis</h3>
-                            <p>Receive a match score, gap analysis, interview prep, and tailored application materials.</p>
+                            <p>Receive a fit score, gap analysis, interview prep, and tailored application materials.</p>
                         </div>
                     </div>
                 </div>
                 <div class="how-to-tip">
                     <strong>Features:</strong>
                     <ul style="margin: 12px 0 0 20px; line-height: 1.8;">
-                        <li><strong>Match Score:</strong> AI analyzes the job against your resume with a 0-100 fit score.</li>
+                        <li><strong>Fit Score:</strong> AI analyzes the job against your resume with a 0-100 fit score.</li>
                         <li><strong>Gap Analysis:</strong> Identifies your strongest matches and potential gaps.</li>
                         <li><strong>Job Intel:</strong> Salary estimates, hiring timeline, competition level, and company intel.</li>
                         <li><strong>Keywords:</strong> Important terms from the JD with a check on which are in your resume.</li>
@@ -1445,7 +1442,7 @@
     <!-- RESUME INPUT CARD (Collapsible) -->
     <div id="resumeCard" class="card collapsible-card">
         <div class="card-header collapsible-trigger" onclick="toggleInputCard('resume')" style="cursor: pointer; flex-wrap: wrap; gap: 12px;">
-            <span class="card-title">Your Resume</span>
+            <span class="card-title">Paste Resume</span>
             <div style="display: flex; align-items: center; gap: 12px;">
                 <span id="resumeStatus" style="font-size: 11px; opacity: 0.6;"></span>
                 <span id="resumeToggle" class="mono" style="font-weight: 700; font-size: 20px;">−</span>
@@ -1477,7 +1474,7 @@
     <!-- JOB DESCRIPTION CARD (Collapsible) -->
     <div id="jobCard" class="card collapsible-card">
         <div class="card-header collapsible-trigger" onclick="toggleInputCard('job')" style="cursor: pointer;">
-            <span class="card-title">Job Description</span>
+            <span class="card-title">Paste Job Description</span>
             <div style="display: flex; align-items: center; gap: 12px;">
                 <span id="jobStatus" style="font-size: 11px; opacity: 0.6;"></span>
                 <span id="jobToggle" class="mono" style="font-weight: 700; font-size: 20px;">−</span>
@@ -1488,7 +1485,7 @@
                 <textarea id="jobDescription" placeholder="Paste job description text or a URL..." aria-label="Job description input"></textarea>
                 <div class="action-bar">
                     <button id="analyzeBtn" class="btn btn-primary" onclick="analyzeJob()" aria-label="Analyze job match">
-                        <span id="btnText">Analyze Match</span>
+                        <span id="btnText">Analyze Job Fit</span>
                     </button>
                     <button class="btn btn-secondary" onclick="clearAll()" aria-label="Reset form and clear results">Reset</button>
                     <button class="btn btn-secondary" onclick="loadSampleData()" aria-label="Load sample data">Sample</button>
@@ -1591,7 +1588,7 @@
                 <div class="supercard-section">
                     <div class="section-header">
                         <span class="section-title">Keywords</span>
-                        <span class="section-meta" id="keywordsCountLabel">0 matched, 0 missing</span>
+                        <span class="section-meta" id="keywordsCountLabel">0 matched, 0 missing (add to LinkedIn)</span>
                     </div>
                     <div class="keyword-cloud" id="keywordCloudNew"></div>
                     <button class="btn btn-sm" onclick="copyKeywordsNew()" style="margin-top: 10px;">Copy Keywords</button>
@@ -2239,7 +2236,7 @@
                     const retryMinutes = data.retryAfter ? Math.ceil(data.retryAfter / 60) : 5;
                     showErrorToast(data.error || `Rate limit exceeded. Please try again in ${retryMinutes} minutes.`, 10000);
                     btn.disabled = false;
-                    btnText.textContent = "Analyze Match";
+                    btnText.textContent = "Analyze Fit";
                     return;
                 }
                 if (!response.ok) {
@@ -2254,7 +2251,7 @@
                     renderResults(data);
                 }, 500);
                 btn.disabled = false;
-                btnText.textContent = "Analyze Match";
+                btnText.textContent = "Analyze Fit";
                 
                 // === CALL 2: Market Intel (runs in background, non-blocking) ===
                 fetchMarketIntel(jd, data.job_title, data.company);
@@ -2273,7 +2270,7 @@
         stopLoadingAnim();
         showErrorToast(`Analysis failed after ${MAX_RETRIES} attempts: ${lastError?.message || 'Unknown error'}`, 8000);
         btn.disabled = false;
-        btnText.textContent = "Analyze Match";
+        btnText.textContent = "Analyze Fit";
     }
     
     // === CALL 2: Market Intel (Background fetch) ===
@@ -2340,7 +2337,7 @@
         const scoreHTML = `
             <div class="score-box">
                 <div class="score-val">${data.score}%</div>
-                <div class="score-label">Match Score</div>
+                <div class="score-label">Job Fit Score</div>
             </div>
             <div class="verdict-box">
                 <div style="display: flex; align-items: flex-start; gap: 14px;">
@@ -2393,7 +2390,7 @@
         matches.forEach(item => {
             const li = document.createElement('li');
             li.className = 'analysis-item item-match';
-            li.innerHTML = `<strong>Match</strong> ${escapeHtml(item.replace(/^(Match:|Strength:)/i, '').trim())}`;
+            li.innerHTML = `<strong>Fit</strong> ${escapeHtml(item.replace(/^(Match:|Strength:)/i, '').trim())}`;
             strengthsList.appendChild(li);
         });
         const strengthsCard = document.getElementById('strengthsCard');
@@ -2692,7 +2689,7 @@ Amazon is an Equal Opportunity Employer.`;
         document.getElementById('resumeText').value = sampleResume;
         document.getElementById('jobDescription').value = sampleJD;
         document.getElementById('resumeSelector').value = '';
-        showErrorToast('Sample data loaded. Click "Analyze Match" to see how it works.', 4000);
+        showErrorToast('Sample data loaded. Click "Analyze Fit" to see how it works.', 4000);
     }
     // ==========================================================================
     // ASK AN EXPERT
