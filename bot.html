@@ -60,7 +60,7 @@
     }
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-        background-color: var(--bg-cream);
+        background-color: #ffffff;
         color: var(--ink-black);
         font-family: 'DM Sans', sans-serif;
         line-height: 1.6;
@@ -72,15 +72,10 @@
     /* HEADER */
     header {
         background: var(--card-white);
-        border-bottom: var(--border-thick) solid var(--ink-black);
         padding: 16px 24px;
         display: flex;
         align-items: center;
         justify-content: space-between;
-        position: sticky;
-        top: 0;
-        z-index: 100;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
     }
     .brand {
         display: flex;
@@ -161,7 +156,7 @@
         transition: transform 0.2s ease;
     }
     .card-header {
-        background: var(--bg-cream);
+        background: var(--accent-mint);
         border-bottom: var(--border-thick) solid var(--ink-black);
         padding: 16px 24px;
         display: flex;
@@ -653,12 +648,8 @@
         .score-box { padding: 30px 20px; flex-direction: column; gap: 10px; align-items: center; }
         .score-val { font-size: 96px; }
         .card-body { padding: 20px; }
-        /* HEADER MOBILE LAYOUT - LEFT ALIGNED */
-        header { 
-            padding: 16px; 
-            position: static;
-            justify-content: flex-start;
-        }
+        /* HEADER MOBILE */
+        header { padding: 16px; }
         .brand {
             justify-content: flex-start;
             text-align: left;
@@ -1470,6 +1461,15 @@
                     <button class="btn btn-secondary" onclick="clearResume()" style="padding: 6px 12px; font-size: 11px;">Clear</button>
                 </div>
                 <textarea id="resumeText" placeholder="Paste your resume text here..." aria-label="Resume input" style="min-height: 120px;"></textarea>
+                <div style="margin-top: 16px; padding: 14px 18px; background: var(--bg-cream); border-radius: var(--radius); font-size: 12px; line-height: 1.6;">
+                    <strong style="font-family: 'Space Mono', monospace; text-transform: uppercase; font-size: 10px; letter-spacing: 0.5px;">Privacy Notice:</strong>
+                    <ul style="margin: 8px 0 0 16px; opacity: 0.8;">
+                        <li>Your resume is <strong>not stored</strong> on our servers</li>
+                        <li>Data is sent to Google Gemini AI for analysis</li>
+                        <li>Google's API does not use your data for model training</li>
+                        <li>Saved resumes are stored locally in your browser only</li>
+                    </ul>
+                </div>
             </div>
         </div>
     </div>
@@ -2312,7 +2312,7 @@
             renderJobIntel(analysisData);
             // Company intel rendered in supercard research links
             
-            console.log('[MARKET INTEL] Successfully loaded');
+            // Market intel loaded successfully
         } catch (error) {
             console.error('[MARKET INTEL] Failed:', error.message);
             // Hide intel section on failure - don't show fake data
