@@ -264,7 +264,7 @@
         box-shadow: 1px 1px 0 var(--ink-black);
     }
     .btn-primary { background: var(--accent-mint); }
-    .btn-primary:hover:not(:disabled) { background: #96bb8d; }
+    .btn-primary:hover:not(:disabled) { background: var(--soft-blue); }
     .btn-secondary { background: var(--card-white); }
     .btn:disabled {
         opacity: 0.6;
@@ -653,16 +653,15 @@
         .score-box { padding: 30px 20px; flex-direction: column; gap: 10px; align-items: center; }
         .score-val { font-size: 96px; }
         .card-body { padding: 20px; }
-        /* HEADER MOBILE LAYOUT */
+        /* HEADER MOBILE LAYOUT - LEFT ALIGNED */
         header { 
             padding: 16px; 
-            position: static; /* Unstick header */
-            justify-content: center; /* Center horizontally */
+            position: static;
+            justify-content: flex-start;
         }
         .brand {
-            justify-content: center;
-            text-align: center;
-            width: 100%;
+            justify-content: flex-start;
+            text-align: left;
         }
     }
     /* ANIMATIONS */
@@ -720,39 +719,100 @@
     .stat-item.blue { background: var(--pale-blue); }
     
     /* ============================================
-       INTEL ROW (Salary & Timeline)
+       INTEL PANELS (3-column: Salary, Timeline, Competition)
        ============================================ */
-    .intel-row {
+    .intel-panels {
         display: grid;
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: repeat(3, 1fr);
         gap: 12px;
         margin-bottom: 16px;
     }
-    @media (max-width: 600px) {
-        .intel-row { grid-template-columns: 1fr; }
+    @media (max-width: 900px) {
+        .intel-panels { grid-template-columns: 1fr; }
     }
-    .intel-box {
-        background: var(--bg-cream);
+    .intel-panel {
+        background: var(--card-white);
         border: var(--border-thick) solid var(--ink-black);
         border-radius: var(--radius);
-        padding: 12px;
+        padding: 16px;
+        box-shadow: var(--shadow-hard);
     }
-    .intel-box .intel-title {
+    .panel-title {
         font-family: 'Space Mono', monospace;
         font-size: 10px;
         text-transform: uppercase;
-        letter-spacing: 0.5px;
-        margin-bottom: 8px;
-        opacity: 0.7;
+        letter-spacing: 1px;
+        opacity: 0.6;
+        margin-bottom: 12px;
+        padding-bottom: 10px;
+        border-bottom: 2px dashed var(--ink-black);
     }
-    .intel-box .intel-value {
+    .panel-value {
         font-family: 'Space Mono', monospace;
-        font-size: 20px;
+        font-size: 22px;
         font-weight: 700;
-        margin-bottom: 8px;
+        color: var(--ink-black);
+        margin-bottom: 6px;
+    }
+    .panel-sub {
+        font-size: 12px;
+        opacity: 0.6;
+        margin-bottom: 12px;
+    }
+    .panel-notes {
+        font-size: 12px;
+        font-style: italic;
+        opacity: 0.7;
+        line-height: 1.5;
+        margin-top: 12px;
     }
     
-    /* Timeline Row */
+    /* Timeline Visual */
+    .timeline-visual { margin-top: 8px; }
+    .timeline-track {
+        display: flex;
+        align-items: center;
+        margin-bottom: 8px;
+    }
+    .timeline-node {
+        width: 28px;
+        height: 28px;
+        background: var(--ink-black);
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: 'Space Mono', monospace;
+        font-size: 12px;
+        font-weight: 700;
+        flex-shrink: 0;
+    }
+    .timeline-line {
+        flex: 1;
+        height: 3px;
+        background: linear-gradient(90deg, var(--pale-blue), var(--soft-blue));
+    }
+    .timeline-labels {
+        display: flex;
+        justify-content: space-between;
+    }
+    .tl-label-item {
+        text-align: center;
+        flex: 1;
+    }
+    .tl-label-item .tl-name {
+        font-family: 'Space Mono', monospace;
+        font-size: 9px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .tl-label-item .tl-time {
+        font-size: 11px;
+        opacity: 0.7;
+    }
+
+    /* Timeline Row (legacy compact) */
     .timeline-row {
         display: flex;
         justify-content: space-between;
@@ -1483,12 +1543,13 @@
                     </div>
                 </div>
                 
-                <!-- SALARY & TIMELINE ROW -->
-                <div class="intel-row">
-                    <div class="intel-box">
-                        <div class="intel-title">Salary Range</div>
+                <!-- INTEL PANELS (Salary, Timeline, Competition) -->
+                <div class="intel-panels">
+                    <div class="intel-panel">
+                        <div class="panel-title">Salary Estimate</div>
                         <div id="salaryIntel">
-                            <div class="intel-value" id="salaryRange">Loading...</div>
+                            <div class="panel-value" id="salaryRange">$---K - $---K</div>
+                            <div class="panel-sub">Based on role level & market</div>
                             <div class="salary-range-bar">
                                 <div class="salary-marker" style="left: 50%;" data-label="Target"></div>
                             </div>
@@ -1498,14 +1559,31 @@
                             </div>
                         </div>
                     </div>
-                    <div class="intel-box">
-                        <div class="intel-title">Hiring Timeline</div>
-                        <div class="timeline-row" id="hiringTimeline">
-                            <div class="tl-step"><div class="tl-dot">1</div><div class="tl-label">Apply</div><div class="tl-time">Today</div></div>
-                            <div class="tl-step"><div class="tl-dot">2</div><div class="tl-label">Screen</div><div class="tl-time">...</div></div>
-                            <div class="tl-step"><div class="tl-dot">3</div><div class="tl-label">Interview</div><div class="tl-time">...</div></div>
-                            <div class="tl-step"><div class="tl-dot">4</div><div class="tl-label">Offer</div><div class="tl-time">...</div></div>
+                    <div class="intel-panel">
+                        <div class="panel-title">Hiring Timeline</div>
+                        <div id="hiringTimeline" class="timeline-visual">
+                            <div class="timeline-track">
+                                <div class="timeline-node"><span>1</span></div>
+                                <div class="timeline-line"></div>
+                                <div class="timeline-node"><span>2</span></div>
+                                <div class="timeline-line"></div>
+                                <div class="timeline-node"><span>3</span></div>
+                                <div class="timeline-line"></div>
+                                <div class="timeline-node"><span>4</span></div>
+                            </div>
+                            <div class="timeline-labels">
+                                <div class="tl-label-item"><div class="tl-name">Apply</div><div class="tl-time">Today</div></div>
+                                <div class="tl-label-item"><div class="tl-name">Screen</div><div class="tl-time" id="screenTime">...</div></div>
+                                <div class="tl-label-item"><div class="tl-name">Interview</div><div class="tl-time" id="interviewTime">...</div></div>
+                                <div class="tl-label-item"><div class="tl-name">Offer</div><div class="tl-time" id="offerTime">...</div></div>
+                            </div>
                         </div>
+                        <div id="timelineNotes" class="panel-notes" style="display:none;"></div>
+                    </div>
+                    <div class="intel-panel">
+                        <div class="panel-title">Competition Level</div>
+                        <div class="panel-value" id="competitionLevel">---</div>
+                        <div id="competitionDesc" class="panel-notes">Analyzing...</div>
                     </div>
                 </div>
                 
@@ -1554,23 +1632,29 @@
             </div>
         </div>
         
-        <!-- STRENGTHS CARD (after expert) -->
-        <div id="strengthsCard" class="card" style="display: none;">
-            <div class="card-header">
+        <!-- STRENGTHS CARD (collapsible, starts collapsed) -->
+        <div id="strengthsCard" class="card collapsible-card collapsed" style="display: none;">
+            <div class="card-header collapsible-trigger" onclick="toggleResultCard('strengths')" style="cursor: pointer;">
                 <span class="card-title">Your Strengths</span>
+                <span id="strengthsToggle" class="mono" style="font-weight: 700; font-size: 20px;">+</span>
             </div>
-            <div class="card-body">
-                <ul id="strengthsList" class="analysis-list"></ul>
+            <div id="strengthsContent" class="collapsible-content">
+                <div class="card-body">
+                    <ul id="strengthsList" class="analysis-list"></ul>
+                </div>
             </div>
         </div>
         
-        <!-- GAPS CARD (after strengths) -->
-        <div id="gapsCard" class="card" style="display: none;">
-            <div class="card-header">
+        <!-- GAPS CARD (collapsible, starts collapsed) -->
+        <div id="gapsCard" class="card collapsible-card collapsed" style="display: none;">
+            <div class="card-header collapsible-trigger" onclick="toggleResultCard('gaps')" style="cursor: pointer;">
                 <span class="card-title">Gaps to Address</span>
+                <span id="gapsToggle" class="mono" style="font-weight: 700; font-size: 20px;">+</span>
             </div>
-            <div class="card-body">
-                <ul id="gapsList" class="analysis-list"></ul>
+            <div id="gapsContent" class="collapsible-content">
+                <div class="card-body">
+                    <ul id="gapsList" class="analysis-list"></ul>
+                </div>
             </div>
         </div>
         <!-- APPLICATION KIT (Collapsible: keywords, resume, intro email) -->
@@ -2028,20 +2112,39 @@
         if (content.style.display === 'none') {
             content.style.display = 'block';
             toggle.textContent = '−';
+            card.classList.remove('collapsed');
         } else {
             content.style.display = 'none';
+            toggle.textContent = '+';
+            card.classList.add('collapsed');
+        }
+    }
+    
+    // Toggle result cards (Strengths, Gaps)
+    function toggleResultCard(cardName) {
+        const card = document.getElementById(cardName + 'Card');
+        const content = document.getElementById(cardName + 'Content');
+        const toggle = document.getElementById(cardName + 'Toggle');
+        
+        if (card.classList.contains('collapsed')) {
+            card.classList.remove('collapsed');
+            toggle.textContent = '−';
+        } else {
+            card.classList.add('collapsed');
             toggle.textContent = '+';
         }
     }
     
     function collapseInputCards() {
         // Collapse resume card
+        const resumeCard = document.getElementById('resumeCard');
         const resumeContent = document.getElementById('resumeContent');
         const resumeToggle = document.getElementById('resumeToggle');
         const resumeStatus = document.getElementById('resumeStatus');
         if (resumeContent) {
             resumeContent.style.display = 'none';
             resumeToggle.textContent = '+';
+            resumeCard.classList.add('collapsed');
             const resumeText = document.getElementById('resumeText').value;
             if (resumeText) {
                 resumeStatus.textContent = '✓ Loaded';
@@ -2049,12 +2152,14 @@
         }
         
         // Collapse job card
+        const jobCard = document.getElementById('jobCard');
         const jobContent = document.getElementById('jobContent');
         const jobToggle = document.getElementById('jobToggle');
         const jobStatus = document.getElementById('jobStatus');
         if (jobContent) {
             jobContent.style.display = 'none';
             jobToggle.textContent = '+';
+            jobCard.classList.add('collapsed');
             const jobText = document.getElementById('jobDescription').value;
             if (jobText) {
                 jobStatus.textContent = '✓ Loaded';
@@ -2225,6 +2330,11 @@
         // Collapse input cards when results show
         collapseInputCards();
         
+        // Scroll to top of results smoothly
+        setTimeout(() => {
+            document.getElementById('analysisResults').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 100);
+        
         // 1. Score Hero - original layout with big score on left, arti next to verdict
         const scoreClass = data.score >= 80 ? 'score-high' : (data.score >= 60 ? 'score-mid' : 'score-low');
         const scoreHTML = `
@@ -2277,7 +2387,7 @@
             keywordCloudNew.appendChild(tag);
         });
         
-        // Render strengths in separate card below expert
+        // Render strengths (card starts collapsed)
         const strengthsList = document.getElementById('strengthsList');
         strengthsList.innerHTML = '';
         matches.forEach(item => {
@@ -2286,9 +2396,12 @@
             li.innerHTML = `<strong>Match</strong> ${escapeHtml(item.replace(/^(Match:|Strength:)/i, '').trim())}`;
             strengthsList.appendChild(li);
         });
-        document.getElementById('strengthsCard').style.display = matches.length > 0 ? 'block' : 'none';
+        const strengthsCard = document.getElementById('strengthsCard');
+        strengthsCard.style.display = matches.length > 0 ? 'block' : 'none';
+        strengthsCard.classList.add('collapsed');
+        document.getElementById('strengthsToggle').textContent = '+';
         
-        // Render gaps in separate card below strengths
+        // Render gaps (card starts collapsed)
         const gapsList = document.getElementById('gapsList');
         gapsList.innerHTML = '';
         gaps.forEach(item => {
@@ -2297,7 +2410,10 @@
             li.innerHTML = `<strong>Gap / Risk</strong> ${escapeHtml(item.replace(/^(Gap:|Risk:|Missing:)/i, '').trim())}`;
             gapsList.appendChild(li);
         });
-        document.getElementById('gapsCard').style.display = gaps.length > 0 ? 'block' : 'none';
+        const gapsCard = document.getElementById('gapsCard');
+        gapsCard.style.display = gaps.length > 0 ? 'block' : 'none';
+        gapsCard.classList.add('collapsed');
+        document.getElementById('gapsToggle').textContent = '+';
         
         // 3. Interview Questions
         const qList = document.getElementById('interviewQuestionsList');
@@ -2375,14 +2491,14 @@
         }
         
         section.style.display = 'block';
-        const encodedCompany = encodeURIComponent(company);
+        const enc = encodeURIComponent(company);
         
         container.innerHTML = `
-            <a href="https://www.linkedin.com/search/results/people/?keywords=${encodedCompany}%20recruiter" target="_blank" class="network-link">Find Recruiters</a>
-            <a href="https://www.linkedin.com/search/results/people/?keywords=${encodedCompany}%20director%20VP" target="_blank" class="network-link">Find Executives</a>
-            <a href="https://www.linkedin.com/search/results/people/?keywords=${encodedCompany}%20veteran" target="_blank" class="network-link">Find Veterans</a>
-            <a href="https://www.glassdoor.com/Search/results.htm?keyword=${encodedCompany}" target="_blank" class="network-link">Glassdoor</a>
-            <a href="https://www.google.com/search?q=${encodedCompany}+contract+award+news" target="_blank" class="network-link">Contract News</a>
+            <a href="https://www.linkedin.com/search/results/people/?keywords=${enc}%20AND%20(recruiter%20OR%20talent%20OR%20HR)" target="_blank" class="network-link">Find Recruiters</a>
+            <a href="https://www.linkedin.com/search/results/people/?keywords=${enc}%20AND%20(director%20OR%20VP%20OR%20executive)" target="_blank" class="network-link">Find Executives</a>
+            <a href="https://www.linkedin.com/search/results/people/?keywords=${enc}%20AND%20(army%20OR%20military%20OR%20veteran%20OR%20special%20operations)" target="_blank" class="network-link">Find Veterans</a>
+            <a href="https://www.glassdoor.com/Search/results.htm?keyword=${enc}" target="_blank" class="network-link">Glassdoor</a>
+            <a href="https://www.google.com/search?q=${enc}+contract+award+news" target="_blank" class="network-link">Contract News</a>
         `;
     }
     // ==========================================================================
@@ -2715,37 +2831,40 @@ Amazon is an Equal Opportunity Employer.`;
             
             // Add notes if available
             const salaryIntel = document.getElementById('salaryIntel');
-            if (salaryIntel) {
-                const existingNotes = salaryIntel.querySelector('.salary-notes');
+            if (salaryIntel && sal.notes) {
+                const existingNotes = salaryIntel.querySelector('.panel-notes');
                 if (existingNotes) existingNotes.remove();
-                if (sal.notes) {
-                    const notesDiv = document.createElement('div');
-                    notesDiv.className = 'salary-notes';
-                    notesDiv.style.cssText = 'font-size: 11px; opacity: 0.7; margin-top: 8px; font-style: italic;';
-                    notesDiv.textContent = sal.notes;
-                    salaryIntel.appendChild(notesDiv);
-                }
+                const notesDiv = document.createElement('div');
+                notesDiv.className = 'panel-notes';
+                notesDiv.textContent = sal.notes;
+                salaryIntel.appendChild(notesDiv);
             }
         }
         
         // Hiring Timeline (from AI)
         if (data.timeline) {
             const tl = data.timeline;
+            document.getElementById('screenTime').textContent = `${tl.screen_weeks}-${tl.screen_weeks + 1} wks`;
+            document.getElementById('interviewTime').textContent = `${tl.interview_weeks}-${tl.interview_weeks + 1} wks`;
+            document.getElementById('offerTime').textContent = `${tl.offer_weeks}-${tl.offer_weeks + 1} wks`;
             
-            const timelineContainer = document.getElementById('hiringTimeline');
-            if (timelineContainer) {
-                timelineContainer.innerHTML = `
-                <div class="tl-step"><div class="tl-dot">1</div><div class="tl-label">Apply</div><div class="tl-time">Today</div></div>
-                <div class="tl-step"><div class="tl-dot">2</div><div class="tl-label">Screen</div><div class="tl-time">${tl.screen_weeks} wks</div></div>
-                <div class="tl-step"><div class="tl-dot">3</div><div class="tl-label">Interview</div><div class="tl-time">${tl.interview_weeks} wks</div></div>
-                <div class="tl-step"><div class="tl-dot">4</div><div class="tl-label">Offer</div><div class="tl-time">${tl.offer_weeks} wks</div></div>
-            `;
+            // Add timeline notes if available
+            const timelineNotes = document.getElementById('timelineNotes');
+            if (timelineNotes && tl.notes) {
+                timelineNotes.textContent = tl.notes;
+                timelineNotes.style.display = 'block';
             }
+        }
+        
+        // Competition Level (from AI)
+        if (data.competition) {
+            document.getElementById('competitionLevel').textContent = data.competition.level;
+            document.getElementById('competitionDesc').textContent = data.competition.reasoning;
         }
     }
     
     // ==========================================================================
-    // NEW: KEYWORD EXTRACTION (Using AI-generated data)
+    // KEYWORD EXTRACTION (Using AI-generated data)
     // ==========================================================================
     function renderKeywords(data) {
         const cloud = document.getElementById('keywordCloud');
@@ -2803,9 +2922,9 @@ Amazon is an Equal Opportunity Employer.`;
         const enc = encodeURIComponent(company);
         
         container.innerHTML = `
-            <a href="https://www.linkedin.com/search/results/people/?keywords=${enc}%20recruiter" target="_blank" class="network-link">Find Recruiters</a>
-            <a href="https://www.linkedin.com/search/results/people/?keywords=${enc}%20director%20VP" target="_blank" class="network-link">Find Executives</a>
-            <a href="https://www.linkedin.com/search/results/people/?keywords=${enc}%20veteran" target="_blank" class="network-link">Find Veterans</a>
+            <a href="https://www.linkedin.com/search/results/people/?keywords=${enc}%20AND%20(recruiter%20OR%20talent%20OR%20HR)" target="_blank" class="network-link">Find Recruiters</a>
+            <a href="https://www.linkedin.com/search/results/people/?keywords=${enc}%20AND%20(director%20OR%20VP%20OR%20executive)" target="_blank" class="network-link">Find Executives</a>
+            <a href="https://www.linkedin.com/search/results/people/?keywords=${enc}%20AND%20(army%20OR%20military%20OR%20veteran%20OR%20special%20operations)" target="_blank" class="network-link">Find Veterans</a>
             <a href="https://www.glassdoor.com/Search/results.htm?keyword=${enc}" target="_blank" class="network-link">Glassdoor</a>
             <a href="https://www.google.com/search?q=${enc}+contract+award+news" target="_blank" class="network-link">Contract News</a>
         `;
