@@ -667,44 +667,7 @@
     }
     /* ANIMATIONS */
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-    /* INTEL PANELS */
-    .intel-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-        gap: 16px;
-        margin-bottom: 24px;
-    }
-    .intel-panel {
-        background: var(--bg-cream);
-        border: 2px solid var(--ink-black);
-        padding: 20px;
-        border-radius: var(--radius);
-    }
-    .intel-panel-header {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        margin-bottom: 12px;
-        padding-bottom: 12px;
-        border-bottom: 2px dashed var(--ink-black);
-    }
-    .intel-panel-icon {
-        width: 32px;
-        height: 32px;
-        background: var(--ink-black);
-        color: var(--bg-cream);
-        display: grid;
-        place-items: center;
-        border-radius: 4px;
-        font-size: 16px;
-    }
-    .intel-panel-title {
-        font-family: 'Space Mono', monospace;
-        font-size: 12px;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
+    /* INTEL VALUES */
     .intel-value {
         font-family: 'Space Mono', monospace;
         font-size: 24px;
@@ -716,138 +679,10 @@
         font-size: 12px;
         opacity: 0.7;
     }
-    .intel-list {
-        list-style: none;
-        font-size: 13px;
-    }
-    .intel-list li {
-        padding: 6px 0;
-        border-bottom: 1px dashed rgba(0,0,0,0.1);
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-    .intel-list li:last-child { border-bottom: none; }
-    .intel-badge {
-        font-family: 'Space Mono', monospace;
-        font-size: 10px;
-        padding: 3px 8px;
-        border-radius: 3px;
-        font-weight: 700;
-    }
-    .intel-badge.green { background: var(--accent-mint); color: var(--ink-black); }
-    .intel-badge.gold { background: var(--accent-gold); color: var(--ink-black); }
-    .intel-badge.clay { background: var(--accent-clay); color: #fff; }
     
     /* ============================================
-       NEW: STATS GRID (Neobrutalist Style)
+       STATS ROW
        ============================================ */
-    .stats-grid {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 12px;
-        margin-bottom: 16px;
-    }
-    @media (min-width: 700px) {
-        .stats-grid { grid-template-columns: repeat(4, 1fr); }
-        .stats-grid.two-col { grid-template-columns: repeat(2, 1fr); }
-    }
-    .stat-card {
-        background: var(--card-white);
-        border: var(--border-thick) solid var(--ink-black);
-        border-radius: 12px;
-        padding: 14px 10px;
-        text-align: center;
-        box-shadow: var(--shadow-hard);
-    }
-    .stat-card .stat-label {
-        font-family: 'Space Mono', monospace;
-        font-size: 9px;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        color: var(--ink-black);
-        opacity: 0.7;
-        margin-bottom: 6px;
-    }
-    .stat-card .stat-value {
-        font-family: 'Space Mono', monospace;
-        font-size: 32px;
-        font-weight: 700;
-        color: var(--ink-black);
-        line-height: 1;
-    }
-    .stat-card .stat-sub {
-        font-size: 10px;
-        color: var(--ink-black);
-        opacity: 0.6;
-        margin-top: 4px;
-    }
-    /* Colored stat card variants */
-    .stat-card.mint { background: var(--pale-blue); }
-    .stat-card.clay { background: rgba(212, 145, 138, 0.3); }
-    .stat-card.gold { background: rgba(232, 201, 146, 0.4); }
-    .stat-card.blue { background: var(--pale-blue); }
-    
-    /* ============================================
-       SUPERCARD STYLES
-       ============================================ */
-    .supercard {
-        border: var(--border-thick) solid var(--ink-black);
-        box-shadow: var(--shadow-hard);
-    }
-    .supercard-header {
-        display: flex;
-        align-items: center;
-        gap: 16px;
-        padding: 16px 20px;
-        background: var(--accent-gold);
-        border-bottom: var(--border-thick) solid var(--ink-black);
-    }
-    .supercard-header .score-circle {
-        width: 70px;
-        height: 70px;
-        background: var(--ink-black);
-        border-radius: 50%;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        flex-shrink: 0;
-    }
-    .supercard-header .score-num {
-        font-family: 'Space Mono', monospace;
-        font-size: 28px;
-        font-weight: 700;
-        line-height: 1;
-    }
-    .supercard-header .score-pct {
-        font-size: 10px;
-        opacity: 0.8;
-    }
-    .supercard-header .verdict-info {
-        flex: 1;
-    }
-    .supercard-header .verdict-info h3 {
-        font-family: 'Space Mono', monospace;
-        font-size: 16px;
-        margin-bottom: 4px;
-    }
-    .supercard-header .verdict-info p {
-        font-size: 12px;
-        opacity: 0.8;
-        margin: 0;
-    }
-    .supercard-header .mascot-img {
-        width: 50px;
-        height: 50px;
-        flex-shrink: 0;
-    }
-    .supercard-header.score-high { background: var(--soft-blue); }
-    .supercard-header.score-mid { background: var(--accent-gold); }
-    .supercard-header.score-low { background: var(--accent-clay); }
-    
-    /* Stats Row */
     .stats-row {
         display: grid;
         grid-template-columns: repeat(4, 1fr);
@@ -884,7 +719,9 @@
     .stat-item.gold { background: rgba(232, 201, 146, 0.4); }
     .stat-item.blue { background: var(--pale-blue); }
     
-    /* Intel Row */
+    /* ============================================
+       INTEL ROW (Salary & Timeline)
+       ============================================ */
     .intel-row {
         display: grid;
         grid-template-columns: 1fr 1fr;
@@ -921,10 +758,7 @@
         justify-content: space-between;
         gap: 4px;
     }
-    .tl-step {
-        flex: 1;
-        text-align: center;
-    }
+    .tl-step { flex: 1; text-align: center; }
     .tl-dot {
         width: 24px;
         height: 24px;
@@ -944,10 +778,7 @@
         font-size: 9px;
         text-transform: uppercase;
     }
-    .tl-time {
-        font-size: 10px;
-        opacity: 0.7;
-    }
+    .tl-time { font-size: 10px; opacity: 0.7; }
     
     /* Supercard Sections */
     .supercard-section {
@@ -974,157 +805,10 @@
         opacity: 0.6;
     }
     
-    /* Strengths/Gaps Lists */
-    .strengths-list, .gaps-list {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-    }
-    .strength-chip, .gap-chip {
-        padding: 10px 14px;
-        border-radius: var(--radius);
-        font-size: 13px;
-        line-height: 1.4;
-        border-left: 5px solid;
-    }
-    .strength-chip {
-        background: rgba(147, 181, 217, 0.15);
-        border-left-color: var(--soft-blue);
-    }
-    .gap-chip {
-        background: rgba(212, 145, 138, 0.15);
-        border-left-color: var(--accent-clay);
-    }
-    
     /* Small Button */
-    .btn-sm {
-        padding: 6px 12px;
-        font-size: 10px;
-    }
+    .btn-sm { padding: 6px 12px; font-size: 10px; }
     
-    /* ============================================
-       NEW: MASCOT INSIGHT BOX (Neobrutalist)
-       ============================================ */
-    .mascot-insight {
-        display: flex;
-        gap: 16px;
-        align-items: flex-start;
-        background: var(--card-white);
-        border: var(--border-thick) solid var(--ink-black);
-        border-radius: var(--radius);
-        padding: 20px;
-        margin-bottom: 24px;
-        box-shadow: var(--shadow-hard);
-    }
-    .mascot-insight .mascot-avatar {
-        width: 48px;
-        height: 48px;
-        flex-shrink: 0;
-    }
-    .mascot-insight .insight-text {
-        font-size: 14px;
-        line-height: 1.6;
-        color: var(--ink-black);
-    }
-    .mascot-insight .insight-text strong {
-        color: var(--deep-blue);
-    }
-    
-    /* ============================================
-       NEW: KEYWORDS BOX (Neobrutalist)
-       ============================================ */
-    .keywords-box {
-        background: var(--card-white);
-        border: var(--border-thick) solid var(--ink-black);
-        border-radius: var(--radius);
-        padding: 24px;
-        margin-bottom: 24px;
-        box-shadow: var(--shadow-hard);
-    }
-    .keywords-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 16px;
-        padding-bottom: 12px;
-        border-bottom: 2px dashed var(--ink-black);
-    }
-    .keywords-box-title {
-        font-family: 'Space Mono', monospace;
-        font-size: 12px;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-    }
-    .keywords-box-title::before {
-        content: '';
-        display: inline-block;
-        width: 10px;
-        height: 10px;
-        background: var(--ink-black);
-        border-radius: 50%;
-    }
-    .keywords-count {
-        font-family: 'Space Mono', monospace;
-        font-size: 11px;
-        color: var(--ink-black);
-        opacity: 0.6;
-    }
-    
-    /* ============================================
-       NEW: STRENGTHS BOX (Neobrutalist)
-       ============================================ */
-    .strengths-box {
-        background: var(--card-white);
-        border: var(--border-thick) solid var(--ink-black);
-        border-radius: var(--radius);
-        padding: 24px;
-        margin-bottom: 24px;
-        box-shadow: var(--shadow-hard);
-    }
-    .box-title {
-        font-family: 'Space Mono', monospace;
-        font-size: 12px;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        margin-bottom: 16px;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-    }
-    .box-title::before {
-        content: '';
-        display: inline-block;
-        width: 10px;
-        height: 10px;
-        background: var(--ink-black);
-        border-radius: 50%;
-    }
-    .strength-item {
-        padding: 14px 18px;
-        background: rgba(147, 181, 217, 0.15);
-        border-left: 6px solid var(--soft-blue);
-        border-radius: 0 var(--radius) var(--radius) 0;
-        margin-bottom: 12px;
-        font-size: 14px;
-        line-height: 1.5;
-    }
-    .strength-item:last-child { margin-bottom: 0; }
-    .strength-item-header {
-        font-family: 'Space Mono', monospace;
-        font-size: 10px;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        color: var(--deep-blue);
-        margin-bottom: 4px;
-    }
-    
-    /* KEYWORD EXTRACTION */
+    /* KEYWORD CLOUD */
     .keyword-cloud {
         display: flex;
         flex-wrap: wrap;
@@ -1889,14 +1573,7 @@
                 <ul id="gapsList" class="analysis-list"></ul>
             </div>
         </div>
-        <!-- 2. GAP ANALYSIS -->
-        <div class="card">
-            <div class="card-header"><span class="card-title">Gap Analysis</span></div>
-            <div class="card-body">
-                <ul id="analysisList" class="analysis-list"></ul>
-            </div>
-        </div>
-        <!-- 5. APPLICATION KIT (Collapsible: keywords, resume, intro email) -->
+        <!-- APPLICATION KIT (Collapsible: keywords, resume, intro email) -->
         <div id="applicationKitCard" class="card collapsible-card collapsed">
             <div class="card-header collapsible-trigger" onclick="toggleKit('application')" role="button" tabindex="0" aria-expanded="false">
                 <span class="card-title">Application Kit</span>
@@ -2528,7 +2205,7 @@
             
             // Render the intel sections
             renderJobIntel(analysisData);
-            renderCompanyIntel(analysisData);
+            // Company intel rendered in supercard research links
             
             console.log('[MARKET INTEL] Successfully loaded');
         } catch (error) {
@@ -3105,89 +2782,33 @@ Amazon is an Equal Opportunity Employer.`;
         });
     }
     
-    function copyKeywordsNew() {
-        if (!analysisData || !analysisData.keywords) return;
-        const keywords = analysisData.keywords.map(k => k.term);
-        navigator.clipboard.writeText(keywords.join(', ')).then(() => {
-            showErrorToast('Keywords copied to clipboard!', 2000);
-        });
-    }
+    // Alias for new button
+    function copyKeywordsNew() { copyKeywords(); }
     
     // ==========================================================================
-    // COMPANY INTEL (renders inside Job Intel card)
-    // ==========================================================================
-    function renderCompanyIntel(data) {
-        const container = document.getElementById('companyIntelContainer');
-        container.innerHTML = '';
-        
-        // Only render if we have company intel
-        if (!data.company_intel || !data.company_intel.known) {
-            return;
-        }
-        
-        const ci = data.company_intel;
-        container.innerHTML = `
-            <div class="intel-panel" style="background: rgba(0,0,0,0.02);">
-                <div class="intel-panel-header">
-                    <div class="intel-panel-title">Company: ${escapeHtml(data.company || 'Unknown')}</div>
-                </div>
-                <ul class="intel-list">
-                    <li><span>Type</span><span>${escapeHtml(ci.type)}</span></li>
-                    <li><span>Size</span><span>${escapeHtml(ci.size)}</span></li>
-                    <li><span>Reputation</span><span style="text-align:right; max-width:55%;">${escapeHtml(ci.reputation)}</span></li>
-                    ${ci.recent_news && ci.recent_news !== 'None known' ? `<li><span>Recent News</span><span style="text-align:right; max-width:55%;">${escapeHtml(ci.recent_news)}</span></li>` : ''}
-                    ${ci.culture_notes && ci.culture_notes !== 'Unknown' ? `<li><span>Culture</span><span style="text-align:right; max-width:55%;">${escapeHtml(ci.culture_notes)}</span></li>` : ''}
-                </ul>
-            </div>
-        `;
-    }
-    
-    // ==========================================================================
-    // NEW: NETWORK FINDER (generates search URLs based on AI-identified company)
+    // NETWORK FINDER (generates search URLs for Outreach Kit)
     // ==========================================================================
     function renderNetworkFinder(data) {
         const company = data.company;
         const container = document.getElementById('networkLinks');
-        const quickLinksContainer = document.getElementById('quickLinksContainer');
-        const quickLinksButtons = document.getElementById('quickLinksButtons');
+        if (!container) return;
         
-        // If company is not specified, show message and hide quick links
         if (!company || company === 'Not Specified' || company.toLowerCase().includes('not specified')) {
             document.getElementById('networkCompany').textContent = 'Unknown Company';
-            container.innerHTML = '<span style="opacity: 0.6; font-size: 13px;">Company not identified - network search unavailable</span>';
-            if (quickLinksContainer) quickLinksContainer.style.display = 'none';
+            container.innerHTML = '<span style="opacity: 0.6; font-size: 13px;">Company not identified</span>';
             return;
         }
         
         document.getElementById('networkCompany').textContent = company;
+        const enc = encodeURIComponent(company);
         
-        const companyEncoded = encodeURIComponent(company);
-        
-        const linksHTML = `
-            <a href="https://www.linkedin.com/search/results/people/?keywords=${companyEncoded}%20AND%20(recruiter%20OR%20talent%20OR%20HR)" target="_blank" class="network-link">
-                Find Recruiters
-            </a>
-            <a href="https://www.linkedin.com/search/results/people/?keywords=${companyEncoded}%20AND%20(director%20OR%20VP%20OR%20executive)" target="_blank" class="network-link">
-                Find Executives
-            </a>
-            <a href="https://www.linkedin.com/search/results/people/?keywords=${companyEncoded}%20AND%20(army%20OR%20military%20OR%20veteran%20OR%20special%20operations)" target="_blank" class="network-link">
-                Find Veterans
-            </a>
-            <a href="https://www.glassdoor.com/Search/results.htm?keyword=${companyEncoded}" target="_blank" class="network-link">
-                Glassdoor
-            </a>
-            <a href="https://www.google.com/search?q=${companyEncoded}+federal+contracts+awards" target="_blank" class="network-link">
-                Contract News
-            </a>
+        container.innerHTML = `
+            <a href="https://www.linkedin.com/search/results/people/?keywords=${enc}%20recruiter" target="_blank" class="network-link">Find Recruiters</a>
+            <a href="https://www.linkedin.com/search/results/people/?keywords=${enc}%20director%20VP" target="_blank" class="network-link">Find Executives</a>
+            <a href="https://www.linkedin.com/search/results/people/?keywords=${enc}%20veteran" target="_blank" class="network-link">Find Veterans</a>
+            <a href="https://www.glassdoor.com/Search/results.htm?keyword=${enc}" target="_blank" class="network-link">Glassdoor</a>
+            <a href="https://www.google.com/search?q=${enc}+contract+award+news" target="_blank" class="network-link">Contract News</a>
         `;
-        
-        // Populate both locations
-        container.innerHTML = linksHTML;
-        
-        if (quickLinksButtons && quickLinksContainer) {
-            quickLinksButtons.innerHTML = linksHTML;
-            quickLinksContainer.style.display = 'block';
-        }
     }
     
     // ==========================================================================
