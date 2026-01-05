@@ -8,7 +8,7 @@
     <link rel="canonical" href="https://dibjobs.com/">
     <!-- Open Graph / LinkedIn -->
     <meta property="og:type" content="website">
-    <meta property="og:title" content="DIB Jobs - Defense Industrial Base Job Matcher">
+    <meta property="og:title" content="DIB Jobs - Defense Industrial Base Job Fit">
     <meta property="og:description" content="A job matching and application toolkit for Defense Industrial Base professionals. Resume fit, gap analysis, interview prep, and job intel.">
     <meta property="og:url" content="https://dibjobs.com/">
     <meta property="og:image" content="https://dibjobs.com/dibjobs.png">
@@ -16,7 +16,7 @@
     <meta property="og:image:height" content="630">
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="DIB Jobs - Defense Industrial Base Job Matcher">
+    <meta name="twitter:title" content="DIB Jobs - Defense Industrial Base Job Fit">
     <meta name="twitter:description" content="See how your resume stacks up against real DIB roles. Match score, gaps, interview prep, and job intel.">
     <meta name="twitter:image" content="https://dibjobs.com/dibjobs.png">
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
@@ -385,11 +385,11 @@
         margin-top: 10px;
     }
     .verdict-box {
-        padding: 20px;
+        padding: 32px;
         display: flex;
         flex-direction: column;
         justify-content: center;
-        background: var(--card-white);
+        background: var(--bg-cream);
     }
         .score-high .score-box { background: var(--accent-olive); color: #fff; }
     .score-high .score-label { opacity: 0.9; }
@@ -1322,11 +1322,11 @@
                         <li><strong>Fit Score:</strong> AI analyzes the job against your resume with a 0-100 fit score.</li>
                         <li><strong>Gap Analysis:</strong> Identifies your strongest matches and potential gaps.</li>
                         <li><strong>Job Intel:</strong> Salary estimates, hiring timeline, competition level, and company intel.</li>
-                        <li><strong>Keywords:</strong> Important terms from the JD with a check on which are in your resume and which you should add to your LinkedIn.</li>
+                        <li><strong>Keywords:</strong> Important terms from the JD with a check on which are in your resume.</li>
                         <li><strong>Tailored Summary:</strong> AI-rewritten executive summary optimized for this role.</li>
                         <li><strong>Intro Email:</strong> Generate a professional intro email to send with your application.</li>
                         <li><strong>Interview Prep:</strong> Likely interview questions with suggested answers from your experience.</li>
-                        <li><strong>Expert Q&A:</strong> Ask AI questions about the role, salary, gaps, or application strategy.</li>
+                        <li><strong>Expert Q&A:</strong> Ask questions about the role, salary, gaps, or application strategy.</li>
                         <li><strong>Application Tracker:</strong> Save jobs locally and track your application status.</li>
                     </ul>
                 </div>
@@ -1587,8 +1587,8 @@
                 <!-- KEYWORDS -->
                 <div class="supercard-section">
                     <div class="section-header">
-                        <span class="section-title">Must-Have Keywords</span>
-                        <span class="section-meta" id="keywordsCountLabel">0 matched, 0 missing (add to Resume and LinkedIn)</span>
+                        <span class="section-title">Keywords</span>
+                        <span class="section-meta" id="keywordsCountLabel">0 matched, 0 missing</span>
                     </div>
                     <div class="keyword-cloud" id="keywordCloudNew"></div>
                     <button class="btn btn-sm" onclick="copyKeywordsNew()" style="margin-top: 10px;">Copy Keywords</button>
@@ -1614,14 +1614,14 @@
             <div class="card-header">
                 <span class="card-title has-avatar" style="gap: 12px;">
                     <img src="arti.png" alt="Expert" style="width: 40px; height: 40px; border-radius: var(--radius);">
-                    Ask a Simulated Recruiter
+                    Ask Expert
                 </span>
             </div>
             <div class="card-body" style="padding: 16px;">
                 <textarea id="recruiterQuestion" placeholder="e.g. 'Is this salary competitive?'" style="min-height: 60px;" aria-label="Your question"></textarea>
                 <div class="action-bar" style="margin-top: 10px;">
                     <button id="askRecruiterBtn" class="btn btn-primary" onclick="askExpert()" aria-label="Ask the expert">
-                        <span id="askRecruiterBtnText">Ask Anything</span>
+                        <span id="askRecruiterBtnText">Ask</span>
                     </button>
                     <button class="btn btn-secondary" onclick="clearExpertChat()">Clear</button>
                 </div>
@@ -2236,7 +2236,7 @@
                     const retryMinutes = data.retryAfter ? Math.ceil(data.retryAfter / 60) : 5;
                     showErrorToast(data.error || `Rate limit exceeded. Please try again in ${retryMinutes} minutes.`, 10000);
                     btn.disabled = false;
-                    btnText.textContent = "Analyze Job Fit";
+                    btnText.textContent = "Analyze Fit";
                     return;
                 }
                 if (!response.ok) {
@@ -2251,7 +2251,7 @@
                     renderResults(data);
                 }, 500);
                 btn.disabled = false;
-                btnText.textContent = "Analyze Job Fit";
+                btnText.textContent = "Analyze Fit";
                 
                 // === CALL 2: Market Intel (runs in background, non-blocking) ===
                 fetchMarketIntel(jd, data.job_title, data.company);
@@ -2270,7 +2270,7 @@
         stopLoadingAnim();
         showErrorToast(`Analysis failed after ${MAX_RETRIES} attempts: ${lastError?.message || 'Unknown error'}`, 8000);
         btn.disabled = false;
-        btnText.textContent = "Analyze Job Fit";
+        btnText.textContent = "Analyze Fit";
     }
     
     // === CALL 2: Market Intel (Background fetch) ===
@@ -2643,7 +2643,7 @@ CERTIFICATIONS
 - MEDDIC Sales Methodology Certified
 
 SKILLS
-Federal Sales, DoD Procurement, Cloud Solutions,
+Federal Sales, DoD Procurement, Cloud Solutions, Strategic Partnerships,
 Account Planning, Contract Negotiations, IDIQ/GWAC, FAR/DFARS,
 Executive Relationships, Pipeline Management, Salesforce, Quota Achievement`;
 
@@ -2689,7 +2689,7 @@ Amazon is an Equal Opportunity Employer.`;
         document.getElementById('resumeText').value = sampleResume;
         document.getElementById('jobDescription').value = sampleJD;
         document.getElementById('resumeSelector').value = '';
-        showErrorToast('Sample data loaded.', 1000);
+        showErrorToast('Sample data loaded. Click "Analyze Fit" to see how it works.', 4000);
     }
     // ==========================================================================
     // ASK AN EXPERT
@@ -2783,8 +2783,8 @@ Amazon is an Equal Opportunity Employer.`;
             <div class="recruiter-header">
                 <img src="arti.png" alt="Expert" class="recruiter-avatar">
                 <div class="recruiter-info">
-                    <div class="recruiter-name">Simulated Expert</div>
-                    <div class="recruiter-title">Federal Recruiter</div>
+                    <div class="recruiter-name">Expert</div>
+                    <div class="recruiter-title">Federal Recruiting Specialist</div>
                 </div>
             </div>
         `;
@@ -2841,9 +2841,10 @@ Amazon is an Equal Opportunity Employer.`;
         // Hiring Timeline (from AI)
         if (data.timeline) {
             const tl = data.timeline;
-            document.getElementById('screenTime').textContent = `${tl.screen_weeks}-${tl.screen_weeks + 1} wks`;
-            document.getElementById('interviewTime').textContent = `${tl.interview_weeks}-${tl.interview_weeks + 1} wks`;
-            document.getElementById('offerTime').textContent = `${tl.offer_weeks}-${tl.offer_weeks + 1} wks`;
+            // Backend returns strings like "1-2" or numbers
+            document.getElementById('screenTime').textContent = typeof tl.screen_weeks === 'string' ? `${tl.screen_weeks} wks` : `${tl.screen_weeks}-${tl.screen_weeks + 1} wks`;
+            document.getElementById('interviewTime').textContent = typeof tl.interview_weeks === 'string' ? `${tl.interview_weeks} wks` : `${tl.interview_weeks}-${tl.interview_weeks + 1} wks`;
+            document.getElementById('offerTime').textContent = typeof tl.offer_weeks === 'string' ? `${tl.offer_weeks} wks` : `${tl.offer_weeks}-${tl.offer_weeks + 1} wks`;
             
             // Add timeline notes if available
             const timelineNotes = document.getElementById('timelineNotes');
