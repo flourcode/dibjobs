@@ -789,6 +789,220 @@
     .stat-card.blue { background: var(--pale-blue); }
     
     /* ============================================
+       SUPERCARD STYLES
+       ============================================ */
+    .supercard {
+        border: var(--border-thick) solid var(--ink-black);
+        box-shadow: var(--shadow-hard);
+    }
+    .supercard-header {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 16px 20px;
+        background: var(--accent-gold);
+        border-bottom: var(--border-thick) solid var(--ink-black);
+    }
+    .supercard-header .score-circle {
+        width: 70px;
+        height: 70px;
+        background: var(--ink-black);
+        border-radius: 50%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        flex-shrink: 0;
+    }
+    .supercard-header .score-num {
+        font-family: 'Space Mono', monospace;
+        font-size: 28px;
+        font-weight: 700;
+        line-height: 1;
+    }
+    .supercard-header .score-pct {
+        font-size: 10px;
+        opacity: 0.8;
+    }
+    .supercard-header .verdict-info {
+        flex: 1;
+    }
+    .supercard-header .verdict-info h3 {
+        font-family: 'Space Mono', monospace;
+        font-size: 16px;
+        margin-bottom: 4px;
+    }
+    .supercard-header .verdict-info p {
+        font-size: 12px;
+        opacity: 0.8;
+        margin: 0;
+    }
+    .supercard-header .mascot-img {
+        width: 50px;
+        height: 50px;
+        flex-shrink: 0;
+    }
+    .supercard-header.score-high { background: var(--soft-blue); }
+    .supercard-header.score-mid { background: var(--accent-gold); }
+    .supercard-header.score-low { background: var(--accent-clay); }
+    
+    /* Stats Row */
+    .stats-row {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 10px;
+        margin-bottom: 16px;
+    }
+    @media (max-width: 600px) {
+        .stats-row { grid-template-columns: repeat(2, 1fr); }
+    }
+    .stat-item {
+        background: var(--card-white);
+        border: var(--border-thick) solid var(--ink-black);
+        border-radius: 10px;
+        padding: 12px 8px;
+        text-align: center;
+        box-shadow: 3px 3px 0 var(--ink-black);
+    }
+    .stat-item .stat-num {
+        font-family: 'Space Mono', monospace;
+        font-size: 24px;
+        font-weight: 700;
+        line-height: 1;
+    }
+    .stat-item .stat-lbl {
+        font-family: 'Space Mono', monospace;
+        font-size: 9px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        opacity: 0.7;
+        margin-top: 4px;
+    }
+    .stat-item.mint { background: var(--pale-blue); }
+    .stat-item.clay { background: rgba(212, 145, 138, 0.3); }
+    .stat-item.gold { background: rgba(232, 201, 146, 0.4); }
+    .stat-item.blue { background: var(--pale-blue); }
+    
+    /* Intel Row */
+    .intel-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin-bottom: 16px;
+    }
+    @media (max-width: 600px) {
+        .intel-row { grid-template-columns: 1fr; }
+    }
+    .intel-box {
+        background: var(--bg-cream);
+        border: var(--border-thick) solid var(--ink-black);
+        border-radius: var(--radius);
+        padding: 12px;
+    }
+    .intel-box .intel-title {
+        font-family: 'Space Mono', monospace;
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 8px;
+        opacity: 0.7;
+    }
+    .intel-box .intel-value {
+        font-family: 'Space Mono', monospace;
+        font-size: 20px;
+        font-weight: 700;
+        margin-bottom: 8px;
+    }
+    
+    /* Timeline Row */
+    .timeline-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 4px;
+    }
+    .tl-step {
+        flex: 1;
+        text-align: center;
+    }
+    .tl-dot {
+        width: 24px;
+        height: 24px;
+        background: var(--ink-black);
+        color: white;
+        border-radius: 50%;
+        font-family: 'Space Mono', monospace;
+        font-size: 11px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 4px;
+    }
+    .tl-label {
+        font-family: 'Space Mono', monospace;
+        font-size: 9px;
+        text-transform: uppercase;
+    }
+    .tl-time {
+        font-size: 10px;
+        opacity: 0.7;
+    }
+    
+    /* Supercard Sections */
+    .supercard-section {
+        border-top: 2px dashed var(--ink-black);
+        padding-top: 14px;
+        margin-top: 14px;
+    }
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+    .section-title {
+        font-family: 'Space Mono', monospace;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .section-meta {
+        font-family: 'Space Mono', monospace;
+        font-size: 10px;
+        opacity: 0.6;
+    }
+    
+    /* Strengths/Gaps Lists */
+    .strengths-list, .gaps-list {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+    .strength-chip, .gap-chip {
+        padding: 10px 14px;
+        border-radius: var(--radius);
+        font-size: 13px;
+        line-height: 1.4;
+        border-left: 5px solid;
+    }
+    .strength-chip {
+        background: rgba(147, 181, 217, 0.15);
+        border-left-color: var(--soft-blue);
+    }
+    .gap-chip {
+        background: rgba(212, 145, 138, 0.15);
+        border-left-color: var(--accent-clay);
+    }
+    
+    /* Small Button */
+    .btn-sm {
+        padding: 6px 12px;
+        font-size: 10px;
+    }
+    
+    /* ============================================
        NEW: MASCOT INSIGHT BOX (Neobrutalist)
        ============================================ */
     .mascot-insight {
@@ -1493,52 +1707,56 @@
         </div>
     </div>
     
-    <!-- RESUME INPUT CARD -->
-    <div class="card">
-        <div class="card-header" style="flex-wrap: wrap; gap: 12px;">
+    <!-- RESUME INPUT CARD (Collapsible) -->
+    <div id="resumeCard" class="card collapsible-card">
+        <div class="card-header collapsible-trigger" onclick="toggleInputCard('resume')" style="cursor: pointer; flex-wrap: wrap; gap: 12px;">
             <span class="card-title">Your Resume</span>
-            <div class="resume-controls">
-                <select id="resumeSelector" onchange="loadSavedResume()" aria-label="Select saved resume">
-                    <option value="">-- Saved Resumes --</option>
-                </select>
-                <button class="btn btn-secondary" onclick="saveCurrentResume()" style="padding: 6px 12px; font-size: 11px;">Save</button>
-                <button class="btn btn-secondary" onclick="clearResume()" style="padding: 6px 12px; font-size: 11px;">Clear</button>
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <span id="resumeStatus" style="font-size: 11px; opacity: 0.6;"></span>
+                <span id="resumeToggle" class="mono" style="font-weight: 700; font-size: 20px;">−</span>
             </div>
         </div>
-        <div class="card-body">
-            <textarea id="resumeText" placeholder="Paste your resume text here..." aria-label="Resume input" style="min-height: 150px;"></textarea>
-            <div style="margin-top: 12px; padding: 12px; background: rgba(0,0,0,0.03); border-radius: var(--radius); font-size: 12px; line-height: 1.6;">
-                <strong style="font-family: 'Space Mono', monospace; text-transform: uppercase; font-size: 10px; letter-spacing: 0.5px;">Privacy Notice:</strong>
-                <ul style="margin: 8px 0 0 16px; opacity: 0.8;">
-                    <li>Your resume is <strong>not stored</strong> on our servers</li>
-                    <li>Data is sent to Google Gemini AI for analysis</li>
-                    <li>Google's API does not use your data for model training</li>
-                    <li>Saved resumes are stored locally in your browser only</li>
-                </ul>
+        <div id="resumeContent" class="collapsible-content">
+            <div class="card-body">
+                <div class="resume-controls" style="margin-bottom: 12px; display: flex; gap: 8px; flex-wrap: wrap;">
+                    <select id="resumeSelector" onchange="loadSavedResume()" aria-label="Select saved resume" style="flex: 1; min-width: 150px;">
+                        <option value="">-- Saved Resumes --</option>
+                    </select>
+                    <button class="btn btn-secondary" onclick="saveCurrentResume()" style="padding: 6px 12px; font-size: 11px;">Save</button>
+                    <button class="btn btn-secondary" onclick="clearResume()" style="padding: 6px 12px; font-size: 11px;">Clear</button>
+                </div>
+                <textarea id="resumeText" placeholder="Paste your resume text here..." aria-label="Resume input" style="min-height: 120px;"></textarea>
             </div>
         </div>
     </div>
     
-    <!-- JOB DESCRIPTION CARD -->
-    <div class="card">
-        <div class="card-header">
+    <!-- JOB DESCRIPTION CARD (Collapsible) -->
+    <div id="jobCard" class="card collapsible-card">
+        <div class="card-header collapsible-trigger" onclick="toggleInputCard('job')" style="cursor: pointer;">
             <span class="card-title">Job Description</span>
-        </div>
-        <div class="card-body">
-            <textarea id="jobDescription" placeholder="Paste job description text or a URL..." aria-label="Job description input"></textarea>
-            <div class="action-bar">
-                <button id="analyzeBtn" class="btn btn-primary" onclick="analyzeJob()" aria-label="Analyze job match">
-                    <span id="btnText">Analyze Match</span>
-                </button>
-                <button class="btn btn-secondary" onclick="clearAll()" aria-label="Reset form and clear results">Reset</button>
-                <button class="btn btn-secondary" onclick="loadSampleData()" aria-label="Load sample resume and job description">Load Sample</button>
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <span id="jobStatus" style="font-size: 11px; opacity: 0.6;"></span>
+                <span id="jobToggle" class="mono" style="font-weight: 700; font-size: 20px;">−</span>
             </div>
-            <div id="inlineError" class="inline-error" role="alert" aria-live="polite">
-                <span id="inlineErrorText"></span>
+        </div>
+        <div id="jobContent" class="collapsible-content">
+            <div class="card-body">
+                <textarea id="jobDescription" placeholder="Paste job description text or a URL..." aria-label="Job description input"></textarea>
+                <div class="action-bar">
+                    <button id="analyzeBtn" class="btn btn-primary" onclick="analyzeJob()" aria-label="Analyze job match">
+                        <span id="btnText">Analyze Match</span>
+                    </button>
+                    <button class="btn btn-secondary" onclick="clearAll()" aria-label="Reset form and clear results">Reset</button>
+                    <button class="btn btn-secondary" onclick="loadSampleData()" aria-label="Load sample data">Sample</button>
+                </div>
+                <div id="inlineError" class="inline-error" role="alert" aria-live="polite">
+                    <span id="inlineErrorText"></span>
+                </div>
             </div>
         </div>
     </div>
-<div id="loadingCard" class="card" style="display:none; text-align:center; padding: 48px 24px; background: var(--bg-cream); border: 2px dashed var(--ink-black);">
+
+    <div id="loadingCard" class="card" style="display:none; text-align:center; padding: 48px 24px; background: var(--bg-cream); border: 2px dashed var(--ink-black);">
         <div class="spinner-box" style="margin-bottom: 24px;">
             <div style="display:inline-block; width: 40px; height: 40px; border: 4px solid var(--ink-black); border-top-color: transparent; border-radius: 50%; animation: spin 1s linear infinite;"></div>
         </div>
@@ -1552,49 +1770,41 @@
             Analyzing your resume against job requirements...
         </p>
     </div>
+
     <div id="analysisResults" style="display: none;">
-        <!-- 1. SCORE/VERDICT -->
-        <div class="card" style="padding:0;">
-            <div id="matchScoreContainer" class="hero-grid">
-                </div>
-        </div>
-        
-        <!-- INTEL & KEYWORDS SUPER CARD -->
-        <div class="card">
-            <div class="card-body" style="padding: 20px;">
-                <!-- STATS GRID -->
-                <div class="stats-grid">
-                    <div class="stat-card mint">
-                        <div class="stat-label">Strengths</div>
-                        <div class="stat-value" id="strengthsCount">0</div>
-                        <div class="stat-sub">alignment points</div>
+        <!-- UNIFIED SUPER CARD -->
+        <div class="card supercard">
+            <!-- SCORE HEADER -->
+            <div id="matchScoreContainer" class="supercard-header">
+            </div>
+            
+            <div class="card-body" style="padding: 16px;">
+                <!-- STATS ROW -->
+                <div class="stats-row">
+                    <div class="stat-item mint">
+                        <div class="stat-num" id="strengthsCount">0</div>
+                        <div class="stat-lbl">Strengths</div>
                     </div>
-                    <div class="stat-card clay">
-                        <div class="stat-label">Gaps</div>
-                        <div class="stat-value" id="gapsCount">0</div>
-                        <div class="stat-sub">to address</div>
+                    <div class="stat-item clay">
+                        <div class="stat-num" id="gapsCount">0</div>
+                        <div class="stat-lbl">Gaps</div>
                     </div>
-                    <div class="stat-card gold">
-                        <div class="stat-label">Keywords</div>
-                        <div class="stat-value" id="keywordsPercent">0%</div>
-                        <div class="stat-sub" id="keywordsSub">0 of 0 matched</div>
+                    <div class="stat-item gold">
+                        <div class="stat-num" id="keywordsPercent">0%</div>
+                        <div class="stat-lbl">Keywords</div>
                     </div>
-                    <div class="stat-card blue">
-                        <div class="stat-label">Salary Estimate</div>
-                        <div class="stat-value" id="salaryEstimate">$---K</div>
-                        <div class="stat-sub" id="salarySub">Loading...</div>
+                    <div class="stat-item blue">
+                        <div class="stat-num" id="salaryEstimate">$---K</div>
+                        <div class="stat-lbl">Salary Est.</div>
                     </div>
                 </div>
                 
-                <!-- SALARY & TIMELINE DIAGRAMS -->
-                <div class="intel-grid" style="margin-bottom: 20px;">
-                    <div class="intel-panel">
-                        <div class="intel-panel-header">
-                            <div class="intel-panel-title">Salary Range</div>
-                        </div>
+                <!-- SALARY & TIMELINE ROW -->
+                <div class="intel-row">
+                    <div class="intel-box">
+                        <div class="intel-title">Salary Range</div>
                         <div id="salaryIntel">
                             <div class="intel-value" id="salaryRange">Loading...</div>
-                            <div class="intel-label">Based on role level & market</div>
                             <div class="salary-range-bar">
                                 <div class="salary-marker" style="left: 50%;" data-label="Target"></div>
                             </div>
@@ -1604,78 +1814,75 @@
                             </div>
                         </div>
                     </div>
-                    <div class="intel-panel">
-                        <div class="intel-panel-header">
-                            <div class="intel-panel-title">Hiring Timeline</div>
-                        </div>
-                        <div class="timeline-estimate" id="hiringTimeline">
-                            <div class="timeline-step">
-                                <div class="timeline-dot">1</div>
-                                <div class="timeline-label">Apply</div>
-                                <div class="timeline-days">Today</div>
-                            </div>
-                            <div class="timeline-step">
-                                <div class="timeline-dot">2</div>
-                                <div class="timeline-label">Screen</div>
-                                <div class="timeline-days">...</div>
-                            </div>
-                            <div class="timeline-step">
-                                <div class="timeline-dot">3</div>
-                                <div class="timeline-label">Interview</div>
-                                <div class="timeline-days">...</div>
-                            </div>
-                            <div class="timeline-step">
-                                <div class="timeline-dot">4</div>
-                                <div class="timeline-label">Offer</div>
-                                <div class="timeline-days">...</div>
-                            </div>
+                    <div class="intel-box">
+                        <div class="intel-title">Hiring Timeline</div>
+                        <div class="timeline-row" id="hiringTimeline">
+                            <div class="tl-step"><div class="tl-dot">1</div><div class="tl-label">Apply</div><div class="tl-time">Today</div></div>
+                            <div class="tl-step"><div class="tl-dot">2</div><div class="tl-label">Screen</div><div class="tl-time">...</div></div>
+                            <div class="tl-step"><div class="tl-dot">3</div><div class="tl-label">Interview</div><div class="tl-time">...</div></div>
+                            <div class="tl-step"><div class="tl-dot">4</div><div class="tl-label">Offer</div><div class="tl-time">...</div></div>
                         </div>
                     </div>
                 </div>
                 
-                <!-- KEYWORDS SECTION -->
-                <div style="border-top: 2px dashed var(--ink-black); padding-top: 16px; margin-bottom: 16px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                        <div class="card-title" style="margin: 0;">Keywords to Add</div>
-                        <div class="keywords-count" id="keywordsCountLabel">0 matched, 0 missing</div>
+                <!-- KEYWORDS -->
+                <div class="supercard-section">
+                    <div class="section-header">
+                        <span class="section-title">Keywords</span>
+                        <span class="section-meta" id="keywordsCountLabel">0 matched, 0 missing</span>
                     </div>
-                    <p style="margin-bottom: 10px; font-size: 12px; opacity: 0.7;"><span style="background: var(--accent-mint); padding: 2px 6px; border-radius: 3px;">Green</span> = in resume. <span style="background: rgba(212, 145, 138, 0.4); padding: 2px 6px; border-radius: 3px;">Orange</span> = missing.</p>
                     <div class="keyword-cloud" id="keywordCloudNew"></div>
-                    <button class="btn" onclick="copyKeywordsNew()" style="margin-top: 12px; padding: 8px 16px; font-size: 11px;">Copy Keywords</button>
+                    <button class="btn btn-sm" onclick="copyKeywordsNew()" style="margin-top: 10px;">Copy Keywords</button>
                 </div>
                 
-                <!-- RESEARCH THIS COMPANY -->
-                <div id="researchCompanySection" style="border-top: 2px dashed var(--ink-black); padding-top: 16px;">
-                    <div class="card-title" style="margin-bottom: 12px;">Research This Company</div>
+                <!-- STRENGTHS -->
+                <div id="strengthsSection" class="supercard-section">
+                    <div class="section-header">
+                        <span class="section-title">Your Strengths</span>
+                    </div>
+                    <div id="strengthsList" class="strengths-list"></div>
+                </div>
+                
+                <!-- GAPS -->
+                <div id="gapsSection" class="supercard-section">
+                    <div class="section-header">
+                        <span class="section-title">Gaps to Address</span>
+                    </div>
+                    <div id="gapsList" class="gaps-list"></div>
+                </div>
+                
+                <!-- RESEARCH LINKS -->
+                <div id="researchCompanySection" class="supercard-section">
+                    <div class="section-header">
+                        <span class="section-title">Research This Company</span>
+                    </div>
                     <div id="researchLinks" class="network-links"></div>
+                </div>
+                
+                <!-- SAVE BUTTON -->
+                <div id="saveToTrackerSection" style="text-align: center; padding-top: 16px; border-top: 2px dashed var(--ink-black); margin-top: 16px; display: none;">
+                    <button id="saveToTrackerBtn" class="btn btn-primary" onclick="saveToTracker()">Save to Tracker</button>
                 </div>
             </div>
         </div>
         
-        <!-- STRENGTHS BOX -->
-        <div id="strengthsBox" class="strengths-box">
-            <div class="box-title">Your Strengths</div>
-            <div id="strengthsList"></div>
-        </div>
-        
-        <!-- 4. ASK AN EXPERT -->
+        <!-- ASK EXPERT (Directly after super card) -->
         <div id="askRecruiterSection" class="card">
             <div class="card-header">
                 <span class="card-title has-avatar" style="gap: 12px;">
-                    <img src="arti.png" alt="Expert" style="width: 48px; height: 48px; border-radius: var(--radius);">
-                    Ask a Simulated Recruiter
+                    <img src="arti.png" alt="Expert" style="width: 40px; height: 40px; border-radius: var(--radius);">
+                    Ask Expert
                 </span>
             </div>
-            <div class="card-body">
-                <p style="margin-bottom: 16px; font-size: 14px; opacity: 0.8;">Questions about salary, fit, gaps, or application strategy? Get answers from a federal recruiting expert.</p>
-                <textarea id="recruiterQuestion" placeholder="e.g. 'Is this salary competitive?' or 'How should I address that gap?'" style="min-height: 80px;" aria-label="Your question"></textarea>
-                <div class="action-bar">
+            <div class="card-body" style="padding: 16px;">
+                <textarea id="recruiterQuestion" placeholder="e.g. 'Is this salary competitive?'" style="min-height: 60px;" aria-label="Your question"></textarea>
+                <div class="action-bar" style="margin-top: 10px;">
                     <button id="askRecruiterBtn" class="btn btn-primary" onclick="askExpert()" aria-label="Ask the expert">
                         <span id="askRecruiterBtnText">Ask</span>
                     </button>
-                    <button class="btn btn-secondary" onclick="clearExpertChat()" aria-label="Clear conversation">Clear</button>
+                    <button class="btn btn-secondary" onclick="clearExpertChat()">Clear</button>
                 </div>
-                <div id="recruiterChatHistory" style="margin-top: 24px; display: none;"></div>
+                <div id="recruiterChatHistory" style="margin-top: 16px; display: none;"></div>
             </div>
         </div>
         <!-- 2. GAP ANALYSIS -->
@@ -2131,6 +2338,49 @@
         }
     }
     
+    // Toggle input cards (Resume, Job Description)
+    function toggleInputCard(cardName) {
+        const card = document.getElementById(cardName + 'Card');
+        const content = document.getElementById(cardName + 'Content');
+        const toggle = document.getElementById(cardName + 'Toggle');
+        
+        if (content.style.display === 'none') {
+            content.style.display = 'block';
+            toggle.textContent = '−';
+        } else {
+            content.style.display = 'none';
+            toggle.textContent = '+';
+        }
+    }
+    
+    function collapseInputCards() {
+        // Collapse resume card
+        const resumeContent = document.getElementById('resumeContent');
+        const resumeToggle = document.getElementById('resumeToggle');
+        const resumeStatus = document.getElementById('resumeStatus');
+        if (resumeContent) {
+            resumeContent.style.display = 'none';
+            resumeToggle.textContent = '+';
+            const resumeText = document.getElementById('resumeText').value;
+            if (resumeText) {
+                resumeStatus.textContent = '✓ Loaded';
+            }
+        }
+        
+        // Collapse job card
+        const jobContent = document.getElementById('jobContent');
+        const jobToggle = document.getElementById('jobToggle');
+        const jobStatus = document.getElementById('jobStatus');
+        if (jobContent) {
+            jobContent.style.display = 'none';
+            jobToggle.textContent = '+';
+            const jobText = document.getElementById('jobDescription').value;
+            if (jobText) {
+                jobStatus.textContent = '✓ Loaded';
+            }
+        }
+    }
+    
     // Toggle kit cards (Application Kit, Interview Kit, Outreach Kit)
     function toggleKit(kitName) {
         const card = document.getElementById(kitName + 'KitCard');
@@ -2290,51 +2540,46 @@
     // ==========================================================================
     function renderResults(data) {
         document.getElementById('analysisResults').style.display = 'block';
-        // 1. Score Hero
+        
+        // Collapse input cards when results show
+        collapseInputCards();
+        
+        // 1. Score Header
         const scoreClass = data.score >= 80 ? 'score-high' : (data.score >= 60 ? 'score-mid' : 'score-low');
         const scoreHTML = `
-            <div class="score-box">
-                <div class="score-val">${data.score}%</div>
-                <div class="score-label">Match Score</div>
+            <div class="score-circle">
+                <div class="score-num">${data.score}</div>
+                <div class="score-pct">%</div>
             </div>
-            <div class="verdict-box">
-                <div style="display: flex; align-items: flex-start; gap: 14px;">
-                    <img src="arti.png" alt="Arti" style="width: 48px; height: 48px; flex-shrink: 0;">
-                    <div>
-                        <h3 style="margin-bottom: 8px;">${escapeHtml(data.verdict)}</h3>
-                        <p style="opacity: 0.7; font-size: 14px; margin: 0;">
-                            <strong>Role:</strong> ${escapeHtml(data.job_title)}<br>
-                            <strong>Company:</strong> ${escapeHtml(data.company)}
-                        </p>
-                    </div>
-                </div>
+            <div class="verdict-info">
+                <h3>${escapeHtml(data.verdict)}</h3>
+                <p><strong>Role:</strong> ${escapeHtml(data.job_title)} · <strong>Company:</strong> ${escapeHtml(data.company)}</p>
             </div>
+            <img src="arti.png" alt="Arti" class="mascot-img">
         `;
         const scoreContainer = document.getElementById('matchScoreContainer');
-        scoreContainer.className = `hero-grid ${scoreClass}`;
+        scoreContainer.className = `supercard-header ${scoreClass}`;
         scoreContainer.innerHTML = scoreHTML;
         
-        // NEW: Count strengths and gaps for stats
+        // Count strengths and gaps
         const gaps = data.analysis ? data.analysis.filter(x => /gap|risk|missing/i.test(x)) : [];
         const matches = data.analysis ? data.analysis.filter(x => !/gap|risk|missing/i.test(x)) : [];
         
-        // NEW: Update stats grid
+        // Update stats
         document.getElementById('strengthsCount').textContent = matches.length;
         document.getElementById('gapsCount').textContent = gaps.length;
         
-        // NEW: Keywords stats
+        // Keywords stats
         const keywords = data.keywords || [];
         const matchedKeywords = keywords.filter(k => k.in_resume);
         const keywordsPercent = keywords.length > 0 ? Math.round((matchedKeywords.length / keywords.length) * 100) : 0;
         document.getElementById('keywordsPercent').textContent = `${keywordsPercent}%`;
-        document.getElementById('keywordsSub').textContent = `${matchedKeywords.length} of ${keywords.length} matched`;
         document.getElementById('keywordsCountLabel').textContent = `${matchedKeywords.length} matched, ${keywords.length - matchedKeywords.length} missing`;
         
-        // Salary placeholder (will be updated by market intel)
+        // Salary placeholder
         document.getElementById('salaryEstimate').textContent = '$---K';
-        document.getElementById('salarySub').textContent = 'Loading...';
         
-        // Render keywords in new box
+        // Render keywords
         const keywordCloudNew = document.getElementById('keywordCloudNew');
         keywordCloudNew.innerHTML = '';
         keywords.forEach(k => {
@@ -2344,59 +2589,67 @@
             keywordCloudNew.appendChild(tag);
         });
         
-        // NEW: Render strengths in new box
+        // Render strengths
         const strengthsList = document.getElementById('strengthsList');
         strengthsList.innerHTML = '';
         matches.forEach(item => {
             const div = document.createElement('div');
-            div.className = 'strength-item';
-            div.innerHTML = `<div class="strength-item-header">Strategic Match</div>${escapeHtml(item.replace(/^(Match:|Strength:)/i, '').trim())}`;
+            div.className = 'strength-chip';
+            div.textContent = item.replace(/^(Match:|Strength:)/i, '').trim();
             strengthsList.appendChild(div);
         });
-        document.getElementById('strengthsBox').style.display = matches.length > 0 ? 'block' : 'none';
+        document.getElementById('strengthsSection').style.display = matches.length > 0 ? 'block' : 'none';
         
-        // 2. Analysis List (gaps only now)
-        const list = document.getElementById('analysisList');
-        list.innerHTML = '';
+        // Render gaps
+        const gapsList = document.getElementById('gapsList');
+        gapsList.innerHTML = '';
         gaps.forEach(item => {
-            const li = document.createElement('li');
-            li.className = 'analysis-item item-gap';
-            li.innerHTML = `<strong>Gap / Risk</strong> ${escapeHtml(item.replace(/^(Match:|Gap:|Risk:)/i, ''))}`;
-            list.appendChild(li);
+            const div = document.createElement('div');
+            div.className = 'gap-chip';
+            div.textContent = item.replace(/^(Gap:|Risk:|Missing:)/i, '').trim();
+            gapsList.appendChild(div);
         });
+        document.getElementById('gapsSection').style.display = gaps.length > 0 ? 'block' : 'none';
         
         // 3. Interview Questions
         const qList = document.getElementById('interviewQuestionsList');
-        qList.innerHTML = '';
-        if (data.interview_questions && data.interview_questions.length > 0) {
-            data.interview_questions.forEach((q, i) => {
-                qList.innerHTML += `
-                    <div class="qa-card">
-                        <div class="qa-q">Q${i+1}: ${escapeHtml(q.question)}</div>
-                        <div class="qa-a">${escapeHtml(q.suggested_answer)}</div>
-                    </div>`;
-            });
-        } else {
-             document.getElementById('interviewQuestionsSection').style.display = 'none';
+        if (qList) {
+            qList.innerHTML = '';
+            if (data.interview_questions && data.interview_questions.length > 0) {
+                data.interview_questions.forEach((q, i) => {
+                    qList.innerHTML += `
+                        <div class="qa-card">
+                            <div class="qa-q">Q${i+1}: ${escapeHtml(q.question)}</div>
+                            <div class="qa-a">${escapeHtml(q.suggested_answer)}</div>
+                        </div>`;
+                });
+            } else {
+                const iqSection = document.getElementById('interviewQuestionsSection');
+                if (iqSection) iqSection.style.display = 'none';
+            }
         }
+        
         // 4. Gap Strategies
         const gList = document.getElementById('gapStrategiesList');
-        gList.innerHTML = '';
-        if (data.gap_strategies && data.gap_strategies.length > 0) {
-            document.getElementById('gapStrategiesSection').style.display = 'block';
-            data.gap_strategies.forEach(s => {
-                gList.innerHTML += `
-                    <div class="qa-card" style="border-left: 6px solid var(--accent-clay);">
-                        <div class="qa-q" style="background:#fff; border-bottom:1px solid #eee;">Gap: ${escapeHtml(s.gap)}</div>
-                        <div class="qa-a">
-                            <strong>Strategy:</strong> ${escapeHtml(s.strategy)}<br><br>
-                            <em>"${escapeHtml(s.talking_points)}"</em>
+        if (gList) {
+            gList.innerHTML = '';
+            if (data.gap_strategies && data.gap_strategies.length > 0) {
+                document.getElementById('gapStrategiesSection').style.display = 'block';
+                data.gap_strategies.forEach(s => {
+                    gList.innerHTML += `
+                        <div class="qa-card" style="border-left: 6px solid var(--accent-clay);">
+                            <div class="qa-q" style="background:#fff; border-bottom:1px solid #eee;">Gap: ${escapeHtml(s.gap)}</div>
+                            <div class="qa-a">
+                                <strong>Strategy:</strong> ${escapeHtml(s.strategy)}<br><br>
+                                <em>"${escapeHtml(s.talking_points)}"</em>
                         </div>
                     </div>`;
             });
         } else {
             document.getElementById('gapStrategiesSection').style.display = 'none';
         }
+        }
+        
         // 5. Generate Resume Preview (now inside Application Kit)
         generateResumeHTML(data.tailored_summary);
         // Reset Intro Email
@@ -2762,7 +3015,6 @@ Amazon is an Equal Opportunity Employer.`;
             
             // Update stat card
             document.getElementById('salaryEstimate').textContent = `$${sal.mid}K`;
-            document.getElementById('salarySub').textContent = `$${sal.low}K - $${sal.high}K`;
             
             // Position the target marker
             const range = sal.high - sal.low;
@@ -2781,7 +3033,7 @@ Amazon is an Equal Opportunity Employer.`;
                 if (sal.notes) {
                     const notesDiv = document.createElement('div');
                     notesDiv.className = 'salary-notes';
-                    notesDiv.style.cssText = 'font-size: 12px; opacity: 0.7; margin-top: 8px; font-style: italic;';
+                    notesDiv.style.cssText = 'font-size: 11px; opacity: 0.7; margin-top: 8px; font-style: italic;';
                     notesDiv.textContent = sal.notes;
                     salaryIntel.appendChild(notesDiv);
                 }
@@ -2795,26 +3047,10 @@ Amazon is an Equal Opportunity Employer.`;
             const timelineContainer = document.getElementById('hiringTimeline');
             if (timelineContainer) {
                 timelineContainer.innerHTML = `
-                <div class="timeline-step">
-                    <div class="timeline-dot">1</div>
-                    <div class="timeline-label">Apply</div>
-                    <div class="timeline-days">Today</div>
-                </div>
-                <div class="timeline-step">
-                    <div class="timeline-dot">2</div>
-                    <div class="timeline-label">Screen</div>
-                    <div class="timeline-days">${tl.screen_weeks} wks</div>
-                </div>
-                <div class="timeline-step">
-                    <div class="timeline-dot">3</div>
-                    <div class="timeline-label">Interview</div>
-                    <div class="timeline-days">${tl.interview_weeks} wks</div>
-                </div>
-                <div class="timeline-step">
-                    <div class="timeline-dot">4</div>
-                    <div class="timeline-label">Offer</div>
-                    <div class="timeline-days">${tl.offer_weeks} wks</div>
-                </div>
+                <div class="tl-step"><div class="tl-dot">1</div><div class="tl-label">Apply</div><div class="tl-time">Today</div></div>
+                <div class="tl-step"><div class="tl-dot">2</div><div class="tl-label">Screen</div><div class="tl-time">${tl.screen_weeks} wks</div></div>
+                <div class="tl-step"><div class="tl-dot">3</div><div class="tl-label">Interview</div><div class="tl-time">${tl.interview_weeks} wks</div></div>
+                <div class="tl-step"><div class="tl-dot">4</div><div class="tl-label">Offer</div><div class="tl-time">${tl.offer_weeks} wks</div></div>
             `;
             }
         }
