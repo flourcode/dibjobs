@@ -1775,7 +1775,7 @@
         <!-- UNIFIED SUPER CARD -->
         <div class="card supercard">
             <!-- SCORE HEADER -->
-            <div id="matchScoreContainer" class="supercard-header">
+            <div id="matchScoreContainer" class="hero-grid">
             </div>
             
             <div class="card-body" style="padding: 16px;">
@@ -1835,22 +1835,6 @@
                     <button class="btn btn-sm" onclick="copyKeywordsNew()" style="margin-top: 10px;">Copy Keywords</button>
                 </div>
                 
-                <!-- STRENGTHS -->
-                <div id="strengthsSection" class="supercard-section">
-                    <div class="section-header">
-                        <span class="section-title">Your Strengths</span>
-                    </div>
-                    <div id="strengthsList" class="strengths-list"></div>
-                </div>
-                
-                <!-- GAPS -->
-                <div id="gapsSection" class="supercard-section">
-                    <div class="section-header">
-                        <span class="section-title">Gaps to Address</span>
-                    </div>
-                    <div id="gapsList" class="gaps-list"></div>
-                </div>
-                
                 <!-- RESEARCH LINKS -->
                 <div id="researchCompanySection" class="supercard-section">
                     <div class="section-header">
@@ -1866,7 +1850,7 @@
             </div>
         </div>
         
-        <!-- ASK EXPERT (Directly after super card) -->
+        <!-- ASK EXPERT -->
         <div id="askRecruiterSection" class="card">
             <div class="card-header">
                 <span class="card-title has-avatar" style="gap: 12px;">
@@ -1883,6 +1867,26 @@
                     <button class="btn btn-secondary" onclick="clearExpertChat()">Clear</button>
                 </div>
                 <div id="recruiterChatHistory" style="margin-top: 16px; display: none;"></div>
+            </div>
+        </div>
+        
+        <!-- STRENGTHS CARD (after expert) -->
+        <div id="strengthsCard" class="card" style="display: none;">
+            <div class="card-header">
+                <span class="card-title">Your Strengths</span>
+            </div>
+            <div class="card-body">
+                <ul id="strengthsList" class="analysis-list"></ul>
+            </div>
+        </div>
+        
+        <!-- GAPS CARD (after strengths) -->
+        <div id="gapsCard" class="card" style="display: none;">
+            <div class="card-header">
+                <span class="card-title">Gaps to Address</span>
+            </div>
+            <div class="card-body">
+                <ul id="gapsList" class="analysis-list"></ul>
             </div>
         </div>
         <!-- 2. GAP ANALYSIS -->
@@ -2544,21 +2548,28 @@
         // Collapse input cards when results show
         collapseInputCards();
         
-        // 1. Score Header
+        // 1. Score Hero - original layout with big score on left, arti next to verdict
         const scoreClass = data.score >= 80 ? 'score-high' : (data.score >= 60 ? 'score-mid' : 'score-low');
         const scoreHTML = `
-            <div class="score-circle">
-                <div class="score-num">${data.score}</div>
-                <div class="score-pct">%</div>
+            <div class="score-box">
+                <div class="score-val">${data.score}%</div>
+                <div class="score-label">Match Score</div>
             </div>
-            <div class="verdict-info">
-                <h3>${escapeHtml(data.verdict)}</h3>
-                <p><strong>Role:</strong> ${escapeHtml(data.job_title)} · <strong>Company:</strong> ${escapeHtml(data.company)}</p>
+            <div class="verdict-box">
+                <div style="display: flex; align-items: flex-start; gap: 14px;">
+                    <img src="arti.png" alt="Arti" style="width: 48px; height: 48px; flex-shrink: 0;">
+                    <div>
+                        <h3 style="margin-bottom: 8px;">${escapeHtml(data.verdict)}</h3>
+                        <p style="opacity: 0.7; font-size: 14px; margin: 0;">
+                            <strong>Role:</strong> ${escapeHtml(data.job_title)}<br>
+                            <strong>Company:</strong> ${escapeHtml(data.company)}
+                        </p>
+                    </div>
+                </div>
             </div>
-            <img src="arti.png" alt="Arti" class="mascot-img">
         `;
         const scoreContainer = document.getElementById('matchScoreContainer');
-        scoreContainer.className = `supercard-header ${scoreClass}`;
+        scoreContainer.className = `hero-grid ${scoreClass}`;
         scoreContainer.innerHTML = scoreHTML;
         
         // Count strengths and gaps
@@ -2589,27 +2600,27 @@
             keywordCloudNew.appendChild(tag);
         });
         
-        // Render strengths
+        // Render strengths in separate card below expert
         const strengthsList = document.getElementById('strengthsList');
         strengthsList.innerHTML = '';
         matches.forEach(item => {
-            const div = document.createElement('div');
-            div.className = 'strength-chip';
-            div.textContent = item.replace(/^(Match:|Strength:)/i, '').trim();
-            strengthsList.appendChild(div);
+            const li = document.createElement('li');
+            li.className = 'analysis-item item-match';
+            li.innerHTML = `<strong>Match</strong> ${escapeHtml(item.replace(/^(Match:|Strength:)/i, '').trim())}`;
+            strengthsList.appendChild(li);
         });
-        document.getElementById('strengthsSection').style.display = matches.length > 0 ? 'block' : 'none';
+        document.getElementById('strengthsCard').style.display = matches.length > 0 ? 'block' : 'none';
         
-        // Render gaps
+        // Render gaps in separate card below strengths
         const gapsList = document.getElementById('gapsList');
         gapsList.innerHTML = '';
         gaps.forEach(item => {
-            const div = document.createElement('div');
-            div.className = 'gap-chip';
-            div.textContent = item.replace(/^(Gap:|Risk:|Missing:)/i, '').trim();
-            gapsList.appendChild(div);
+            const li = document.createElement('li');
+            li.className = 'analysis-item item-gap';
+            li.innerHTML = `<strong>Gap / Risk</strong> ${escapeHtml(item.replace(/^(Gap:|Risk:|Missing:)/i, '').trim())}`;
+            gapsList.appendChild(li);
         });
-        document.getElementById('gapsSection').style.display = gaps.length > 0 ? 'block' : 'none';
+        document.getElementById('gapsCard').style.display = gaps.length > 0 ? 'block' : 'none';
         
         // 3. Interview Questions
         const qList = document.getElementById('interviewQuestionsList');
