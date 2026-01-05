@@ -1288,7 +1288,7 @@
     <!-- QUICK START CARD (Collapsible, starts collapsed) -->
     <div id="quickStartCard" class="card collapsible-card collapsed">
         <div class="card-header collapsible-trigger" onclick="toggleQuickStart()" role="button" tabindex="0" aria-expanded="false" aria-controls="quickStartContent" aria-label="Toggle quick start guide" onkeydown="if(event.key==='Enter'||event.key===' '){toggleQuickStart();event.preventDefault();}">
-            <span class="card-title">How It Works</span>
+            <span class="card-title">Quick Start</span>
             <span id="quickStartToggleIcon" class="mono" style="font-weight: 700; font-size: 20px;" aria-hidden="true">+</span>
         </div>
         <div id="quickStartContent" class="collapsible-content">
@@ -1326,7 +1326,7 @@
                         <li><strong>Tailored Summary:</strong> AI-rewritten executive summary optimized for this role.</li>
                         <li><strong>Intro Email:</strong> Generate a professional intro email to send with your application.</li>
                         <li><strong>Interview Prep:</strong> Likely interview questions with suggested answers from your experience.</li>
-                        <li><strong>Expert Q&A:</strong> Ask questions about the role, salary, gaps, or application strategy.</li>
+                        <li><strong>Expert Q&A:</strong> Ask AI questions about the role, salary, gaps, or application strategy.</li>
                         <li><strong>Application Tracker:</strong> Save jobs locally and track your application status.</li>
                     </ul>
                 </div>
@@ -1614,14 +1614,14 @@
             <div class="card-header">
                 <span class="card-title has-avatar" style="gap: 12px;">
                     <img src="arti.png" alt="Expert" style="width: 40px; height: 40px; border-radius: var(--radius);">
-                    Ask Expert
+                    Ask a Simulated Recruiter
                 </span>
             </div>
             <div class="card-body" style="padding: 16px;">
                 <textarea id="recruiterQuestion" placeholder="e.g. 'Is this salary competitive?'" style="min-height: 60px;" aria-label="Your question"></textarea>
                 <div class="action-bar" style="margin-top: 10px;">
                     <button id="askRecruiterBtn" class="btn btn-primary" onclick="askExpert()" aria-label="Ask the expert">
-                        <span id="askRecruiterBtnText">Ask</span>
+                        <span id="askRecruiterBtnText">Ask Anything</span>
                     </button>
                     <button class="btn btn-secondary" onclick="clearExpertChat()">Clear</button>
                 </div>
@@ -2783,8 +2783,8 @@ Amazon is an Equal Opportunity Employer.`;
             <div class="recruiter-header">
                 <img src="arti.png" alt="Expert" class="recruiter-avatar">
                 <div class="recruiter-info">
-                    <div class="recruiter-name">Expert</div>
-                    <div class="recruiter-title">Federal Recruiting Specialist</div>
+                    <div class="recruiter-name">Simulated Expert</div>
+                    <div class="recruiter-title">Federal Recruiter</div>
                 </div>
             </div>
         `;
