@@ -52,9 +52,11 @@
         --ink-black: var(--navy-900);
         
         /* Accent Colors - Harmonious */
+        --accent-green: #5d8a66;
+        --accent-green-light: #e3efe5;
         --accent-mint: var(--slate-100);
         --accent-mint-light: #f1f5f8;
-        --accent-olive: var(--slate-400);
+        --accent-olive: var(--accent-green);
         --accent-clay: #c9785c;
         --accent-clay-light: #f8ebe6;
         --accent-gold: #d4a84b;
@@ -491,7 +493,7 @@
         background: var(--card-white);
     }
     .score-high .score-box { 
-        background: var(--navy-500); 
+        background: var(--accent-green); 
         color: #fff; 
     }
     .score-high .score-label { opacity: 0.9; }
@@ -526,10 +528,10 @@
         margin-bottom: 8px;
     }
     .item-match {
-        background: var(--accent-mint-light);
-        border-left: 6px solid var(--navy-500);
+        background: var(--accent-green-light);
+        border-left: 6px solid var(--accent-green);
     }
-    .item-match strong { color: var(--navy-700); }
+    .item-match strong { color: var(--accent-green); }
     .item-gap {
         background: var(--accent-clay-light);
         border-left: 6px solid var(--accent-clay);
@@ -628,6 +630,14 @@
         content: '⚠';
         font-size: 20px;
         filter: drop-shadow(1px 1px 0 rgba(0,0,0,0.1));
+    }
+    /* Success toast variant */
+    .error-toast.success {
+        background: var(--accent-green-light);
+        border-color: var(--accent-green);
+    }
+    .error-toast.success::before {
+        content: '✓';
     }
     .error-toast-close {
         background: none;
@@ -1018,12 +1028,12 @@
         color: var(--card-white);
     }
     .keyword-tag.in-resume {
-        background: var(--slate-100);
-        border-color: var(--navy-500);
+        background: var(--accent-green-light);
+        border-color: var(--accent-green);
     }
     .keyword-tag.in-resume::before {
         content: '✓';
-        color: var(--navy-500);
+        color: var(--accent-green);
         font-size: 12px;
     }
     .keyword-tag.missing {
@@ -1111,6 +1121,98 @@
         background: var(--ink-black);
         color: var(--card-white);
         transform: translate(-1px, -1px);
+    }
+    /* JOB RECOMMENDATIONS */
+    .recommendations-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 12px;
+    }
+    .recommendation-card {
+        background: var(--card-white);
+        border: 2px solid var(--ink-black);
+        border-radius: var(--radius);
+        padding: 16px;
+        transition: all var(--transition-snap);
+        position: relative;
+    }
+    .recommendation-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 4px 4px 0 rgba(0,0,0,0.1);
+    }
+    .recommendation-card.role-card {
+        border-left: 5px solid var(--accent-green);
+    }
+    .recommendation-card.company-card {
+        border-left: 5px solid var(--accent-gold);
+    }
+    .rec-title {
+        font-family: 'Space Mono', monospace;
+        font-size: 13px;
+        font-weight: 700;
+        margin-bottom: 6px;
+        color: var(--ink-black);
+    }
+    .rec-company {
+        font-size: 12px;
+        color: var(--navy-500);
+        margin-bottom: 8px;
+    }
+    .rec-reason {
+        font-size: 12px;
+        line-height: 1.5;
+        opacity: 0.8;
+        margin-bottom: 10px;
+    }
+    .rec-match-score {
+        display: inline-block;
+        padding: 3px 8px;
+        font-family: 'Space Mono', monospace;
+        font-size: 10px;
+        font-weight: 700;
+        border-radius: 12px;
+        background: var(--accent-green-light);
+        color: var(--accent-green);
+    }
+    .rec-match-score.high { background: var(--accent-green-light); color: var(--accent-green); }
+    .rec-match-score.medium { background: var(--accent-gold-light); color: #b8860b; }
+    .rec-search-link {
+        display: inline-block;
+        margin-left: 8px;
+        padding: 3px 8px;
+        font-family: 'Space Mono', monospace;
+        font-size: 10px;
+        text-decoration: none;
+        color: var(--ink-black);
+        background: var(--bg-cream);
+        border: 1px solid var(--ink-black);
+        border-radius: 12px;
+        transition: all 0.15s;
+    }
+    .rec-search-link:hover {
+        background: var(--ink-black);
+        color: var(--card-white);
+    }
+    .strategic-insight-box {
+        background: linear-gradient(135deg, var(--accent-mint-light) 0%, var(--bg-cream) 100%);
+        border: 2px solid var(--ink-black);
+        border-radius: var(--radius);
+        padding: 20px;
+        font-size: 14px;
+        line-height: 1.7;
+    }
+    .strategic-insight-box strong {
+        font-family: 'Space Mono', monospace;
+        display: block;
+        margin-bottom: 8px;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    @media (max-width: 600px) {
+        .recommendations-grid {
+            grid-template-columns: 1fr;
+        }
     }
     /* APPLICATION TRACKER */
     .tracker-table {
@@ -1514,8 +1616,8 @@
         letter-spacing: 0.5px;
     }
     .intel-badge.green { 
-        background: var(--slate-100); 
-        color: var(--navy-700);
+        background: var(--accent-green-light); 
+        color: var(--accent-green);
     }
     .intel-badge.gold { 
         background: var(--accent-gold-light); 
@@ -1560,7 +1662,7 @@
     .stat-item:hover {
         transform: translateY(-3px);
     }
-    .stat-item.mint { background: var(--slate-100); }
+    .stat-item.mint { background: var(--accent-green-light); }
     .stat-item.clay { background: var(--accent-clay-light); }
     .stat-item.gold { background: var(--accent-gold-light); }
     .stat-item.blue { background: var(--slate-100); }
@@ -1925,6 +2027,47 @@
                     <div id="researchLinks" class="network-links"></div>
                 </div>
                 
+                <!-- JOB RECOMMENDATIONS -->
+                <div id="jobRecommendationsSection" class="supercard-section" style="display: none;">
+                    <div class="section-header">
+                        <span class="section-title">🎯 Recommended Opportunities</span>
+                        <button class="btn btn-sm" onclick="generateJobRecommendations()" id="genRecsBtn" style="font-size: 10px; padding: 6px 12px;">
+                            <span id="genRecsBtnText">Find Matches</span>
+                        </button>
+                    </div>
+                    <p style="font-size: 13px; opacity: 0.7; margin-bottom: 16px;">Based on your resume analysis, here are roles and companies that would likely value your experience most.</p>
+                    
+                    <div id="recommendationsLoading" style="display: none; text-align: center; padding: 24px;">
+                        <div style="font-family: 'Space Mono', monospace; font-size: 12px; opacity: 0.7;">Analyzing your experience...</div>
+                    </div>
+                    
+                    <div id="recommendationsContent" style="display: none;">
+                        <!-- Top Role Recommendations -->
+                        <div style="margin-bottom: 20px;">
+                            <div class="kit-section-title" style="margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+                                <span style="font-size: 16px;">💼</span> Best-Fit Roles
+                            </div>
+                            <div id="roleRecommendations" class="recommendations-grid"></div>
+                        </div>
+                        
+                        <!-- Company Recommendations -->
+                        <div style="margin-bottom: 20px;">
+                            <div class="kit-section-title" style="margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+                                <span style="font-size: 16px;">🏢</span> Target Companies
+                            </div>
+                            <div id="companyRecommendations" class="recommendations-grid"></div>
+                        </div>
+                        
+                        <!-- Strategic Insights -->
+                        <div>
+                            <div class="kit-section-title" style="margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+                                <span style="font-size: 16px;">💡</span> Strategic Insight
+                            </div>
+                            <div id="strategicInsight" class="strategic-insight-box"></div>
+                        </div>
+                    </div>
+                </div>
+                
                 <!-- SAVE BUTTON -->
                 <div id="saveToTrackerSection" style="text-align: center; padding-top: 16px; border-top: 2px dashed var(--ink-black); margin-top: 16px; display: none;">
                     <button id="saveToTrackerBtn" class="btn btn-primary" onclick="saveToTracker()">Save to Tracker</button>
@@ -2198,7 +2341,7 @@
             localStorage.setItem(RESUME_STORAGE_KEY, JSON.stringify(resumes));
             updateResumeSelector();
             document.getElementById('resumeSelector').value = trimmedName;
-            showErrorToast(`Resume "${trimmedName}" saved to browser.`, 3000);
+            showErrorToast(`Resume "${trimmedName}" saved to browser.`, 3000, true);
         } catch (e) {
             showErrorToast('Could not save resume. Browser storage may be full.');
         }
@@ -2219,7 +2362,7 @@
         const resumes = getSavedResumes();
         if (resumes[selectedName]) {
             document.getElementById('resumeText').value = resumes[selectedName].text;
-            showErrorToast(`Loaded "${selectedName}"`, 2000);
+            showErrorToast(`Loaded "${selectedName}"`, 2000, true);
         }
     }
     
@@ -2239,7 +2382,7 @@
             delete resumes[name];
             localStorage.setItem(RESUME_STORAGE_KEY, JSON.stringify(resumes));
             updateResumeSelector();
-            showErrorToast(`Deleted "${name}"`, 3000);
+            showErrorToast(`Deleted "${name}"`, 3000, true);
         } else {
             showErrorToast(`Resume "${name}" not found.`);
         }
@@ -2354,7 +2497,7 @@
     /**
      * Show error toast (for API/network errors - appears at bottom of screen)
      */
-    function showErrorToast(message, duration = 6000) {
+    function showErrorToast(message, duration = 6000, isSuccess = false) {
         const toast = document.getElementById('errorToast');
         const toastText = document.getElementById('errorToastText');
         // Clear any existing timeout
@@ -2362,6 +2505,12 @@
             clearTimeout(errorToastTimeout);
         }
         toastText.textContent = message;
+        // Toggle success styling
+        if (isSuccess) {
+            toast.classList.add('success');
+        } else {
+            toast.classList.remove('success');
+        }
         toast.classList.add('show');
         // Auto-hide after duration
         errorToastTimeout = setTimeout(() => {
@@ -2371,6 +2520,7 @@
     function hideErrorToast() {
         const toast = document.getElementById('errorToast');
         toast.classList.remove('show');
+        toast.classList.remove('success');
         if (errorToastTimeout) {
             clearTimeout(errorToastTimeout);
             errorToastTimeout = null;
@@ -2796,6 +2946,13 @@
         // 10. Render Research Links in super card
         renderResearchLinks(data);
         
+        // 11. Show Job Recommendations section
+        document.getElementById('jobRecommendationsSection').style.display = 'block';
+        document.getElementById('recommendationsContent').style.display = 'none';
+        document.getElementById('recommendationsLoading').style.display = 'none';
+        document.getElementById('genRecsBtn').disabled = false;
+        document.getElementById('genRecsBtnText').textContent = 'Find Matches';
+        
         // NOTE: Salary and timeline diagrams are populated by fetchMarketIntel() 
         // when Call 2 completes (runs in background)
     }
@@ -2820,6 +2977,339 @@
             <a href="https://www.glassdoor.com/Search/results.htm?keyword=${enc}" target="_blank" class="network-link">Glassdoor</a>
             <a href="https://www.google.com/search?q=${enc}+contract+award+news" target="_blank" class="network-link">Contract News</a>
         `;
+    }
+    // ==========================================================================
+    // JOB RECOMMENDATIONS
+    // ==========================================================================
+    async function generateJobRecommendations() {
+        if (!analysisData || !resumeText) {
+            showErrorToast('Please analyze a job first.');
+            return;
+        }
+        
+        const btn = document.getElementById('genRecsBtn');
+        const btnText = document.getElementById('genRecsBtnText');
+        const loadingEl = document.getElementById('recommendationsLoading');
+        const contentEl = document.getElementById('recommendationsContent');
+        
+        // Show loading state
+        btn.disabled = true;
+        btnText.textContent = 'Analyzing...';
+        loadingEl.style.display = 'block';
+        contentEl.style.display = 'none';
+        
+        try {
+            const res = await fetch(API_ENDPOINT, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    request_type: 'job_recommendations',
+                    resume_text: resumeText,
+                    job_description: document.getElementById('jobDescription').value,
+                    analysis_data: analysisData
+                })
+            });
+            
+            const data = await res.json();
+            
+            // If API returns error or doesn't support this request type, use smart fallback
+            if (data.error || !data.role_recommendations) {
+                console.log('Using client-side recommendations fallback');
+                const fallbackData = generateSmartRecommendations(analysisData, resumeText);
+                renderJobRecommendations(fallbackData);
+            } else {
+                renderJobRecommendations(data);
+            }
+            
+        } catch (e) {
+            console.error('Job recommendations API error, using fallback:', e);
+            // Use smart client-side recommendations as fallback
+            const fallbackData = generateSmartRecommendations(analysisData, resumeText);
+            renderJobRecommendations(fallbackData);
+        } finally {
+            btn.disabled = false;
+            btnText.textContent = 'Refresh';
+            loadingEl.style.display = 'none';
+        }
+    }
+    
+    // Smart client-side recommendations based on resume analysis
+    function generateSmartRecommendations(analysis, resume) {
+        const resumeLower = resume.toLowerCase();
+        const analysisText = JSON.stringify(analysis).toLowerCase();
+        
+        // Detect key experience areas from resume
+        const hasCloudExp = /aws|azure|gcp|cloud|saas/i.test(resumeLower);
+        const hasSalesExp = /sales|account|revenue|quota|business development|bd/i.test(resumeLower);
+        const hasClearance = /clearance|ts\/sci|secret|polygraph/i.test(resumeLower);
+        const hasDoD = /dod|department of defense|military|army|navy|air force|pentagon/i.test(resumeLower);
+        const hasIntel = /intelligence|ic|nsa|cia|dia|nga|intel community/i.test(resumeLower);
+        const hasCyber = /cyber|security|ciso|infosec|soc|penetration/i.test(resumeLower);
+        const hasProgram = /program manager|pmp|project manager|delivery/i.test(resumeLower);
+        const hasCapture = /capture|proposal|bd|pipeline|orals/i.test(resumeLower);
+        const hasPartner = /partner|channel|alliance|ecosystem/i.test(resumeLower);
+        const hasExecutive = /director|vp|vice president|chief|executive|c-suite/i.test(resumeLower);
+        const hasTech = /engineer|developer|architect|technical|software/i.test(resumeLower);
+        
+        // Extract current job title if possible
+        const currentRole = analysis.job_title || 'Professional';
+        const currentCompany = analysis.company || '';
+        
+        // Build role recommendations based on experience
+        const roleRecs = [];
+        
+        if (hasSalesExp && hasDoD) {
+            roleRecs.push({
+                title: 'Federal Account Executive',
+                industry: 'Defense & Federal IT',
+                reason: 'Your DoD sales experience and existing relationships make you ideal for enterprise federal sales.',
+                match_strength: 'High'
+            });
+            roleRecs.push({
+                title: 'Director of Federal Sales',
+                industry: 'Cloud & Enterprise Software',
+                reason: 'Your track record in federal sales positions you for sales leadership roles.',
+                match_strength: 'High'
+            });
+        }
+        
+        if (hasCapture) {
+            roleRecs.push({
+                title: 'Capture Manager',
+                industry: 'Defense Contractors',
+                reason: 'Your business development and capture experience is highly valued in defense primes.',
+                match_strength: 'High'
+            });
+            roleRecs.push({
+                title: 'VP of Business Development',
+                industry: 'Systems Integrators',
+                reason: 'Strategic capture experience at scale qualifies you for BD leadership.',
+                match_strength: 'Medium'
+            });
+        }
+        
+        if (hasCloudExp && hasClearance) {
+            roleRecs.push({
+                title: 'Cloud Sales Specialist - Public Sector',
+                industry: 'Cloud Service Providers',
+                reason: 'Cleared cloud professionals are in high demand at AWS, Azure, and Google Cloud.',
+                match_strength: 'High'
+            });
+        }
+        
+        if (hasPartner) {
+            roleRecs.push({
+                title: 'Partner Development Manager',
+                industry: 'Technology & SaaS',
+                reason: 'Your partner ecosystem experience translates well to channel and alliance roles.',
+                match_strength: 'High'
+            });
+        }
+        
+        if (hasProgram) {
+            roleRecs.push({
+                title: 'Program Manager',
+                industry: 'Defense & Federal IT',
+                reason: 'Your program management skills are valuable across defense contractors.',
+                match_strength: 'High'
+            });
+        }
+        
+        if (hasCyber && hasClearance) {
+            roleRecs.push({
+                title: 'Cybersecurity Sales Engineer',
+                industry: 'Security Vendors',
+                reason: 'Cleared cyber professionals command premium roles at security companies.',
+                match_strength: 'High'
+            });
+        }
+        
+        if (hasTech && hasDoD) {
+            roleRecs.push({
+                title: 'Solutions Architect - Federal',
+                industry: 'Technology Vendors',
+                reason: 'Technical background plus federal experience is ideal for pre-sales engineering.',
+                match_strength: 'High'
+            });
+        }
+        
+        // Add generic recommendations if we don't have enough specific ones
+        if (roleRecs.length < 3 && hasClearance) {
+            roleRecs.push({
+                title: 'Business Development Manager',
+                industry: 'Defense Industrial Base',
+                reason: 'Your security clearance opens doors across the defense industry.',
+                match_strength: 'Medium'
+            });
+        }
+        
+        // Build company recommendations based on experience profile
+        const companyRecs = [];
+        
+        if (hasCloudExp) {
+            companyRecs.push({
+                name: 'Amazon Web Services (AWS)',
+                sector: 'Cloud Service Provider',
+                reason: 'AWS GovCloud is expanding rapidly and values cleared cloud professionals.'
+            });
+            companyRecs.push({
+                name: 'Microsoft',
+                sector: 'Cloud & Enterprise Software',
+                reason: 'Azure Government is a major growth area with strong demand for federal expertise.'
+            });
+            companyRecs.push({
+                name: 'Google Cloud',
+                sector: 'Cloud Service Provider',
+                reason: 'Google is aggressively growing its public sector presence.'
+            });
+        }
+        
+        if (hasDoD || hasIntel) {
+            companyRecs.push({
+                name: 'General Dynamics IT (GDIT)',
+                sector: 'Defense Prime',
+                reason: 'GDIT leads in DoD and Intel Community contracts with major growth plans.'
+            });
+            companyRecs.push({
+                name: 'Booz Allen Hamilton',
+                sector: 'Defense & Consulting',
+                reason: 'Strong presence across DoD and IC with consulting and technology focus.'
+            });
+            companyRecs.push({
+                name: 'Leidos',
+                sector: 'Defense Prime',
+                reason: 'One of the largest federal IT contractors with diverse mission areas.'
+            });
+        }
+        
+        if (hasCyber) {
+            companyRecs.push({
+                name: 'Palo Alto Networks',
+                sector: 'Cybersecurity',
+                reason: 'Growing federal security practice with premium compensation.'
+            });
+            companyRecs.push({
+                name: 'CrowdStrike',
+                sector: 'Cybersecurity',
+                reason: 'Rapid federal growth in endpoint security and threat intelligence.'
+            });
+        }
+        
+        if (hasSalesExp && !hasCloudExp) {
+            companyRecs.push({
+                name: 'Carahsoft',
+                sector: 'Federal VAR',
+                reason: 'Leading federal distributor always seeking experienced federal sales pros.'
+            });
+            companyRecs.push({
+                name: 'World Wide Technology',
+                sector: 'Systems Integrator',
+                reason: 'Growing federal practice with strong sales culture and benefits.'
+            });
+        }
+        
+        // Ensure minimum recommendations
+        if (companyRecs.length < 3) {
+            companyRecs.push({
+                name: 'Accenture Federal Services',
+                sector: 'Federal Consulting',
+                reason: 'Broad federal portfolio with diverse opportunities.'
+            });
+        }
+        
+        // Generate strategic insight
+        let insight = '';
+        const strengths = [];
+        if (hasClearance) strengths.push('active security clearance');
+        if (hasDoD) strengths.push('DoD customer relationships');
+        if (hasCloudExp) strengths.push('cloud technology expertise');
+        if (hasSalesExp) strengths.push('proven sales track record');
+        if (hasCapture) strengths.push('capture and BD experience');
+        if (hasCyber) strengths.push('cybersecurity domain knowledge');
+        
+        if (strengths.length > 0) {
+            insight = `Your combination of ${strengths.slice(0, 3).join(', ')} makes you particularly valuable in the current federal market. `;
+            
+            if (hasClearance && hasCloudExp) {
+                insight += 'Cleared cloud professionals are in extremely high demand, with compensation packages often 20-30% above commercial equivalents. Consider targeting cloud provider public sector teams or federal systems integrators with cloud practices.';
+            } else if (hasClearance && hasSalesExp) {
+                insight += 'Federal sales professionals with active clearances can command premium compensation. Focus on companies with large DoD portfolios where your existing relationships can drive immediate pipeline.';
+            } else if (hasClearance) {
+                insight += 'Your clearance is a significant differentiator. Many roles require candidates who can start immediately without waiting for clearance processing.';
+            } else {
+                insight += 'Focus on highlighting your transferable skills and consider targeting companies that sponsor clearances for strong candidates.';
+            }
+        } else {
+            insight = 'Based on your experience profile, focus on roles that align with your core competencies while highlighting any federal or government experience.';
+        }
+        
+        return {
+            role_recommendations: roleRecs.slice(0, 4),
+            company_recommendations: companyRecs.slice(0, 4),
+            strategic_insight: insight
+        };
+    }
+    
+    function renderJobRecommendations(data) {
+        const loadingEl = document.getElementById('recommendationsLoading');
+        const contentEl = document.getElementById('recommendationsContent');
+        const roleContainer = document.getElementById('roleRecommendations');
+        const companyContainer = document.getElementById('companyRecommendations');
+        const insightContainer = document.getElementById('strategicInsight');
+        
+        loadingEl.style.display = 'none';
+        contentEl.style.display = 'block';
+        
+        // Render role recommendations
+        if (data.role_recommendations && data.role_recommendations.length > 0) {
+            roleContainer.innerHTML = data.role_recommendations.map(role => {
+                const searchQuery = encodeURIComponent(`${role.title} ${role.industry || 'federal'}`);
+                const matchClass = role.match_strength === 'High' ? 'high' : 'medium';
+                return `
+                    <div class="recommendation-card role-card">
+                        <div class="rec-title">${escapeHtml(role.title)}</div>
+                        <div class="rec-company">${escapeHtml(role.industry || 'Defense & Federal')}</div>
+                        <div class="rec-reason">${escapeHtml(role.reason)}</div>
+                        <div>
+                            <span class="rec-match-score ${matchClass}">${role.match_strength || 'Strong'} Match</span>
+                            <a href="https://www.linkedin.com/jobs/search/?keywords=${searchQuery}" target="_blank" class="rec-search-link">Search Jobs →</a>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        } else {
+            roleContainer.innerHTML = '<p style="opacity: 0.6; font-size: 13px;">No role recommendations available.</p>';
+        }
+        
+        // Render company recommendations
+        if (data.company_recommendations && data.company_recommendations.length > 0) {
+            companyContainer.innerHTML = data.company_recommendations.map(company => {
+                const searchQuery = encodeURIComponent(company.name);
+                return `
+                    <div class="recommendation-card company-card">
+                        <div class="rec-title">${escapeHtml(company.name)}</div>
+                        <div class="rec-company">${escapeHtml(company.sector || 'Defense Industrial Base')}</div>
+                        <div class="rec-reason">${escapeHtml(company.reason)}</div>
+                        <div>
+                            <span class="rec-match-score high">Target</span>
+                            <a href="https://www.linkedin.com/company/${searchQuery.toLowerCase().replace(/\s+/g, '-')}/jobs/" target="_blank" class="rec-search-link">View Jobs →</a>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        } else {
+            companyContainer.innerHTML = '<p style="opacity: 0.6; font-size: 13px;">No company recommendations available.</p>';
+        }
+        
+        // Render strategic insight
+        if (data.strategic_insight) {
+            insightContainer.innerHTML = `
+                <strong>Your Competitive Advantage</strong>
+                <p>${escapeHtml(data.strategic_insight)}</p>
+            `;
+        } else {
+            insightContainer.innerHTML = '<p style="opacity: 0.6; font-size: 13px;">Complete the analysis to see strategic insights.</p>';
+        }
     }
     // ==========================================================================
     // TAILORED SUMMARY DISPLAY
@@ -3012,7 +3502,7 @@ Amazon is an Equal Opportunity Employer.`;
         document.getElementById('resumeText').value = sampleResume;
         document.getElementById('jobDescription').value = sampleJD;
         document.getElementById('resumeSelector').value = '';
-        showErrorToast('Sample data loaded.', 1000);
+        showErrorToast('Sample data loaded.', 1000, true);
     }
     // ==========================================================================
     // ASK AN EXPERT
@@ -3218,7 +3708,7 @@ Amazon is an Equal Opportunity Employer.`;
         if (!analysisData || !analysisData.keywords) return;
         const keywords = analysisData.keywords.map(k => k.term);
         navigator.clipboard.writeText(keywords.join(', ')).then(() => {
-            showErrorToast('Keywords copied to clipboard!', 2000);
+            showErrorToast('Keywords copied to clipboard!', 2000, true);
         });
     }
     
@@ -3348,7 +3838,7 @@ Best regards,
         const el = document.getElementById(templateId);
         if (el) {
             navigator.clipboard.writeText(el.textContent).then(() => {
-                showErrorToast('Template copied to clipboard!', 2000);
+                showErrorToast('Template copied to clipboard!', 2000, true);
             });
         }
     }
