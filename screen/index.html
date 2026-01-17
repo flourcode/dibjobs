@@ -8,6 +8,10 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<!-- PDF.js for PDF parsing -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<!-- Mammoth.js for DOCX parsing -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
 <style>
     :root {
         /* Recruiter Mode - Deep Navy & Amber Accents */
@@ -885,6 +889,87 @@
         letter-spacing: 0.5px;
         color: var(--slate-400);
     }
+    
+    /* DRAG AND DROP */
+    .drop-zone {
+        position: relative;
+        transition: all 0.2s ease;
+    }
+    
+    .drop-zone.drag-over {
+        border-color: var(--accent-amber) !important;
+        background: var(--accent-amber-light) !important;
+        box-shadow: 0 0 0 3px var(--accent-amber-light), var(--shadow-active);
+    }
+    
+    .drop-zone.drag-over::after {
+        content: 'Drop file here';
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(245, 158, 11, 0.9);
+        color: var(--ink-black);
+        font-family: 'Space Mono', monospace;
+        font-size: 14px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        border-radius: var(--radius);
+        pointer-events: none;
+        z-index: 10;
+    }
+    
+    .drop-hint {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 8px;
+        font-size: 11px;
+        color: var(--slate-400);
+    }
+    
+    .drop-hint svg {
+        width: 16px;
+        height: 16px;
+        opacity: 0.6;
+    }
+    
+    .file-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 10px;
+        background: var(--accent-blue-light);
+        border: 1px solid var(--accent-blue);
+        border-radius: 12px;
+        font-family: 'Space Mono', monospace;
+        font-size: 10px;
+        color: var(--accent-blue);
+        margin-top: 8px;
+    }
+    
+    .file-badge .remove-file {
+        cursor: pointer;
+        opacity: 0.7;
+        transition: opacity 0.15s;
+    }
+    
+    .file-badge .remove-file:hover {
+        opacity: 1;
+    }
+    
+    .processing-indicator {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 12px;
+        background: var(--accent-amber-light);
+        border-radius: var(--radius);
+        font-size: 12px;
+        margin-top: 8px;
+    }
 </style>
 </head>
 <body>
@@ -913,13 +998,27 @@
                 <!-- Job Description -->
                 <div>
                     <label for="jobDescription">Job Description</label>
-                    <textarea id="jobDescription" placeholder="Paste the job description you're hiring for..."></textarea>
+                    <textarea id="jobDescription" class="drop-zone" placeholder="Paste the job description or drag & drop a PDF/DOCX file..."></textarea>
+                    <div class="drop-hint">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/>
+                        </svg>
+                        <span>Drag & drop PDF or DOCX, or paste text directly</span>
+                    </div>
+                    <div id="jobFileInfo"></div>
                 </div>
                 
                 <!-- Candidate Resume -->
                 <div>
                     <label for="candidateResume">Add Candidate Resume</label>
-                    <textarea id="candidateResume" placeholder="Paste a candidate's resume here..."></textarea>
+                    <textarea id="candidateResume" class="drop-zone" placeholder="Paste a candidate's resume or drag & drop a PDF/DOCX file..."></textarea>
+                    <div class="drop-hint">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/>
+                        </svg>
+                        <span>Drag & drop PDF or DOCX, or paste text directly</span>
+                    </div>
+                    <div id="resumeFileInfo"></div>
                     <div style="margin-top: 12px;">
                         <label for="candidateName" style="margin-bottom: 6px;">Candidate Name (optional)</label>
                         <input type="text" id="candidateName" placeholder="e.g., John Smith">
@@ -1597,7 +1696,154 @@ function showToast(message, isError = false) {
 // ==========================================================================
 document.addEventListener('DOMContentLoaded', () => {
     renderQueue();
+    initDragAndDrop();
 });
+
+// ==========================================================================
+// DRAG AND DROP FILE HANDLING
+// ==========================================================================
+function initDragAndDrop() {
+    // Set up PDF.js worker
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    
+    const dropZones = document.querySelectorAll('.drop-zone');
+    
+    dropZones.forEach(zone => {
+        // Prevent default drag behaviors
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            zone.addEventListener(eventName, preventDefaults, false);
+        });
+        
+        // Highlight drop zone when dragging over
+        ['dragenter', 'dragover'].forEach(eventName => {
+            zone.addEventListener(eventName, () => zone.classList.add('drag-over'), false);
+        });
+        
+        ['dragleave', 'drop'].forEach(eventName => {
+            zone.addEventListener(eventName, () => zone.classList.remove('drag-over'), false);
+        });
+        
+        // Handle dropped files
+        zone.addEventListener('drop', handleDrop, false);
+    });
+}
+
+function preventDefaults(e) {
+    e.preventDefault();
+    e.stopPropagation();
+}
+
+async function handleDrop(e) {
+    const files = e.dataTransfer.files;
+    if (files.length === 0) return;
+    
+    const file = files[0];
+    const textarea = e.target;
+    const isJobDescription = textarea.id === 'jobDescription';
+    const fileInfoId = isJobDescription ? 'jobFileInfo' : 'resumeFileInfo';
+    const fileInfoEl = document.getElementById(fileInfoId);
+    
+    // Validate file type
+    const validTypes = [
+        'application/pdf',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'application/msword',
+        'text/plain'
+    ];
+    
+    const fileExtension = file.name.split('.').pop().toLowerCase();
+    const isValidType = validTypes.includes(file.type) || ['pdf', 'docx', 'doc', 'txt'].includes(fileExtension);
+    
+    if (!isValidType) {
+        showToast('Please drop a PDF, DOCX, or TXT file', true);
+        return;
+    }
+    
+    // Show processing indicator
+    fileInfoEl.innerHTML = `
+        <div class="processing-indicator">
+            <span class="spinner"></span>
+            <span>Processing ${escapeHtml(file.name)}...</span>
+        </div>
+    `;
+    
+    try {
+        let text = '';
+        
+        if (file.type === 'application/pdf' || fileExtension === 'pdf') {
+            text = await extractTextFromPDF(file);
+        } else if (file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' || fileExtension === 'docx') {
+            text = await extractTextFromDOCX(file);
+        } else if (file.type === 'text/plain' || fileExtension === 'txt') {
+            text = await file.text();
+        } else {
+            // Try as text
+            text = await file.text();
+        }
+        
+        if (!text || text.trim().length < 50) {
+            throw new Error('Could not extract enough text from file');
+        }
+        
+        // Set the textarea value
+        textarea.value = text.trim();
+        
+        // Show success badge
+        fileInfoEl.innerHTML = `
+            <span class="file-badge">
+                📄 ${escapeHtml(file.name)}
+                <span class="remove-file" onclick="clearFileInput('${textarea.id}', '${fileInfoId}')" title="Remove">×</span>
+            </span>
+        `;
+        
+        // If it's a resume, try to extract name
+        if (!isJobDescription) {
+            const firstLine = text.split('\n')[0].trim();
+            const nameInput = document.getElementById('candidateName');
+            if (firstLine.length < 50 && !firstLine.includes('@') && !firstLine.includes('http') && !nameInput.value) {
+                nameInput.value = firstLine;
+            }
+        }
+        
+        showToast(`Loaded ${file.name}`);
+        
+    } catch (error) {
+        console.error('File processing error:', error);
+        fileInfoEl.innerHTML = '';
+        showToast(`Failed to read file: ${error.message}`, true);
+    }
+}
+
+async function extractTextFromPDF(file) {
+    const arrayBuffer = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+    
+    let fullText = '';
+    
+    for (let i = 1; i <= pdf.numPages; i++) {
+        const page = await pdf.getPage(i);
+        const textContent = await page.getTextContent();
+        const pageText = textContent.items.map(item => item.str).join(' ');
+        fullText += pageText + '\n';
+    }
+    
+    return fullText;
+}
+
+async function extractTextFromDOCX(file) {
+    const arrayBuffer = await file.arrayBuffer();
+    const result = await mammoth.extractRawText({ arrayBuffer: arrayBuffer });
+    return result.value;
+}
+
+function clearFileInput(textareaId, fileInfoId) {
+    document.getElementById(textareaId).value = '';
+    document.getElementById(fileInfoId).innerHTML = '';
+    
+    if (textareaId === 'candidateResume') {
+        document.getElementById('candidateName').value = '';
+    }
+}
 </script>
 </body>
 </html>
