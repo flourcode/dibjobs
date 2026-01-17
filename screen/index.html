@@ -1389,88 +1389,107 @@ function clearJobDescription() {
     document.getElementById('jobFileInfo').innerHTML = '';
 }
 
-// Smart name extraction from resume text
+// ==========================================================================
+// NAME EXTRACTION - FILENAME FIRST, THEN RESUME TEXT
+// ==========================================================================
+
+// Extract name from filename (most reliable for recruiters)
+function extractNameFromFilename(filename) {
+    if (!filename) return null;
+    
+    // Remove extension
+    let name = filename.replace(/\.(pdf|docx?|txt|rtf)$/i, '');
+    
+    // Remove common suffixes
+    name = name.replace(/(resume|cv|curriculum[\s_-]*vitae|cover[\s_-]*letter|application)/gi, ' ');
+    
+    // Remove dates - years like 2024, 2025
+    name = name.replace(/20\d{2}/g, ' ');
+    
+    // Remove month names
+    name = name.replace(/(january|february|march|april|may|june|july|august|september|october|november|december|jan|feb|mar|apr|jun|jul|aug|sep|sept|oct|nov|dec)/gi, ' ');
+    
+    // Remove version indicators
+    name = name.replace(/(v\d+|version[\s_-]*\d+|final|draft|updated|new|copy|edit|\d+)/gi, ' ');
+    
+    // Replace underscores, hyphens with spaces
+    name = name.replace(/[_-]+/g, ' ');
+    
+    // Remove extra spaces
+    name = name.replace(/\s+/g, ' ').trim();
+    
+    // Skip if empty or too short
+    if (name.length < 2) return null;
+    
+    // Skip generic names
+    const generic = ['resume', 'cv', 'document', 'file', 'untitled', 'download', 'attachment'];
+    if (generic.includes(name.toLowerCase())) return null;
+    
+    // Title case
+    name = name.toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
+    
+    return name;
+}
+
+// Extract name from resume text (fallback when filename doesn't work)
 function extractNameFromResume(resumeText) {
     if (!resumeText) return null;
     
-    // Split into lines and clean them
-    const lines = resumeText.split('\n')
-        .map(line => line.trim())
-        .filter(line => line.length > 0);
+    const lines = resumeText.split('\n').map(l => l.trim()).filter(l => l.length > 0);
     
-    // Skip common header junk from PDFs
-    const skipPatterns = [
-        /^page\s*\d/i,
-        /^\d+$/,
-        /^resume$/i,
-        /^curriculum\s*vitae$/i,
-        /^cv$/i,
-        /^contact/i,
-        /^profile$/i,
-        /^summary$/i,
-        /^objective$/i,
-        /^experience$/i,
-        /^education$/i,
-        /^\s*$/,
-    ];
+    // Section headers to skip (lowercase)
+    const headers = new Set([
+        'summary', 'experience', 'education', 'skills', 'profile', 'objective',
+        'qualifications', 'competencies', 'core competencies', 'key competencies',
+        'professional experience', 'work experience', 'employment history',
+        'career summary', 'professional summary', 'executive summary',
+        'technical skills', 'certifications', 'achievements', 'accomplishments',
+        'references', 'awards', 'publications', 'languages', 'interests', 'hobbies',
+        'contact', 'contact information', 'personal information',
+        'resume', 'cv', 'curriculum vitae',
+        'account management', 'project management', 'business development',
+        'contract negotiation', 'sales', 'marketing', 'leadership', 'management',
+        'communication', 'strategic planning', 'customer relations', 'team leadership',
+        'problem solving', 'analytics', 'operations', 'finance', 'human resources',
+        'areas of expertise', 'key skills', 'professional profile', 'career objective',
+        'overview', 'about', 'about me', 'background', 'mentorship', 'work life balance',
+        'mentorship & career growth', 'work/life balance'
+    ]);
     
-    // Patterns that suggest this is a name
-    const namePatterns = [
-        /^[A-Z][a-z]+\s+[A-Z][a-z]+$/,                    // "John Smith"
-        /^[A-Z][a-z]+\s+[A-Z]\.?\s+[A-Z][a-z]+$/,        // "John A. Smith" or "John A Smith"
-        /^[A-Z][a-z]+\s+[A-Z][a-z]+\s+[A-Z][a-z]+$/,     // "John David Smith"
-        /^[A-Z][a-z]+\s+[A-Z][a-z]+-[A-Z][a-z]+$/,       // "Mary Smith-Jones"
-        /^[A-Z][A-Z]+\s+[A-Z][A-Z]+$/,                    // "JOHN SMITH" (all caps)
-    ];
-    
-    // Check first 10 non-empty lines for a name
-    for (let i = 0; i < Math.min(lines.length, 10); i++) {
-        const line = lines[i];
+    for (let i = 0; i < Math.min(lines.length, 20); i++) {
+        let line = lines[i];
         
-        // Skip if matches junk patterns
-        if (skipPatterns.some(p => p.test(line))) continue;
+        // Skip headers
+        if (headers.has(line.toLowerCase())) continue;
         
-        // Skip if too long (probably not a name)
-        if (line.length > 40) continue;
+        // Skip wrong length
+        if (line.length < 4 || line.length > 45) continue;
         
-        // Skip if contains obvious non-name stuff
-        if (line.includes('@') || 
-            line.includes('http') || 
-            line.includes('www.') ||
-            line.includes('|') ||
-            line.includes('•') ||
-            /\d{3}[-.\s]?\d{3}[-.\s]?\d{4}/.test(line) || // phone number
-            /\d{5}/.test(line)) { // zip code
-            continue;
+        // Skip lines with non-name chars
+        if (/[@|•:()\/]/.test(line)) continue;
+        if (/\d{3}.*\d{3}.*\d{4}/.test(line)) continue; // phone
+        if (/\d{4,}/.test(line)) continue; // year or zip
+        if (/^\d/.test(line)) continue; // starts with number
+        if (/http|www\.|\.com|\.org|\.net/i.test(line)) continue; // URLs
+        
+        // Clean weird PDF spacing: "K YLIE" -> "KYLIE"
+        let cleaned = line.replace(/\b([A-Z])\s+(?=[A-Z]\b)/g, '$1');
+        
+        const words = cleaned.split(/\s+/).filter(w => w.length > 0);
+        
+        // Names have 2-4 words
+        if (words.length < 2 || words.length > 4) continue;
+        
+        // Each word should look like a name (letters, maybe hyphens/apostrophes)
+        const isName = words.every(w => /^[A-Za-z][A-Za-z.\-']*$/.test(w));
+        if (!isName) continue;
+        
+        // Title case if all caps
+        if (cleaned === cleaned.toUpperCase()) {
+            cleaned = cleaned.toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
         }
         
-        // Check if it looks like a name
-        if (namePatterns.some(p => p.test(line))) {
-            // Convert ALL CAPS to Title Case if needed
-            if (line === line.toUpperCase()) {
-                return line.toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
-            }
-            return line;
-        }
-        
-        // If first real line is short and has 2-3 words, probably a name
-        if (i < 3 && line.length >= 3 && line.length <= 35) {
-            const words = line.split(/\s+/);
-            if (words.length >= 2 && words.length <= 4) {
-                // Make sure words look like name parts (start with capital or are initials)
-                const looksLikeName = words.every(w => 
-                    /^[A-Z]/.test(w) || // Starts with capital
-                    /^[A-Z]\.?$/.test(w) // Initial
-                );
-                if (looksLikeName) {
-                    // Convert ALL CAPS to Title Case if needed
-                    if (line === line.toUpperCase()) {
-                        return line.toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
-                    }
-                    return line;
-                }
-            }
-        }
+        return cleaned;
     }
     
     return null;
@@ -2293,11 +2312,11 @@ async function handleDrop(e) {
             </span>
         `;
         
-        // If it's a resume, try to extract name
+        // If it's a resume, try to extract name from FILENAME first
         if (!isJobDescription) {
             const nameInput = document.getElementById('candidateName');
             if (!nameInput.value) {
-                const extractedName = extractNameFromResume(text);
+                const extractedName = extractNameFromFilename(file.name) || extractNameFromResume(text);
                 if (extractedName) {
                     nameInput.value = extractedName;
                 }
