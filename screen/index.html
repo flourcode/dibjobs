@@ -1347,13 +1347,7 @@ function addCandidate() {
     // Extract name from resume if not provided
     let candidateName = nameInput;
     if (!candidateName) {
-        // Try to extract name from first line of resume
-        const firstLine = resumeText.split('\n')[0].trim();
-        if (firstLine.length < 50 && !firstLine.includes('@') && !firstLine.includes('http')) {
-            candidateName = firstLine;
-        } else {
-            candidateName = `Candidate ${candidateQueue.length + 1}`;
-        }
+        candidateName = extractNameFromResume(resumeText) || `Candidate ${candidateQueue.length + 1}`;
     }
     
     // Check for duplicate
@@ -1393,6 +1387,93 @@ function clearCandidateInput() {
 function clearJobDescription() {
     document.getElementById('jobDescription').value = '';
     document.getElementById('jobFileInfo').innerHTML = '';
+}
+
+// Smart name extraction from resume text
+function extractNameFromResume(resumeText) {
+    if (!resumeText) return null;
+    
+    // Split into lines and clean them
+    const lines = resumeText.split('\n')
+        .map(line => line.trim())
+        .filter(line => line.length > 0);
+    
+    // Skip common header junk from PDFs
+    const skipPatterns = [
+        /^page\s*\d/i,
+        /^\d+$/,
+        /^resume$/i,
+        /^curriculum\s*vitae$/i,
+        /^cv$/i,
+        /^contact/i,
+        /^profile$/i,
+        /^summary$/i,
+        /^objective$/i,
+        /^experience$/i,
+        /^education$/i,
+        /^\s*$/,
+    ];
+    
+    // Patterns that suggest this is a name
+    const namePatterns = [
+        /^[A-Z][a-z]+\s+[A-Z][a-z]+$/,                    // "John Smith"
+        /^[A-Z][a-z]+\s+[A-Z]\.?\s+[A-Z][a-z]+$/,        // "John A. Smith" or "John A Smith"
+        /^[A-Z][a-z]+\s+[A-Z][a-z]+\s+[A-Z][a-z]+$/,     // "John David Smith"
+        /^[A-Z][a-z]+\s+[A-Z][a-z]+-[A-Z][a-z]+$/,       // "Mary Smith-Jones"
+        /^[A-Z][A-Z]+\s+[A-Z][A-Z]+$/,                    // "JOHN SMITH" (all caps)
+    ];
+    
+    // Check first 10 non-empty lines for a name
+    for (let i = 0; i < Math.min(lines.length, 10); i++) {
+        const line = lines[i];
+        
+        // Skip if matches junk patterns
+        if (skipPatterns.some(p => p.test(line))) continue;
+        
+        // Skip if too long (probably not a name)
+        if (line.length > 40) continue;
+        
+        // Skip if contains obvious non-name stuff
+        if (line.includes('@') || 
+            line.includes('http') || 
+            line.includes('www.') ||
+            line.includes('|') ||
+            line.includes('•') ||
+            /\d{3}[-.\s]?\d{3}[-.\s]?\d{4}/.test(line) || // phone number
+            /\d{5}/.test(line)) { // zip code
+            continue;
+        }
+        
+        // Check if it looks like a name
+        if (namePatterns.some(p => p.test(line))) {
+            // Convert ALL CAPS to Title Case if needed
+            if (line === line.toUpperCase()) {
+                return line.toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
+            }
+            return line;
+        }
+        
+        // If first real line is short and has 2-3 words, probably a name
+        if (i < 3 && line.length >= 3 && line.length <= 35) {
+            const words = line.split(/\s+/);
+            if (words.length >= 2 && words.length <= 4) {
+                // Make sure words look like name parts (start with capital or are initials)
+                const looksLikeName = words.every(w => 
+                    /^[A-Z]/.test(w) || // Starts with capital
+                    /^[A-Z]\.?$/.test(w) // Initial
+                );
+                if (looksLikeName) {
+                    // Convert ALL CAPS to Title Case if needed
+                    if (line === line.toUpperCase()) {
+                        return line.toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
+                    }
+                    return line;
+                }
+            }
+        }
+    }
+    
+    return null;
 }
 
 function clearQueue() {
@@ -2214,10 +2295,12 @@ async function handleDrop(e) {
         
         // If it's a resume, try to extract name
         if (!isJobDescription) {
-            const firstLine = text.split('\n')[0].trim();
             const nameInput = document.getElementById('candidateName');
-            if (firstLine.length < 50 && !firstLine.includes('@') && !firstLine.includes('http') && !nameInput.value) {
-                nameInput.value = firstLine;
+            if (!nameInput.value) {
+                const extractedName = extractNameFromResume(text);
+                if (extractedName) {
+                    nameInput.value = extractedName;
+                }
             }
         }
         
