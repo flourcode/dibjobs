@@ -14,37 +14,44 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
 <style>
     :root {
-        /* Recruiter Mode - Deep Navy & Amber Accents */
-        --navy-900: #0f172a;
-        --navy-800: #1e293b;
+        /* Cohesive Palette - Professional Navy & Warm Neutrals (matching DIB Jobs) */
+        --navy-900: #1e2a3b;
+        --navy-800: #2a3a4d;
         --navy-700: #334155;
-        --navy-600: #475569;
-        --slate-400: #94a3b8;
-        --slate-300: #cbd5e1;
-        --slate-200: #e2e8f0;
-        --slate-100: #f1f5f9;
+        --navy-600: #4a5e78;
+        --slate-400: #8294aa;
+        --slate-300: #a8b8c8;
+        --slate-200: #c5d1dc;
+        --slate-100: #e8eef3;
         
-        /* Warm Background */
-        --bg-cream: #fafaf9;
-        --card-white: #ffffff;
+        /* Warm Neutrals */
+        --cream: #faf9f7;
+        --white: #ffffff;
+        
+        /* Mapped Colors */
+        --bg-cream: var(--cream);
+        --card-white: var(--white);
         --ink-black: var(--navy-900);
         
-        /* Recruiter Accent Palette */
-        --accent-amber: #f59e0b;
-        --accent-amber-light: #fef3c7;
-        --accent-emerald: #10b981;
-        --accent-emerald-light: #d1fae5;
-        --accent-rose: #f43f5e;
-        --accent-rose-light: #ffe4e6;
-        --accent-blue: #3b82f6;
-        --accent-blue-light: #dbeafe;
-        --accent-violet: #8b5cf6;
-        --accent-violet-light: #ede9fe;
+        /* Accent Colors - Harmonious (matching DIB Jobs) */
+        --accent-green: #5d8a66;
+        --accent-green-light: #e3efe5;
+        --accent-mint: var(--slate-100);
+        --accent-mint-light: #f1f5f8;
+        --accent-olive: var(--accent-green);
+        --accent-clay: #c9785c;
+        --accent-clay-light: #f8ebe6;
+        --accent-gold: #d4a84b;
+        --accent-gold-light: #fdf6e8;
+        --accent-blue: var(--slate-400);
+        --accent-blue-light: #e8eef3;
+        --accent-violet: #7c6b9e;
+        --accent-violet-light: #eeeaf5;
         
         /* Spacing & Layout */
         --border-thick: 2px;
-        --shadow-hard: 4px 4px 0px var(--ink-black);
-        --shadow-hover: 6px 6px 0px var(--ink-black);
+        --shadow-hard: 5px 5px 0px var(--ink-black);
+        --shadow-hover: 7px 7px 0px var(--ink-black);
         --shadow-active: 2px 2px 0px var(--ink-black);
         --radius: 6px;
         --radius-lg: 10px;
@@ -76,14 +83,14 @@
     
     h1, h2, h3, .mono { font-family: 'Space Mono', monospace; letter-spacing: -0.02em; }
     
-    /* HEADER - Recruiter branded */
+    /* HEADER - Matching DIB Jobs */
     header {
-        background: var(--navy-900);
+        background: var(--bg-cream);
         padding: 18px 28px;
         display: flex;
         align-items: center;
         justify-content: space-between;
-        border-bottom: 4px solid var(--accent-amber);
+        border-bottom: 2px solid var(--ink-black);
     }
     
     .brand {
@@ -93,45 +100,48 @@
     }
     
     .logo-icon {
-        width: 44px;
-        height: 44px;
+        width: 48px;
+        height: 48px;
         flex-shrink: 0;
     }
     
     .brand-text {
         display: flex;
         flex-direction: column;
-        gap: 2px;
+        gap: 3px;
     }
     
     .app-title {
         font-family: 'Space Mono', monospace;
-        font-size: 22px;
+        font-size: 24px;
         font-weight: 700;
         text-transform: uppercase;
         letter-spacing: -0.5px;
         line-height: 1.1;
-        color: #fff;
+        color: var(--ink-black);
     }
     
     .app-subtitle {
         font-family: 'Space Mono', monospace;
         font-size: 10px;
         text-transform: uppercase;
-        letter-spacing: 1.5px;
-        color: var(--accent-amber);
+        letter-spacing: 1px;
+        color: var(--ink-black);
+        opacity: 0.7;
     }
     
     .mode-badge {
-        background: var(--accent-amber);
-        color: var(--ink-black);
+        background: var(--accent-green);
+        color: #fff;
         font-family: 'Space Mono', monospace;
         font-size: 10px;
         font-weight: 700;
-        padding: 6px 12px;
-        border-radius: 20px;
+        padding: 6px 14px;
+        border-radius: 4px;
         text-transform: uppercase;
         letter-spacing: 1px;
+        border: 2px solid var(--ink-black);
+        box-shadow: var(--shadow-active);
     }
     
     /* MAIN */
@@ -178,9 +188,9 @@
         display: inline-block;
         width: 10px;
         height: 10px;
-        background: var(--accent-amber);
+        background: var(--ink-black);
         border-radius: 50%;
-        box-shadow: 0 0 0 3px var(--accent-amber-light);
+        box-shadow: 0 0 0 3px var(--accent-mint);
     }
     
     .card-body {
@@ -270,22 +280,35 @@
     }
     
     .btn-primary { 
-        background: var(--accent-amber); 
+        background: var(--accent-mint); 
         border-color: var(--ink-black);
     }
     
     .btn-primary:hover:not(:disabled) { 
-        background: #fbbf24;
+        background: var(--accent-green);
+        color: #fff;
     }
     
     .btn-success {
-        background: var(--accent-emerald);
+        background: var(--accent-green-light);
+        border-color: var(--accent-green);
+        color: var(--accent-green);
+    }
+    
+    .btn-success:hover:not(:disabled) {
+        background: var(--accent-green);
         color: #fff;
     }
     
     .btn-danger {
-        background: var(--accent-rose-light);
-        color: var(--accent-rose);
+        background: var(--accent-clay-light);
+        color: var(--accent-clay);
+        border-color: var(--accent-clay);
+    }
+    
+    .btn-danger:hover:not(:disabled) {
+        background: var(--accent-clay);
+        color: #fff;
     }
     
     .btn:disabled {
@@ -373,18 +396,18 @@
     }
     
     .queue-item.analyzing {
-        border-color: var(--accent-amber);
-        background: var(--accent-amber-light);
+        border-color: var(--accent-gold);
+        background: var(--accent-gold-light);
     }
     
     .queue-item.complete {
-        border-color: var(--accent-emerald);
-        background: var(--accent-emerald-light);
+        border-color: var(--accent-green);
+        background: var(--accent-green-light);
     }
     
     .queue-item.error {
-        border-color: var(--accent-rose);
-        background: var(--accent-rose-light);
+        border-color: var(--accent-clay);
+        background: var(--accent-clay-light);
     }
     
     .queue-name {
@@ -413,9 +436,9 @@
         border: 2px solid var(--ink-black);
     }
     
-    .score-high { background: var(--accent-emerald-light); color: #047857; }
-    .score-mid { background: var(--accent-amber-light); color: #b45309; }
-    .score-low { background: var(--accent-rose-light); color: #be123c; }
+    .score-high { background: var(--accent-green-light); color: var(--accent-green); }
+    .score-mid { background: var(--accent-gold-light); color: #9a7520; }
+    .score-low { background: var(--accent-clay-light); color: var(--accent-clay); }
     
     .remove-btn {
         background: none;
@@ -460,7 +483,7 @@
     }
     
     .results-table th {
-        background: var(--navy-900);
+        background: var(--ink-black);
         color: #fff;
         font-family: 'Space Mono', monospace;
         font-size: 11px;
@@ -504,16 +527,16 @@
     }
     
     .results-table tbody tr.rank-1 {
-        background: var(--accent-emerald-light);
-        border-left: 4px solid var(--accent-emerald);
+        background: var(--accent-green-light);
+        border-left: 4px solid var(--accent-green);
     }
     
     .results-table tbody tr.rank-2 {
-        background: var(--accent-amber-light);
+        background: var(--accent-gold-light);
     }
     
     .results-table tbody tr.rank-3 {
-        background: var(--accent-blue-light);
+        background: var(--accent-mint);
     }
     
     .candidate-name {
@@ -535,9 +558,9 @@
         border: 2px solid var(--ink-black);
     }
     
-    .rank-1 .rank-badge { background: var(--accent-emerald); color: #fff; }
-    .rank-2 .rank-badge { background: var(--accent-amber); color: var(--ink-black); }
-    .rank-3 .rank-badge { background: var(--accent-blue); color: #fff; }
+    .rank-1 .rank-badge { background: var(--accent-green); color: #fff; }
+    .rank-2 .rank-badge { background: var(--accent-gold); color: var(--ink-black); }
+    .rank-3 .rank-badge { background: var(--slate-400); color: #fff; }
     
     .score-cell {
         font-family: 'Space Mono', monospace;
@@ -578,15 +601,15 @@
     }
     
     .pill-match {
-        background: var(--accent-emerald-light);
-        border-color: var(--accent-emerald);
-        color: #047857;
+        background: var(--accent-green-light);
+        border-color: var(--accent-green);
+        color: var(--accent-green);
     }
     
     .pill-gap {
-        background: var(--accent-rose-light);
-        border-color: var(--accent-rose);
-        color: #be123c;
+        background: var(--accent-clay-light);
+        border-color: var(--accent-clay);
+        color: var(--accent-clay);
     }
     
     /* DETAILS MODAL */
@@ -698,7 +721,7 @@
         padding: 12px 16px;
         background: var(--slate-100);
         border-radius: var(--radius);
-        border-left: 4px solid var(--accent-amber);
+        border-left: 4px solid var(--accent-gold);
     }
     
     /* STATS SUMMARY */
@@ -725,10 +748,10 @@
         transform: translateY(-3px);
     }
     
-    .stat-card.amber { background: var(--accent-amber-light); }
-    .stat-card.emerald { background: var(--accent-emerald-light); }
-    .stat-card.rose { background: var(--accent-rose-light); }
-    .stat-card.blue { background: var(--accent-blue-light); }
+    .stat-card.amber { background: var(--accent-gold-light); }
+    .stat-card.emerald { background: var(--accent-green-light); }
+    .stat-card.rose { background: var(--accent-clay-light); }
+    .stat-card.blue { background: var(--slate-100); }
     
     .stat-value {
         font-family: 'Space Mono', monospace;
@@ -752,7 +775,7 @@
         width: 16px;
         height: 16px;
         border: 2px solid var(--slate-300);
-        border-top-color: var(--accent-amber);
+        border-top-color: var(--accent-green);
         border-radius: 50%;
         animation: spin 0.8s linear infinite;
     }
@@ -770,9 +793,9 @@
         font-size: 10px;
         font-weight: 700;
         font-family: 'Space Mono', monospace;
-        background: var(--accent-rose-light);
-        color: var(--accent-rose);
-        border: 1px solid var(--accent-rose);
+        background: var(--accent-clay-light);
+        color: var(--accent-clay);
+        border: 1px solid var(--accent-clay);
         border-radius: 12px;
         text-transform: uppercase;
     }
@@ -793,7 +816,7 @@
         font-size: 12px;
         border-radius: var(--radius);
         box-shadow: var(--shadow-hard);
-        border: 2px solid var(--accent-emerald);
+        border: 2px solid var(--accent-green);
         transform: translateY(120px);
         opacity: 0;
         transition: all var(--transition-bounce);
@@ -897,9 +920,9 @@
     }
     
     .drop-zone.drag-over {
-        border-color: var(--accent-amber) !important;
-        background: var(--accent-amber-light) !important;
-        box-shadow: 0 0 0 3px var(--accent-amber-light), var(--shadow-active);
+        border-color: var(--accent-green) !important;
+        background: var(--accent-green-light) !important;
+        box-shadow: 0 0 0 3px var(--accent-green-light), var(--shadow-active);
     }
     
     .drop-zone.drag-over::after {
@@ -909,8 +932,8 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        background: rgba(245, 158, 11, 0.9);
-        color: var(--ink-black);
+        background: rgba(93, 138, 102, 0.9);
+        color: #fff;
         font-family: 'Space Mono', monospace;
         font-size: 14px;
         font-weight: 700;
@@ -941,12 +964,12 @@
         align-items: center;
         gap: 6px;
         padding: 4px 10px;
-        background: var(--accent-blue-light);
-        border: 1px solid var(--accent-blue);
+        background: var(--accent-green-light);
+        border: 1px solid var(--accent-green);
         border-radius: 12px;
         font-family: 'Space Mono', monospace;
         font-size: 10px;
-        color: var(--accent-blue);
+        color: var(--accent-green);
         margin-top: 8px;
     }
     
@@ -965,10 +988,157 @@
         align-items: center;
         gap: 8px;
         padding: 8px 12px;
-        background: var(--accent-amber-light);
+        background: var(--accent-gold-light);
         border-radius: var(--radius);
         font-size: 12px;
         margin-top: 8px;
+    }
+    
+    /* SHORTLIST STATUS */
+    .status-select {
+        padding: 6px 10px;
+        font-family: 'Space Mono', monospace;
+        font-size: 10px;
+        font-weight: 700;
+        border: 2px solid var(--ink-black);
+        border-radius: var(--radius);
+        cursor: pointer;
+        text-transform: uppercase;
+        min-width: 100px;
+        transition: all var(--transition-snap);
+    }
+    
+    .status-select:focus {
+        outline: none;
+        box-shadow: var(--shadow-active);
+    }
+    
+    .status-select.status-send {
+        background: var(--accent-green-light);
+        border-color: var(--accent-green);
+        color: var(--accent-green);
+    }
+    
+    .status-select.status-pass {
+        background: var(--accent-clay-light);
+        border-color: var(--accent-clay);
+        color: var(--accent-clay);
+    }
+    
+    .status-select.status-maybe {
+        background: var(--accent-gold-light);
+        border-color: var(--accent-gold);
+        color: #9a7520;
+    }
+    
+    .status-select.status-review {
+        background: var(--slate-100);
+        border-color: var(--slate-300);
+        color: var(--slate-400);
+    }
+    
+    /* WHY/WHY NOT SUMMARY */
+    .why-summary {
+        font-size: 12px;
+        line-height: 1.5;
+        color: var(--navy-700);
+        max-width: 280px;
+    }
+    
+    .why-summary .why-good {
+        color: var(--accent-green);
+    }
+    
+    .why-summary .why-bad {
+        color: var(--accent-clay);
+    }
+    
+    .copy-summary {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        margin-top: 6px;
+        padding: 3px 8px;
+        font-size: 9px;
+        font-family: 'Space Mono', monospace;
+        background: var(--slate-100);
+        border: 1px solid var(--slate-300);
+        border-radius: 10px;
+        cursor: pointer;
+        color: var(--slate-400);
+        transition: all var(--transition-snap);
+    }
+    
+    .copy-summary:hover {
+        background: var(--ink-black);
+        color: #fff;
+        border-color: var(--ink-black);
+    }
+    
+    /* RECRUITER NOTES */
+    .notes-cell {
+        min-width: 150px;
+    }
+    
+    .notes-input {
+        width: 100%;
+        padding: 8px 10px;
+        font-size: 11px;
+        font-family: 'DM Sans', sans-serif;
+        border: 1px solid var(--slate-200);
+        border-radius: var(--radius);
+        background: var(--slate-100);
+        resize: none;
+        min-height: 50px;
+        transition: all var(--transition-snap);
+    }
+    
+    .notes-input:focus {
+        outline: none;
+        border-color: var(--accent-green);
+        background: #fff;
+        box-shadow: 0 0 0 2px var(--accent-green-light);
+    }
+    
+    .notes-input::placeholder {
+        color: var(--slate-400);
+        font-style: italic;
+    }
+    
+    /* EXPORT BUTTONS */
+    .export-group {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+    }
+    
+    .shortlist-count {
+        font-family: 'Space Mono', monospace;
+        font-size: 11px;
+        color: var(--accent-green);
+        padding: 4px 10px;
+        background: var(--accent-green-light);
+        border-radius: 12px;
+        border: 1px solid var(--accent-green);
+    }
+    
+    /* Wider table for new columns */
+    .results-table {
+        min-width: 1100px;
+    }
+    
+    .results-table th,
+    .results-table td {
+        vertical-align: top;
+    }
+    
+    /* Status filter */
+    .filter-bar {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        align-items: center;
+        margin-bottom: 16px;
     }
 </style>
 </head>
@@ -976,8 +1146,8 @@
 <header>
     <div class="brand">
         <svg class="logo-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 125">
-            <path d="M93.764,38.143l-42-30.515c-1.053-0.764-2.475-0.764-3.527,0l-42,30.515c-1.051,0.764-1.491,2.118-1.09,3.354l16.043,49.374c0.402,1.236,1.554,2.073,2.854,2.073h51.914c1.3,0,2.451-0.837,2.854-2.073l16.043-49.374C95.255,40.261,94.814,38.907,93.764,38.143z M73.777,86.944H26.223L11.526,41.716L50,13.764l38.474,27.953L73.777,86.944z" fill="#fff" stroke="#fff" stroke-width="4"/>
-            <path d="M48.236,32.35L29.748,45.782c-1.051,0.764-1.491,2.118-1.09,3.354l7.062,21.735c0.402,1.236,1.554,2.073,2.854,2.073h22.854c1.3,0,2.451-0.837,2.854-2.073l7.062-21.735c0.401-1.236-0.039-2.59-1.09-3.354L51.764,32.35C50.711,31.586,49.289,31.586,48.236,32.35z" fill="var(--accent-amber)" stroke="#fff" stroke-width="3"/>
+            <path d="M93.764,38.143l-42-30.515c-1.053-0.764-2.475-0.764-3.527,0l-42,30.515c-1.051,0.764-1.491,2.118-1.09,3.354l16.043,49.374c0.402,1.236,1.554,2.073,2.854,2.073h51.914c1.3,0,2.451-0.837,2.854-2.073l16.043-49.374C95.255,40.261,94.814,38.907,93.764,38.143z M73.777,86.944H26.223L11.526,41.716L50,13.764l38.474,27.953L73.777,86.944z" fill="var(--ink-black)" stroke="var(--ink-black)" stroke-width="6"/>
+            <path d="M48.236,32.35L29.748,45.782c-1.051,0.764-1.491,2.118-1.09,3.354l7.062,21.735c0.402,1.236,1.554,2.073,2.854,2.073h22.854c1.3,0,2.451-0.837,2.854-2.073l7.062-21.735c0.401-1.236-0.039-2.59-1.09-3.354L51.764,32.35C50.711,31.586,49.289,31.586,48.236,32.35z M64.962,49.355l-5.715,17.589H40.753l-5.715-17.589L50,38.485L64.962,49.355z" stroke="var(--ink-black)" stroke-width="6"/>
         </svg>
         <div class="brand-text">
             <div class="app-title">DIB Jobs</div>
@@ -1058,8 +1228,10 @@
     <div class="card" id="resultsCard" style="display: none;">
         <div class="card-header">
             <span class="card-title">Candidate Rankings</span>
-            <div style="display: flex; gap: 12px;">
-                <button class="btn btn-sm" onclick="exportCSV()">Export CSV</button>
+            <div class="export-group">
+                <span class="shortlist-count" id="shortlistCount">0 to send</span>
+                <button class="btn btn-sm btn-success" onclick="exportShortlist()">Export Shortlist</button>
+                <button class="btn btn-sm" onclick="exportCSV()">Export All CSV</button>
             </div>
         </div>
         <div class="card-body">
@@ -1085,7 +1257,7 @@
             
             <!-- Filters -->
             <div class="filter-bar">
-                <span class="filter-label">Filter by:</span>
+                <span class="filter-label">Filter:</span>
                 <select class="filter-select" id="scoreFilter" onchange="applyFilters()">
                     <option value="all">All Scores</option>
                     <option value="strong">Strong (75%+)</option>
@@ -1098,6 +1270,13 @@
                     <option value="secret">Secret+</option>
                     <option value="none">No Clearance</option>
                 </select>
+                <select class="filter-select" id="statusFilter" onchange="applyFilters()">
+                    <option value="all">All Statuses</option>
+                    <option value="send">Send to HM</option>
+                    <option value="maybe">Maybe</option>
+                    <option value="pass">Pass</option>
+                    <option value="review">Needs Review</option>
+                </select>
             </div>
             
             <!-- Results Table -->
@@ -1105,13 +1284,14 @@
                 <table class="results-table" id="resultsTable">
                     <thead>
                         <tr>
-                            <th onclick="sortTable('rank')" style="width: 60px;">Rank</th>
-                            <th onclick="sortTable('name')">Candidate</th>
-                            <th onclick="sortTable('score')" style="width: 80px;">Score</th>
-                            <th onclick="sortTable('clearance')" style="width: 120px;">Clearance</th>
-                            <th>Key Strengths</th>
-                            <th>Gaps / Red Flags</th>
-                            <th style="width: 80px;">Actions</th>
+                            <th onclick="sortTable('rank')" style="width: 50px;">Rank</th>
+                            <th onclick="sortTable('name')" style="width: 120px;">Candidate</th>
+                            <th onclick="sortTable('score')" style="width: 70px;">Score</th>
+                            <th style="width: 100px;">Status</th>
+                            <th style="width: 280px;">Why / Why Not</th>
+                            <th onclick="sortTable('clearance')" style="width: 100px;">Clearance</th>
+                            <th style="width: 150px;">Notes</th>
+                            <th style="width: 70px;">Actions</th>
                         </tr>
                     </thead>
                     <tbody id="resultsBody"></tbody>
@@ -1364,6 +1544,7 @@ function renderResults() {
     
     // Update stats
     updateStats(analysisResults);
+    updateShortlistCount();
     
     // Render table
     tbody.innerHTML = filtered.map((result, index) => {
@@ -1377,31 +1558,45 @@ function renderResults() {
         const clearanceClass = clearance.includes('TS') ? 'clearance-ts' : 
                                clearance.includes('Secret') ? 'clearance-secret' : 'clearance-none';
         
-        // Extract matches and gaps
-        const matches = (result.analysis || []).filter(a => a.startsWith('Match:')).slice(0, 3);
-        const gaps = (result.analysis || []).filter(a => a.startsWith('Gap:'));
+        // Generate why/why not summary
+        const whySummary = generateWhySummary(result);
         
-        // Check for red flags
-        const redFlags = extractRedFlags(result, gaps);
+        // Get current status and notes
+        const status = result.status || 'review';
+        const notes = result.notes || '';
+        const statusClass = `status-${status}`;
         
         return `
-            <tr class="${rankClass}">
+            <tr class="${rankClass}" data-id="${result.id}">
                 <td><span class="rank-badge">${rank}</span></td>
                 <td>
                     <div class="candidate-name">${escapeHtml(result.name)}</div>
                 </td>
                 <td class="score-cell ${scoreClass}">${score}%</td>
-                <td><span class="clearance-badge ${clearanceClass}">${clearance}</span></td>
                 <td>
-                    <div class="pill-list">
-                        ${matches.slice(0, 2).map(m => `<span class="pill pill-match">${escapeHtml(m.replace('Match:', '').trim().substring(0, 30))}...</span>`).join('')}
-                    </div>
+                    <select class="status-select ${statusClass}" onchange="updateStatus(${result.id}, this.value)" data-id="${result.id}">
+                        <option value="review" ${status === 'review' ? 'selected' : ''}>Review</option>
+                        <option value="send" ${status === 'send' ? 'selected' : ''}>Send to HM</option>
+                        <option value="maybe" ${status === 'maybe' ? 'selected' : ''}>Maybe</option>
+                        <option value="pass" ${status === 'pass' ? 'selected' : ''}>Pass</option>
+                    </select>
                 </td>
                 <td>
-                    <div class="pill-list">
-                        ${redFlags.map(f => `<span class="red-flag">${escapeHtml(f)}</span>`).join('')}
-                        ${gaps.slice(0, 2).map(g => `<span class="pill pill-gap">${escapeHtml(g.replace('Gap:', '').trim().substring(0, 25))}...</span>`).join('')}
+                    <div class="why-summary">
+                        ${whySummary.html}
                     </div>
+                    <button class="copy-summary" onclick="copySummary(${result.id})" title="Copy to clipboard">
+                        📋 Copy
+                    </button>
+                </td>
+                <td><span class="clearance-badge ${clearanceClass}">${clearance}</span></td>
+                <td class="notes-cell">
+                    <textarea 
+                        class="notes-input" 
+                        placeholder="Add notes..." 
+                        onchange="updateNotes(${result.id}, this.value)"
+                        data-id="${result.id}"
+                    >${escapeHtml(notes)}</textarea>
                 </td>
                 <td>
                     <button class="btn btn-sm" onclick="showDetails(${result.id})">View</button>
@@ -1414,10 +1609,12 @@ function renderResults() {
 function applyFiltersToData(data) {
     const scoreFilter = document.getElementById('scoreFilter').value;
     const clearanceFilter = document.getElementById('clearanceFilter').value;
+    const statusFilter = document.getElementById('statusFilter').value;
     
     return data.filter(result => {
         const score = result.score || 0;
         const clearance = extractClearance(result).toLowerCase();
+        const status = result.status || 'review';
         
         // Score filter
         if (scoreFilter === 'strong' && score < 75) return false;
@@ -1428,6 +1625,9 @@ function applyFiltersToData(data) {
         if (clearanceFilter === 'ts' && !clearance.includes('ts')) return false;
         if (clearanceFilter === 'secret' && !clearance.includes('secret') && !clearance.includes('ts')) return false;
         if (clearanceFilter === 'none' && (clearance.includes('secret') || clearance.includes('ts'))) return false;
+        
+        // Status filter
+        if (statusFilter !== 'all' && status !== statusFilter) return false;
         
         return true;
     });
@@ -1493,6 +1693,178 @@ function extractRedFlags(result, gaps) {
     }
     
     return flags.slice(0, 2); // Max 2 flags shown
+}
+
+// ==========================================================================
+// WHY/WHY NOT SUMMARY
+// ==========================================================================
+function generateWhySummary(result) {
+    const score = result.score || 0;
+    const matches = (result.analysis || []).filter(a => a.startsWith('Match:')).map(m => m.replace('Match:', '').trim());
+    const gaps = (result.analysis || []).filter(a => a.startsWith('Gap:')).map(g => g.replace('Gap:', '').trim());
+    
+    // Get top match and gap
+    const topMatch = matches[0] ? matches[0].substring(0, 60) : null;
+    const topGap = gaps[0] ? gaps[0].substring(0, 60) : null;
+    
+    let summary = '';
+    let html = '';
+    
+    // Build the summary
+    if (score >= 75) {
+        summary = `Strong fit (${score}%). `;
+        html = `<span class="why-good">✓ Strong fit (${score}%).</span> `;
+    } else if (score >= 50) {
+        summary = `Moderate fit (${score}%). `;
+        html = `Moderate fit (${score}%). `;
+    } else {
+        summary = `Weak fit (${score}%). `;
+        html = `<span class="why-bad">⚠ Weak fit (${score}%).</span> `;
+    }
+    
+    if (topMatch) {
+        summary += `+ ${topMatch}. `;
+        html += `<span class="why-good">+</span> ${escapeHtml(topMatch)}. `;
+    }
+    
+    if (topGap) {
+        summary += `- ${topGap}.`;
+        html += `<span class="why-bad">−</span> ${escapeHtml(topGap)}.`;
+    }
+    
+    return { text: summary, html: html };
+}
+
+// ==========================================================================
+// STATUS & NOTES MANAGEMENT
+// ==========================================================================
+function updateStatus(candidateId, newStatus) {
+    const result = analysisResults.find(r => r.id === candidateId);
+    if (result) {
+        result.status = newStatus;
+        
+        // Update the select styling
+        const select = document.querySelector(`select[data-id="${candidateId}"]`);
+        if (select) {
+            select.className = `status-select status-${newStatus}`;
+        }
+        
+        updateShortlistCount();
+        saveToLocalStorage();
+    }
+}
+
+function updateNotes(candidateId, notes) {
+    const result = analysisResults.find(r => r.id === candidateId);
+    if (result) {
+        result.notes = notes;
+        saveToLocalStorage();
+    }
+}
+
+function updateShortlistCount() {
+    const sendCount = analysisResults.filter(r => r.status === 'send').length;
+    document.getElementById('shortlistCount').textContent = `${sendCount} to send`;
+}
+
+function copySummary(candidateId) {
+    const result = analysisResults.find(r => r.id === candidateId);
+    if (!result) return;
+    
+    const summary = generateWhySummary(result);
+    const fullText = `${result.name}: ${summary.text}`;
+    
+    navigator.clipboard.writeText(fullText).then(() => {
+        showToast('Summary copied to clipboard');
+    }).catch(() => {
+        showToast('Failed to copy', true);
+    });
+}
+
+// ==========================================================================
+// LOCAL STORAGE PERSISTENCE
+// ==========================================================================
+function saveToLocalStorage() {
+    try {
+        // Save just the status and notes, not the full results
+        const savedData = analysisResults.map(r => ({
+            id: r.id,
+            name: r.name,
+            status: r.status || 'review',
+            notes: r.notes || ''
+        }));
+        localStorage.setItem('dib_recruiter_decisions', JSON.stringify(savedData));
+    } catch (e) {
+        console.error('Failed to save to localStorage:', e);
+    }
+}
+
+function loadFromLocalStorage() {
+    try {
+        const saved = localStorage.getItem('dib_recruiter_decisions');
+        if (saved) {
+            const savedData = JSON.parse(saved);
+            // Merge saved status/notes back into results
+            savedData.forEach(saved => {
+                const result = analysisResults.find(r => r.id === saved.id || r.name === saved.name);
+                if (result) {
+                    result.status = saved.status;
+                    result.notes = saved.notes;
+                }
+            });
+        }
+    } catch (e) {
+        console.error('Failed to load from localStorage:', e);
+    }
+}
+
+// ==========================================================================
+// EXPORT SHORTLIST ONLY
+// ==========================================================================
+function exportShortlist() {
+    const shortlist = analysisResults.filter(r => r.status === 'send');
+    
+    if (shortlist.length === 0) {
+        showToast('No candidates marked "Send to HM"', true);
+        return;
+    }
+    
+    const headers = ['Rank', 'Name', 'Score', 'Clearance', 'Why/Why Not', 'Notes', 'Job Title', 'Company'];
+    
+    const rows = shortlist.map((result, index) => {
+        const summary = generateWhySummary(result);
+        
+        return [
+            index + 1,
+            result.name,
+            result.score || 0,
+            extractClearance(result),
+            summary.text.replace(/"/g, '""'),
+            (result.notes || '').replace(/"/g, '""'),
+            result.job_title || '',
+            result.company || ''
+        ];
+    });
+    
+    const csvContent = [
+        headers.join(','),
+        ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
+    ].join('\n');
+    
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    
+    const timestamp = new Date().toISOString().split('T')[0];
+    link.setAttribute('href', url);
+    link.setAttribute('download', `shortlist-for-hiring-manager-${timestamp}.csv`);
+    link.style.display = 'none';
+    
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    showToast(`Exported ${shortlist.length} candidates to shortlist`);
 }
 
 // ==========================================================================
@@ -1623,7 +1995,7 @@ function sortTable(column) {
 }
 
 // ==========================================================================
-// CSV EXPORT
+// CSV EXPORT (ALL CANDIDATES)
 // ==========================================================================
 function exportCSV() {
     if (analysisResults.length === 0) {
@@ -1631,20 +2003,24 @@ function exportCSV() {
         return;
     }
     
-    const headers = ['Rank', 'Name', 'Score', 'Clearance', 'Job Title', 'Company', 'Verdict', 'Key Matches', 'Gaps'];
+    const headers = ['Rank', 'Name', 'Score', 'Status', 'Clearance', 'Why/Why Not', 'Notes', 'Job Title', 'Company', 'Key Matches', 'Gaps'];
     
     const rows = analysisResults.map((result, index) => {
         const matches = (result.analysis || []).filter(a => a.startsWith('Match:')).map(m => m.replace('Match:', '').trim()).join('; ');
         const gaps = (result.analysis || []).filter(a => a.startsWith('Gap:')).map(g => g.replace('Gap:', '').trim()).join('; ');
+        const summary = generateWhySummary(result);
+        const statusLabels = { review: 'Needs Review', send: 'Send to HM', maybe: 'Maybe', pass: 'Pass' };
         
         return [
             index + 1,
             result.name,
             result.score || 0,
+            statusLabels[result.status] || 'Needs Review',
             extractClearance(result),
+            summary.text.replace(/"/g, '""'),
+            (result.notes || '').replace(/"/g, '""'),
             result.job_title || '',
             result.company || '',
-            (result.verdict || '').replace(/"/g, '""'),
             matches.replace(/"/g, '""'),
             gaps.replace(/"/g, '""')
         ];
@@ -1661,7 +2037,7 @@ function exportCSV() {
     
     const timestamp = new Date().toISOString().split('T')[0];
     link.setAttribute('href', url);
-    link.setAttribute('download', `candidate-rankings-${timestamp}.csv`);
+    link.setAttribute('download', `all-candidates-${timestamp}.csv`);
     link.style.display = 'none';
     
     document.body.appendChild(link);
