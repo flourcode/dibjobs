@@ -1176,6 +1176,9 @@
                         <span>Drag & drop PDF or DOCX, or paste text directly</span>
                     </div>
                     <div id="jobFileInfo"></div>
+                    <div class="action-bar" style="margin-top: 12px;">
+                        <button class="btn" onclick="clearJobDescription()">Clear</button>
+                    </div>
                 </div>
                 
                 <!-- Candidate Resume -->
@@ -1385,6 +1388,12 @@ function removeCandidate(id) {
 function clearCandidateInput() {
     document.getElementById('candidateResume').value = '';
     document.getElementById('candidateName').value = '';
+    document.getElementById('resumeFileInfo').innerHTML = '';
+}
+
+function clearJobDescription() {
+    document.getElementById('jobDescription').value = '';
+    document.getElementById('jobFileInfo').innerHTML = '';
 }
 
 function clearQueue() {
