@@ -1,0 +1,1602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DIB Jobs Recruiter // Candidate Screening Tool</title>
+    <meta name="description" content="Screen and rank candidates for Defense Industrial Base positions. Multi-candidate comparison and fit analysis.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+        /* Recruiter Mode - Deep Navy & Amber Accents */
+        --navy-900: #0f172a;
+        --navy-800: #1e293b;
+        --navy-700: #334155;
+        --navy-600: #475569;
+        --slate-400: #94a3b8;
+        --slate-300: #cbd5e1;
+        --slate-200: #e2e8f0;
+        --slate-100: #f1f5f9;
+        
+        /* Warm Background */
+        --bg-cream: #fafaf9;
+        --card-white: #ffffff;
+        --ink-black: var(--navy-900);
+        
+        /* Recruiter Accent Palette */
+        --accent-amber: #f59e0b;
+        --accent-amber-light: #fef3c7;
+        --accent-emerald: #10b981;
+        --accent-emerald-light: #d1fae5;
+        --accent-rose: #f43f5e;
+        --accent-rose-light: #ffe4e6;
+        --accent-blue: #3b82f6;
+        --accent-blue-light: #dbeafe;
+        --accent-violet: #8b5cf6;
+        --accent-violet-light: #ede9fe;
+        
+        /* Spacing & Layout */
+        --border-thick: 2px;
+        --shadow-hard: 4px 4px 0px var(--ink-black);
+        --shadow-hover: 6px 6px 0px var(--ink-black);
+        --shadow-active: 2px 2px 0px var(--ink-black);
+        --radius: 6px;
+        --radius-lg: 10px;
+        
+        /* Transitions */
+        --transition-snap: 0.15s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        --transition-bounce: 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    ::selection {
+        background: var(--accent-amber);
+        color: var(--ink-black);
+    }
+    
+    body {
+        background: var(--bg-cream);
+        color: var(--ink-black);
+        font-family: 'DM Sans', sans-serif;
+        line-height: 1.7;
+        min-height: 100vh;
+        padding-bottom: 100px;
+        font-size: 15px;
+        -webkit-font-smoothing: antialiased;
+    }
+    
+    html { scroll-behavior: smooth; }
+    
+    h1, h2, h3, .mono { font-family: 'Space Mono', monospace; letter-spacing: -0.02em; }
+    
+    /* HEADER - Recruiter branded */
+    header {
+        background: var(--navy-900);
+        padding: 18px 28px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: 4px solid var(--accent-amber);
+    }
+    
+    .brand {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+    
+    .logo-icon {
+        width: 44px;
+        height: 44px;
+        flex-shrink: 0;
+    }
+    
+    .brand-text {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+    
+    .app-title {
+        font-family: 'Space Mono', monospace;
+        font-size: 22px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: -0.5px;
+        line-height: 1.1;
+        color: #fff;
+    }
+    
+    .app-subtitle {
+        font-family: 'Space Mono', monospace;
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        color: var(--accent-amber);
+    }
+    
+    .mode-badge {
+        background: var(--accent-amber);
+        color: var(--ink-black);
+        font-family: 'Space Mono', monospace;
+        font-size: 10px;
+        font-weight: 700;
+        padding: 6px 12px;
+        border-radius: 20px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    
+    /* MAIN */
+    main {
+        max-width: 1400px;
+        margin: 32px auto;
+        padding: 0 24px;
+    }
+    
+    /* CARDS */
+    .card {
+        background: var(--card-white);
+        border: var(--border-thick) solid var(--ink-black);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-hard);
+        margin-bottom: 28px;
+        overflow: hidden;
+    }
+    
+    .card-header {
+        background: var(--slate-100);
+        border-bottom: var(--border-thick) solid var(--ink-black);
+        padding: 16px 24px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+    
+    .card-title {
+        font-family: 'Space Mono', monospace;
+        font-size: 13px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .card-title::before {
+        content: '';
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        background: var(--accent-amber);
+        border-radius: 50%;
+        box-shadow: 0 0 0 3px var(--accent-amber-light);
+    }
+    
+    .card-body {
+        padding: 28px;
+    }
+    
+    /* TWO COLUMN LAYOUT */
+    .two-col {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 24px;
+    }
+    
+    @media (max-width: 900px) {
+        .two-col { grid-template-columns: 1fr; }
+    }
+    
+    /* FORMS */
+    textarea, input[type="text"] {
+        width: 100%;
+        padding: 16px;
+        font-family: 'Space Mono', monospace;
+        font-size: 13px;
+        line-height: 1.6;
+        border: var(--border-thick) solid var(--ink-black);
+        border-radius: var(--radius);
+        background: #fafafa;
+        resize: vertical;
+        transition: all var(--transition-snap);
+    }
+    
+    textarea { min-height: 200px; }
+    
+    textarea:focus, input:focus {
+        outline: none;
+        background: #fff;
+        box-shadow: var(--shadow-active);
+        border-color: var(--accent-amber);
+    }
+    
+    textarea::placeholder, input::placeholder {
+        color: var(--navy-600);
+        opacity: 0.5;
+    }
+    
+    label {
+        display: block;
+        font-family: 'Space Mono', monospace;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 8px;
+        color: var(--navy-700);
+    }
+    
+    /* BUTTONS */
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 12px 24px;
+        font-family: 'Space Mono', monospace;
+        font-weight: 700;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+        color: var(--ink-black);
+        background: var(--card-white);
+        border: var(--border-thick) solid var(--ink-black);
+        border-radius: var(--radius);
+        cursor: pointer;
+        box-shadow: var(--shadow-hard);
+        transition: all var(--transition-snap);
+        transform: translate(0, 0);
+    }
+    
+    .btn:hover:not(:disabled) {
+        transform: translate(-2px, -2px);
+        box-shadow: var(--shadow-hover);
+    }
+    
+    .btn:active:not(:disabled) {
+        transform: translate(2px, 2px);
+        box-shadow: var(--shadow-active);
+    }
+    
+    .btn-primary { 
+        background: var(--accent-amber); 
+        border-color: var(--ink-black);
+    }
+    
+    .btn-primary:hover:not(:disabled) { 
+        background: #fbbf24;
+    }
+    
+    .btn-success {
+        background: var(--accent-emerald);
+        color: #fff;
+    }
+    
+    .btn-danger {
+        background: var(--accent-rose-light);
+        color: var(--accent-rose);
+    }
+    
+    .btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        box-shadow: none;
+        transform: none;
+    }
+    
+    .btn-sm {
+        padding: 8px 14px;
+        font-size: 10px;
+    }
+    
+    .action-bar {
+        margin-top: 20px;
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+    
+    /* CANDIDATE QUEUE */
+    .queue-section {
+        margin-top: 20px;
+    }
+    
+    .queue-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+    }
+    
+    .queue-title {
+        font-family: 'Space Mono', monospace;
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .queue-count {
+        font-family: 'Space Mono', monospace;
+        font-size: 11px;
+        color: var(--slate-400);
+    }
+    
+    .candidate-queue {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        max-height: 300px;
+        overflow-y: auto;
+        padding-right: 8px;
+    }
+    
+    .candidate-queue::-webkit-scrollbar {
+        width: 6px;
+    }
+    
+    .candidate-queue::-webkit-scrollbar-track {
+        background: var(--slate-100);
+        border-radius: 3px;
+    }
+    
+    .candidate-queue::-webkit-scrollbar-thumb {
+        background: var(--slate-300);
+        border-radius: 3px;
+    }
+    
+    .queue-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 16px;
+        background: var(--slate-100);
+        border: 2px solid var(--slate-200);
+        border-radius: var(--radius);
+        transition: all var(--transition-snap);
+    }
+    
+    .queue-item:hover {
+        border-color: var(--ink-black);
+        transform: translateX(4px);
+    }
+    
+    .queue-item.analyzing {
+        border-color: var(--accent-amber);
+        background: var(--accent-amber-light);
+    }
+    
+    .queue-item.complete {
+        border-color: var(--accent-emerald);
+        background: var(--accent-emerald-light);
+    }
+    
+    .queue-item.error {
+        border-color: var(--accent-rose);
+        background: var(--accent-rose-light);
+    }
+    
+    .queue-name {
+        font-family: 'Space Mono', monospace;
+        font-size: 12px;
+        font-weight: 700;
+    }
+    
+    .queue-status {
+        font-size: 11px;
+        color: var(--slate-400);
+    }
+    
+    .queue-actions {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+    }
+    
+    .queue-score {
+        font-family: 'Space Mono', monospace;
+        font-size: 14px;
+        font-weight: 700;
+        padding: 4px 10px;
+        border-radius: 12px;
+        border: 2px solid var(--ink-black);
+    }
+    
+    .score-high { background: var(--accent-emerald-light); color: #047857; }
+    .score-mid { background: var(--accent-amber-light); color: #b45309; }
+    .score-low { background: var(--accent-rose-light); color: #be123c; }
+    
+    .remove-btn {
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-size: 18px;
+        color: var(--slate-400);
+        padding: 4px;
+        line-height: 1;
+        transition: color 0.15s;
+    }
+    
+    .remove-btn:hover {
+        color: var(--accent-rose);
+    }
+    
+    /* EMPTY STATE */
+    .empty-state {
+        text-align: center;
+        padding: 40px 20px;
+        color: var(--slate-400);
+    }
+    
+    .empty-icon {
+        font-size: 48px;
+        margin-bottom: 12px;
+        opacity: 0.5;
+    }
+    
+    .empty-text {
+        font-family: 'Space Mono', monospace;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    /* RESULTS TABLE */
+    .results-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+    }
+    
+    .results-table th {
+        background: var(--navy-900);
+        color: #fff;
+        font-family: 'Space Mono', monospace;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        padding: 14px 16px;
+        text-align: left;
+        border: 2px solid var(--ink-black);
+        cursor: pointer;
+        transition: background 0.15s;
+        user-select: none;
+    }
+    
+    .results-table th:hover {
+        background: var(--navy-700);
+    }
+    
+    .results-table th.sorted-asc::after {
+        content: ' ↑';
+    }
+    
+    .results-table th.sorted-desc::after {
+        content: ' ↓';
+    }
+    
+    .results-table td {
+        padding: 14px 16px;
+        border: 2px solid var(--slate-200);
+        vertical-align: middle;
+    }
+    
+    .results-table tbody tr {
+        background: var(--card-white);
+        transition: all var(--transition-snap);
+    }
+    
+    .results-table tbody tr:hover {
+        background: var(--slate-100);
+        transform: scale(1.005);
+    }
+    
+    .results-table tbody tr.rank-1 {
+        background: var(--accent-emerald-light);
+        border-left: 4px solid var(--accent-emerald);
+    }
+    
+    .results-table tbody tr.rank-2 {
+        background: var(--accent-amber-light);
+    }
+    
+    .results-table tbody tr.rank-3 {
+        background: var(--accent-blue-light);
+    }
+    
+    .candidate-name {
+        font-family: 'Space Mono', monospace;
+        font-weight: 700;
+        font-size: 13px;
+    }
+    
+    .rank-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        font-family: 'Space Mono', monospace;
+        font-weight: 700;
+        font-size: 12px;
+        border: 2px solid var(--ink-black);
+    }
+    
+    .rank-1 .rank-badge { background: var(--accent-emerald); color: #fff; }
+    .rank-2 .rank-badge { background: var(--accent-amber); color: var(--ink-black); }
+    .rank-3 .rank-badge { background: var(--accent-blue); color: #fff; }
+    
+    .score-cell {
+        font-family: 'Space Mono', monospace;
+        font-weight: 700;
+        font-size: 16px;
+    }
+    
+    .clearance-badge {
+        display: inline-block;
+        padding: 4px 10px;
+        font-family: 'Space Mono', monospace;
+        font-size: 10px;
+        font-weight: 700;
+        border-radius: 12px;
+        border: 2px solid var(--ink-black);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .clearance-ts { background: var(--accent-violet-light); color: #6d28d9; }
+    .clearance-secret { background: var(--accent-blue-light); color: #1d4ed8; }
+    .clearance-none { background: var(--slate-100); color: var(--slate-400); }
+    
+    /* MATCH/GAP PILLS */
+    .pill-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+    
+    .pill {
+        display: inline-block;
+        padding: 4px 10px;
+        font-size: 11px;
+        font-weight: 600;
+        border-radius: 12px;
+        border: 1px solid;
+    }
+    
+    .pill-match {
+        background: var(--accent-emerald-light);
+        border-color: var(--accent-emerald);
+        color: #047857;
+    }
+    
+    .pill-gap {
+        background: var(--accent-rose-light);
+        border-color: var(--accent-rose);
+        color: #be123c;
+    }
+    
+    /* DETAILS MODAL */
+    .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.7);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.2s;
+    }
+    
+    .modal-overlay.active {
+        opacity: 1;
+        visibility: visible;
+    }
+    
+    .modal {
+        background: var(--card-white);
+        border: var(--border-thick) solid var(--ink-black);
+        border-radius: var(--radius-lg);
+        box-shadow: 8px 8px 0 var(--ink-black);
+        width: 90%;
+        max-width: 700px;
+        max-height: 85vh;
+        overflow: hidden;
+        transform: scale(0.9) translateY(20px);
+        transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    
+    .modal-overlay.active .modal {
+        transform: scale(1) translateY(0);
+    }
+    
+    .modal-header {
+        background: var(--navy-900);
+        color: #fff;
+        padding: 20px 24px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .modal-title {
+        font-family: 'Space Mono', monospace;
+        font-size: 16px;
+        font-weight: 700;
+    }
+    
+    .modal-close {
+        background: none;
+        border: none;
+        color: #fff;
+        font-size: 24px;
+        cursor: pointer;
+        padding: 4px;
+        line-height: 1;
+        opacity: 0.7;
+        transition: opacity 0.15s;
+    }
+    
+    .modal-close:hover {
+        opacity: 1;
+    }
+    
+    .modal-body {
+        padding: 24px;
+        max-height: calc(85vh - 70px);
+        overflow-y: auto;
+    }
+    
+    .detail-section {
+        margin-bottom: 24px;
+    }
+    
+    .detail-section:last-child {
+        margin-bottom: 0;
+    }
+    
+    .detail-label {
+        font-family: 'Space Mono', monospace;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--slate-400);
+        margin-bottom: 8px;
+    }
+    
+    .detail-value {
+        font-size: 14px;
+        line-height: 1.7;
+    }
+    
+    .detail-score {
+        font-family: 'Space Mono', monospace;
+        font-size: 48px;
+        font-weight: 700;
+        line-height: 1;
+    }
+    
+    .detail-verdict {
+        font-size: 14px;
+        margin-top: 8px;
+        padding: 12px 16px;
+        background: var(--slate-100);
+        border-radius: var(--radius);
+        border-left: 4px solid var(--accent-amber);
+    }
+    
+    /* STATS SUMMARY */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+    
+    @media (max-width: 768px) {
+        .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    
+    .stat-card {
+        text-align: center;
+        padding: 20px 16px;
+        border: 2px solid var(--ink-black);
+        border-radius: var(--radius);
+        transition: transform var(--transition-snap);
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-3px);
+    }
+    
+    .stat-card.amber { background: var(--accent-amber-light); }
+    .stat-card.emerald { background: var(--accent-emerald-light); }
+    .stat-card.rose { background: var(--accent-rose-light); }
+    .stat-card.blue { background: var(--accent-blue-light); }
+    
+    .stat-value {
+        font-family: 'Space Mono', monospace;
+        font-size: 32px;
+        font-weight: 700;
+        line-height: 1;
+    }
+    
+    .stat-label {
+        font-family: 'Space Mono', monospace;
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-top: 8px;
+        color: var(--navy-700);
+    }
+    
+    /* LOADING SPINNER */
+    .spinner {
+        display: inline-block;
+        width: 16px;
+        height: 16px;
+        border: 2px solid var(--slate-300);
+        border-top-color: var(--accent-amber);
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+    }
+    
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+    
+    /* RED FLAGS */
+    .red-flag {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 4px 10px;
+        font-size: 10px;
+        font-weight: 700;
+        font-family: 'Space Mono', monospace;
+        background: var(--accent-rose-light);
+        color: var(--accent-rose);
+        border: 1px solid var(--accent-rose);
+        border-radius: 12px;
+        text-transform: uppercase;
+    }
+    
+    .red-flag::before {
+        content: '⚠';
+    }
+    
+    /* TOAST */
+    .toast {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        background: var(--ink-black);
+        color: #fff;
+        padding: 16px 24px;
+        font-family: 'Space Mono', monospace;
+        font-size: 12px;
+        border-radius: var(--radius);
+        box-shadow: var(--shadow-hard);
+        border: 2px solid var(--accent-emerald);
+        transform: translateY(120px);
+        opacity: 0;
+        transition: all var(--transition-bounce);
+        z-index: 999;
+    }
+    
+    .toast.show {
+        transform: translateY(0);
+        opacity: 1;
+    }
+    
+    /* RESPONSIVE */
+    @media (max-width: 600px) {
+        header {
+            padding: 14px 18px;
+        }
+        
+        .app-title {
+            font-size: 18px;
+        }
+        
+        main {
+            padding: 0 16px;
+            margin: 20px auto;
+        }
+        
+        .card-body {
+            padding: 20px;
+        }
+        
+        .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+        
+        .stat-value {
+            font-size: 24px;
+        }
+        
+        .results-table {
+            font-size: 11px;
+        }
+        
+        .results-table th,
+        .results-table td {
+            padding: 10px 8px;
+        }
+    }
+    
+    /* ANIMATIONS */
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .card {
+        animation: slideUp 0.4s ease-out;
+    }
+    
+    .card:nth-child(1) { animation-delay: 0ms; }
+    .card:nth-child(2) { animation-delay: 50ms; }
+    .card:nth-child(3) { animation-delay: 100ms; }
+    
+    /* FILTER BAR */
+    .filter-bar {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        align-items: center;
+        margin-bottom: 16px;
+    }
+    
+    .filter-select {
+        padding: 8px 12px;
+        font-family: 'Space Mono', monospace;
+        font-size: 11px;
+        border: 2px solid var(--ink-black);
+        border-radius: var(--radius);
+        background: var(--card-white);
+        cursor: pointer;
+    }
+    
+    .filter-label {
+        font-family: 'Space Mono', monospace;
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--slate-400);
+    }
+</style>
+</head>
+<body>
+<header>
+    <div class="brand">
+        <svg class="logo-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 125">
+            <path d="M93.764,38.143l-42-30.515c-1.053-0.764-2.475-0.764-3.527,0l-42,30.515c-1.051,0.764-1.491,2.118-1.09,3.354l16.043,49.374c0.402,1.236,1.554,2.073,2.854,2.073h51.914c1.3,0,2.451-0.837,2.854-2.073l16.043-49.374C95.255,40.261,94.814,38.907,93.764,38.143z M73.777,86.944H26.223L11.526,41.716L50,13.764l38.474,27.953L73.777,86.944z" fill="#fff" stroke="#fff" stroke-width="4"/>
+            <path d="M48.236,32.35L29.748,45.782c-1.051,0.764-1.491,2.118-1.09,3.354l7.062,21.735c0.402,1.236,1.554,2.073,2.854,2.073h22.854c1.3,0,2.451-0.837,2.854-2.073l7.062-21.735c0.401-1.236-0.039-2.59-1.09-3.354L51.764,32.35C50.711,31.586,49.289,31.586,48.236,32.35z" fill="var(--accent-amber)" stroke="#fff" stroke-width="3"/>
+        </svg>
+        <div class="brand-text">
+            <div class="app-title">DIB Jobs</div>
+            <div class="app-subtitle">Recruiter Screening Tool</div>
+        </div>
+    </div>
+    <span class="mode-badge">Recruiter Mode</span>
+</header>
+
+<main>
+    <!-- INPUT SECTION -->
+    <div class="card">
+        <div class="card-header">
+            <span class="card-title">Screen Candidates</span>
+        </div>
+        <div class="card-body">
+            <div class="two-col">
+                <!-- Job Description -->
+                <div>
+                    <label for="jobDescription">Job Description</label>
+                    <textarea id="jobDescription" placeholder="Paste the job description you're hiring for..."></textarea>
+                </div>
+                
+                <!-- Candidate Resume -->
+                <div>
+                    <label for="candidateResume">Add Candidate Resume</label>
+                    <textarea id="candidateResume" placeholder="Paste a candidate's resume here..."></textarea>
+                    <div style="margin-top: 12px;">
+                        <label for="candidateName" style="margin-bottom: 6px;">Candidate Name (optional)</label>
+                        <input type="text" id="candidateName" placeholder="e.g., John Smith">
+                    </div>
+                    <div class="action-bar">
+                        <button class="btn btn-primary" onclick="addCandidate()">
+                            <span id="addBtnText">+ Add to Queue</span>
+                        </button>
+                        <button class="btn" onclick="clearCandidateInput()">Clear</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Candidate Queue -->
+            <div class="queue-section">
+                <div class="queue-header">
+                    <span class="queue-title">Candidate Queue</span>
+                    <span class="queue-count" id="queueCount">0 candidates</span>
+                </div>
+                <div id="candidateQueue" class="candidate-queue">
+                    <div class="empty-state" id="queueEmpty">
+                        <div class="empty-icon">📋</div>
+                        <div class="empty-text">No candidates added yet</div>
+                    </div>
+                </div>
+                <div class="action-bar" id="queueActions" style="display: none;">
+                    <button class="btn btn-success" onclick="analyzeAll()" id="analyzeAllBtn">
+                        Analyze All Candidates
+                    </button>
+                    <button class="btn btn-danger" onclick="clearQueue()">Clear Queue</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- RESULTS SECTION -->
+    <div class="card" id="resultsCard" style="display: none;">
+        <div class="card-header">
+            <span class="card-title">Candidate Rankings</span>
+            <div style="display: flex; gap: 12px;">
+                <button class="btn btn-sm" onclick="exportCSV()">Export CSV</button>
+            </div>
+        </div>
+        <div class="card-body">
+            <!-- Summary Stats -->
+            <div class="stats-grid" id="summaryStats">
+                <div class="stat-card amber">
+                    <div class="stat-value" id="totalCandidates">0</div>
+                    <div class="stat-label">Candidates</div>
+                </div>
+                <div class="stat-card emerald">
+                    <div class="stat-value" id="strongMatches">0</div>
+                    <div class="stat-label">Strong (75%+)</div>
+                </div>
+                <div class="stat-card blue">
+                    <div class="stat-value" id="avgScore">0%</div>
+                    <div class="stat-label">Avg Score</div>
+                </div>
+                <div class="stat-card rose">
+                    <div class="stat-value" id="flaggedCount">0</div>
+                    <div class="stat-label">Red Flags</div>
+                </div>
+            </div>
+            
+            <!-- Filters -->
+            <div class="filter-bar">
+                <span class="filter-label">Filter by:</span>
+                <select class="filter-select" id="scoreFilter" onchange="applyFilters()">
+                    <option value="all">All Scores</option>
+                    <option value="strong">Strong (75%+)</option>
+                    <option value="moderate">Moderate (50-74%)</option>
+                    <option value="weak">Weak (&lt;50%)</option>
+                </select>
+                <select class="filter-select" id="clearanceFilter" onchange="applyFilters()">
+                    <option value="all">All Clearances</option>
+                    <option value="ts">TS/SCI Only</option>
+                    <option value="secret">Secret+</option>
+                    <option value="none">No Clearance</option>
+                </select>
+            </div>
+            
+            <!-- Results Table -->
+            <div style="overflow-x: auto;">
+                <table class="results-table" id="resultsTable">
+                    <thead>
+                        <tr>
+                            <th onclick="sortTable('rank')" style="width: 60px;">Rank</th>
+                            <th onclick="sortTable('name')">Candidate</th>
+                            <th onclick="sortTable('score')" style="width: 80px;">Score</th>
+                            <th onclick="sortTable('clearance')" style="width: 120px;">Clearance</th>
+                            <th>Key Strengths</th>
+                            <th>Gaps / Red Flags</th>
+                            <th style="width: 80px;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="resultsBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- Detail Modal -->
+<div class="modal-overlay" id="detailModal" onclick="closeModal(event)">
+    <div class="modal" onclick="event.stopPropagation()">
+        <div class="modal-header">
+            <span class="modal-title" id="modalTitle">Candidate Details</span>
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+        </div>
+        <div class="modal-body" id="modalBody">
+            <!-- Dynamic content -->
+        </div>
+    </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ==========================================================================
+// CONFIGURATION
+// ==========================================================================
+const API_ENDPOINT = 'https://76unm1rlj0.execute-api.us-east-1.amazonaws.com/default/grumpy2';
+
+// ==========================================================================
+// STATE
+// ==========================================================================
+let candidateQueue = [];
+let analysisResults = [];
+let currentSort = { column: 'score', direction: 'desc' };
+
+// ==========================================================================
+// CANDIDATE QUEUE MANAGEMENT
+// ==========================================================================
+function addCandidate() {
+    const resumeText = document.getElementById('candidateResume').value.trim();
+    const nameInput = document.getElementById('candidateName').value.trim();
+    
+    if (!resumeText || resumeText.length < 100) {
+        showToast('Please paste a resume (at least 100 characters)', true);
+        return;
+    }
+    
+    // Extract name from resume if not provided
+    let candidateName = nameInput;
+    if (!candidateName) {
+        // Try to extract name from first line of resume
+        const firstLine = resumeText.split('\n')[0].trim();
+        if (firstLine.length < 50 && !firstLine.includes('@') && !firstLine.includes('http')) {
+            candidateName = firstLine;
+        } else {
+            candidateName = `Candidate ${candidateQueue.length + 1}`;
+        }
+    }
+    
+    // Check for duplicate
+    const isDuplicate = candidateQueue.some(c => c.resumeText === resumeText);
+    if (isDuplicate) {
+        showToast('This resume is already in the queue', true);
+        return;
+    }
+    
+    const candidate = {
+        id: Date.now(),
+        name: candidateName,
+        resumeText: resumeText,
+        status: 'pending', // pending, analyzing, complete, error
+        result: null
+    };
+    
+    candidateQueue.push(candidate);
+    renderQueue();
+    clearCandidateInput();
+    showToast(`Added ${candidateName} to queue`);
+}
+
+function removeCandidate(id) {
+    candidateQueue = candidateQueue.filter(c => c.id !== id);
+    analysisResults = analysisResults.filter(r => r.id !== id);
+    renderQueue();
+    renderResults();
+}
+
+function clearCandidateInput() {
+    document.getElementById('candidateResume').value = '';
+    document.getElementById('candidateName').value = '';
+}
+
+function clearQueue() {
+    if (confirm('Clear all candidates from queue?')) {
+        candidateQueue = [];
+        analysisResults = [];
+        renderQueue();
+        document.getElementById('resultsCard').style.display = 'none';
+    }
+}
+
+function renderQueue() {
+    const container = document.getElementById('candidateQueue');
+    const countEl = document.getElementById('queueCount');
+    const actionsEl = document.getElementById('queueActions');
+    const emptyEl = document.getElementById('queueEmpty');
+    
+    countEl.textContent = `${candidateQueue.length} candidate${candidateQueue.length !== 1 ? 's' : ''}`;
+    
+    if (candidateQueue.length === 0) {
+        emptyEl.style.display = 'block';
+        actionsEl.style.display = 'none';
+        container.innerHTML = '';
+        container.appendChild(emptyEl);
+        return;
+    }
+    
+    emptyEl.style.display = 'none';
+    actionsEl.style.display = 'flex';
+    
+    container.innerHTML = candidateQueue.map(candidate => {
+        let statusClass = '';
+        let statusText = 'Pending';
+        let scoreHtml = '';
+        
+        if (candidate.status === 'analyzing') {
+            statusClass = 'analyzing';
+            statusText = '<span class="spinner"></span> Analyzing...';
+        } else if (candidate.status === 'complete' && candidate.result) {
+            statusClass = 'complete';
+            statusText = 'Complete';
+            const score = candidate.result.score || 0;
+            const scoreClass = score >= 75 ? 'score-high' : score >= 50 ? 'score-mid' : 'score-low';
+            scoreHtml = `<span class="queue-score ${scoreClass}">${score}%</span>`;
+        } else if (candidate.status === 'error') {
+            statusClass = 'error';
+            statusText = 'Error';
+        }
+        
+        return `
+            <div class="queue-item ${statusClass}">
+                <div>
+                    <div class="queue-name">${escapeHtml(candidate.name)}</div>
+                    <div class="queue-status">${statusText}</div>
+                </div>
+                <div class="queue-actions">
+                    ${scoreHtml}
+                    <button class="remove-btn" onclick="removeCandidate(${candidate.id})" title="Remove">×</button>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+// ==========================================================================
+// ANALYSIS
+// ==========================================================================
+async function analyzeAll() {
+    const jobDescription = document.getElementById('jobDescription').value.trim();
+    
+    if (!jobDescription || jobDescription.length < 50) {
+        showToast('Please paste a job description first', true);
+        return;
+    }
+    
+    if (candidateQueue.length === 0) {
+        showToast('Add at least one candidate to analyze', true);
+        return;
+    }
+    
+    const btn = document.getElementById('analyzeAllBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> Analyzing...';
+    
+    analysisResults = [];
+    
+    // Analyze each candidate sequentially to avoid rate limits
+    for (const candidate of candidateQueue) {
+        candidate.status = 'analyzing';
+        renderQueue();
+        
+        try {
+            const result = await analyzeCandidate(jobDescription, candidate.resumeText);
+            candidate.status = 'complete';
+            candidate.result = result;
+            
+            analysisResults.push({
+                id: candidate.id,
+                name: candidate.name,
+                resumeText: candidate.resumeText,
+                ...result
+            });
+        } catch (error) {
+            candidate.status = 'error';
+            candidate.result = { error: error.message };
+            console.error(`Error analyzing ${candidate.name}:`, error);
+        }
+        
+        renderQueue();
+    }
+    
+    btn.disabled = false;
+    btn.innerHTML = 'Analyze All Candidates';
+    
+    // Sort by score descending and render results
+    analysisResults.sort((a, b) => (b.score || 0) - (a.score || 0));
+    renderResults();
+    showToast(`Analysis complete: ${analysisResults.length} candidates ranked`);
+}
+
+async function analyzeCandidate(jobDescription, resumeText) {
+    const response = await fetch(API_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            request_type: 'resume_match',
+            job_description: jobDescription,
+            resume_text: resumeText
+        })
+    });
+    
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Analysis failed');
+    }
+    
+    return await response.json();
+}
+
+// ==========================================================================
+// RESULTS RENDERING
+// ==========================================================================
+function renderResults() {
+    const resultsCard = document.getElementById('resultsCard');
+    const tbody = document.getElementById('resultsBody');
+    
+    if (analysisResults.length === 0) {
+        resultsCard.style.display = 'none';
+        return;
+    }
+    
+    resultsCard.style.display = 'block';
+    
+    // Apply filters
+    let filtered = applyFiltersToData(analysisResults);
+    
+    // Update stats
+    updateStats(analysisResults);
+    
+    // Render table
+    tbody.innerHTML = filtered.map((result, index) => {
+        const rank = index + 1;
+        const score = result.score || 0;
+        const scoreClass = score >= 75 ? 'score-high' : score >= 50 ? 'score-mid' : 'score-low';
+        const rankClass = rank <= 3 ? `rank-${rank}` : '';
+        
+        // Extract clearance
+        const clearance = extractClearance(result);
+        const clearanceClass = clearance.includes('TS') ? 'clearance-ts' : 
+                               clearance.includes('Secret') ? 'clearance-secret' : 'clearance-none';
+        
+        // Extract matches and gaps
+        const matches = (result.analysis || []).filter(a => a.startsWith('Match:')).slice(0, 3);
+        const gaps = (result.analysis || []).filter(a => a.startsWith('Gap:'));
+        
+        // Check for red flags
+        const redFlags = extractRedFlags(result, gaps);
+        
+        return `
+            <tr class="${rankClass}">
+                <td><span class="rank-badge">${rank}</span></td>
+                <td>
+                    <div class="candidate-name">${escapeHtml(result.name)}</div>
+                </td>
+                <td class="score-cell ${scoreClass}">${score}%</td>
+                <td><span class="clearance-badge ${clearanceClass}">${clearance}</span></td>
+                <td>
+                    <div class="pill-list">
+                        ${matches.slice(0, 2).map(m => `<span class="pill pill-match">${escapeHtml(m.replace('Match:', '').trim().substring(0, 30))}...</span>`).join('')}
+                    </div>
+                </td>
+                <td>
+                    <div class="pill-list">
+                        ${redFlags.map(f => `<span class="red-flag">${escapeHtml(f)}</span>`).join('')}
+                        ${gaps.slice(0, 2).map(g => `<span class="pill pill-gap">${escapeHtml(g.replace('Gap:', '').trim().substring(0, 25))}...</span>`).join('')}
+                    </div>
+                </td>
+                <td>
+                    <button class="btn btn-sm" onclick="showDetails(${result.id})">View</button>
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+function applyFiltersToData(data) {
+    const scoreFilter = document.getElementById('scoreFilter').value;
+    const clearanceFilter = document.getElementById('clearanceFilter').value;
+    
+    return data.filter(result => {
+        const score = result.score || 0;
+        const clearance = extractClearance(result).toLowerCase();
+        
+        // Score filter
+        if (scoreFilter === 'strong' && score < 75) return false;
+        if (scoreFilter === 'moderate' && (score < 50 || score >= 75)) return false;
+        if (scoreFilter === 'weak' && score >= 50) return false;
+        
+        // Clearance filter
+        if (clearanceFilter === 'ts' && !clearance.includes('ts')) return false;
+        if (clearanceFilter === 'secret' && !clearance.includes('secret') && !clearance.includes('ts')) return false;
+        if (clearanceFilter === 'none' && (clearance.includes('secret') || clearance.includes('ts'))) return false;
+        
+        return true;
+    });
+}
+
+function applyFilters() {
+    renderResults();
+}
+
+function updateStats(results) {
+    const total = results.length;
+    const strong = results.filter(r => (r.score || 0) >= 75).length;
+    const avgScore = total > 0 ? Math.round(results.reduce((sum, r) => sum + (r.score || 0), 0) / total) : 0;
+    const flagged = results.filter(r => extractRedFlags(r, []).length > 0).length;
+    
+    document.getElementById('totalCandidates').textContent = total;
+    document.getElementById('strongMatches').textContent = strong;
+    document.getElementById('avgScore').textContent = avgScore + '%';
+    document.getElementById('flaggedCount').textContent = flagged;
+}
+
+function extractClearance(result) {
+    // Try to find clearance in analysis or keywords
+    const analysis = (result.analysis || []).join(' ').toLowerCase();
+    const resumeText = (result.resumeText || '').toLowerCase();
+    
+    if (analysis.includes('ts/sci') || resumeText.includes('ts/sci') || resumeText.includes('top secret/sci')) {
+        return 'TS/SCI';
+    }
+    if (analysis.includes('top secret') || resumeText.includes('top secret')) {
+        return 'Top Secret';
+    }
+    if (analysis.includes('secret clearance') || resumeText.includes('secret clearance')) {
+        return 'Secret';
+    }
+    if (resumeText.includes('poly') || resumeText.includes('polygraph')) {
+        if (resumeText.includes('ts/sci') || resumeText.includes('top secret')) {
+            return 'TS/SCI + Poly';
+        }
+    }
+    
+    return 'Unknown';
+}
+
+function extractRedFlags(result, gaps) {
+    const flags = [];
+    const analysis = (result.analysis || []).join(' ').toLowerCase();
+    const gapText = gaps.join(' ').toLowerCase();
+    
+    // Check for clearance mismatch
+    if (gapText.includes('clearance') || gapText.includes('security')) {
+        flags.push('Clearance');
+    }
+    
+    // Check for experience gap
+    if (gapText.includes('years') || gapText.includes('experience')) {
+        flags.push('Experience');
+    }
+    
+    // Low score is a flag
+    if ((result.score || 0) < 50) {
+        flags.push('Low Fit');
+    }
+    
+    return flags.slice(0, 2); // Max 2 flags shown
+}
+
+// ==========================================================================
+// DETAIL MODAL
+// ==========================================================================
+function showDetails(candidateId) {
+    const result = analysisResults.find(r => r.id === candidateId);
+    if (!result) return;
+    
+    const modal = document.getElementById('detailModal');
+    const title = document.getElementById('modalTitle');
+    const body = document.getElementById('modalBody');
+    
+    title.textContent = result.name;
+    
+    const matches = (result.analysis || []).filter(a => a.startsWith('Match:'));
+    const gaps = (result.analysis || []).filter(a => a.startsWith('Gap:'));
+    
+    body.innerHTML = `
+        <div class="detail-section">
+            <div class="detail-label">Match Score</div>
+            <div class="detail-score ${result.score >= 75 ? 'score-high' : result.score >= 50 ? 'score-mid' : 'score-low'}">${result.score || 0}%</div>
+            <div class="detail-verdict">${result.verdict || 'No verdict available'}</div>
+        </div>
+        
+        <div class="detail-section">
+            <div class="detail-label">Clearance</div>
+            <div class="detail-value">${extractClearance(result)}</div>
+        </div>
+        
+        <div class="detail-section">
+            <div class="detail-label">Job Identified</div>
+            <div class="detail-value"><strong>${result.job_title || 'Unknown'}</strong> at ${result.company || 'Unknown'}</div>
+        </div>
+        
+        <div class="detail-section">
+            <div class="detail-label">Key Strengths (${matches.length})</div>
+            <div class="detail-value">
+                ${matches.length > 0 ? matches.map(m => `
+                    <div style="margin-bottom: 8px; padding: 10px 12px; background: var(--accent-emerald-light); border-left: 3px solid var(--accent-emerald); border-radius: 4px;">
+                        ${escapeHtml(m.replace('Match:', '').trim())}
+                    </div>
+                `).join('') : '<em>None identified</em>'}
+            </div>
+        </div>
+        
+        <div class="detail-section">
+            <div class="detail-label">Gaps / Concerns (${gaps.length})</div>
+            <div class="detail-value">
+                ${gaps.length > 0 ? gaps.map(g => `
+                    <div style="margin-bottom: 8px; padding: 10px 12px; background: var(--accent-rose-light); border-left: 3px solid var(--accent-rose); border-radius: 4px;">
+                        ${escapeHtml(g.replace('Gap:', '').trim())}
+                    </div>
+                `).join('') : '<em>None identified</em>'}
+            </div>
+        </div>
+        
+        ${result.interview_questions ? `
+        <div class="detail-section">
+            <div class="detail-label">Suggested Interview Questions</div>
+            <div class="detail-value">
+                ${result.interview_questions.map((q, i) => `
+                    <div style="margin-bottom: 8px; padding: 10px 12px; background: var(--slate-100); border-radius: 4px;">
+                        <strong>${i + 1}.</strong> ${escapeHtml(q)}
+                    </div>
+                `).join('')}
+            </div>
+        </div>
+        ` : ''}
+    `;
+    
+    modal.classList.add('active');
+}
+
+function closeModal(event) {
+    if (event && event.target !== event.currentTarget) return;
+    document.getElementById('detailModal').classList.remove('active');
+}
+
+// Close modal on Escape
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeModal();
+});
+
+// ==========================================================================
+// SORTING
+// ==========================================================================
+function sortTable(column) {
+    if (currentSort.column === column) {
+        currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+    } else {
+        currentSort.column = column;
+        currentSort.direction = column === 'score' ? 'desc' : 'asc';
+    }
+    
+    analysisResults.sort((a, b) => {
+        let valA, valB;
+        
+        switch (column) {
+            case 'rank':
+            case 'score':
+                valA = a.score || 0;
+                valB = b.score || 0;
+                break;
+            case 'name':
+                valA = a.name.toLowerCase();
+                valB = b.name.toLowerCase();
+                break;
+            case 'clearance':
+                valA = extractClearance(a);
+                valB = extractClearance(b);
+                break;
+            default:
+                return 0;
+        }
+        
+        if (valA < valB) return currentSort.direction === 'asc' ? -1 : 1;
+        if (valA > valB) return currentSort.direction === 'asc' ? 1 : -1;
+        return 0;
+    });
+    
+    // Update header classes
+    document.querySelectorAll('.results-table th').forEach(th => {
+        th.classList.remove('sorted-asc', 'sorted-desc');
+    });
+    
+    renderResults();
+}
+
+// ==========================================================================
+// CSV EXPORT
+// ==========================================================================
+function exportCSV() {
+    if (analysisResults.length === 0) {
+        showToast('No results to export', true);
+        return;
+    }
+    
+    const headers = ['Rank', 'Name', 'Score', 'Clearance', 'Job Title', 'Company', 'Verdict', 'Key Matches', 'Gaps'];
+    
+    const rows = analysisResults.map((result, index) => {
+        const matches = (result.analysis || []).filter(a => a.startsWith('Match:')).map(m => m.replace('Match:', '').trim()).join('; ');
+        const gaps = (result.analysis || []).filter(a => a.startsWith('Gap:')).map(g => g.replace('Gap:', '').trim()).join('; ');
+        
+        return [
+            index + 1,
+            result.name,
+            result.score || 0,
+            extractClearance(result),
+            result.job_title || '',
+            result.company || '',
+            (result.verdict || '').replace(/"/g, '""'),
+            matches.replace(/"/g, '""'),
+            gaps.replace(/"/g, '""')
+        ];
+    });
+    
+    const csvContent = [
+        headers.join(','),
+        ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
+    ].join('\n');
+    
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    
+    const timestamp = new Date().toISOString().split('T')[0];
+    link.setAttribute('href', url);
+    link.setAttribute('download', `candidate-rankings-${timestamp}.csv`);
+    link.style.display = 'none';
+    
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    showToast('CSV exported successfully');
+}
+
+// ==========================================================================
+// UTILITIES
+// ==========================================================================
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function showToast(message, isError = false) {
+    const toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.style.borderColor = isError ? 'var(--accent-rose)' : 'var(--accent-emerald)';
+    toast.classList.add('show');
+    
+    setTimeout(() => {
+        toast.classList.remove('show');
+    }, 3000);
+}
+
+// ==========================================================================
+// INITIALIZE
+// ==========================================================================
+document.addEventListener('DOMContentLoaded', () => {
+    renderQueue();
+});
+</script>
+</body>
+</html>
