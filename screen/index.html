@@ -1121,19 +1121,20 @@ function renderQueue() {
     const container = document.getElementById('candidateQueue');
     const countEl = document.getElementById('queueCount');
     const actionsEl = document.getElementById('queueActions');
-    const emptyEl = document.getElementById('queueEmpty');
     
     countEl.textContent = `${candidateQueue.length} candidate${candidateQueue.length !== 1 ? 's' : ''}`;
     
     if (candidateQueue.length === 0) {
-        emptyEl.style.display = 'block';
         actionsEl.style.display = 'none';
-        container.innerHTML = '';
-        container.appendChild(emptyEl);
+        container.innerHTML = `
+            <div class="empty-state">
+                <div class="empty-icon">📋</div>
+                <div class="empty-text">No candidates added yet</div>
+            </div>
+        `;
         return;
     }
     
-    emptyEl.style.display = 'none';
     actionsEl.style.display = 'flex';
     
     container.innerHTML = candidateQueue.map(candidate => {
