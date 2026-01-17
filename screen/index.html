@@ -1922,11 +1922,11 @@ function showDetails(candidateId) {
             </div>
         </div>
         
-        ${result.interview_questions ? `
+        ${hasValidInterviewQuestions(result) ? `
         <div class="detail-section">
             <div class="detail-label">Suggested Interview Questions</div>
             <div class="detail-value">
-                ${result.interview_questions.map((q, i) => `
+                ${getValidInterviewQuestions(result).map((q, i) => `
                     <div style="margin-bottom: 8px; padding: 10px 12px; background: var(--slate-100); border-radius: 4px;">
                         <strong>${i + 1}.</strong> ${escapeHtml(q)}
                     </div>
@@ -1942,6 +1942,38 @@ function showDetails(candidateId) {
 function closeModal(event) {
     if (event && event.target !== event.currentTarget) return;
     document.getElementById('detailModal').classList.remove('active');
+}
+
+// Helper functions to validate interview questions
+function hasValidInterviewQuestions(result) {
+    const questions = getValidInterviewQuestions(result);
+    return questions.length > 0;
+}
+
+function getValidInterviewQuestions(result) {
+    if (!result.interview_questions || !Array.isArray(result.interview_questions)) {
+        return [];
+    }
+    
+    // Filter to only valid string questions that aren't empty or [object Object]
+    return result.interview_questions.filter(q => {
+        if (typeof q === 'string' && q.trim().length > 0 && !q.includes('[object')) {
+            return true;
+        }
+        // If it's an object with a question property, extract that
+        if (typeof q === 'object' && q !== null) {
+            const questionText = q.question || q.text || q.content;
+            if (typeof questionText === 'string' && questionText.trim().length > 0) {
+                return true;
+            }
+        }
+        return false;
+    }).map(q => {
+        // Return the string value
+        if (typeof q === 'string') return q.trim();
+        // Extract from object
+        return (q.question || q.text || q.content || '').trim();
+    });
 }
 
 // Close modal on Escape
