@@ -1183,6 +1183,49 @@
     .copy-btn:hover {
         background: var(--slate-100);
     }
+    
+    /* Candidate verdict in table */
+    .candidate-verdict {
+        font-size: 11px;
+        color: var(--slate-400);
+        font-style: italic;
+        margin-top: 2px;
+    }
+    
+    /* Better pill styling for table */
+    .pill {
+        display: inline-block;
+        padding: 4px 8px;
+        font-size: 11px;
+        font-weight: 600;
+        border-radius: 4px;
+        margin: 2px;
+        line-height: 1.3;
+    }
+    
+    .pill-match {
+        background: var(--accent-green-light);
+        color: #2d5a36;
+        border: 1px solid var(--accent-green);
+    }
+    
+    .pill-gap {
+        background: var(--accent-clay-light);
+        color: #8b4332;
+        border: 1px solid var(--accent-clay);
+    }
+    
+    .pill-list {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+    }
+    
+    .no-data {
+        color: var(--slate-300);
+        font-style: italic;
+        font-size: 12px;
+    }
 </style>
 </head>
 <body>
@@ -1330,13 +1373,13 @@
                     <thead>
                         <tr>
                             <th onclick="sortTable('rank')" style="width: 50px;">Rank</th>
-                            <th onclick="sortTable('name')" style="width: 120px;">Candidate</th>
+                            <th onclick="sortTable('name')" style="width: 140px;">Candidate</th>
                             <th onclick="sortTable('score')" style="width: 70px;">Score</th>
                             <th style="width: 100px;">Status</th>
-                            <th style="width: 200px;">Strengths</th>
-                            <th style="width: 200px;">Gaps</th>
+                            <th style="width: 220px;">Strengths</th>
+                            <th style="width: 220px;">Gaps</th>
                             <th onclick="sortTable('clearance')" style="width: 100px;">Clearance</th>
-                            <th style="width: 150px;">Notes</th>
+                            <th style="width: 140px;">Notes</th>
                             <th style="width: 70px;">Actions</th>
                         </tr>
                     </thead>
@@ -1716,15 +1759,20 @@ function renderResults() {
         const clearanceClass = clearance.includes('TS') ? 'clearance-ts' : 
                                clearance.includes('Secret') ? 'clearance-secret' : 'clearance-none';
         
-        // Extract matches and gaps for pills
+        // Extract matches and gaps - get just the key part before the arrow
+        const extractKeyPart = (str) => {
+            const arrowIdx = str.indexOf('→');
+            return arrowIdx > 0 ? str.substring(0, arrowIdx).trim() : str.substring(0, 50);
+        };
+        
         const matches = (result.analysis || [])
             .filter(a => a.startsWith('Match:'))
-            .map(m => m.replace('Match:', '').trim())
+            .map(m => extractKeyPart(m.replace('Match:', '').trim()))
             .slice(0, 3);
         
         const gaps = (result.analysis || [])
             .filter(a => a.startsWith('Gap:'))
-            .map(g => g.replace('Gap:', '').trim())
+            .map(g => extractKeyPart(g.replace('Gap:', '').trim()))
             .slice(0, 3);
         
         // Get current status and notes
@@ -1732,20 +1780,25 @@ function renderResults() {
         const notes = result.notes || '';
         const statusClass = `status-${status}`;
         
-        // Generate strength/gap pills HTML
-        const strengthsHtml = matches.length > 0 
-            ? matches.map(m => `<span class="pill pill-match">${escapeHtml(truncateText(m, 35))}</span>`).join('')
-            : '<span class="no-data">None identified</span>';
+        // Get verdict for quick assessment
+        const verdict = result.verdict || '';
         
+        // Generate strength pills - show up to 3, more visible
+        const strengthsHtml = matches.length > 0 
+            ? matches.map(m => `<span class="pill pill-match" title="${escapeHtml(m)}">✓ ${escapeHtml(truncateText(m, 30))}</span>`).join('')
+            : '<span class="no-data">—</span>';
+        
+        // Generate gap pills - show up to 3, CRITICAL for recruiter screening
         const gapsHtml = gaps.length > 0 
-            ? gaps.map(g => `<span class="pill pill-gap">${escapeHtml(truncateText(g, 35))}</span>`).join('')
-            : '<span class="no-data">None identified</span>';
+            ? gaps.map(g => `<span class="pill pill-gap" title="${escapeHtml(g)}">✗ ${escapeHtml(truncateText(g, 30))}</span>`).join('')
+            : '<span class="no-data">—</span>';
         
         return `
             <tr class="${rankClass}" data-id="${result.id}">
                 <td><span class="rank-badge">${rank}</span></td>
                 <td>
                     <div class="candidate-name">${escapeHtml(result.name)}</div>
+                    ${verdict ? `<div class="candidate-verdict">${escapeHtml(verdict)}</div>` : ''}
                 </td>
                 <td class="score-cell ${scoreClass}">${score}%</td>
                 <td>
