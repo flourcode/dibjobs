@@ -1770,10 +1770,20 @@ function renderResults() {
             .map(m => extractKeyPart(m.replace('Match:', '').trim()))
             .slice(0, 3);
         
-        const gaps = (result.analysis || [])
+        // Get gaps from BOTH analysis array AND gap_strategies
+        let gaps = (result.analysis || [])
             .filter(a => a.startsWith('Gap:'))
-            .map(g => extractKeyPart(g.replace('Gap:', '').trim()))
-            .slice(0, 3);
+            .map(g => extractKeyPart(g.replace('Gap:', '').trim()));
+        
+        // Also extract from gap_strategies if analysis gaps are empty
+        if (gaps.length === 0 && result.gap_strategies && Array.isArray(result.gap_strategies)) {
+            gaps = result.gap_strategies
+                .filter(gs => gs && gs.gap)
+                .map(gs => gs.gap)
+                .slice(0, 3);
+        } else {
+            gaps = gaps.slice(0, 3);
+        }
         
         // Get current status and notes
         const status = result.status || 'review';
@@ -2093,12 +2103,19 @@ function exportShortlist() {
             .slice(0, 3)
             .join(' • ');
         
-        // Get top 2 gaps as short bullets
-        const gaps = (result.analysis || [])
+        // Get gaps from analysis OR gap_strategies
+        let gaps = (result.analysis || [])
             .filter(a => a.startsWith('Gap:'))
-            .map(g => extractKeyPoint(g.replace('Gap:', '').trim()))
-            .slice(0, 2)
-            .join(' • ');
+            .map(g => extractKeyPoint(g.replace('Gap:', '').trim()));
+        
+        // Fallback to gap_strategies if no gaps in analysis
+        if (gaps.length === 0 && result.gap_strategies) {
+            gaps = result.gap_strategies
+                .filter(gs => gs && gs.gap)
+                .map(gs => gs.gap);
+        }
+        
+        const gapsStr = gaps.slice(0, 2).join(' • ');
         
         return [
             index + 1,
@@ -2106,7 +2123,7 @@ function exportShortlist() {
             (result.score || 0) + '%',
             extractClearance(result),
             strengths || 'None identified',
-            gaps || 'None identified',
+            gapsStr || 'None identified',
             (result.notes || '').replace(/"/g, '""')
         ];
     });
@@ -2161,13 +2178,23 @@ function showDetails(candidateId) {
     title.textContent = result.name;
     
     const matches = (result.analysis || []).filter(a => a.startsWith('Match:'));
-    const gaps = (result.analysis || []).filter(a => a.startsWith('Gap:'));
+    
+    // Get gaps from analysis array first
+    let gaps = (result.analysis || []).filter(a => a.startsWith('Gap:'));
+    
+    // Get gap strategies from Lambda
+    const gapStrategies = result.gap_strategies || [];
+    
+    // If no gaps in analysis but we have gap_strategies, extract gaps from there
+    const gapsFromStrategies = gapStrategies.map(gs => gs.gap).filter(g => g);
     
     // Get interview questions with suggested answers
     const interviewQs = getInterviewQuestionsWithAnswers(result);
     
-    // Get gap strategies from Lambda
-    const gapStrategies = result.gap_strategies || [];
+    // Determine which gaps to show - prefer analysis, fallback to gap_strategies
+    const hasAnalysisGaps = gaps.length > 0;
+    const displayGaps = hasAnalysisGaps ? gaps : gapsFromStrategies;
+    const gapCount = displayGaps.length;
     
     body.innerHTML = `
         <div class="detail-section">
@@ -2211,11 +2238,11 @@ function showDetails(candidateId) {
         </div>
         
         <div class="detail-section">
-            <div class="detail-label">Gaps / Concerns (${gaps.length})</div>
+            <div class="detail-label">Gaps / Concerns (${gapCount})</div>
             <div class="detail-value">
-                ${gaps.length > 0 ? gaps.map(g => `
+                ${gapCount > 0 ? displayGaps.map(g => `
                     <div style="margin-bottom: 8px; padding: 10px 12px; background: var(--accent-clay-light); border-left: 3px solid var(--accent-clay); border-radius: 4px;">
-                        ${escapeHtml(g.replace('Gap:', '').trim())}
+                        ${escapeHtml(hasAnalysisGaps ? g.replace('Gap:', '').trim() : g)}
                     </div>
                 `).join('') : '<em>None identified</em>'}
             </div>
@@ -2405,12 +2432,19 @@ function exportCSV() {
             .slice(0, 3)
             .join(' • ');
         
-        // Get top 2 gaps as short bullets  
-        const gaps = (result.analysis || [])
+        // Get gaps from analysis OR gap_strategies
+        let gaps = (result.analysis || [])
             .filter(a => a.startsWith('Gap:'))
-            .map(g => extractKeyPoint(g.replace('Gap:', '').trim()))
-            .slice(0, 2)
-            .join(' • ');
+            .map(g => extractKeyPoint(g.replace('Gap:', '').trim()));
+        
+        // Fallback to gap_strategies if no gaps in analysis
+        if (gaps.length === 0 && result.gap_strategies) {
+            gaps = result.gap_strategies
+                .filter(gs => gs && gs.gap)
+                .map(gs => gs.gap);
+        }
+        
+        const gapsStr = gaps.slice(0, 2).join(' • ');
         
         return [
             index + 1,
@@ -2419,7 +2453,7 @@ function exportCSV() {
             statusLabels[result.status] || 'Needs Review',
             extractClearance(result),
             strengths || 'None identified',
-            gaps || 'None identified',
+            gapsStr || 'None identified',
             (result.notes || '').replace(/"/g, '""')
         ];
     });
