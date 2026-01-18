@@ -1160,6 +1160,29 @@
         align-items: center;
         margin-bottom: 16px;
     }
+    
+    /* Copy button in modal */
+    .copy-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 12px;
+        font-family: 'Space Mono', monospace;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+        color: var(--ink-black);
+        background: var(--card-white);
+        border: 2px solid var(--ink-black);
+        border-radius: var(--radius);
+        cursor: pointer;
+        transition: all var(--transition-snap);
+    }
+    
+    .copy-btn:hover {
+        background: var(--slate-100);
+    }
 </style>
 </head>
 <body>
@@ -1651,7 +1674,13 @@ async function analyzeCandidate(jobDescription, resumeText) {
         throw new Error(error.error || 'Analysis failed');
     }
     
-    return await response.json();
+    const result = await response.json();
+    
+    // Debug: Log the full Lambda response to help diagnose issues
+    console.log('[DIB Recruiter] Lambda Response:', result);
+    console.log('[DIB Recruiter] Fields received:', Object.keys(result));
+    
+    return result;
 }
 
 // ==========================================================================
@@ -1854,26 +1883,43 @@ function extractRedFlags(result, gaps) {
 // ==========================================================================
 function generateWhySummary(result) {
     const score = result.score || 0;
+    const verdict = result.verdict || '';
     const matches = (result.analysis || []).filter(a => a.startsWith('Match:')).map(m => m.replace('Match:', '').trim());
     const gaps = (result.analysis || []).filter(a => a.startsWith('Gap:')).map(g => g.replace('Gap:', '').trim());
     
-    // Get top match and gap
-    const topMatch = matches[0] ? matches[0].substring(0, 60) : null;
-    const topGap = gaps[0] ? gaps[0].substring(0, 60) : null;
+    // Extract the key part of match/gap (before the arrow)
+    const getKeyPart = (str) => {
+        const arrowIndex = str.indexOf('→');
+        if (arrowIndex > 0) {
+            return str.substring(0, arrowIndex).trim();
+        }
+        return str.substring(0, 50);
+    };
+    
+    const topMatch = matches[0] ? getKeyPart(matches[0]) : null;
+    const topGap = gaps[0] ? getKeyPart(gaps[0]) : null;
     
     let summary = '';
     let html = '';
     
-    // Build the summary
-    if (score >= 75) {
-        summary = `Strong fit (${score}%). `;
-        html = `<span class="why-good">✓ Strong fit (${score}%).</span> `;
-    } else if (score >= 50) {
-        summary = `Moderate fit (${score}%). `;
-        html = `Moderate fit (${score}%). `;
+    // Use Lambda's verdict if available, otherwise generate from score
+    if (verdict && verdict.length > 0) {
+        const verdictClass = score >= 75 ? 'why-good' : score >= 50 ? '' : 'why-bad';
+        const verdictIcon = score >= 75 ? '✓' : score >= 50 ? '•' : '⚠';
+        html = `<span class="${verdictClass}">${verdictIcon} ${escapeHtml(verdict)} (${score}%)</span> `;
+        summary = `${verdict} (${score}%). `;
     } else {
-        summary = `Weak fit (${score}%). `;
-        html = `<span class="why-bad">⚠ Weak fit (${score}%).</span> `;
+        // Fallback to generated summary
+        if (score >= 75) {
+            summary = `Strong fit (${score}%). `;
+            html = `<span class="why-good">✓ Strong fit (${score}%).</span> `;
+        } else if (score >= 50) {
+            summary = `Moderate fit (${score}%). `;
+            html = `Moderate fit (${score}%). `;
+        } else {
+            summary = `Weak fit (${score}%). `;
+            html = `<span class="why-bad">⚠ Weak fit (${score}%).</span> `;
+        }
     }
     
     if (topMatch) {
@@ -2064,6 +2110,12 @@ function showDetails(candidateId) {
     const matches = (result.analysis || []).filter(a => a.startsWith('Match:'));
     const gaps = (result.analysis || []).filter(a => a.startsWith('Gap:'));
     
+    // Get interview questions with suggested answers
+    const interviewQs = getInterviewQuestionsWithAnswers(result);
+    
+    // Get gap strategies from Lambda
+    const gapStrategies = result.gap_strategies || [];
+    
     body.innerHTML = `
         <div class="detail-section">
             <div class="detail-label">Match Score</div>
@@ -2072,20 +2124,33 @@ function showDetails(candidateId) {
         </div>
         
         <div class="detail-section">
-            <div class="detail-label">Clearance</div>
-            <div class="detail-value">${extractClearance(result)}</div>
+            <div class="detail-label">Job Identified</div>
+            <div class="detail-value">
+                <strong>${result.job_title || 'Unknown'}</strong> at ${result.company || 'Unknown'}
+                ${result.job_summary ? `<div style="margin-top: 6px; color: var(--slate-400); font-size: 13px;">${escapeHtml(result.job_summary)}</div>` : ''}
+            </div>
         </div>
         
         <div class="detail-section">
-            <div class="detail-label">Job Identified</div>
-            <div class="detail-value"><strong>${result.job_title || 'Unknown'}</strong> at ${result.company || 'Unknown'}</div>
+            <div class="detail-label">Clearance Status</div>
+            <div class="detail-value">${extractClearance(result)}</div>
         </div>
+        
+        ${result.tailored_summary ? `
+        <div class="detail-section">
+            <div class="detail-label">Tailored Executive Summary</div>
+            <div class="detail-value" style="background: var(--accent-gold-light); padding: 14px 16px; border-radius: var(--radius); border-left: 4px solid var(--accent-gold);">
+                ${escapeHtml(result.tailored_summary)}
+                <button class="copy-btn" onclick="copyToClipboard('${escapeHtml(result.tailored_summary).replace(/'/g, "\\'")}', this)" style="margin-top: 10px; display: block;">📋 Copy Summary</button>
+            </div>
+        </div>
+        ` : ''}
         
         <div class="detail-section">
             <div class="detail-label">Key Strengths (${matches.length})</div>
             <div class="detail-value">
                 ${matches.length > 0 ? matches.map(m => `
-                    <div style="margin-bottom: 8px; padding: 10px 12px; background: var(--accent-emerald-light); border-left: 3px solid var(--accent-emerald); border-radius: 4px;">
+                    <div style="margin-bottom: 8px; padding: 10px 12px; background: var(--accent-green-light); border-left: 3px solid var(--accent-green); border-radius: 4px;">
                         ${escapeHtml(m.replace('Match:', '').trim())}
                     </div>
                 `).join('') : '<em>None identified</em>'}
@@ -2096,22 +2161,59 @@ function showDetails(candidateId) {
             <div class="detail-label">Gaps / Concerns (${gaps.length})</div>
             <div class="detail-value">
                 ${gaps.length > 0 ? gaps.map(g => `
-                    <div style="margin-bottom: 8px; padding: 10px 12px; background: var(--accent-rose-light); border-left: 3px solid var(--accent-rose); border-radius: 4px;">
+                    <div style="margin-bottom: 8px; padding: 10px 12px; background: var(--accent-clay-light); border-left: 3px solid var(--accent-clay); border-radius: 4px;">
                         ${escapeHtml(g.replace('Gap:', '').trim())}
                     </div>
                 `).join('') : '<em>None identified</em>'}
             </div>
         </div>
         
-        ${hasValidInterviewQuestions(result) ? `
+        ${gapStrategies.length > 0 ? `
         <div class="detail-section">
-            <div class="detail-label">Suggested Interview Questions</div>
+            <div class="detail-label">Gap Mitigation Strategies</div>
             <div class="detail-value">
-                ${getValidInterviewQuestions(result).map((q, i) => `
-                    <div style="margin-bottom: 8px; padding: 10px 12px; background: var(--slate-100); border-radius: 4px;">
-                        <strong>${i + 1}.</strong> ${escapeHtml(q)}
+                ${gapStrategies.map(gs => `
+                    <div style="margin-bottom: 12px; padding: 12px 14px; background: var(--slate-100); border-radius: var(--radius); border: 1px solid var(--slate-200);">
+                        <div style="font-weight: 700; color: var(--accent-clay); margin-bottom: 6px;">⚠️ ${escapeHtml(gs.gap || '')}</div>
+                        <div style="margin-bottom: 8px;"><strong>Strategy:</strong> ${escapeHtml(gs.strategy || '')}</div>
+                        <div style="font-size: 13px; color: var(--navy-700);"><strong>Talking Points:</strong> ${escapeHtml(gs.talking_points || '')}</div>
                     </div>
                 `).join('')}
+            </div>
+        </div>
+        ` : ''}
+        
+        ${interviewQs.length > 0 ? `
+        <div class="detail-section">
+            <div class="detail-label">Interview Questions & Suggested Answers</div>
+            <div class="detail-value">
+                ${interviewQs.map((q, i) => `
+                    <div style="margin-bottom: 14px; padding: 12px 14px; background: var(--slate-100); border-radius: var(--radius);">
+                        <div style="font-weight: 700; margin-bottom: 8px; color: var(--navy-900);">
+                            <strong>Q${i + 1}:</strong> ${escapeHtml(q.question)}
+                        </div>
+                        ${q.answer ? `
+                        <div style="font-size: 13px; color: var(--navy-700); padding-left: 12px; border-left: 2px solid var(--accent-green);">
+                            <strong>Suggested Answer:</strong> ${escapeHtml(q.answer)}
+                        </div>
+                        ` : ''}
+                    </div>
+                `).join('')}
+            </div>
+        </div>
+        ` : ''}
+        
+        ${result.keywords && result.keywords.length > 0 ? `
+        <div class="detail-section">
+            <div class="detail-label">Keywords Analysis</div>
+            <div class="detail-value">
+                <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+                    ${result.keywords.map(kw => `
+                        <span class="pill ${kw.in_resume ? 'pill-match' : 'pill-gap'}" title="${kw.importance || 'keyword'}">
+                            ${kw.in_resume ? '✓' : '✗'} ${escapeHtml(kw.term || '')}
+                        </span>
+                    `).join('')}
+                </div>
             </div>
         </div>
         ` : ''}
@@ -2125,35 +2227,57 @@ function closeModal(event) {
     document.getElementById('detailModal').classList.remove('active');
 }
 
-// Helper functions to validate interview questions
-function hasValidInterviewQuestions(result) {
-    const questions = getValidInterviewQuestions(result);
-    return questions.length > 0;
-}
-
-function getValidInterviewQuestions(result) {
+// Helper function to extract interview questions with suggested answers
+function getInterviewQuestionsWithAnswers(result) {
     if (!result.interview_questions || !Array.isArray(result.interview_questions)) {
         return [];
     }
     
-    // Filter to only valid string questions that aren't empty or [object Object]
-    return result.interview_questions.filter(q => {
-        if (typeof q === 'string' && q.trim().length > 0 && !q.includes('[object')) {
-            return true;
-        }
-        // If it's an object with a question property, extract that
-        if (typeof q === 'object' && q !== null) {
-            const questionText = q.question || q.text || q.content;
-            if (typeof questionText === 'string' && questionText.trim().length > 0) {
-                return true;
+    return result.interview_questions
+        .filter(q => {
+            if (typeof q === 'object' && q !== null && q.question) {
+                return typeof q.question === 'string' && q.question.trim().length > 0;
             }
-        }
-        return false;
-    }).map(q => {
-        // Return the string value
-        if (typeof q === 'string') return q.trim();
-        // Extract from object
-        return (q.question || q.text || q.content || '').trim();
+            if (typeof q === 'string') {
+                return q.trim().length > 0 && !q.includes('[object');
+            }
+            return false;
+        })
+        .map(q => {
+            if (typeof q === 'object' && q !== null) {
+                return {
+                    question: (q.question || '').trim(),
+                    answer: (q.suggested_answer || q.answer || '').trim()
+                };
+            }
+            return { question: q.trim(), answer: '' };
+        })
+        .slice(0, 5); // Limit to 5 questions
+}
+
+// Helper function for simple question extraction (backwards compatibility)
+function hasValidInterviewQuestions(result) {
+    return getInterviewQuestionsWithAnswers(result).length > 0;
+}
+
+function getValidInterviewQuestions(result) {
+    return getInterviewQuestionsWithAnswers(result).map(q => q.question);
+}
+
+// Copy to clipboard helper
+function copyToClipboard(text, btn) {
+    // Decode escaped quotes
+    const decodedText = text.replace(/\\'/g, "'").replace(/\\"/g, '"');
+    navigator.clipboard.writeText(decodedText).then(() => {
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '✓ Copied!';
+        btn.style.background = 'var(--accent-green-light)';
+        setTimeout(() => {
+            btn.innerHTML = originalText;
+            btn.style.background = '';
+        }, 2000);
+    }).catch(() => {
+        showToast('Failed to copy', true);
     });
 }
 
