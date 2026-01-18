@@ -1727,75 +1727,80 @@ function renderResults() {
     
     // Update stats
     updateStats(analysisResults);
-    updateShortlistCount();
     
     // Render table
     tbody.innerHTML = filtered.map((result, index) => {
-        const rank = index + 1;
-        const score = result.score || 0;
-        const scoreClass = score >= 75 ? 'score-high' : score >= 50 ? 'score-mid' : 'score-low';
-        const rankClass = rank <= 3 ? `rank-${rank}` : '';
-        
-        // Get verdict for quick assessment
-        const verdict = result.verdict || '';
-        
-        // Extract matches - get just the key part before the arrow
-        const extractKeyPart = (str) => {
-            const arrowIdx = str.indexOf('→');
-            return arrowIdx > 0 ? str.substring(0, arrowIdx).trim() : str.substring(0, 60);
-        };
-        
-        const matches = (result.analysis || [])
-            .filter(a => a.startsWith('Match:'))
-            .map(m => extractKeyPart(m.replace('Match:', '').trim()))
-            .slice(0, 3);
-        
-        // Get gaps from BOTH analysis array AND gap_strategies
-        let gaps = (result.analysis || [])
-            .filter(a => a.startsWith('Gap:'))
-            .map(g => extractKeyPart(g.replace('Gap:', '').trim()));
-        
-        // Fallback to gap_strategies if analysis gaps are empty
-        if (gaps.length === 0 && result.gap_strategies && Array.isArray(result.gap_strategies)) {
-            gaps = result.gap_strategies
-                .filter(gs => gs && gs.gap)
-                .map(gs => gs.gap);
+        try {
+            const rank = index + 1;
+            const score = result.score || 0;
+            const scoreClass = score >= 75 ? 'score-high' : score >= 50 ? 'score-mid' : 'score-low';
+            const rankClass = rank <= 3 ? `rank-${rank}` : '';
+            
+            // Get verdict for quick assessment
+            const verdict = result.verdict || '';
+            
+            // Extract matches - get just the key part before the arrow
+            const extractKeyPart = (str) => {
+                if (!str || typeof str !== 'string') return '';
+                const arrowIdx = str.indexOf('→');
+                return arrowIdx > 0 ? str.substring(0, arrowIdx).trim() : str.substring(0, 60);
+            };
+            
+            const matches = (result.analysis || [])
+                .filter(a => typeof a === 'string' && a.startsWith('Match:'))
+                .map(m => extractKeyPart(m.replace('Match:', '').trim()))
+                .slice(0, 3);
+            
+            // Get gaps from BOTH analysis array AND gap_strategies
+            let gaps = (result.analysis || [])
+                .filter(a => typeof a === 'string' && a.startsWith('Gap:'))
+                .map(g => extractKeyPart(g.replace('Gap:', '').trim()));
+            
+            // Fallback to gap_strategies if analysis gaps are empty
+            if (gaps.length === 0 && result.gap_strategies && Array.isArray(result.gap_strategies)) {
+                gaps = result.gap_strategies
+                    .filter(gs => gs && gs.gap)
+                    .map(gs => gs.gap);
+            }
+            gaps = gaps.slice(0, 3);
+            
+            // Generate strength pills
+            const strengthsHtml = matches.length > 0 
+                ? matches.map(m => `<span class="pill pill-match" title="${escapeHtml(m || '')}">✓ ${escapeHtml(truncateText(m || '', 40))}</span>`).join('')
+                : '<span class="no-data">None identified</span>';
+            
+            // Generate gap pills
+            const gapsHtml = gaps.length > 0 
+                ? gaps.map(g => `<span class="pill pill-gap" title="${escapeHtml(g || '')}">✗ ${escapeHtml(truncateText(g || '', 40))}</span>`).join('')
+                : '<span class="no-data">None identified</span>';
+            
+            return `
+                <tr class="${rankClass}" data-id="${result.id}">
+                    <td><span class="rank-badge">${rank}</span></td>
+                    <td>
+                        <div class="candidate-name">${escapeHtml(result.name || 'Unknown')}</div>
+                        ${verdict ? `<div class="candidate-verdict">${escapeHtml(verdict)}</div>` : ''}
+                    </td>
+                    <td class="score-cell ${scoreClass}">${score}%</td>
+                    <td>
+                        <div class="pill-list">
+                            ${strengthsHtml}
+                        </div>
+                    </td>
+                    <td>
+                        <div class="pill-list">
+                            ${gapsHtml}
+                        </div>
+                    </td>
+                    <td>
+                        <button class="btn btn-sm" onclick="showDetails(${result.id})">View</button>
+                    </td>
+                </tr>
+            `;
+        } catch (err) {
+            console.error('[DIB Recruiter] Error rendering row:', err, result);
+            return `<tr><td colspan="6">Error rendering ${result.name || 'candidate'}</td></tr>`;
         }
-        gaps = gaps.slice(0, 3);
-        
-        // Generate strength pills
-        const strengthsHtml = matches.length > 0 
-            ? matches.map(m => `<span class="pill pill-match" title="${escapeHtml(m)}">✓ ${escapeHtml(truncateText(m, 40))}</span>`).join('')
-            : '<span class="no-data">None identified</span>';
-        
-        // Generate gap pills
-        const gapsHtml = gaps.length > 0 
-            ? gaps.map(g => `<span class="pill pill-gap" title="${escapeHtml(g)}">✗ ${escapeHtml(truncateText(g, 40))}</span>`).join('')
-            : '<span class="no-data">None identified</span>';
-        
-        return `
-            <tr class="${rankClass}" data-id="${result.id}">
-                <td><span class="rank-badge">${rank}</span></td>
-                <td>
-                    <div class="candidate-name">${escapeHtml(result.name)}</div>
-                    ${verdict ? `<div class="candidate-verdict">${escapeHtml(verdict)}</div>` : ''}
-                </td>
-                <td class="score-cell ${scoreClass}">${score}%</td>
-                <td>
-                    <div class="pill-list">
-                        ${strengthsHtml}
-                    </div>
-                </td>
-                <td>
-                    <div class="pill-list">
-                        ${gapsHtml}
-                    </div>
-                </td>
-                <td>
-                    <button class="btn btn-sm" onclick="showDetails(${result.id})">View</button>
-                </td>
-            </tr>
-        `;
     }).join('');
 }
 
