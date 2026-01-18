@@ -1192,33 +1192,65 @@
         margin-top: 2px;
     }
     
-    /* Better pill styling for table */
-    .pill {
-        display: inline-block;
-        padding: 4px 8px;
+    /* Risk indicator */
+    .risk-indicator {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 10px;
+        border-radius: var(--radius);
         font-size: 11px;
-        font-weight: 600;
-        border-radius: 4px;
-        margin: 2px;
-        line-height: 1.3;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
     }
     
-    .pill-match {
+    .risk-green {
         background: var(--accent-green-light);
         color: #2d5a36;
         border: 1px solid var(--accent-green);
     }
     
-    .pill-gap {
+    .risk-yellow {
+        background: var(--accent-gold-light);
+        color: #8b6914;
+        border: 1px solid var(--accent-gold);
+    }
+    
+    .risk-red {
         background: var(--accent-clay-light);
         color: #8b4332;
         border: 1px solid var(--accent-clay);
     }
     
-    .pill-list {
-        display: flex;
-        flex-direction: column;
-        gap: 3px;
+    .risk-icon {
+        font-size: 12px;
+    }
+    
+    /* Key points in table */
+    .key-point {
+        padding: 8px 12px;
+        border-radius: var(--radius);
+        font-size: 13px;
+        line-height: 1.4;
+    }
+    
+    .key-strength {
+        background: var(--accent-green-light);
+        border-left: 3px solid var(--accent-green);
+        color: #2d5a36;
+    }
+    
+    .key-gap {
+        background: var(--accent-gold-light);
+        border-left: 3px solid var(--accent-gold);
+        color: #8b6914;
+    }
+    
+    .key-gap.is-dealbreaker {
+        background: var(--accent-clay-light);
+        border-left: 3px solid var(--accent-clay);
+        color: #8b4332;
     }
     
     .no-data {
@@ -1360,8 +1392,9 @@
                             <th onclick="sortTable('rank')" style="width: 50px;">Rank</th>
                             <th onclick="sortTable('name')" style="width: 180px;">Candidate</th>
                             <th onclick="sortTable('score')" style="width: 70px;">Score</th>
-                            <th style="width: 280px;">Strengths</th>
-                            <th style="width: 280px;">Gaps</th>
+                            <th style="width: 120px;">Risk</th>
+                            <th style="width: 250px;">Top Strength</th>
+                            <th style="width: 250px;">Key Concern</th>
                             <th style="width: 80px;">Details</th>
                         </tr>
                     </thead>
@@ -1736,43 +1769,51 @@ function renderResults() {
             const scoreClass = score >= 75 ? 'score-high' : score >= 50 ? 'score-mid' : 'score-low';
             const rankClass = rank <= 3 ? `rank-${rank}` : '';
             
+            // Get recruiter summary if available (new Lambda field)
+            const recruiterSummary = result.recruiter_summary || {};
+            const riskLevel = recruiterSummary.risk_level || (score >= 75 ? 'green' : score >= 60 ? 'yellow' : 'red');
+            const topStrength = recruiterSummary.top_strength || '';
+            const dealbreaker = recruiterSummary.dealbreaker || null;
+            
             // Get verdict for quick assessment
             const verdict = result.verdict || '';
             
-            // Extract matches - get just the key part before the arrow
+            // Extract key part helper
             const extractKeyPart = (str) => {
                 if (!str || typeof str !== 'string') return '';
                 const arrowIdx = str.indexOf('→');
                 return arrowIdx > 0 ? str.substring(0, arrowIdx).trim() : str.substring(0, 60);
             };
             
-            const matches = (result.analysis || [])
-                .filter(a => typeof a === 'string' && a.startsWith('Match:'))
-                .map(m => extractKeyPart(m.replace('Match:', '').trim()))
-                .slice(0, 3);
-            
-            // Get gaps from BOTH analysis array AND gap_strategies
-            let gaps = (result.analysis || [])
-                .filter(a => typeof a === 'string' && a.startsWith('Gap:'))
-                .map(g => extractKeyPart(g.replace('Gap:', '').trim()));
-            
-            // Fallback to gap_strategies if analysis gaps are empty
-            if (gaps.length === 0 && result.gap_strategies && Array.isArray(result.gap_strategies)) {
-                gaps = result.gap_strategies
-                    .filter(gs => gs && gs.gap)
-                    .map(gs => gs.gap);
+            // Get top strength - prefer recruiter_summary, fallback to first match
+            let displayStrength = topStrength;
+            if (!displayStrength) {
+                const matches = (result.analysis || [])
+                    .filter(a => typeof a === 'string' && a.startsWith('Match:'))
+                    .map(m => extractKeyPart(m.replace('Match:', '').trim()));
+                displayStrength = matches[0] || '';
             }
-            gaps = gaps.slice(0, 3);
             
-            // Generate strength pills
-            const strengthsHtml = matches.length > 0 
-                ? matches.map(m => `<span class="pill pill-match" title="${escapeHtml(m || '')}">✓ ${escapeHtml(truncateText(m || '', 40))}</span>`).join('')
-                : '<span class="no-data">None identified</span>';
+            // Get dealbreaker or top gap
+            let displayGap = dealbreaker;
+            if (!displayGap) {
+                // Check analysis for gaps
+                let gaps = (result.analysis || [])
+                    .filter(a => typeof a === 'string' && a.startsWith('Gap:'))
+                    .map(g => extractKeyPart(g.replace('Gap:', '').trim()));
+                
+                // Fallback to gap_strategies
+                if (gaps.length === 0 && result.gap_strategies && Array.isArray(result.gap_strategies)) {
+                    gaps = result.gap_strategies
+                        .filter(gs => gs && gs.gap)
+                        .map(gs => gs.gap);
+                }
+                displayGap = gaps[0] || null;
+            }
             
-            // Generate gap pills
-            const gapsHtml = gaps.length > 0 
-                ? gaps.map(g => `<span class="pill pill-gap" title="${escapeHtml(g || '')}">✗ ${escapeHtml(truncateText(g || '', 40))}</span>`).join('')
-                : '<span class="no-data">None identified</span>';
+            // Risk indicator
+            const riskIcon = riskLevel === 'green' ? '🟢' : riskLevel === 'yellow' ? '🟡' : '🔴';
+            const riskLabel = riskLevel === 'green' ? 'Safe to Send' : riskLevel === 'yellow' ? 'Review First' : 'Do Not Send';
             
             return `
                 <tr class="${rankClass}" data-id="${result.id}">
@@ -1783,14 +1824,20 @@ function renderResults() {
                     </td>
                     <td class="score-cell ${scoreClass}">${score}%</td>
                     <td>
-                        <div class="pill-list">
-                            ${strengthsHtml}
+                        <div class="risk-indicator risk-${riskLevel}" title="${riskLabel}">
+                            <span class="risk-icon">${riskIcon}</span>
+                            <span class="risk-label">${riskLabel}</span>
                         </div>
                     </td>
                     <td>
-                        <div class="pill-list">
-                            ${gapsHtml}
-                        </div>
+                        ${displayStrength 
+                            ? `<div class="key-point key-strength" title="${escapeHtml(displayStrength)}">✓ ${escapeHtml(truncateText(displayStrength, 50))}</div>`
+                            : '<span class="no-data">None identified</span>'}
+                    </td>
+                    <td>
+                        ${displayGap 
+                            ? `<div class="key-point key-gap ${dealbreaker ? 'is-dealbreaker' : ''}" title="${escapeHtml(displayGap)}">${dealbreaker ? '⛔' : '⚠'} ${escapeHtml(truncateText(displayGap, 50))}</div>`
+                            : '<span class="no-data">None identified</span>'}
                     </td>
                     <td>
                         <button class="btn btn-sm" onclick="showDetails(${result.id})">View</button>
@@ -1799,7 +1846,7 @@ function renderResults() {
             `;
         } catch (err) {
             console.error('[DIB Recruiter] Error rendering row:', err, result);
-            return `<tr><td colspan="6">Error rendering ${result.name || 'candidate'}</td></tr>`;
+            return `<tr><td colspan="7">Error rendering ${result.name || 'candidate'}</td></tr>`;
         }
     }).join('');
 }
