@@ -2,15 +2,19 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DIB Jobs // Recruiter Screen</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DIB Jobs Recruiter // Candidate Screening Tool</title>
+    <meta name="description" content="Screen and rank candidates for Defense Industrial Base positions. Multi-candidate comparison and fit analysis.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<!-- PDF.js for PDF parsing -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<!-- Mammoth.js for DOCX parsing -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
 <style>
     :root {
+        /* Cohesive Palette - Professional Navy & Warm Neutrals (matching DIB Jobs) */
         --navy-900: #1e2a3b;
         --navy-800: #2a3a4d;
         --navy-700: #334155;
@@ -19,32 +23,50 @@
         --slate-300: #a8b8c8;
         --slate-200: #c5d1dc;
         --slate-100: #e8eef3;
+        
+        /* Warm Neutrals */
         --cream: #faf9f7;
         --white: #ffffff;
+        
+        /* Mapped Colors */
         --bg-cream: var(--cream);
         --card-white: var(--white);
         --ink-black: var(--navy-900);
+        
+        /* Accent Colors - Harmonious (matching DIB Jobs) */
         --accent-green: #5d8a66;
         --accent-green-light: #e3efe5;
         --accent-mint: var(--slate-100);
+        --accent-mint-light: #f1f5f8;
+        --accent-olive: var(--accent-green);
         --accent-clay: #c9785c;
         --accent-clay-light: #f8ebe6;
         --accent-gold: #d4a84b;
         --accent-gold-light: #fdf6e8;
+        --accent-blue: var(--slate-400);
+        --accent-blue-light: #e8eef3;
         --accent-violet: #7c6b9e;
         --accent-violet-light: #eeeaf5;
+        
+        /* Spacing & Layout */
         --border-thick: 2px;
         --shadow-hard: 5px 5px 0px var(--ink-black);
         --shadow-hover: 7px 7px 0px var(--ink-black);
         --shadow-active: 2px 2px 0px var(--ink-black);
         --radius: 6px;
         --radius-lg: 10px;
+        
+        /* Transitions */
         --transition-snap: 0.15s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         --transition-bounce: 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
     
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    ::selection { background: var(--accent-gold); color: var(--ink-black); }
+    
+    ::selection {
+        background: var(--accent-gold);
+        color: var(--ink-black);
+    }
     
     body {
         background: var(--bg-cream);
@@ -52,34 +74,41 @@
         font-family: 'DM Sans', sans-serif;
         line-height: 1.7;
         min-height: 100vh;
+        padding-bottom: 100px;
         font-size: 15px;
         -webkit-font-smoothing: antialiased;
     }
     
-    /* HEADER */
+    html { scroll-behavior: smooth; }
+    
+    h1, h2, h3, .mono { font-family: 'Space Mono', monospace; letter-spacing: -0.02em; }
+    
+    /* HEADER - Matching DIB Jobs */
     header {
         background: var(--bg-cream);
         padding: 18px 28px;
         display: flex;
         align-items: center;
         justify-content: space-between;
-        border-bottom: var(--border-thick) solid var(--ink-black);
-        position: sticky;
-        top: 0;
-        z-index: 100;
     }
     
     .brand {
         display: flex;
         align-items: center;
         gap: 16px;
-        text-decoration: none;
-        color: inherit;
     }
     
-    .logo-icon { width: 48px; height: 48px; flex-shrink: 0; }
+    .logo-icon {
+        width: 48px;
+        height: 48px;
+        flex-shrink: 0;
+    }
     
-    .brand-text { display: flex; flex-direction: column; gap: 3px; }
+    .brand-text {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+    }
     
     .app-title {
         font-family: 'Space Mono', monospace;
@@ -100,29 +129,126 @@
         opacity: 0.7;
     }
     
-    .header-right { display: flex; align-items: center; gap: 20px; }
-    
-    .header-stats { display: flex; gap: 16px; align-items: center; }
-    
-    .stat {
+    .mode-badge {
+        background: var(--accent-green);
+        color: #fff;
         font-family: 'Space Mono', monospace;
-        font-size: 11px;
+        font-size: 10px;
+        font-weight: 700;
+        padding: 6px 14px;
+        border-radius: 4px;
         text-transform: uppercase;
-        letter-spacing: 0.5px;
+        letter-spacing: 1px;
+        border: 2px solid var(--ink-black);
+        box-shadow: var(--shadow-active);
+    }
+    
+    /* MAIN */
+    main {
+        max-width: 1400px;
+        margin: 32px auto;
+        padding: 0 24px;
+    }
+    
+    /* CARDS */
+    .card {
+        background: var(--card-white);
+        border: var(--border-thick) solid var(--ink-black);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-hard);
+        margin-bottom: 28px;
+        overflow: hidden;
+    }
+    
+    .card-header {
+        background: var(--slate-100);
+        border-bottom: var(--border-thick) solid var(--ink-black);
+        padding: 16px 24px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+    
+    .card-title {
+        font-family: 'Space Mono', monospace;
+        font-size: 13px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
         display: flex;
         align-items: center;
-        gap: 8px;
+        gap: 10px;
     }
     
-    .stat-num {
-        font-weight: 700;
-        padding: 4px 10px;
+    .card-title::before {
+        content: '';
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        background: var(--ink-black);
+        border-radius: 50%;
+        box-shadow: 0 0 0 3px var(--accent-mint);
+    }
+    
+    .card-body {
+        padding: 28px;
+    }
+    
+    /* TWO COLUMN LAYOUT */
+    .two-col {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 24px;
+    }
+    
+    @media (max-width: 900px) {
+        .two-col { grid-template-columns: 1fr; }
+    }
+    
+    /* FORMS */
+    textarea, input[type="text"] {
+        width: 100%;
+        padding: 16px;
+        font-family: 'Space Mono', monospace;
+        font-size: 13px;
+        line-height: 1.6;
         border: var(--border-thick) solid var(--ink-black);
-        background: var(--card-white);
+        border-radius: var(--radius);
+        background: #fafafa;
+        resize: vertical;
+        transition: all var(--transition-snap);
+        -webkit-user-select: text;
+        -moz-user-select: text;
+        -ms-user-select: text;
+        user-select: text;
     }
     
-    .stat-num.forward { background: var(--accent-green-light); border-color: var(--accent-green); color: var(--accent-green); }
-    .stat-num.pass { background: var(--accent-clay-light); border-color: var(--accent-clay); color: var(--accent-clay); }
+    textarea { min-height: 200px; }
+    
+    textarea:focus, input:focus {
+        outline: none;
+        background: #fff;
+        box-shadow: var(--shadow-active);
+        border-color: var(--accent-green);
+    }
+    
+    textarea::placeholder, input::placeholder {
+        color: var(--navy-600);
+        opacity: 0.5;
+    }
+    
+    label {
+        display: block;
+        font-family: 'Space Mono', monospace;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 8px;
+        color: var(--navy-700);
+    }
     
     /* BUTTONS */
     .btn {
@@ -146,263 +272,551 @@
         transform: translate(0, 0);
     }
     
-    .btn:hover:not(:disabled) { transform: translate(-2px, -2px); box-shadow: var(--shadow-hover); }
-    .btn:active:not(:disabled) { transform: translate(2px, 2px); box-shadow: var(--shadow-active); }
-    .btn:disabled { opacity: 0.5; cursor: not-allowed; box-shadow: none; transform: none; }
-    
-    .btn-success { background: var(--accent-green-light); border-color: var(--accent-green); color: var(--accent-green); }
-    .btn-success:hover:not(:disabled) { background: var(--accent-green); color: #fff; }
-    
-    .btn-danger { background: var(--accent-clay-light); color: var(--accent-clay); border-color: var(--accent-clay); }
-    .btn-danger:hover:not(:disabled) { background: var(--accent-clay); color: #fff; }
-    
-    .btn-warning { background: var(--accent-gold-light); color: #996a00; border-color: var(--accent-gold); }
-    .btn-warning:hover:not(:disabled) { background: var(--accent-gold); color: #fff; }
-    
-    .btn-sm { padding: 8px 14px; font-size: 10px; box-shadow: var(--shadow-active); }
-    .btn-sm:hover:not(:disabled) { box-shadow: 4px 4px 0px var(--ink-black); }
-    
-    /* MAIN LAYOUT */
-    main { display: grid; grid-template-columns: 360px 1fr; min-height: calc(100vh - 90px); }
-    
-    /* LEFT PANEL */
-    .left-panel {
-        background: var(--card-white);
-        border-right: var(--border-thick) solid var(--ink-black);
-        padding: 24px;
-        display: flex;
-        flex-direction: column;
-        gap: 20px;
-        position: sticky;
-        top: 90px;
-        height: calc(100vh - 90px);
-        overflow-y: auto;
+    .btn:hover:not(:disabled) {
+        transform: translate(-2px, -2px);
+        box-shadow: var(--shadow-hover);
     }
     
-    label {
-        display: block;
+    .btn:active:not(:disabled) {
+        transform: translate(2px, 2px);
+        box-shadow: var(--shadow-active);
+    }
+    
+    .btn-primary { 
+        background: var(--accent-mint); 
+        border-color: var(--ink-black);
+    }
+    
+    .btn-primary:hover:not(:disabled) { 
+        background: var(--accent-green);
+        color: #fff;
+    }
+    
+    .btn-success {
+        background: var(--accent-green-light);
+        border-color: var(--accent-green);
+        color: var(--accent-green);
+    }
+    
+    .btn-success:hover:not(:disabled) {
+        background: var(--accent-green);
+        color: #fff;
+    }
+    
+    .btn-danger {
+        background: var(--accent-clay-light);
+        color: var(--accent-clay);
+        border-color: var(--accent-clay);
+    }
+    
+    .btn-danger:hover:not(:disabled) {
+        background: var(--accent-clay);
+        color: #fff;
+    }
+    
+    .btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        box-shadow: none;
+        transform: none;
+    }
+    
+    .btn-sm {
+        padding: 8px 14px;
+        font-size: 10px;
+    }
+    
+    .action-bar {
+        margin-top: 20px;
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+    
+    /* CANDIDATE QUEUE */
+    .queue-section {
+        margin-top: 20px;
+    }
+    
+    .queue-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+    }
+    
+    .queue-title {
+        font-family: 'Space Mono', monospace;
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .queue-count {
+        font-family: 'Space Mono', monospace;
+        font-size: 11px;
+        color: var(--slate-400);
+    }
+    
+    .candidate-queue {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        max-height: 300px;
+        overflow-y: auto;
+        padding-right: 8px;
+    }
+    
+    .candidate-queue::-webkit-scrollbar {
+        width: 6px;
+    }
+    
+    .candidate-queue::-webkit-scrollbar-track {
+        background: var(--slate-100);
+        border-radius: 3px;
+    }
+    
+    .candidate-queue::-webkit-scrollbar-thumb {
+        background: var(--slate-300);
+        border-radius: 3px;
+    }
+    
+    .queue-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 16px;
+        background: var(--slate-100);
+        border: 2px solid var(--slate-200);
+        border-radius: var(--radius);
+        transition: all var(--transition-snap);
+    }
+    
+    .queue-item:hover {
+        border-color: var(--ink-black);
+        transform: translateX(4px);
+    }
+    
+    .queue-item.analyzing {
+        border-color: var(--accent-gold);
+        background: var(--accent-gold-light);
+    }
+    
+    .queue-item.complete {
+        border-color: var(--accent-green);
+        background: var(--accent-green-light);
+    }
+    
+    .queue-item.error {
+        border-color: var(--accent-clay);
+        background: var(--accent-clay-light);
+    }
+    
+    .queue-name {
+        font-family: 'Space Mono', monospace;
+        font-size: 12px;
+        font-weight: 700;
+    }
+    
+    .queue-status {
+        font-size: 11px;
+        color: var(--slate-400);
+    }
+    
+    .queue-actions {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+    }
+    
+    .queue-score {
+        font-family: 'Space Mono', monospace;
+        font-size: 14px;
+        font-weight: 700;
+        padding: 4px 10px;
+        border-radius: 12px;
+        border: 2px solid var(--ink-black);
+    }
+    
+    .score-high { background: var(--accent-green-light); color: var(--accent-green); }
+    .score-mid { background: var(--accent-gold-light); color: #9a7520; }
+    .score-low { background: var(--accent-clay-light); color: var(--accent-clay); }
+    
+    .remove-btn {
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-size: 18px;
+        color: var(--slate-400);
+        padding: 4px;
+        line-height: 1;
+        transition: color 0.15s;
+    }
+    
+    .remove-btn:hover {
+        color: var(--accent-rose);
+    }
+    
+    /* EMPTY STATE */
+    .empty-state {
+        text-align: center;
+        padding: 40px 20px;
+        color: var(--slate-400);
+    }
+    
+    .empty-icon {
+        font-size: 48px;
+        margin-bottom: 12px;
+        opacity: 0.5;
+    }
+    
+    .empty-text {
+        font-family: 'Space Mono', monospace;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    /* RESULTS TABLE */
+    .results-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+    }
+    
+    .results-table th {
+        background: var(--ink-black);
+        color: #fff;
         font-family: 'Space Mono', monospace;
         font-size: 11px;
         font-weight: 700;
         text-transform: uppercase;
         letter-spacing: 0.5px;
-        margin-bottom: 8px;
-        color: var(--navy-700);
+        padding: 14px 16px;
+        text-align: left;
+        border: 2px solid var(--ink-black);
+        cursor: pointer;
+        transition: background 0.15s;
+        user-select: none;
     }
     
-    textarea {
-        width: 100%;
-        padding: 16px;
-        font-family: 'Space Mono', monospace;
-        font-size: 13px;
-        line-height: 1.6;
-        border: var(--border-thick) solid var(--ink-black);
-        border-radius: var(--radius);
-        background: #fafafa;
-        resize: vertical;
+    .results-table th:hover {
+        background: var(--navy-700);
+    }
+    
+    .results-table th.sorted-asc::after {
+        content: ' ↑';
+    }
+    
+    .results-table th.sorted-desc::after {
+        content: ' ↓';
+    }
+    
+    .results-table td {
+        padding: 14px 16px;
+        border: 2px solid var(--slate-200);
+        vertical-align: middle;
+    }
+    
+    .results-table tbody tr {
+        background: var(--card-white);
         transition: all var(--transition-snap);
     }
     
-    textarea:focus { outline: none; background: #fff; box-shadow: var(--shadow-active); }
+    .results-table tbody tr:hover {
+        background: var(--slate-100);
+        transform: scale(1.005);
+    }
     
-    .job-input { height: 180px; resize: none; }
+    .results-table tbody tr.rank-1 {
+        background: var(--accent-green-light);
+        border-left: 4px solid var(--accent-green);
+    }
     
-    /* DROP ZONE */
-    .drop-zone-container { flex: 1; display: flex; flex-direction: column; }
+    .results-table tbody tr.rank-2 {
+        background: var(--accent-gold-light);
+    }
     
-    .drop-zone {
-        flex: 1;
-        min-height: 200px;
-        border: 3px dashed var(--ink-black);
-        border-radius: var(--radius);
-        display: flex;
-        flex-direction: column;
+    .results-table tbody tr.rank-3 {
+        background: var(--accent-mint);
+    }
+    
+    .candidate-name {
+        font-family: 'Space Mono', monospace;
+        font-weight: 700;
+        font-size: 13px;
+    }
+    
+    .rank-badge {
+        display: inline-flex;
         align-items: center;
         justify-content: center;
-        text-align: center;
-        padding: 24px;
-        transition: all var(--transition-snap);
-        cursor: pointer;
-        background: var(--bg-cream);
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        font-family: 'Space Mono', monospace;
+        font-weight: 700;
+        font-size: 12px;
+        border: 2px solid var(--ink-black);
     }
     
-    .drop-zone:hover { background: var(--slate-100); border-color: var(--accent-green); }
-    .drop-zone.drag-over { border-color: var(--accent-green); border-style: solid; background: var(--accent-green-light); }
+    .rank-1 .rank-badge { background: var(--accent-green); color: #fff; }
+    .rank-2 .rank-badge { background: var(--accent-gold); color: var(--ink-black); }
+    .rank-3 .rank-badge { background: var(--slate-400); color: #fff; }
     
-    .drop-icon { font-size: 48px; margin-bottom: 16px; }
-    
-    .drop-text {
+    .score-cell {
         font-family: 'Space Mono', monospace;
-        font-size: 12px;
-        color: var(--navy-700);
+        font-weight: 700;
+        font-size: 16px;
+    }
+    
+    .clearance-badge {
+        display: inline-block;
+        padding: 4px 10px;
+        font-family: 'Space Mono', monospace;
+        font-size: 10px;
+        font-weight: 700;
+        border-radius: 12px;
+        border: 2px solid var(--ink-black);
         text-transform: uppercase;
         letter-spacing: 0.5px;
     }
     
-    .drop-text strong { display: block; font-size: 13px; margin-bottom: 6px; }
-    .drop-hint { font-size: 11px; margin-top: 10px; color: var(--slate-400); text-transform: none; }
+    .clearance-ts { background: var(--accent-violet-light); color: #6d28d9; }
+    .clearance-secret { background: var(--accent-blue-light); color: #1d4ed8; }
+    .clearance-none { background: var(--slate-100); color: var(--slate-400); }
     
-    .processing {
+    /* MATCH/GAP PILLS */
+    .pill-list {
         display: flex;
-        align-items: center;
-        gap: 10px;
-        padding: 12px 16px;
-        background: var(--accent-gold-light);
-        border: var(--border-thick) solid var(--accent-gold);
-        border-radius: var(--radius);
-        font-family: 'Space Mono', monospace;
-        font-size: 11px;
-        margin-top: 16px;
+        flex-wrap: wrap;
+        gap: 6px;
+        align-items: flex-start;
     }
     
+    .pill {
+        display: inline-block;
+        padding: 5px 10px;
+        font-size: 11px;
+        font-weight: 600;
+        border-radius: 12px;
+        border: 1px solid;
+        line-height: 1.3;
+        max-width: 100%;
+    }
+    
+    .pill-match {
+        background: var(--accent-green-light);
+        border-color: var(--accent-green);
+        color: var(--accent-green);
+    }
+    
+    .pill-gap {
+        background: var(--accent-clay-light);
+        border-color: var(--accent-clay);
+        color: var(--accent-clay);
+    }
+    
+    .no-data {
+        font-size: 11px;
+        font-style: italic;
+        color: var(--slate-400);
+    }
+    
+    /* DETAILS MODAL */
+    .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.7);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.2s;
+    }
+    
+    .modal-overlay.active {
+        opacity: 1;
+        visibility: visible;
+    }
+    
+    .modal {
+        background: var(--card-white);
+        border: var(--border-thick) solid var(--ink-black);
+        border-radius: var(--radius-lg);
+        box-shadow: 8px 8px 0 var(--ink-black);
+        width: 90%;
+        max-width: 700px;
+        max-height: 85vh;
+        overflow: hidden;
+        transform: scale(0.9) translateY(20px);
+        transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    
+    .modal-overlay.active .modal {
+        transform: scale(1) translateY(0);
+    }
+    
+    .modal-header {
+        background: var(--navy-900);
+        color: #fff;
+        padding: 20px 24px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .modal-title {
+        font-family: 'Space Mono', monospace;
+        font-size: 16px;
+        font-weight: 700;
+    }
+    
+    .modal-close {
+        background: none;
+        border: none;
+        color: #fff;
+        font-size: 24px;
+        cursor: pointer;
+        padding: 4px;
+        line-height: 1;
+        opacity: 0.7;
+        transition: opacity 0.15s;
+    }
+    
+    .modal-close:hover {
+        opacity: 1;
+    }
+    
+    .modal-body {
+        padding: 24px;
+        max-height: calc(85vh - 70px);
+        overflow-y: auto;
+    }
+    
+    .detail-section {
+        margin-bottom: 24px;
+    }
+    
+    .detail-section:last-child {
+        margin-bottom: 0;
+    }
+    
+    .detail-label {
+        font-family: 'Space Mono', monospace;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--slate-400);
+        margin-bottom: 8px;
+    }
+    
+    .detail-value {
+        font-size: 14px;
+        line-height: 1.7;
+    }
+    
+    .detail-score {
+        font-family: 'Space Mono', monospace;
+        font-size: 48px;
+        font-weight: 700;
+        line-height: 1;
+    }
+    
+    .detail-verdict {
+        font-size: 14px;
+        margin-top: 8px;
+        padding: 12px 16px;
+        background: var(--slate-100);
+        border-radius: var(--radius);
+        border-left: 4px solid var(--accent-gold);
+    }
+    
+    /* STATS SUMMARY */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+    
+    @media (max-width: 768px) {
+        .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    
+    .stat-card {
+        text-align: center;
+        padding: 20px 16px;
+        border: 2px solid var(--ink-black);
+        border-radius: var(--radius);
+        transition: transform var(--transition-snap);
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-3px);
+    }
+    
+    .stat-card.amber { background: var(--accent-gold-light); }
+    .stat-card.emerald { background: var(--accent-green-light); }
+    .stat-card.rose { background: var(--accent-clay-light); }
+    .stat-card.blue { background: var(--slate-100); }
+    
+    .stat-value {
+        font-family: 'Space Mono', monospace;
+        font-size: 32px;
+        font-weight: 700;
+        line-height: 1;
+    }
+    
+    .stat-label {
+        font-family: 'Space Mono', monospace;
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-top: 8px;
+        color: var(--navy-700);
+    }
+    
+    /* LOADING SPINNER */
     .spinner {
+        display: inline-block;
         width: 16px;
         height: 16px;
-        border: 2px solid var(--slate-200);
+        border: 2px solid var(--slate-300);
         border-top-color: var(--accent-green);
         border-radius: 50%;
         animation: spin 0.8s linear infinite;
     }
     
-    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
     
-    /* RIGHT PANEL */
-    .right-panel { padding: 24px; overflow-y: auto; }
-    
-    .empty-state {
-        display: flex;
-        flex-direction: column;
+    /* RED FLAGS */
+    .red-flag {
+        display: inline-flex;
         align-items: center;
-        justify-content: center;
-        height: 400px;
-        color: var(--slate-400);
-        text-align: center;
-    }
-    
-    .empty-state .icon { font-size: 64px; margin-bottom: 20px; }
-    .empty-state .text { font-family: 'Space Mono', monospace; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; }
-    
-    /* CANDIDATE CARDS */
-    .candidates-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 24px; }
-    
-    .candidate-card {
-        background: var(--card-white);
-        border: var(--border-thick) solid var(--ink-black);
-        border-radius: var(--radius-lg);
-        box-shadow: var(--shadow-hard);
-        overflow: hidden;
-        transition: all var(--transition-snap);
-    }
-    
-    .candidate-card:hover { transform: translate(-2px, -2px); box-shadow: var(--shadow-hover); }
-    .candidate-card.decided { opacity: 0.8; box-shadow: var(--shadow-active); }
-    .candidate-card.decided:hover { transform: none; box-shadow: var(--shadow-active); }
-    .candidate-card.forwarded { border-color: var(--accent-green); border-width: 3px; }
-    .candidate-card.forwarded .card-header { background: var(--accent-green-light); }
-    .candidate-card.passed { border-color: var(--accent-clay); border-width: 3px; }
-    .candidate-card.passed .card-header { background: var(--accent-clay-light); }
-    
-    .card-header {
-        padding: 16px 20px;
-        background: var(--slate-100);
-        border-bottom: var(--border-thick) solid var(--ink-black);
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-        gap: 16px;
-    }
-    
-    .candidate-info { flex: 1; min-width: 0; }
-    
-    .candidate-name {
-        font-family: 'Space Mono', monospace;
-        font-weight: 700;
-        font-size: 14px;
-        line-height: 1.3;
-        margin-bottom: 8px;
-        word-break: break-word;
-    }
-    
-    .candidate-clearance {
-        display: inline-block;
-        font-family: 'Space Mono', monospace;
-        font-size: 10px;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
+        gap: 4px;
         padding: 4px 10px;
-        border-radius: 4px;
-        border: var(--border-thick) solid;
-    }
-    
-    .clearance-ts { background: var(--accent-violet-light); color: var(--accent-violet); border-color: var(--accent-violet); }
-    .clearance-secret { background: var(--slate-100); color: var(--navy-700); border-color: var(--navy-700); }
-    .clearance-none { background: var(--slate-100); color: var(--slate-400); border-color: var(--slate-200); }
-    
-    .score-badge { font-family: 'Space Mono', monospace; font-size: 32px; font-weight: 700; line-height: 1; flex-shrink: 0; }
-    .score-high { color: var(--accent-green); }
-    .score-mid { color: var(--accent-gold); }
-    .score-low { color: var(--accent-clay); }
-    
-    .card-body { padding: 20px; }
-    
-    .section-label {
-        font-family: 'Space Mono', monospace;
         font-size: 10px;
         font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        color: var(--slate-400);
-        margin-bottom: 10px;
-    }
-    
-    .pills { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
-    .pills:last-child { margin-bottom: 0; }
-    
-    .pill {
-        font-size: 11px;
-        padding: 6px 12px;
-        border-radius: 4px;
-        font-weight: 600;
-        line-height: 1.3;
-        border: var(--border-thick) solid;
-    }
-    
-    .pill-match { background: var(--accent-green-light); color: var(--accent-green); border-color: var(--accent-green); }
-    .pill-gap { background: var(--accent-clay-light); color: var(--accent-clay); border-color: var(--accent-clay); }
-    .pill-none { color: var(--slate-400); font-style: italic; border: none; padding-left: 0; }
-    
-    .card-actions {
-        display: flex;
-        gap: 12px;
-        padding: 16px 20px;
-        background: var(--slate-100);
-        border-top: var(--border-thick) solid var(--ink-black);
-    }
-    
-    .card-actions .btn { flex: 1; padding: 14px 16px; }
-    .card-actions .btn-sm-action { flex: 0 0 60px; }
-    
-    .decision-badge {
-        flex: 1;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-        padding: 14px 16px;
-        border-radius: var(--radius);
         font-family: 'Space Mono', monospace;
-        font-size: 11px;
-        font-weight: 700;
+        background: var(--accent-clay-light);
+        color: var(--accent-clay);
+        border: 1px solid var(--accent-clay);
+        border-radius: 12px;
         text-transform: uppercase;
-        letter-spacing: 0.5px;
-        border: var(--border-thick) solid var(--ink-black);
     }
     
-    .decision-forward { background: var(--accent-green); color: #fff; }
-    .decision-pass { background: var(--accent-clay); color: #fff; }
-    .decision-maybe { background: var(--accent-gold); color: #fff; }
+    .red-flag::before {
+        content: '⚠';
+    }
     
+    /* TOAST */
     .toast {
         position: fixed;
         bottom: 30px;
@@ -418,290 +832,1610 @@
         transform: translateY(120px);
         opacity: 0;
         transition: all var(--transition-bounce);
-        z-index: 1000;
+        z-index: 999;
     }
     
-    .toast.show { transform: translateY(0); opacity: 1; }
+    .toast.show {
+        transform: translateY(0);
+        opacity: 1;
+    }
     
-    @media (max-width: 900px) {
-        main { grid-template-columns: 1fr; }
-        .left-panel { position: relative; top: 0; height: auto; border-right: none; border-bottom: var(--border-thick) solid var(--ink-black); }
-        .candidates-grid { grid-template-columns: 1fr; }
-        .header-stats { display: none; }
+    /* RESPONSIVE */
+    @media (max-width: 600px) {
+        header {
+            padding: 14px 18px;
+        }
+        
+        .app-title {
+            font-size: 18px;
+        }
+        
+        main {
+            padding: 0 16px;
+            margin: 20px auto;
+        }
+        
+        .card-body {
+            padding: 20px;
+        }
+        
+        .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+        
+        .stat-value {
+            font-size: 24px;
+        }
+        
+        .results-table {
+            font-size: 11px;
+        }
+        
+        .results-table th,
+        .results-table td {
+            padding: 10px 8px;
+        }
+    }
+    
+    /* ANIMATIONS */
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .card {
+        animation: slideUp 0.4s ease-out;
+    }
+    
+    .card:nth-child(1) { animation-delay: 0ms; }
+    .card:nth-child(2) { animation-delay: 50ms; }
+    .card:nth-child(3) { animation-delay: 100ms; }
+    
+    /* FILTER BAR */
+    .filter-bar {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        align-items: center;
+        margin-bottom: 16px;
+    }
+    
+    .filter-select {
+        padding: 8px 12px;
+        font-family: 'Space Mono', monospace;
+        font-size: 11px;
+        border: 2px solid var(--ink-black);
+        border-radius: var(--radius);
+        background: var(--card-white);
+        cursor: pointer;
+    }
+    
+    .filter-label {
+        font-family: 'Space Mono', monospace;
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--slate-400);
+    }
+    
+    /* DRAG AND DROP */
+    .drop-zone {
+        position: relative;
+        transition: all 0.2s ease;
+    }
+    
+    .drop-zone.drag-over {
+        border-color: var(--accent-green) !important;
+        background: var(--accent-green-light) !important;
+        box-shadow: 0 0 0 3px var(--accent-green-light), var(--shadow-active);
+    }
+    
+    .drop-zone.drag-over::after {
+        content: 'Drop file here';
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(93, 138, 102, 0.9);
+        color: #fff;
+        font-family: 'Space Mono', monospace;
+        font-size: 14px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        border-radius: var(--radius);
+        pointer-events: none;
+        z-index: 10;
+    }
+    
+    .drop-hint {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 8px;
+        font-size: 11px;
+        color: var(--slate-400);
+    }
+    
+    .drop-hint svg {
+        width: 16px;
+        height: 16px;
+        opacity: 0.6;
+    }
+    
+    .file-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 10px;
+        background: var(--accent-green-light);
+        border: 1px solid var(--accent-green);
+        border-radius: 12px;
+        font-family: 'Space Mono', monospace;
+        font-size: 10px;
+        color: var(--accent-green);
+        margin-top: 8px;
+    }
+    
+    .file-badge .remove-file {
+        cursor: pointer;
+        opacity: 0.7;
+        transition: opacity 0.15s;
+    }
+    
+    .file-badge .remove-file:hover {
+        opacity: 1;
+    }
+    
+    .processing-indicator {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 12px;
+        background: var(--accent-gold-light);
+        border-radius: var(--radius);
+        font-size: 12px;
+        margin-top: 8px;
+    }
+    
+    /* SHORTLIST STATUS */
+    .status-select {
+        padding: 6px 10px;
+        font-family: 'Space Mono', monospace;
+        font-size: 10px;
+        font-weight: 700;
+        border: 2px solid var(--ink-black);
+        border-radius: var(--radius);
+        cursor: pointer;
+        text-transform: uppercase;
+        min-width: 100px;
+        transition: all var(--transition-snap);
+    }
+    
+    .status-select:focus {
+        outline: none;
+        box-shadow: var(--shadow-active);
+    }
+    
+    .status-select.status-send {
+        background: var(--accent-green-light);
+        border-color: var(--accent-green);
+        color: var(--accent-green);
+    }
+    
+    .status-select.status-pass {
+        background: var(--accent-clay-light);
+        border-color: var(--accent-clay);
+        color: var(--accent-clay);
+    }
+    
+    .status-select.status-maybe {
+        background: var(--accent-gold-light);
+        border-color: var(--accent-gold);
+        color: #9a7520;
+    }
+    
+    .status-select.status-review {
+        background: var(--slate-100);
+        border-color: var(--slate-300);
+        color: var(--slate-400);
+    }
+    
+    /* WHY/WHY NOT SUMMARY */
+    .why-summary {
+        font-size: 12px;
+        line-height: 1.5;
+        color: var(--navy-700);
+        max-width: 280px;
+    }
+    
+    .why-summary .why-good {
+        color: var(--accent-green);
+    }
+    
+    .why-summary .why-bad {
+        color: var(--accent-clay);
+    }
+    
+    .copy-summary {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        margin-top: 6px;
+        padding: 3px 8px;
+        font-size: 9px;
+        font-family: 'Space Mono', monospace;
+        background: var(--slate-100);
+        border: 1px solid var(--slate-300);
+        border-radius: 10px;
+        cursor: pointer;
+        color: var(--slate-400);
+        transition: all var(--transition-snap);
+    }
+    
+    .copy-summary:hover {
+        background: var(--ink-black);
+        color: #fff;
+        border-color: var(--ink-black);
+    }
+    
+    /* RECRUITER NOTES */
+    .notes-cell {
+        min-width: 150px;
+    }
+    
+    .notes-input {
+        width: 100%;
+        padding: 8px 10px;
+        font-size: 11px;
+        font-family: 'DM Sans', sans-serif;
+        border: 1px solid var(--slate-200);
+        border-radius: var(--radius);
+        background: var(--slate-100);
+        resize: none;
+        min-height: 50px;
+        transition: all var(--transition-snap);
+    }
+    
+    .notes-input:focus {
+        outline: none;
+        border-color: var(--accent-green);
+        background: #fff;
+        box-shadow: 0 0 0 2px var(--accent-green-light);
+    }
+    
+    .notes-input::placeholder {
+        color: var(--slate-400);
+        font-style: italic;
+    }
+    
+    /* EXPORT BUTTONS */
+    .export-group {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+    }
+    
+    .shortlist-count {
+        font-family: 'Space Mono', monospace;
+        font-size: 11px;
+        color: var(--accent-green);
+        padding: 4px 10px;
+        background: var(--accent-green-light);
+        border-radius: 12px;
+        border: 1px solid var(--accent-green);
+    }
+    
+    /* Wider table for new columns */
+    .results-table {
+        min-width: 1250px;
+    }
+    
+    .results-table th,
+    .results-table td {
+        vertical-align: top;
+    }
+    
+    /* Status filter */
+    .filter-bar {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        align-items: center;
+        margin-bottom: 16px;
     }
 </style>
 </head>
 <body>
 <header>
-    <a href="https://dibjobs.com" class="brand">
+    <a href="https://dibjobs.com" style="text-decoration: none;"><div class="brand">
         <svg class="logo-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 125">
             <path d="M93.764,38.143l-42-30.515c-1.053-0.764-2.475-0.764-3.527,0l-42,30.515c-1.051,0.764-1.491,2.118-1.09,3.354l16.043,49.374c0.402,1.236,1.554,2.073,2.854,2.073h51.914c1.3,0,2.451-0.837,2.854-2.073l16.043-49.374C95.255,40.261,94.814,38.907,93.764,38.143z M73.777,86.944H26.223L11.526,41.716L50,13.764l38.474,27.953L73.777,86.944z" fill="var(--ink-black)" stroke="var(--ink-black)" stroke-width="6"/>
             <path d="M48.236,32.35L29.748,45.782c-1.051,0.764-1.491,2.118-1.09,3.354l7.062,21.735c0.402,1.236,1.554,2.073,2.854,2.073h22.854c1.3,0,2.451-0.837,2.854-2.073l7.062-21.735c0.401-1.236-0.039-2.59-1.09-3.354L51.764,32.35C50.711,31.586,49.289,31.586,48.236,32.35z M64.962,49.355l-5.715,17.589H40.753l-5.715-17.589L50,38.485L64.962,49.355z" stroke="var(--ink-black)" stroke-width="6"/>
         </svg>
         <div class="brand-text">
             <div class="app-title">DIB Jobs</div>
-            <div class="app-subtitle">Recruiter Screen</div>
+            <div class="app-subtitle">Recruiter Screening Tool</div>
         </div>
-    </a>
-    <div class="header-right">
-        <div class="header-stats">
-            <div class="stat">Forward: <span class="stat-num forward" id="forwardCount">0</span></div>
-            <div class="stat">Pass: <span class="stat-num pass" id="passCount">0</span></div>
-        </div>
-        <button class="btn btn-success" onclick="exportForward()" id="exportBtn" disabled>Export Forward List</button>
-    </div>
+    </div></a>
+    <span class="mode-badge">Recruiter</span>
 </header>
+
 <main>
-    <div class="left-panel">
-        <div>
-            <label for="jobInput">Job Description</label>
-            <textarea class="job-input" id="jobInput" placeholder="Paste job description here..."></textarea>
+    <!-- INPUT SECTION -->
+    <div class="card">
+        <div class="card-header">
+            <span class="card-title">Screen Candidates</span>
         </div>
-        <div class="drop-zone-container">
-            <label>Drop Resumes</label>
-            <div class="drop-zone" id="dropZone">
-                <div class="drop-icon">📄</div>
-                <div class="drop-text"><strong>Drop PDF/DOCX here</strong>Multiple files supported</div>
-                <div class="drop-hint">or click to select files</div>
+        <div class="card-body">
+            <div class="two-col">
+                <!-- Job Description -->
+                <div>
+                    <label for="jobDescription">Job Description</label>
+                    <textarea id="jobDescription" class="drop-zone" placeholder="Paste the job description or drag & drop a PDF/DOCX file..."></textarea>
+                    <div class="drop-hint">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/>
+                        </svg>
+                        <span>Drag & drop PDF or DOCX, or paste text directly</span>
+                    </div>
+                    <div id="jobFileInfo"></div>
+                    <div class="action-bar" style="margin-top: 12px;">
+                        <button class="btn" onclick="clearJobDescription()">Clear</button>
+                    </div>
+                </div>
+                
+                <!-- Candidate Resume -->
+                <div>
+                    <label for="candidateResume">Add Candidate Resume</label>
+                    <textarea id="candidateResume" class="drop-zone" placeholder="Paste a candidate's resume or drag & drop a PDF/DOCX file..."></textarea>
+                    <div class="drop-hint">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/>
+                        </svg>
+                        <span>Drag & drop PDF or DOCX, or paste text directly</span>
+                    </div>
+                    <div id="resumeFileInfo"></div>
+                    <div style="margin-top: 12px;">
+                        <label for="candidateName" style="margin-bottom: 6px;">Candidate Name (optional)</label>
+                        <input type="text" id="candidateName" placeholder="e.g., John Smith">
+                    </div>
+                    <div class="action-bar">
+                        <button class="btn btn-primary" onclick="addCandidate()">
+                            <span id="addBtnText">+ Add to Queue</span>
+                        </button>
+                        <button class="btn" onclick="clearCandidateInput()">Clear</button>
+                    </div>
+                </div>
             </div>
-            <input type="file" id="fileInput" multiple accept=".pdf,.docx,.doc,.txt" style="display: none;">
-            <div id="processingStatus"></div>
+            
+            <!-- Candidate Queue -->
+            <div class="queue-section">
+                <div class="queue-header">
+                    <span class="queue-title">Candidate Queue</span>
+                    <span class="queue-count" id="queueCount">0 candidates</span>
+                </div>
+                <div id="candidateQueue" class="candidate-queue">
+                    <div class="empty-state" id="queueEmpty">
+                        <div class="empty-icon">📋</div>
+                        <div class="empty-text">No candidates added yet</div>
+                    </div>
+                </div>
+                <div class="action-bar" id="queueActions" style="display: none;">
+                    <button class="btn btn-success" onclick="analyzeAll()" id="analyzeAllBtn">
+                        Analyze All Candidates
+                    </button>
+                    <button class="btn btn-danger" onclick="clearQueue()">Clear Queue</button>
+                </div>
+            </div>
         </div>
     </div>
-    <div class="right-panel">
-        <div class="empty-state" id="emptyState">
-            <div class="icon">📋</div>
-            <div class="text">Drop resumes to start screening</div>
+    
+    <!-- RESULTS SECTION -->
+    <div class="card" id="resultsCard" style="display: none;">
+        <div class="card-header">
+            <span class="card-title">Candidate Rankings</span>
+            <div class="export-group">
+                <span class="shortlist-count" id="shortlistCount">0 to send</span>
+                <button class="btn btn-sm btn-success" onclick="exportShortlist()">Export Shortlist</button>
+                <button class="btn btn-sm" onclick="exportCSV()">Export All CSV</button>
+            </div>
         </div>
-        <div class="candidates-grid" id="candidatesGrid" style="display: none;"></div>
+        <div class="card-body">
+            <!-- Summary Stats -->
+            <div class="stats-grid" id="summaryStats">
+                <div class="stat-card amber">
+                    <div class="stat-value" id="totalCandidates">0</div>
+                    <div class="stat-label">Candidates</div>
+                </div>
+                <div class="stat-card emerald">
+                    <div class="stat-value" id="strongMatches">0</div>
+                    <div class="stat-label">Strong (75%+)</div>
+                </div>
+                <div class="stat-card blue">
+                    <div class="stat-value" id="avgScore">0%</div>
+                    <div class="stat-label">Avg Score</div>
+                </div>
+                <div class="stat-card rose">
+                    <div class="stat-value" id="flaggedCount">0</div>
+                    <div class="stat-label">Red Flags</div>
+                </div>
+            </div>
+            
+            <!-- Filters -->
+            <div class="filter-bar">
+                <span class="filter-label">Filter:</span>
+                <select class="filter-select" id="scoreFilter" onchange="applyFilters()">
+                    <option value="all">All Scores</option>
+                    <option value="strong">Strong (75%+)</option>
+                    <option value="moderate">Moderate (50-74%)</option>
+                    <option value="weak">Weak (&lt;50%)</option>
+                </select>
+                <select class="filter-select" id="clearanceFilter" onchange="applyFilters()">
+                    <option value="all">All Clearances</option>
+                    <option value="ts">TS/SCI Only</option>
+                    <option value="secret">Secret+</option>
+                    <option value="none">No Clearance</option>
+                </select>
+                <select class="filter-select" id="statusFilter" onchange="applyFilters()">
+                    <option value="all">All Statuses</option>
+                    <option value="send">Send to HM</option>
+                    <option value="maybe">Maybe</option>
+                    <option value="pass">Pass</option>
+                    <option value="review">Needs Review</option>
+                </select>
+            </div>
+            
+            <!-- Results Table -->
+            <div style="overflow-x: auto;">
+                <table class="results-table" id="resultsTable">
+                    <thead>
+                        <tr>
+                            <th onclick="sortTable('rank')" style="width: 50px;">Rank</th>
+                            <th onclick="sortTable('name')" style="width: 120px;">Candidate</th>
+                            <th onclick="sortTable('score')" style="width: 70px;">Score</th>
+                            <th style="width: 100px;">Status</th>
+                            <th style="width: 200px;">Strengths</th>
+                            <th style="width: 200px;">Gaps</th>
+                            <th onclick="sortTable('clearance')" style="width: 100px;">Clearance</th>
+                            <th style="width: 150px;">Notes</th>
+                            <th style="width: 70px;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="resultsBody"></tbody>
+                </table>
+            </div>
+        </div>
     </div>
 </main>
+
+<!-- Detail Modal -->
+<div class="modal-overlay" id="detailModal" onclick="closeModal(event)">
+    <div class="modal" onclick="event.stopPropagation()">
+        <div class="modal-header">
+            <span class="modal-title" id="modalTitle">Candidate Details</span>
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+        </div>
+        <div class="modal-body" id="modalBody">
+            <!-- Dynamic content -->
+        </div>
+    </div>
+</div>
+
+<!-- Toast -->
 <div class="toast" id="toast"></div>
+
 <script>
+// ==========================================================================
+// CONFIGURATION
+// ==========================================================================
 const API_ENDPOINT = 'https://76unm1rlj0.execute-api.us-east-1.amazonaws.com/default/grumpy2';
-let candidates = [];
-let processingQueue = [];
-let isProcessing = false;
 
-document.addEventListener('DOMContentLoaded', () => {
-    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-    initDropZone();
-});
+// ==========================================================================
+// STATE
+// ==========================================================================
+let candidateQueue = [];
+let analysisResults = [];
+let currentSort = { column: 'score', direction: 'desc' };
 
-function initDropZone() {
-    const dropZone = document.getElementById('dropZone');
-    const fileInput = document.getElementById('fileInput');
-    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(event => {
-        dropZone.addEventListener(event, e => { e.preventDefault(); e.stopPropagation(); });
-    });
-    ['dragenter', 'dragover'].forEach(event => {
-        dropZone.addEventListener(event, () => dropZone.classList.add('drag-over'));
-    });
-    ['dragleave', 'drop'].forEach(event => {
-        dropZone.addEventListener(event, () => dropZone.classList.remove('drag-over'));
-    });
-    dropZone.addEventListener('drop', e => handleFiles(e.dataTransfer.files));
-    dropZone.addEventListener('click', () => fileInput.click());
-    fileInput.addEventListener('change', e => handleFiles(e.target.files));
-}
-
-async function handleFiles(files) {
-    const jobDesc = document.getElementById('jobInput').value.trim();
-    if (!jobDesc || jobDesc.length < 50) { showToast('Please paste a job description first'); return; }
-    for (const file of files) { if (isValidFile(file)) processingQueue.push(file); }
-    if (!isProcessing) processNextFile();
-}
-
-function isValidFile(file) { return ['pdf', 'docx', 'doc', 'txt'].includes(file.name.split('.').pop().toLowerCase()); }
-
-async function processNextFile() {
-    if (processingQueue.length === 0) { isProcessing = false; updateProcessingStatus(); return; }
-    isProcessing = true;
-    const file = processingQueue.shift();
-    updateProcessingStatus(file.name);
-    try {
-        const text = await extractText(file);
-        if (!text || text.length < 50) throw new Error('Could not extract text');
-        const name = extractNameFromFilename(file.name) || extractNameFromText(text) || file.name;
-        const candidate = { id: Date.now() + Math.random(), name, fileName: file.name, resumeText: text, status: 'analyzing', result: null, decision: null };
-        candidates.push(candidate);
-        renderCandidates();
-        const jobDesc = document.getElementById('jobInput').value.trim();
-        const result = await analyzeCandidate(jobDesc, text);
-        candidate.status = 'complete';
-        candidate.result = result;
-        renderCandidates();
-    } catch (err) { console.error('Error processing file:', err); showToast('Failed to process ' + file.name); }
-    processNextFile();
-}
-
-async function extractText(file) {
-    const ext = file.name.split('.').pop().toLowerCase();
-    if (ext === 'pdf') {
-        const arrayBuffer = await file.arrayBuffer();
-        const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-        let text = '';
-        for (let i = 1; i <= pdf.numPages; i++) {
-            const page = await pdf.getPage(i);
-            const content = await page.getTextContent();
-            text += content.items.map(item => item.str).join(' ') + '\n';
-        }
-        return text;
+// ==========================================================================
+// CANDIDATE QUEUE MANAGEMENT
+// ==========================================================================
+function addCandidate() {
+    const resumeText = document.getElementById('candidateResume').value.trim();
+    const nameInput = document.getElementById('candidateName').value.trim();
+    
+    if (!resumeText || resumeText.length < 100) {
+        showToast('Please paste a resume (at least 100 characters)', true);
+        return;
     }
-    if (ext === 'docx') {
-        const arrayBuffer = await file.arrayBuffer();
-        const result = await mammoth.extractRawText({ arrayBuffer });
-        return result.value;
+    
+    // Extract name from resume if not provided
+    let candidateName = nameInput;
+    if (!candidateName) {
+        candidateName = extractNameFromResume(resumeText) || `Candidate ${candidateQueue.length + 1}`;
     }
-    return await file.text();
+    
+    // Check for duplicate
+    const isDuplicate = candidateQueue.some(c => c.resumeText === resumeText);
+    if (isDuplicate) {
+        showToast('This resume is already in the queue', true);
+        return;
+    }
+    
+    const candidate = {
+        id: Date.now(),
+        name: candidateName,
+        resumeText: resumeText,
+        status: 'pending', // pending, analyzing, complete, error
+        result: null
+    };
+    
+    candidateQueue.push(candidate);
+    renderQueue();
+    clearCandidateInput();
+    showToast(`Added ${candidateName} to queue`);
 }
 
-async function analyzeCandidate(jobDesc, resumeText) {
-    const response = await fetch(API_ENDPOINT, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ request_type: 'resume_match', job_description: jobDesc, resume_text: resumeText })
-    });
-    if (!response.ok) throw new Error('Analysis failed');
-    return await response.json();
+function removeCandidate(id) {
+    candidateQueue = candidateQueue.filter(c => c.id !== id);
+    analysisResults = analysisResults.filter(r => r.id !== id);
+    renderQueue();
+    renderResults();
 }
 
+function clearCandidateInput() {
+    document.getElementById('candidateResume').value = '';
+    document.getElementById('candidateName').value = '';
+    document.getElementById('resumeFileInfo').innerHTML = '';
+}
+
+function clearJobDescription() {
+    document.getElementById('jobDescription').value = '';
+    document.getElementById('jobFileInfo').innerHTML = '';
+}
+
+// ==========================================================================
+// NAME EXTRACTION - FILENAME FIRST, THEN RESUME TEXT
+// ==========================================================================
+
+// Extract name from filename (most reliable for recruiters)
 function extractNameFromFilename(filename) {
     if (!filename) return null;
-    let name = filename.replace(/\.(pdf|docx?|txt)$/i, '');
-    name = name.replace(/(resume|cv|cover.*letter|application)/gi, ' ');
+    
+    // Remove extension
+    let name = filename.replace(/\.(pdf|docx?|txt|rtf)$/i, '');
+    
+    // Remove common suffixes
+    name = name.replace(/(resume|cv|curriculum[\s_-]*vitae|cover[\s_-]*letter|application)/gi, ' ');
+    
+    // Remove dates - years like 2024, 2025
     name = name.replace(/20\d{2}/g, ' ');
-    name = name.replace(/(january|february|march|april|may|june|july|august|september|october|november|december|jan|feb|mar|apr|jun|jul|aug|sep|oct|nov|dec)/gi, ' ');
-    name = name.replace(/(v\d+|final|draft|updated|new|copy|\d+)/gi, ' ');
-    name = name.replace(/[_-]+/g, ' ').replace(/\s+/g, ' ').trim();
-    if (name.length < 2 || ['resume', 'cv', 'document', 'file', 'untitled'].includes(name.toLowerCase())) return null;
-    return name.toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
+    
+    // Remove month names
+    name = name.replace(/(january|february|march|april|may|june|july|august|september|october|november|december|jan|feb|mar|apr|jun|jul|aug|sep|sept|oct|nov|dec)/gi, ' ');
+    
+    // Remove version indicators
+    name = name.replace(/(v\d+|version[\s_-]*\d+|final|draft|updated|new|copy|edit|\d+)/gi, ' ');
+    
+    // Replace underscores, hyphens with spaces
+    name = name.replace(/[_-]+/g, ' ');
+    
+    // Remove extra spaces
+    name = name.replace(/\s+/g, ' ').trim();
+    
+    // Skip if empty or too short
+    if (name.length < 2) return null;
+    
+    // Skip generic names
+    const generic = ['resume', 'cv', 'document', 'file', 'untitled', 'download', 'attachment'];
+    if (generic.includes(name.toLowerCase())) return null;
+    
+    // Title case
+    name = name.toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
+    
+    return name;
 }
 
-function extractNameFromText(text) {
-    const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-    const headers = new Set(['summary','experience','education','skills','profile','objective','qualifications','contact','resume','cv']);
-    for (let i = 0; i < Math.min(lines.length, 15); i++) {
+// Extract name from resume text (fallback when filename doesn't work)
+function extractNameFromResume(resumeText) {
+    if (!resumeText) return null;
+    
+    const lines = resumeText.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+    
+    // Section headers to skip (lowercase)
+    const headers = new Set([
+        'summary', 'experience', 'education', 'skills', 'profile', 'objective',
+        'qualifications', 'competencies', 'core competencies', 'key competencies',
+        'professional experience', 'work experience', 'employment history',
+        'career summary', 'professional summary', 'executive summary',
+        'technical skills', 'certifications', 'achievements', 'accomplishments',
+        'references', 'awards', 'publications', 'languages', 'interests', 'hobbies',
+        'contact', 'contact information', 'personal information',
+        'resume', 'cv', 'curriculum vitae',
+        'account management', 'project management', 'business development',
+        'contract negotiation', 'sales', 'marketing', 'leadership', 'management',
+        'communication', 'strategic planning', 'customer relations', 'team leadership',
+        'problem solving', 'analytics', 'operations', 'finance', 'human resources',
+        'areas of expertise', 'key skills', 'professional profile', 'career objective',
+        'overview', 'about', 'about me', 'background', 'mentorship', 'work life balance',
+        'mentorship & career growth', 'work/life balance'
+    ]);
+    
+    for (let i = 0; i < Math.min(lines.length, 20); i++) {
         let line = lines[i];
-        if (headers.has(line.toLowerCase()) || line.length < 4 || line.length > 40) continue;
-        if (/[@|•:()\/]/.test(line) || /\d{3}.*\d{4}/.test(line) || /\d{4}/.test(line)) continue;
-        const words = line.split(/\s+/).filter(w => w.length > 0);
+        
+        // Skip headers
+        if (headers.has(line.toLowerCase())) continue;
+        
+        // Skip wrong length
+        if (line.length < 4 || line.length > 45) continue;
+        
+        // Skip lines with non-name chars
+        if (/[@|•:()\/]/.test(line)) continue;
+        if (/\d{3}.*\d{3}.*\d{4}/.test(line)) continue; // phone
+        if (/\d{4,}/.test(line)) continue; // year or zip
+        if (/^\d/.test(line)) continue; // starts with number
+        if (/http|www\.|\.com|\.org|\.net/i.test(line)) continue; // URLs
+        
+        // Clean weird PDF spacing: "K YLIE" -> "KYLIE"
+        let cleaned = line.replace(/\b([A-Z])\s+(?=[A-Z]\b)/g, '$1');
+        
+        const words = cleaned.split(/\s+/).filter(w => w.length > 0);
+        
+        // Names have 2-4 words
         if (words.length < 2 || words.length > 4) continue;
-        if (!words.every(w => /^[A-Za-z][A-Za-z.\-']*$/.test(w))) continue;
-        return line === line.toUpperCase() ? line.toLowerCase().replace(/\b\w/g, c => c.toUpperCase()) : line;
+        
+        // Each word should look like a name (letters, maybe hyphens/apostrophes)
+        const isName = words.every(w => /^[A-Za-z][A-Za-z.\-']*$/.test(w));
+        if (!isName) continue;
+        
+        // Title case if all caps
+        if (cleaned === cleaned.toUpperCase()) {
+            cleaned = cleaned.toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
+        }
+        
+        return cleaned;
     }
+    
     return null;
 }
 
-function renderCandidates() {
-    const grid = document.getElementById('candidatesGrid');
-    const empty = document.getElementById('emptyState');
-    if (candidates.length === 0) { empty.style.display = 'flex'; grid.style.display = 'none'; return; }
-    empty.style.display = 'none';
-    grid.style.display = 'grid';
-    const sorted = [...candidates].sort((a, b) => {
-        if (a.decision && !b.decision) return 1;
-        if (!a.decision && b.decision) return -1;
-        return (b.result?.score || 0) - (a.result?.score || 0);
-    });
-    grid.innerHTML = sorted.map(c => renderCard(c)).join('');
-    updateStats();
-}
-
-function renderCard(c) {
-    const isAnalyzing = c.status === 'analyzing';
-    const score = c.result?.score || 0;
-    const scoreClass = score >= 75 ? 'score-high' : score >= 50 ? 'score-mid' : 'score-low';
-    const clearance = extractClearance(c);
-    const clearanceClass = clearance.includes('TS') ? 'clearance-ts' : clearance.includes('Secret') ? 'clearance-secret' : 'clearance-none';
-    const strengths = (c.result?.analysis || []).filter(a => a.startsWith('Match:')).map(m => extractKeyPoint(m.replace('Match:', '').trim())).slice(0, 3);
-    const gaps = (c.result?.analysis || []).filter(a => a.startsWith('Gap:')).map(g => extractKeyPoint(g.replace('Gap:', '').trim())).slice(0, 2);
-    let cardClass = 'candidate-card';
-    if (c.decision === 'forward') cardClass += ' forwarded decided';
-    else if (c.decision === 'pass') cardClass += ' passed decided';
-    else if (c.decision === 'maybe') cardClass += ' decided';
-    let actionsHtml = '';
-    if (c.decision) {
-        const decisionClass = c.decision === 'forward' ? 'decision-forward' : c.decision === 'pass' ? 'decision-pass' : 'decision-maybe';
-        const decisionText = c.decision === 'forward' ? '✓ Forward to HM' : c.decision === 'pass' ? '✗ Pass' : '? Maybe';
-        actionsHtml = `<span class="decision-badge ${decisionClass}">${decisionText}</span><button class="btn btn-sm-action" onclick="undoDecision('${c.id}')">Undo</button>`;
-    } else if (!isAnalyzing) {
-        actionsHtml = `<button class="btn btn-success" onclick="decide('${c.id}', 'forward')">Forward</button><button class="btn btn-danger" onclick="decide('${c.id}', 'pass')">Pass</button><button class="btn btn-warning btn-sm-action" onclick="decide('${c.id}', 'maybe')">?</button>`;
+function clearQueue() {
+    if (confirm('Clear all candidates from queue?')) {
+        candidateQueue = [];
+        analysisResults = [];
+        renderQueue();
+        document.getElementById('resultsCard').style.display = 'none';
     }
-    return `<div class="${cardClass}">
-        <div class="card-header">
-            <div class="candidate-info">
-                <div class="candidate-name">${escapeHtml(c.name)}</div>
-                <span class="candidate-clearance ${clearanceClass}">${clearance}</span>
-            </div>
-            <div class="score-badge ${scoreClass}">${isAnalyzing ? '<span class="spinner"></span>' : score + '%'}</div>
-        </div>
-        <div class="card-body">
-            <div class="section-label">Strengths</div>
-            <div class="pills">${strengths.length ? strengths.map(s => `<span class="pill pill-match">${escapeHtml(s)}</span>`).join('') : '<span class="pill pill-none">Analyzing...</span>'}</div>
-            <div class="section-label">Gaps</div>
-            <div class="pills">${gaps.length ? gaps.map(g => `<span class="pill pill-gap">${escapeHtml(g)}</span>`).join('') : `<span class="pill pill-none">${isAnalyzing ? 'Analyzing...' : 'None identified'}</span>`}</div>
-        </div>
-        <div class="card-actions">${actionsHtml}</div>
-    </div>`;
 }
 
-function extractClearance(c) {
-    const text = (c.resumeText || '').toLowerCase();
-    if (text.includes('ts/sci') || text.includes('top secret/sci')) return 'TS/SCI';
-    if (text.includes('top secret')) return 'Top Secret';
-    if (text.includes('secret clearance')) return 'Secret';
+function renderQueue() {
+    const container = document.getElementById('candidateQueue');
+    const countEl = document.getElementById('queueCount');
+    const actionsEl = document.getElementById('queueActions');
+    
+    countEl.textContent = `${candidateQueue.length} candidate${candidateQueue.length !== 1 ? 's' : ''}`;
+    
+    if (candidateQueue.length === 0) {
+        actionsEl.style.display = 'none';
+        container.innerHTML = `
+            <div class="empty-state">
+                <div class="empty-icon">📋</div>
+                <div class="empty-text">No candidates added yet</div>
+            </div>
+        `;
+        return;
+    }
+    
+    actionsEl.style.display = 'flex';
+    
+    container.innerHTML = candidateQueue.map(candidate => {
+        let statusClass = '';
+        let statusText = 'Pending';
+        let scoreHtml = '';
+        
+        if (candidate.status === 'analyzing') {
+            statusClass = 'analyzing';
+            statusText = '<span class="spinner"></span> Analyzing...';
+        } else if (candidate.status === 'complete' && candidate.result) {
+            statusClass = 'complete';
+            statusText = 'Complete';
+            const score = candidate.result.score || 0;
+            const scoreClass = score >= 75 ? 'score-high' : score >= 50 ? 'score-mid' : 'score-low';
+            scoreHtml = `<span class="queue-score ${scoreClass}">${score}%</span>`;
+        } else if (candidate.status === 'error') {
+            statusClass = 'error';
+            statusText = 'Error';
+        }
+        
+        return `
+            <div class="queue-item ${statusClass}">
+                <div>
+                    <div class="queue-name">${escapeHtml(candidate.name)}</div>
+                    <div class="queue-status">${statusText}</div>
+                </div>
+                <div class="queue-actions">
+                    ${scoreHtml}
+                    <button class="remove-btn" onclick="removeCandidate(${candidate.id})" title="Remove">×</button>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+// ==========================================================================
+// ANALYSIS
+// ==========================================================================
+async function analyzeAll() {
+    const jobDescription = document.getElementById('jobDescription').value.trim();
+    
+    if (!jobDescription || jobDescription.length < 50) {
+        showToast('Please paste a job description first', true);
+        return;
+    }
+    
+    if (candidateQueue.length === 0) {
+        showToast('Add at least one candidate to analyze', true);
+        return;
+    }
+    
+    const btn = document.getElementById('analyzeAllBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> Analyzing...';
+    
+    analysisResults = [];
+    
+    // Analyze each candidate sequentially to avoid rate limits
+    for (const candidate of candidateQueue) {
+        candidate.status = 'analyzing';
+        renderQueue();
+        
+        try {
+            const result = await analyzeCandidate(jobDescription, candidate.resumeText);
+            candidate.status = 'complete';
+            candidate.result = result;
+            
+            analysisResults.push({
+                id: candidate.id,
+                name: candidate.name,
+                resumeText: candidate.resumeText,
+                ...result
+            });
+        } catch (error) {
+            candidate.status = 'error';
+            candidate.result = { error: error.message };
+            console.error(`Error analyzing ${candidate.name}:`, error);
+        }
+        
+        renderQueue();
+    }
+    
+    btn.disabled = false;
+    btn.innerHTML = 'Analyze All Candidates';
+    
+    // Sort by score descending and render results
+    analysisResults.sort((a, b) => (b.score || 0) - (a.score || 0));
+    renderResults();
+    showToast(`Analysis complete: ${analysisResults.length} candidates ranked`);
+}
+
+async function analyzeCandidate(jobDescription, resumeText) {
+    const response = await fetch(API_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            request_type: 'resume_match',
+            job_description: jobDescription,
+            resume_text: resumeText
+        })
+    });
+    
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Analysis failed');
+    }
+    
+    return await response.json();
+}
+
+// ==========================================================================
+// RESULTS RENDERING
+// ==========================================================================
+function renderResults() {
+    const resultsCard = document.getElementById('resultsCard');
+    const tbody = document.getElementById('resultsBody');
+    
+    if (analysisResults.length === 0) {
+        resultsCard.style.display = 'none';
+        return;
+    }
+    
+    resultsCard.style.display = 'block';
+    
+    // Apply filters
+    let filtered = applyFiltersToData(analysisResults);
+    
+    // Update stats
+    updateStats(analysisResults);
+    updateShortlistCount();
+    
+    // Render table
+    tbody.innerHTML = filtered.map((result, index) => {
+        const rank = index + 1;
+        const score = result.score || 0;
+        const scoreClass = score >= 75 ? 'score-high' : score >= 50 ? 'score-mid' : 'score-low';
+        const rankClass = rank <= 3 ? `rank-${rank}` : '';
+        
+        // Extract clearance
+        const clearance = extractClearance(result);
+        const clearanceClass = clearance.includes('TS') ? 'clearance-ts' : 
+                               clearance.includes('Secret') ? 'clearance-secret' : 'clearance-none';
+        
+        // Extract matches and gaps for pills
+        const matches = (result.analysis || [])
+            .filter(a => a.startsWith('Match:'))
+            .map(m => m.replace('Match:', '').trim())
+            .slice(0, 3);
+        
+        const gaps = (result.analysis || [])
+            .filter(a => a.startsWith('Gap:'))
+            .map(g => g.replace('Gap:', '').trim())
+            .slice(0, 3);
+        
+        // Get current status and notes
+        const status = result.status || 'review';
+        const notes = result.notes || '';
+        const statusClass = `status-${status}`;
+        
+        // Generate strength/gap pills HTML
+        const strengthsHtml = matches.length > 0 
+            ? matches.map(m => `<span class="pill pill-match">${escapeHtml(truncateText(m, 35))}</span>`).join('')
+            : '<span class="no-data">None identified</span>';
+        
+        const gapsHtml = gaps.length > 0 
+            ? gaps.map(g => `<span class="pill pill-gap">${escapeHtml(truncateText(g, 35))}</span>`).join('')
+            : '<span class="no-data">None identified</span>';
+        
+        return `
+            <tr class="${rankClass}" data-id="${result.id}">
+                <td><span class="rank-badge">${rank}</span></td>
+                <td>
+                    <div class="candidate-name">${escapeHtml(result.name)}</div>
+                </td>
+                <td class="score-cell ${scoreClass}">${score}%</td>
+                <td>
+                    <select class="status-select ${statusClass}" onchange="updateStatus(${result.id}, this.value)" data-id="${result.id}">
+                        <option value="review" ${status === 'review' ? 'selected' : ''}>Review</option>
+                        <option value="send" ${status === 'send' ? 'selected' : ''}>Send to HM</option>
+                        <option value="maybe" ${status === 'maybe' ? 'selected' : ''}>Maybe</option>
+                        <option value="pass" ${status === 'pass' ? 'selected' : ''}>Pass</option>
+                    </select>
+                </td>
+                <td>
+                    <div class="pill-list">
+                        ${strengthsHtml}
+                    </div>
+                </td>
+                <td>
+                    <div class="pill-list">
+                        ${gapsHtml}
+                    </div>
+                </td>
+                <td><span class="clearance-badge ${clearanceClass}">${clearance}</span></td>
+                <td class="notes-cell">
+                    <textarea 
+                        class="notes-input" 
+                        placeholder="Add notes..." 
+                        onchange="updateNotes(${result.id}, this.value)"
+                        data-id="${result.id}"
+                    >${escapeHtml(notes)}</textarea>
+                </td>
+                <td>
+                    <button class="btn btn-sm" onclick="showDetails(${result.id})">View</button>
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+// Helper to truncate text for pills
+function truncateText(text, maxLength) {
+    if (text.length <= maxLength) return text;
+    return text.substring(0, maxLength - 3) + '...';
+}
+
+function applyFiltersToData(data) {
+    const scoreFilter = document.getElementById('scoreFilter').value;
+    const clearanceFilter = document.getElementById('clearanceFilter').value;
+    const statusFilter = document.getElementById('statusFilter').value;
+    
+    return data.filter(result => {
+        const score = result.score || 0;
+        const clearance = extractClearance(result).toLowerCase();
+        const status = result.status || 'review';
+        
+        // Score filter
+        if (scoreFilter === 'strong' && score < 75) return false;
+        if (scoreFilter === 'moderate' && (score < 50 || score >= 75)) return false;
+        if (scoreFilter === 'weak' && score >= 50) return false;
+        
+        // Clearance filter
+        if (clearanceFilter === 'ts' && !clearance.includes('ts')) return false;
+        if (clearanceFilter === 'secret' && !clearance.includes('secret') && !clearance.includes('ts')) return false;
+        if (clearanceFilter === 'none' && (clearance.includes('secret') || clearance.includes('ts'))) return false;
+        
+        // Status filter
+        if (statusFilter !== 'all' && status !== statusFilter) return false;
+        
+        return true;
+    });
+}
+
+function applyFilters() {
+    renderResults();
+}
+
+function updateStats(results) {
+    const total = results.length;
+    const strong = results.filter(r => (r.score || 0) >= 75).length;
+    const avgScore = total > 0 ? Math.round(results.reduce((sum, r) => sum + (r.score || 0), 0) / total) : 0;
+    const flagged = results.filter(r => extractRedFlags(r, []).length > 0).length;
+    
+    document.getElementById('totalCandidates').textContent = total;
+    document.getElementById('strongMatches').textContent = strong;
+    document.getElementById('avgScore').textContent = avgScore + '%';
+    document.getElementById('flaggedCount').textContent = flagged;
+}
+
+function extractClearance(result) {
+    // Try to find clearance in analysis or keywords
+    const analysis = (result.analysis || []).join(' ').toLowerCase();
+    const resumeText = (result.resumeText || '').toLowerCase();
+    
+    if (analysis.includes('ts/sci') || resumeText.includes('ts/sci') || resumeText.includes('top secret/sci')) {
+        return 'TS/SCI';
+    }
+    if (analysis.includes('top secret') || resumeText.includes('top secret')) {
+        return 'Top Secret';
+    }
+    if (analysis.includes('secret clearance') || resumeText.includes('secret clearance')) {
+        return 'Secret';
+    }
+    if (resumeText.includes('poly') || resumeText.includes('polygraph')) {
+        if (resumeText.includes('ts/sci') || resumeText.includes('top secret')) {
+            return 'TS/SCI + Poly';
+        }
+    }
+    
     return 'Unknown';
 }
 
+function extractRedFlags(result, gaps) {
+    const flags = [];
+    const analysis = (result.analysis || []).join(' ').toLowerCase();
+    const gapText = gaps.join(' ').toLowerCase();
+    
+    // Check for clearance mismatch
+    if (gapText.includes('clearance') || gapText.includes('security')) {
+        flags.push('Clearance');
+    }
+    
+    // Check for experience gap
+    if (gapText.includes('years') || gapText.includes('experience')) {
+        flags.push('Experience');
+    }
+    
+    // Low score is a flag
+    if ((result.score || 0) < 50) {
+        flags.push('Low Fit');
+    }
+    
+    return flags.slice(0, 2); // Max 2 flags shown
+}
+
+// ==========================================================================
+// WHY/WHY NOT SUMMARY
+// ==========================================================================
+function generateWhySummary(result) {
+    const score = result.score || 0;
+    const matches = (result.analysis || []).filter(a => a.startsWith('Match:')).map(m => m.replace('Match:', '').trim());
+    const gaps = (result.analysis || []).filter(a => a.startsWith('Gap:')).map(g => g.replace('Gap:', '').trim());
+    
+    // Get top match and gap
+    const topMatch = matches[0] ? matches[0].substring(0, 60) : null;
+    const topGap = gaps[0] ? gaps[0].substring(0, 60) : null;
+    
+    let summary = '';
+    let html = '';
+    
+    // Build the summary
+    if (score >= 75) {
+        summary = `Strong fit (${score}%). `;
+        html = `<span class="why-good">✓ Strong fit (${score}%).</span> `;
+    } else if (score >= 50) {
+        summary = `Moderate fit (${score}%). `;
+        html = `Moderate fit (${score}%). `;
+    } else {
+        summary = `Weak fit (${score}%). `;
+        html = `<span class="why-bad">⚠ Weak fit (${score}%).</span> `;
+    }
+    
+    if (topMatch) {
+        summary += `+ ${topMatch}. `;
+        html += `<span class="why-good">+</span> ${escapeHtml(topMatch)}. `;
+    }
+    
+    if (topGap) {
+        summary += `- ${topGap}.`;
+        html += `<span class="why-bad">−</span> ${escapeHtml(topGap)}.`;
+    }
+    
+    return { text: summary, html: html };
+}
+
+// ==========================================================================
+// STATUS & NOTES MANAGEMENT
+// ==========================================================================
+function updateStatus(candidateId, newStatus) {
+    const result = analysisResults.find(r => r.id === candidateId);
+    if (result) {
+        result.status = newStatus;
+        
+        // Update the select styling
+        const select = document.querySelector(`select[data-id="${candidateId}"]`);
+        if (select) {
+            select.className = `status-select status-${newStatus}`;
+        }
+        
+        updateShortlistCount();
+        saveToLocalStorage();
+    }
+}
+
+function updateNotes(candidateId, notes) {
+    const result = analysisResults.find(r => r.id === candidateId);
+    if (result) {
+        result.notes = notes;
+        saveToLocalStorage();
+    }
+}
+
+function updateShortlistCount() {
+    const sendCount = analysisResults.filter(r => r.status === 'send').length;
+    document.getElementById('shortlistCount').textContent = `${sendCount} to send`;
+}
+
+function copySummary(candidateId) {
+    const result = analysisResults.find(r => r.id === candidateId);
+    if (!result) return;
+    
+    const summary = generateWhySummary(result);
+    const fullText = `${result.name}: ${summary.text}`;
+    
+    navigator.clipboard.writeText(fullText).then(() => {
+        showToast('Summary copied to clipboard');
+    }).catch(() => {
+        showToast('Failed to copy', true);
+    });
+}
+
+// ==========================================================================
+// LOCAL STORAGE PERSISTENCE
+// ==========================================================================
+function saveToLocalStorage() {
+    try {
+        // Save just the status and notes, not the full results
+        const savedData = analysisResults.map(r => ({
+            id: r.id,
+            name: r.name,
+            status: r.status || 'review',
+            notes: r.notes || ''
+        }));
+        localStorage.setItem('dib_recruiter_decisions', JSON.stringify(savedData));
+    } catch (e) {
+        console.error('Failed to save to localStorage:', e);
+    }
+}
+
+function loadFromLocalStorage() {
+    try {
+        const saved = localStorage.getItem('dib_recruiter_decisions');
+        if (saved) {
+            const savedData = JSON.parse(saved);
+            // Merge saved status/notes back into results
+            savedData.forEach(saved => {
+                const result = analysisResults.find(r => r.id === saved.id || r.name === saved.name);
+                if (result) {
+                    result.status = saved.status;
+                    result.notes = saved.notes;
+                }
+            });
+        }
+    } catch (e) {
+        console.error('Failed to load from localStorage:', e);
+    }
+}
+
+// ==========================================================================
+// EXPORT SHORTLIST ONLY (FOR HIRING MANAGER)
+// ==========================================================================
+function exportShortlist() {
+    const shortlist = analysisResults.filter(r => r.status === 'send');
+    
+    if (shortlist.length === 0) {
+        showToast('No candidates marked "Send to HM"', true);
+        return;
+    }
+    
+    // Clean, scannable columns for the hiring manager
+    const headers = ['Rank', 'Name', 'Score', 'Clearance', 'Top Strengths', 'Key Gaps', 'Recruiter Notes'];
+    
+    const rows = shortlist.map((result, index) => {
+        // Get top 3 strengths as short bullets
+        const strengths = (result.analysis || [])
+            .filter(a => a.startsWith('Match:'))
+            .map(m => extractKeyPoint(m.replace('Match:', '').trim()))
+            .slice(0, 3)
+            .join(' • ');
+        
+        // Get top 2 gaps as short bullets
+        const gaps = (result.analysis || [])
+            .filter(a => a.startsWith('Gap:'))
+            .map(g => extractKeyPoint(g.replace('Gap:', '').trim()))
+            .slice(0, 2)
+            .join(' • ');
+        
+        return [
+            index + 1,
+            result.name,
+            (result.score || 0) + '%',
+            extractClearance(result),
+            strengths || 'None identified',
+            gaps || 'None identified',
+            (result.notes || '').replace(/"/g, '""')
+        ];
+    });
+    
+    const csvContent = [
+        headers.join(','),
+        ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
+    ].join('\n');
+    
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    
+    const timestamp = new Date().toISOString().split('T')[0];
+    link.setAttribute('href', url);
+    link.setAttribute('download', `shortlist-for-hiring-manager-${timestamp}.csv`);
+    link.style.display = 'none';
+    
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    showToast(`Exported ${shortlist.length} candidates for hiring manager`);
+}
+
+// Extract the key point from a verbose match/gap string (before the arrow or first 50 chars)
 function extractKeyPoint(text) {
     if (!text) return '';
-    const arrow = text.indexOf('→');
-    if (arrow > 0) return text.substring(0, arrow).trim();
-    return text.length > 45 ? text.substring(0, 42) + '...' : text;
+    // If there's an arrow, take just the part before it
+    const arrowIndex = text.indexOf('→');
+    if (arrowIndex > 0) {
+        return text.substring(0, arrowIndex).trim();
+    }
+    // Otherwise truncate to 50 chars
+    if (text.length > 50) {
+        return text.substring(0, 47) + '...';
+    }
+    return text;
 }
 
-function decide(id, decision) {
-    const c = candidates.find(x => x.id == id);
-    if (c) { c.decision = decision; renderCandidates(); showToast(c.name + (decision === 'forward' ? ' forwarded' : decision === 'pass' ? ' passed' : ' marked maybe')); }
+// ==========================================================================
+// DETAIL MODAL
+// ==========================================================================
+function showDetails(candidateId) {
+    const result = analysisResults.find(r => r.id === candidateId);
+    if (!result) return;
+    
+    const modal = document.getElementById('detailModal');
+    const title = document.getElementById('modalTitle');
+    const body = document.getElementById('modalBody');
+    
+    title.textContent = result.name;
+    
+    const matches = (result.analysis || []).filter(a => a.startsWith('Match:'));
+    const gaps = (result.analysis || []).filter(a => a.startsWith('Gap:'));
+    
+    body.innerHTML = `
+        <div class="detail-section">
+            <div class="detail-label">Match Score</div>
+            <div class="detail-score ${result.score >= 75 ? 'score-high' : result.score >= 50 ? 'score-mid' : 'score-low'}">${result.score || 0}%</div>
+            <div class="detail-verdict">${result.verdict || 'No verdict available'}</div>
+        </div>
+        
+        <div class="detail-section">
+            <div class="detail-label">Clearance</div>
+            <div class="detail-value">${extractClearance(result)}</div>
+        </div>
+        
+        <div class="detail-section">
+            <div class="detail-label">Job Identified</div>
+            <div class="detail-value"><strong>${result.job_title || 'Unknown'}</strong> at ${result.company || 'Unknown'}</div>
+        </div>
+        
+        <div class="detail-section">
+            <div class="detail-label">Key Strengths (${matches.length})</div>
+            <div class="detail-value">
+                ${matches.length > 0 ? matches.map(m => `
+                    <div style="margin-bottom: 8px; padding: 10px 12px; background: var(--accent-emerald-light); border-left: 3px solid var(--accent-emerald); border-radius: 4px;">
+                        ${escapeHtml(m.replace('Match:', '').trim())}
+                    </div>
+                `).join('') : '<em>None identified</em>'}
+            </div>
+        </div>
+        
+        <div class="detail-section">
+            <div class="detail-label">Gaps / Concerns (${gaps.length})</div>
+            <div class="detail-value">
+                ${gaps.length > 0 ? gaps.map(g => `
+                    <div style="margin-bottom: 8px; padding: 10px 12px; background: var(--accent-rose-light); border-left: 3px solid var(--accent-rose); border-radius: 4px;">
+                        ${escapeHtml(g.replace('Gap:', '').trim())}
+                    </div>
+                `).join('') : '<em>None identified</em>'}
+            </div>
+        </div>
+        
+        ${hasValidInterviewQuestions(result) ? `
+        <div class="detail-section">
+            <div class="detail-label">Suggested Interview Questions</div>
+            <div class="detail-value">
+                ${getValidInterviewQuestions(result).map((q, i) => `
+                    <div style="margin-bottom: 8px; padding: 10px 12px; background: var(--slate-100); border-radius: 4px;">
+                        <strong>${i + 1}.</strong> ${escapeHtml(q)}
+                    </div>
+                `).join('')}
+            </div>
+        </div>
+        ` : ''}
+    `;
+    
+    modal.classList.add('active');
 }
 
-function undoDecision(id) {
-    const c = candidates.find(x => x.id == id);
-    if (c) { c.decision = null; renderCandidates(); }
+function closeModal(event) {
+    if (event && event.target !== event.currentTarget) return;
+    document.getElementById('detailModal').classList.remove('active');
 }
 
-function updateStats() {
-    document.getElementById('forwardCount').textContent = candidates.filter(c => c.decision === 'forward').length;
-    document.getElementById('passCount').textContent = candidates.filter(c => c.decision === 'pass').length;
-    document.getElementById('exportBtn').disabled = candidates.filter(c => c.decision === 'forward').length === 0;
+// Helper functions to validate interview questions
+function hasValidInterviewQuestions(result) {
+    const questions = getValidInterviewQuestions(result);
+    return questions.length > 0;
 }
 
-function updateProcessingStatus(fileName) {
-    const el = document.getElementById('processingStatus');
-    el.innerHTML = fileName ? '<div class="processing"><span class="spinner"></span> Processing ' + escapeHtml(fileName) + '...</div>' : '';
-}
-
-function exportForward() {
-    const forwarded = candidates.filter(c => c.decision === 'forward');
-    if (!forwarded.length) return;
-    const headers = ['Name', 'Score', 'Clearance', 'Top Strengths', 'Key Gaps'];
-    const rows = forwarded.map(c => {
-        const strengths = (c.result?.analysis || []).filter(a => a.startsWith('Match:')).map(m => extractKeyPoint(m.replace('Match:', '').trim())).slice(0, 3).join(' • ');
-        const gaps = (c.result?.analysis || []).filter(a => a.startsWith('Gap:')).map(g => extractKeyPoint(g.replace('Gap:', '').trim())).slice(0, 2).join(' • ');
-        return [c.name, (c.result?.score || 0) + '%', extractClearance(c), strengths || 'None identified', gaps || 'None identified'];
+function getValidInterviewQuestions(result) {
+    if (!result.interview_questions || !Array.isArray(result.interview_questions)) {
+        return [];
+    }
+    
+    // Filter to only valid string questions that aren't empty or [object Object]
+    return result.interview_questions.filter(q => {
+        if (typeof q === 'string' && q.trim().length > 0 && !q.includes('[object')) {
+            return true;
+        }
+        // If it's an object with a question property, extract that
+        if (typeof q === 'object' && q !== null) {
+            const questionText = q.question || q.text || q.content;
+            if (typeof questionText === 'string' && questionText.trim().length > 0) {
+                return true;
+            }
+        }
+        return false;
+    }).map(q => {
+        // Return the string value
+        if (typeof q === 'string') return q.trim();
+        // Extract from object
+        return (q.question || q.text || q.content || '').trim();
     });
-    const csv = [headers, ...rows].map(row => row.map(cell => '"' + String(cell).replace(/"/g, '""') + '"').join(',')).join('\n');
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = 'forward-to-hm-' + new Date().toISOString().split('T')[0] + '.csv';
-    link.click();
-    showToast('Exported ' + forwarded.length + ' candidates');
 }
 
-function escapeHtml(str) { return str ? String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;') : ''; }
-function showToast(msg) { const toast = document.getElementById('toast'); toast.textContent = msg; toast.classList.add('show'); setTimeout(() => toast.classList.remove('show'), 3000); }
+// Close modal on Escape
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeModal();
+});
+
+// ==========================================================================
+// SORTING
+// ==========================================================================
+function sortTable(column) {
+    if (currentSort.column === column) {
+        currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+    } else {
+        currentSort.column = column;
+        currentSort.direction = column === 'score' ? 'desc' : 'asc';
+    }
+    
+    analysisResults.sort((a, b) => {
+        let valA, valB;
+        
+        switch (column) {
+            case 'rank':
+            case 'score':
+                valA = a.score || 0;
+                valB = b.score || 0;
+                break;
+            case 'name':
+                valA = a.name.toLowerCase();
+                valB = b.name.toLowerCase();
+                break;
+            case 'clearance':
+                valA = extractClearance(a);
+                valB = extractClearance(b);
+                break;
+            default:
+                return 0;
+        }
+        
+        if (valA < valB) return currentSort.direction === 'asc' ? -1 : 1;
+        if (valA > valB) return currentSort.direction === 'asc' ? 1 : -1;
+        return 0;
+    });
+    
+    // Update header classes
+    document.querySelectorAll('.results-table th').forEach(th => {
+        th.classList.remove('sorted-asc', 'sorted-desc');
+    });
+    
+    renderResults();
+}
+
+// ==========================================================================
+// CSV EXPORT (ALL CANDIDATES - RECRUITER TRACKING)
+// ==========================================================================
+function exportCSV() {
+    if (analysisResults.length === 0) {
+        showToast('No results to export', true);
+        return;
+    }
+    
+    // Clean columns for recruiter tracking
+    const headers = ['Rank', 'Name', 'Score', 'Decision', 'Clearance', 'Top Strengths', 'Key Gaps', 'Recruiter Notes'];
+    const statusLabels = { review: 'Needs Review', send: 'Send to HM', maybe: 'Maybe', pass: 'Pass' };
+    
+    const rows = analysisResults.map((result, index) => {
+        // Get top 3 strengths as short bullets
+        const strengths = (result.analysis || [])
+            .filter(a => a.startsWith('Match:'))
+            .map(m => extractKeyPoint(m.replace('Match:', '').trim()))
+            .slice(0, 3)
+            .join(' • ');
+        
+        // Get top 2 gaps as short bullets  
+        const gaps = (result.analysis || [])
+            .filter(a => a.startsWith('Gap:'))
+            .map(g => extractKeyPoint(g.replace('Gap:', '').trim()))
+            .slice(0, 2)
+            .join(' • ');
+        
+        return [
+            index + 1,
+            result.name,
+            (result.score || 0) + '%',
+            statusLabels[result.status] || 'Needs Review',
+            extractClearance(result),
+            strengths || 'None identified',
+            gaps || 'None identified',
+            (result.notes || '').replace(/"/g, '""')
+        ];
+    });
+    
+    const csvContent = [
+        headers.join(','),
+        ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
+    ].join('\n');
+    
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    
+    const timestamp = new Date().toISOString().split('T')[0];
+    link.setAttribute('href', url);
+    link.setAttribute('download', `candidate-screening-${timestamp}.csv`);
+    link.style.display = 'none';
+    
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    showToast('CSV exported successfully');
+}
+
+// ==========================================================================
+// UTILITIES
+// ==========================================================================
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function showToast(message, isError = false) {
+    const toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.style.borderColor = isError ? 'var(--accent-rose)' : 'var(--accent-emerald)';
+    toast.classList.add('show');
+    
+    setTimeout(() => {
+        toast.classList.remove('show');
+    }, 3000);
+}
+
+// ==========================================================================
+// INITIALIZE
+// ==========================================================================
+document.addEventListener('DOMContentLoaded', () => {
+    renderQueue();
+    initDragAndDrop();
+});
+
+// ==========================================================================
+// DRAG AND DROP FILE HANDLING
+// ==========================================================================
+function initDragAndDrop() {
+    // Set up PDF.js worker
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    
+    const dropZones = document.querySelectorAll('.drop-zone');
+    
+    dropZones.forEach(zone => {
+        // Prevent default drag behaviors
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            zone.addEventListener(eventName, preventDefaults, false);
+        });
+        
+        // Highlight drop zone when dragging over
+        ['dragenter', 'dragover'].forEach(eventName => {
+            zone.addEventListener(eventName, () => zone.classList.add('drag-over'), false);
+        });
+        
+        ['dragleave', 'drop'].forEach(eventName => {
+            zone.addEventListener(eventName, () => zone.classList.remove('drag-over'), false);
+        });
+        
+        // Handle dropped files
+        zone.addEventListener('drop', handleDrop, false);
+    });
+}
+
+function preventDefaults(e) {
+    e.preventDefault();
+    e.stopPropagation();
+}
+
+async function handleDrop(e) {
+    const files = e.dataTransfer.files;
+    if (files.length === 0) return;
+    
+    const file = files[0];
+    const textarea = e.target;
+    const isJobDescription = textarea.id === 'jobDescription';
+    const fileInfoId = isJobDescription ? 'jobFileInfo' : 'resumeFileInfo';
+    const fileInfoEl = document.getElementById(fileInfoId);
+    
+    // Validate file type
+    const validTypes = [
+        'application/pdf',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'application/msword',
+        'text/plain'
+    ];
+    
+    const fileExtension = file.name.split('.').pop().toLowerCase();
+    const isValidType = validTypes.includes(file.type) || ['pdf', 'docx', 'doc', 'txt'].includes(fileExtension);
+    
+    if (!isValidType) {
+        showToast('Please drop a PDF, DOCX, or TXT file', true);
+        return;
+    }
+    
+    // Show processing indicator
+    fileInfoEl.innerHTML = `
+        <div class="processing-indicator">
+            <span class="spinner"></span>
+            <span>Processing ${escapeHtml(file.name)}...</span>
+        </div>
+    `;
+    
+    try {
+        let text = '';
+        
+        if (file.type === 'application/pdf' || fileExtension === 'pdf') {
+            text = await extractTextFromPDF(file);
+        } else if (file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' || fileExtension === 'docx') {
+            text = await extractTextFromDOCX(file);
+        } else if (file.type === 'text/plain' || fileExtension === 'txt') {
+            text = await file.text();
+        } else {
+            // Try as text
+            text = await file.text();
+        }
+        
+        if (!text || text.trim().length < 50) {
+            throw new Error('Could not extract enough text from file');
+        }
+        
+        // Set the textarea value
+        textarea.value = text.trim();
+        
+        // Show success badge
+        fileInfoEl.innerHTML = `
+            <span class="file-badge">
+                📄 ${escapeHtml(file.name)}
+                <span class="remove-file" onclick="clearFileInput('${textarea.id}', '${fileInfoId}')" title="Remove">×</span>
+            </span>
+        `;
+        
+        // If it's a resume, try to extract name from FILENAME first
+        if (!isJobDescription) {
+            const nameInput = document.getElementById('candidateName');
+            if (!nameInput.value) {
+                const extractedName = extractNameFromFilename(file.name) || extractNameFromResume(text);
+                if (extractedName) {
+                    nameInput.value = extractedName;
+                }
+            }
+        }
+        
+        showToast(`Loaded ${file.name}`);
+        
+    } catch (error) {
+        console.error('File processing error:', error);
+        fileInfoEl.innerHTML = '';
+        showToast(`Failed to read file: ${error.message}`, true);
+    }
+}
+
+async function extractTextFromPDF(file) {
+    const arrayBuffer = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+    
+    let fullText = '';
+    
+    for (let i = 1; i <= pdf.numPages; i++) {
+        const page = await pdf.getPage(i);
+        const textContent = await page.getTextContent();
+        const pageText = textContent.items.map(item => item.str).join(' ');
+        fullText += pageText + '\n';
+    }
+    
+    return fullText;
+}
+
+async function extractTextFromDOCX(file) {
+    const arrayBuffer = await file.arrayBuffer();
+    const result = await mammoth.extractRawText({ arrayBuffer: arrayBuffer });
+    return result.value;
+}
+
+function clearFileInput(textareaId, fileInfoId) {
+    document.getElementById(textareaId).value = '';
+    document.getElementById(fileInfoId).innerHTML = '';
+    
+    if (textareaId === 'candidateResume') {
+        document.getElementById('candidateName').value = '';
+    }
+}
 </script>
 </body>
 </html>
