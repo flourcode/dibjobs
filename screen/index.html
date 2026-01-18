@@ -1317,9 +1317,7 @@
         <div class="card-header">
             <span class="card-title">Candidate Rankings</span>
             <div class="export-group">
-                <span class="shortlist-count" id="shortlistCount">0 to send</span>
-                <button class="btn btn-sm btn-success" onclick="exportShortlist()">Export Shortlist</button>
-                <button class="btn btn-sm" onclick="exportCSV()">Export All CSV</button>
+                <button class="btn btn-sm" onclick="exportCSV()">Export CSV</button>
             </div>
         </div>
         <div class="card-body">
@@ -1339,7 +1337,7 @@
                 </div>
                 <div class="stat-card rose">
                     <div class="stat-value" id="flaggedCount">0</div>
-                    <div class="stat-label">Red Flags</div>
+                    <div class="stat-label">With Gaps</div>
                 </div>
             </div>
             
@@ -1352,19 +1350,6 @@
                     <option value="moderate">Moderate (50-74%)</option>
                     <option value="weak">Weak (&lt;50%)</option>
                 </select>
-                <select class="filter-select" id="clearanceFilter" onchange="applyFilters()">
-                    <option value="all">All Clearances</option>
-                    <option value="ts">TS/SCI Only</option>
-                    <option value="secret">Secret+</option>
-                    <option value="none">No Clearance</option>
-                </select>
-                <select class="filter-select" id="statusFilter" onchange="applyFilters()">
-                    <option value="all">All Statuses</option>
-                    <option value="send">Send to HM</option>
-                    <option value="maybe">Maybe</option>
-                    <option value="pass">Pass</option>
-                    <option value="review">Needs Review</option>
-                </select>
             </div>
             
             <!-- Results Table -->
@@ -1373,14 +1358,11 @@
                     <thead>
                         <tr>
                             <th onclick="sortTable('rank')" style="width: 50px;">Rank</th>
-                            <th onclick="sortTable('name')" style="width: 140px;">Candidate</th>
+                            <th onclick="sortTable('name')" style="width: 180px;">Candidate</th>
                             <th onclick="sortTable('score')" style="width: 70px;">Score</th>
-                            <th style="width: 100px;">Status</th>
-                            <th style="width: 220px;">Strengths</th>
-                            <th style="width: 220px;">Gaps</th>
-                            <th onclick="sortTable('clearance')" style="width: 100px;">Clearance</th>
-                            <th style="width: 140px;">Notes</th>
-                            <th style="width: 70px;">Actions</th>
+                            <th style="width: 280px;">Strengths</th>
+                            <th style="width: 280px;">Gaps</th>
+                            <th style="width: 80px;">Details</th>
                         </tr>
                     </thead>
                     <tbody id="resultsBody"></tbody>
@@ -1754,15 +1736,13 @@ function renderResults() {
         const scoreClass = score >= 75 ? 'score-high' : score >= 50 ? 'score-mid' : 'score-low';
         const rankClass = rank <= 3 ? `rank-${rank}` : '';
         
-        // Extract clearance
-        const clearance = extractClearance(result);
-        const clearanceClass = clearance.includes('TS') ? 'clearance-ts' : 
-                               clearance.includes('Secret') ? 'clearance-secret' : 'clearance-none';
+        // Get verdict for quick assessment
+        const verdict = result.verdict || '';
         
-        // Extract matches and gaps - get just the key part before the arrow
+        // Extract matches - get just the key part before the arrow
         const extractKeyPart = (str) => {
             const arrowIdx = str.indexOf('→');
-            return arrowIdx > 0 ? str.substring(0, arrowIdx).trim() : str.substring(0, 50);
+            return arrowIdx > 0 ? str.substring(0, arrowIdx).trim() : str.substring(0, 60);
         };
         
         const matches = (result.analysis || [])
@@ -1775,33 +1755,23 @@ function renderResults() {
             .filter(a => a.startsWith('Gap:'))
             .map(g => extractKeyPart(g.replace('Gap:', '').trim()));
         
-        // Also extract from gap_strategies if analysis gaps are empty
+        // Fallback to gap_strategies if analysis gaps are empty
         if (gaps.length === 0 && result.gap_strategies && Array.isArray(result.gap_strategies)) {
             gaps = result.gap_strategies
                 .filter(gs => gs && gs.gap)
-                .map(gs => gs.gap)
-                .slice(0, 3);
-        } else {
-            gaps = gaps.slice(0, 3);
+                .map(gs => gs.gap);
         }
+        gaps = gaps.slice(0, 3);
         
-        // Get current status and notes
-        const status = result.status || 'review';
-        const notes = result.notes || '';
-        const statusClass = `status-${status}`;
-        
-        // Get verdict for quick assessment
-        const verdict = result.verdict || '';
-        
-        // Generate strength pills - show up to 3, more visible
+        // Generate strength pills
         const strengthsHtml = matches.length > 0 
-            ? matches.map(m => `<span class="pill pill-match" title="${escapeHtml(m)}">✓ ${escapeHtml(truncateText(m, 30))}</span>`).join('')
-            : '<span class="no-data">—</span>';
+            ? matches.map(m => `<span class="pill pill-match" title="${escapeHtml(m)}">✓ ${escapeHtml(truncateText(m, 40))}</span>`).join('')
+            : '<span class="no-data">None identified</span>';
         
-        // Generate gap pills - show up to 3, CRITICAL for recruiter screening
+        // Generate gap pills
         const gapsHtml = gaps.length > 0 
-            ? gaps.map(g => `<span class="pill pill-gap" title="${escapeHtml(g)}">✗ ${escapeHtml(truncateText(g, 30))}</span>`).join('')
-            : '<span class="no-data">—</span>';
+            ? gaps.map(g => `<span class="pill pill-gap" title="${escapeHtml(g)}">✗ ${escapeHtml(truncateText(g, 40))}</span>`).join('')
+            : '<span class="no-data">None identified</span>';
         
         return `
             <tr class="${rankClass}" data-id="${result.id}">
@@ -1812,14 +1782,6 @@ function renderResults() {
                 </td>
                 <td class="score-cell ${scoreClass}">${score}%</td>
                 <td>
-                    <select class="status-select ${statusClass}" onchange="updateStatus(${result.id}, this.value)" data-id="${result.id}">
-                        <option value="review" ${status === 'review' ? 'selected' : ''}>Review</option>
-                        <option value="send" ${status === 'send' ? 'selected' : ''}>Send to HM</option>
-                        <option value="maybe" ${status === 'maybe' ? 'selected' : ''}>Maybe</option>
-                        <option value="pass" ${status === 'pass' ? 'selected' : ''}>Pass</option>
-                    </select>
-                </td>
-                <td>
                     <div class="pill-list">
                         ${strengthsHtml}
                     </div>
@@ -1828,15 +1790,6 @@ function renderResults() {
                     <div class="pill-list">
                         ${gapsHtml}
                     </div>
-                </td>
-                <td><span class="clearance-badge ${clearanceClass}">${clearance}</span></td>
-                <td class="notes-cell">
-                    <textarea 
-                        class="notes-input" 
-                        placeholder="Add notes..." 
-                        onchange="updateNotes(${result.id}, this.value)"
-                        data-id="${result.id}"
-                    >${escapeHtml(notes)}</textarea>
                 </td>
                 <td>
                     <button class="btn btn-sm" onclick="showDetails(${result.id})">View</button>
@@ -1854,26 +1807,14 @@ function truncateText(text, maxLength) {
 
 function applyFiltersToData(data) {
     const scoreFilter = document.getElementById('scoreFilter').value;
-    const clearanceFilter = document.getElementById('clearanceFilter').value;
-    const statusFilter = document.getElementById('statusFilter').value;
     
     return data.filter(result => {
         const score = result.score || 0;
-        const clearance = extractClearance(result).toLowerCase();
-        const status = result.status || 'review';
         
         // Score filter
         if (scoreFilter === 'strong' && score < 75) return false;
         if (scoreFilter === 'moderate' && (score < 50 || score >= 75)) return false;
         if (scoreFilter === 'weak' && score >= 50) return false;
-        
-        // Clearance filter
-        if (clearanceFilter === 'ts' && !clearance.includes('ts')) return false;
-        if (clearanceFilter === 'secret' && !clearance.includes('secret') && !clearance.includes('ts')) return false;
-        if (clearanceFilter === 'none' && (clearance.includes('secret') || clearance.includes('ts'))) return false;
-        
-        // Status filter
-        if (statusFilter !== 'all' && status !== statusFilter) return false;
         
         return true;
     });
@@ -1887,58 +1828,18 @@ function updateStats(results) {
     const total = results.length;
     const strong = results.filter(r => (r.score || 0) >= 75).length;
     const avgScore = total > 0 ? Math.round(results.reduce((sum, r) => sum + (r.score || 0), 0) / total) : 0;
-    const flagged = results.filter(r => extractRedFlags(r, []).length > 0).length;
+    
+    // Count candidates with gaps
+    const withGaps = results.filter(r => {
+        const analysisGaps = (r.analysis || []).filter(a => a.startsWith('Gap:')).length;
+        const strategyGaps = (r.gap_strategies || []).length;
+        return analysisGaps > 0 || strategyGaps > 0;
+    }).length;
     
     document.getElementById('totalCandidates').textContent = total;
     document.getElementById('strongMatches').textContent = strong;
     document.getElementById('avgScore').textContent = avgScore + '%';
-    document.getElementById('flaggedCount').textContent = flagged;
-}
-
-function extractClearance(result) {
-    // Try to find clearance in analysis or keywords
-    const analysis = (result.analysis || []).join(' ').toLowerCase();
-    const resumeText = (result.resumeText || '').toLowerCase();
-    
-    if (analysis.includes('ts/sci') || resumeText.includes('ts/sci') || resumeText.includes('top secret/sci')) {
-        return 'TS/SCI';
-    }
-    if (analysis.includes('top secret') || resumeText.includes('top secret')) {
-        return 'Top Secret';
-    }
-    if (analysis.includes('secret clearance') || resumeText.includes('secret clearance')) {
-        return 'Secret';
-    }
-    if (resumeText.includes('poly') || resumeText.includes('polygraph')) {
-        if (resumeText.includes('ts/sci') || resumeText.includes('top secret')) {
-            return 'TS/SCI + Poly';
-        }
-    }
-    
-    return 'Unknown';
-}
-
-function extractRedFlags(result, gaps) {
-    const flags = [];
-    const analysis = (result.analysis || []).join(' ').toLowerCase();
-    const gapText = gaps.join(' ').toLowerCase();
-    
-    // Check for clearance mismatch
-    if (gapText.includes('clearance') || gapText.includes('security')) {
-        flags.push('Clearance');
-    }
-    
-    // Check for experience gap
-    if (gapText.includes('years') || gapText.includes('experience')) {
-        flags.push('Experience');
-    }
-    
-    // Low score is a flag
-    if ((result.score || 0) < 50) {
-        flags.push('Low Fit');
-    }
-    
-    return flags.slice(0, 2); // Max 2 flags shown
+    document.getElementById('flaggedCount').textContent = withGaps;
 }
 
 // ==========================================================================
@@ -1996,157 +1897,6 @@ function generateWhySummary(result) {
     }
     
     return { text: summary, html: html };
-}
-
-// ==========================================================================
-// STATUS & NOTES MANAGEMENT
-// ==========================================================================
-function updateStatus(candidateId, newStatus) {
-    const result = analysisResults.find(r => r.id === candidateId);
-    if (result) {
-        result.status = newStatus;
-        
-        // Update the select styling
-        const select = document.querySelector(`select[data-id="${candidateId}"]`);
-        if (select) {
-            select.className = `status-select status-${newStatus}`;
-        }
-        
-        updateShortlistCount();
-        saveToLocalStorage();
-    }
-}
-
-function updateNotes(candidateId, notes) {
-    const result = analysisResults.find(r => r.id === candidateId);
-    if (result) {
-        result.notes = notes;
-        saveToLocalStorage();
-    }
-}
-
-function updateShortlistCount() {
-    const sendCount = analysisResults.filter(r => r.status === 'send').length;
-    document.getElementById('shortlistCount').textContent = `${sendCount} to send`;
-}
-
-function copySummary(candidateId) {
-    const result = analysisResults.find(r => r.id === candidateId);
-    if (!result) return;
-    
-    const summary = generateWhySummary(result);
-    const fullText = `${result.name}: ${summary.text}`;
-    
-    navigator.clipboard.writeText(fullText).then(() => {
-        showToast('Summary copied to clipboard');
-    }).catch(() => {
-        showToast('Failed to copy', true);
-    });
-}
-
-// ==========================================================================
-// LOCAL STORAGE PERSISTENCE
-// ==========================================================================
-function saveToLocalStorage() {
-    try {
-        // Save just the status and notes, not the full results
-        const savedData = analysisResults.map(r => ({
-            id: r.id,
-            name: r.name,
-            status: r.status || 'review',
-            notes: r.notes || ''
-        }));
-        localStorage.setItem('dib_recruiter_decisions', JSON.stringify(savedData));
-    } catch (e) {
-        console.error('Failed to save to localStorage:', e);
-    }
-}
-
-function loadFromLocalStorage() {
-    try {
-        const saved = localStorage.getItem('dib_recruiter_decisions');
-        if (saved) {
-            const savedData = JSON.parse(saved);
-            // Merge saved status/notes back into results
-            savedData.forEach(saved => {
-                const result = analysisResults.find(r => r.id === saved.id || r.name === saved.name);
-                if (result) {
-                    result.status = saved.status;
-                    result.notes = saved.notes;
-                }
-            });
-        }
-    } catch (e) {
-        console.error('Failed to load from localStorage:', e);
-    }
-}
-
-// ==========================================================================
-// EXPORT SHORTLIST ONLY (FOR HIRING MANAGER)
-// ==========================================================================
-function exportShortlist() {
-    const shortlist = analysisResults.filter(r => r.status === 'send');
-    
-    if (shortlist.length === 0) {
-        showToast('No candidates marked "Send to HM"', true);
-        return;
-    }
-    
-    // Clean, scannable columns for the hiring manager
-    const headers = ['Rank', 'Name', 'Score', 'Clearance', 'Top Strengths', 'Key Gaps', 'Recruiter Notes'];
-    
-    const rows = shortlist.map((result, index) => {
-        // Get top 3 strengths as short bullets
-        const strengths = (result.analysis || [])
-            .filter(a => a.startsWith('Match:'))
-            .map(m => extractKeyPoint(m.replace('Match:', '').trim()))
-            .slice(0, 3)
-            .join(' • ');
-        
-        // Get gaps from analysis OR gap_strategies
-        let gaps = (result.analysis || [])
-            .filter(a => a.startsWith('Gap:'))
-            .map(g => extractKeyPoint(g.replace('Gap:', '').trim()));
-        
-        // Fallback to gap_strategies if no gaps in analysis
-        if (gaps.length === 0 && result.gap_strategies) {
-            gaps = result.gap_strategies
-                .filter(gs => gs && gs.gap)
-                .map(gs => gs.gap);
-        }
-        
-        const gapsStr = gaps.slice(0, 2).join(' • ');
-        
-        return [
-            index + 1,
-            result.name,
-            (result.score || 0) + '%',
-            extractClearance(result),
-            strengths || 'None identified',
-            gapsStr || 'None identified',
-            (result.notes || '').replace(/"/g, '""')
-        ];
-    });
-    
-    const csvContent = [
-        headers.join(','),
-        ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
-    ].join('\n');
-    
-    const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
-    
-    const timestamp = new Date().toISOString().split('T')[0];
-    link.setAttribute('href', url);
-    link.setAttribute('download', `shortlist-for-hiring-manager-${timestamp}.csv`);
-    link.style.display = 'none';
-    
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    
-    showToast(`Exported ${shortlist.length} candidates for hiring manager`);
 }
 
 // Extract the key point from a verbose match/gap string (before the arrow or first 50 chars)
@@ -2209,11 +1959,6 @@ function showDetails(candidateId) {
                 <strong>${result.job_title || 'Unknown'}</strong> at ${result.company || 'Unknown'}
                 ${result.job_summary ? `<div style="margin-top: 6px; color: var(--slate-400); font-size: 13px;">${escapeHtml(result.job_summary)}</div>` : ''}
             </div>
-        </div>
-        
-        <div class="detail-section">
-            <div class="detail-label">Clearance Status</div>
-            <div class="detail-value">${extractClearance(result)}</div>
         </div>
         
         ${result.tailored_summary ? `
@@ -2390,10 +2135,6 @@ function sortTable(column) {
                 valA = a.name.toLowerCase();
                 valB = b.name.toLowerCase();
                 break;
-            case 'clearance':
-                valA = extractClearance(a);
-                valB = extractClearance(b);
-                break;
             default:
                 return 0;
         }
@@ -2420,12 +2161,11 @@ function exportCSV() {
         return;
     }
     
-    // Clean columns for recruiter tracking
-    const headers = ['Rank', 'Name', 'Score', 'Decision', 'Clearance', 'Top Strengths', 'Key Gaps', 'Recruiter Notes'];
-    const statusLabels = { review: 'Needs Review', send: 'Send to HM', maybe: 'Maybe', pass: 'Pass' };
+    // Clean columns - empty Decision and Notes columns for recruiter to fill
+    const headers = ['Rank', 'Name', 'Score', 'Verdict', 'Top Strengths', 'Key Gaps', 'Decision', 'Notes'];
     
     const rows = analysisResults.map((result, index) => {
-        // Get top 3 strengths as short bullets
+        // Get top 3 strengths
         const strengths = (result.analysis || [])
             .filter(a => a.startsWith('Match:'))
             .map(m => extractKeyPoint(m.replace('Match:', '').trim()))
@@ -2444,17 +2184,17 @@ function exportCSV() {
                 .map(gs => gs.gap);
         }
         
-        const gapsStr = gaps.slice(0, 2).join(' • ');
+        const gapsStr = gaps.slice(0, 3).join(' • ');
         
         return [
             index + 1,
             result.name,
             (result.score || 0) + '%',
-            statusLabels[result.status] || 'Needs Review',
-            extractClearance(result),
+            result.verdict || '',
             strengths || 'None identified',
             gapsStr || 'None identified',
-            (result.notes || '').replace(/"/g, '""')
+            '', // Empty Decision column for recruiter
+            ''  // Empty Notes column for recruiter
         ];
     });
     
