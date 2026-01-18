@@ -12,6 +12,14 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <!-- Mammoth.js for DOCX parsing -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+ <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-N10ZLNFZHE"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-N10ZLNFZHE');
+    </script>
 <style>
     :root {
         /* Cohesive Palette - Professional Navy & Warm Neutrals (matching DIB Jobs) */
@@ -64,7 +72,7 @@
     * { margin: 0; padding: 0; box-sizing: border-box; }
     
     ::selection {
-        background: var(--accent-amber);
+        background: var(--accent-gold);
         color: var(--ink-black);
     }
     
@@ -219,6 +227,10 @@
         background: #fafafa;
         resize: vertical;
         transition: all var(--transition-snap);
+        -webkit-user-select: text;
+        -moz-user-select: text;
+        -ms-user-select: text;
+        user-select: text;
     }
     
     textarea { min-height: 200px; }
@@ -227,7 +239,7 @@
         outline: none;
         background: #fff;
         box-shadow: var(--shadow-active);
-        border-color: var(--accent-amber);
+        border-color: var(--accent-green);
     }
     
     textarea::placeholder, input::placeholder {
@@ -588,15 +600,18 @@
         display: flex;
         flex-wrap: wrap;
         gap: 6px;
+        align-items: flex-start;
     }
     
     .pill {
         display: inline-block;
-        padding: 4px 10px;
+        padding: 5px 10px;
         font-size: 11px;
         font-weight: 600;
         border-radius: 12px;
         border: 1px solid;
+        line-height: 1.3;
+        max-width: 100%;
     }
     
     .pill-match {
@@ -609,6 +624,12 @@
         background: var(--accent-clay-light);
         border-color: var(--accent-clay);
         color: var(--accent-clay);
+    }
+    
+    .no-data {
+        font-size: 11px;
+        font-style: italic;
+        color: var(--slate-400);
     }
     
     /* DETAILS MODAL */
@@ -1123,7 +1144,7 @@
     
     /* Wider table for new columns */
     .results-table {
-        min-width: 1100px;
+        min-width: 1250px;
     }
     
     .results-table th,
@@ -1149,8 +1170,8 @@
             <path d="M48.236,32.35L29.748,45.782c-1.051,0.764-1.491,2.118-1.09,3.354l7.062,21.735c0.402,1.236,1.554,2.073,2.854,2.073h22.854c1.3,0,2.451-0.837,2.854-2.073l7.062-21.735c0.401-1.236-0.039-2.59-1.09-3.354L51.764,32.35C50.711,31.586,49.289,31.586,48.236,32.35z M64.962,49.355l-5.715,17.589H40.753l-5.715-17.589L50,38.485L64.962,49.355z" stroke="var(--ink-black)" stroke-width="6"/>
         </svg>
         <div class="brand-text">
-            <div class="app-title">DIB Jobs</div>
-            <div class="app-subtitle">Recruiter Screening Tool</div>
+            <div class="app-title">DIB Recruiter</div>
+            <div class="app-subtitle">Candidate Screening Tool</div>
         </div>
     </div></a>
     <span class="mode-badge">Recruiter</span>
@@ -1290,7 +1311,8 @@
                             <th onclick="sortTable('name')" style="width: 120px;">Candidate</th>
                             <th onclick="sortTable('score')" style="width: 70px;">Score</th>
                             <th style="width: 100px;">Status</th>
-                            <th style="width: 280px;">Why / Why Not</th>
+                            <th style="width: 200px;">Strengths</th>
+                            <th style="width: 200px;">Gaps</th>
                             <th onclick="sortTable('clearance')" style="width: 100px;">Clearance</th>
                             <th style="width: 150px;">Notes</th>
                             <th style="width: 70px;">Actions</th>
@@ -1666,13 +1688,30 @@ function renderResults() {
         const clearanceClass = clearance.includes('TS') ? 'clearance-ts' : 
                                clearance.includes('Secret') ? 'clearance-secret' : 'clearance-none';
         
-        // Generate why/why not summary
-        const whySummary = generateWhySummary(result);
+        // Extract matches and gaps for pills
+        const matches = (result.analysis || [])
+            .filter(a => a.startsWith('Match:'))
+            .map(m => m.replace('Match:', '').trim())
+            .slice(0, 3);
+        
+        const gaps = (result.analysis || [])
+            .filter(a => a.startsWith('Gap:'))
+            .map(g => g.replace('Gap:', '').trim())
+            .slice(0, 3);
         
         // Get current status and notes
         const status = result.status || 'review';
         const notes = result.notes || '';
         const statusClass = `status-${status}`;
+        
+        // Generate strength/gap pills HTML
+        const strengthsHtml = matches.length > 0 
+            ? matches.map(m => `<span class="pill pill-match">${escapeHtml(truncateText(m, 35))}</span>`).join('')
+            : '<span class="no-data">None identified</span>';
+        
+        const gapsHtml = gaps.length > 0 
+            ? gaps.map(g => `<span class="pill pill-gap">${escapeHtml(truncateText(g, 35))}</span>`).join('')
+            : '<span class="no-data">None identified</span>';
         
         return `
             <tr class="${rankClass}" data-id="${result.id}">
@@ -1690,12 +1729,14 @@ function renderResults() {
                     </select>
                 </td>
                 <td>
-                    <div class="why-summary">
-                        ${whySummary.html}
+                    <div class="pill-list">
+                        ${strengthsHtml}
                     </div>
-                    <button class="copy-summary" onclick="copySummary(${result.id})" title="Copy to clipboard">
-                        📋 Copy
-                    </button>
+                </td>
+                <td>
+                    <div class="pill-list">
+                        ${gapsHtml}
+                    </div>
                 </td>
                 <td><span class="clearance-badge ${clearanceClass}">${clearance}</span></td>
                 <td class="notes-cell">
@@ -1712,6 +1753,12 @@ function renderResults() {
             </tr>
         `;
     }).join('');
+}
+
+// Helper to truncate text for pills
+function truncateText(text, maxLength) {
+    if (text.length <= maxLength) return text;
+    return text.substring(0, maxLength - 3) + '...';
 }
 
 function applyFiltersToData(data) {
