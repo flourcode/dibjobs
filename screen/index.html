@@ -1192,65 +1192,40 @@
         margin-top: 2px;
     }
     
-    /* Risk indicator */
+    /* Risk indicator - clean text style */
     .risk-indicator {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        padding: 6px 10px;
-        border-radius: var(--radius);
+        font-family: 'Space Mono', monospace;
         font-size: 11px;
         font-weight: 700;
         text-transform: uppercase;
-        letter-spacing: 0.03em;
+        letter-spacing: 0.02em;
     }
     
-    .risk-green {
-        background: var(--accent-green-light);
-        color: #2d5a36;
-        border: 1px solid var(--accent-green);
-    }
+    .risk-green { color: var(--accent-green); }
+    .risk-yellow { color: #b8860b; }
+    .risk-red { color: var(--accent-clay); }
     
-    .risk-yellow {
-        background: var(--accent-gold-light);
-        color: #8b6914;
-        border: 1px solid var(--accent-gold);
-    }
-    
-    .risk-red {
-        background: var(--accent-clay-light);
-        color: #8b4332;
-        border: 1px solid var(--accent-clay);
-    }
-    
-    .risk-icon {
-        font-size: 12px;
-    }
-    
-    /* Key points in table */
+    /* Key points - simple clean text */
     .key-point {
-        padding: 8px 12px;
-        border-radius: var(--radius);
         font-size: 13px;
         line-height: 1.4;
+        color: var(--ink-black);
     }
     
-    .key-strength {
-        background: var(--accent-green-light);
-        border-left: 3px solid var(--accent-green);
-        color: #2d5a36;
+    .key-strength::before {
+        content: "✓ ";
+        color: var(--accent-green);
+        font-weight: 700;
     }
     
-    .key-gap {
-        background: var(--accent-gold-light);
-        border-left: 3px solid var(--accent-gold);
-        color: #8b6914;
+    .key-gap::before {
+        content: "✗ ";
+        color: var(--accent-clay);
+        font-weight: 700;
     }
     
     .key-gap.is-dealbreaker {
-        background: var(--accent-clay-light);
-        border-left: 3px solid var(--accent-clay);
-        color: #8b4332;
+        font-weight: 600;
     }
     
     .no-data {
@@ -1811,9 +1786,8 @@ function renderResults() {
                 displayGap = gaps[0] || null;
             }
             
-            // Risk indicator
-            const riskIcon = riskLevel === 'green' ? '🟢' : riskLevel === 'yellow' ? '🟡' : '🔴';
-            const riskLabel = riskLevel === 'green' ? 'Safe to Send' : riskLevel === 'yellow' ? 'Review First' : 'Do Not Send';
+            // Risk indicator - simple text
+            const riskText = riskLevel === 'green' ? 'SEND' : riskLevel === 'yellow' ? 'REVIEW' : 'PASS';
             
             return `
                 <tr class="${rankClass}" data-id="${result.id}">
@@ -1824,20 +1798,17 @@ function renderResults() {
                     </td>
                     <td class="score-cell ${scoreClass}">${score}%</td>
                     <td>
-                        <div class="risk-indicator risk-${riskLevel}" title="${riskLabel}">
-                            <span class="risk-icon">${riskIcon}</span>
-                            <span class="risk-label">${riskLabel}</span>
-                        </div>
+                        <span class="risk-indicator risk-${riskLevel}">${riskText}</span>
                     </td>
                     <td>
                         ${displayStrength 
-                            ? `<div class="key-point key-strength" title="${escapeHtml(displayStrength)}">✓ ${escapeHtml(truncateText(displayStrength, 50))}</div>`
-                            : '<span class="no-data">None identified</span>'}
+                            ? `<span class="key-point key-strength" title="${escapeHtml(displayStrength)}">${escapeHtml(truncateText(displayStrength, 45))}</span>`
+                            : '<span class="no-data">—</span>'}
                     </td>
                     <td>
                         ${displayGap 
-                            ? `<div class="key-point key-gap ${dealbreaker ? 'is-dealbreaker' : ''}" title="${escapeHtml(displayGap)}">${dealbreaker ? '⛔' : '⚠'} ${escapeHtml(truncateText(displayGap, 50))}</div>`
-                            : '<span class="no-data">None identified</span>'}
+                            ? `<span class="key-point key-gap ${dealbreaker ? 'is-dealbreaker' : ''}" title="${escapeHtml(displayGap)}">${escapeHtml(truncateText(displayGap, 45))}</span>`
+                            : '<span class="no-data">—</span>'}
                     </td>
                     <td>
                         <button class="btn btn-sm" onclick="showDetails(${result.id})">View</button>
