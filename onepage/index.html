@@ -6,123 +6,86 @@
 <title>The One-Page Resume Press</title>
 <style>
   :root {
-    --desk: #E8E6E0;
-    --desk-edge: #DBD8D0;
-    --paper: #FFFFFF;
-    --ink: #22262B;
-    --navy: #1C2B4A;
-    --faded: #6B7280;
-    --action: #0E6E64;
-    --action-dark: #0A554E;
-    --flag: #B45309;
-    --flag-bg: #FDF3E3;
-    --flag-border: #F0D9B5;
-    --line: #D1CFC7;
+    --desk:#E8E6E0; --desk-edge:#DBD8D0; --paper:#FFF; --ink:#22262B;
+    --navy:#1C2B4A; --faded:#6B7280; --action:#0E6E64; --action-dark:#0A554E;
+    --flag:#B45309; --flag-bg:#FDF3E3; --flag-border:#F0D9B5;
+    --ok:#166534; --ok-bg:#EDF7EE; --ok-border:#CDE8D0; --line:#D1CFC7;
   }
-  * { box-sizing: border-box; }
-  body {
-    margin: 0;
-    background: var(--desk);
-    color: var(--ink);
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-  }
-  header { border-bottom: 1px solid var(--line); }
-  .wrap { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
-  header .wrap { padding-top: 28px; padding-bottom: 22px; }
-  h1 {
-    font-family: Georgia, 'Times New Roman', serif;
-    color: var(--navy);
-    font-size: 30px; line-height: 1.1; margin: 0; font-weight: 700;
-  }
-  .tagline { margin: 8px 0 0; color: var(--faded); font-size: 14px; max-width: 640px; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--desk); color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; }
+  header { border-bottom:1px solid var(--line); }
+  .wrap { max-width:1120px; margin:0 auto; padding:0 24px; }
+  header .wrap { padding-top:28px; padding-bottom:22px; }
+  h1 { font-family:Georgia,'Times New Roman',serif; color:var(--navy);
+    font-size:30px; line-height:1.1; margin:0; font-weight:700; }
+  .tagline { margin:8px 0 0; color:var(--faded); font-size:14px; max-width:660px; }
 
-  main { display: flex; flex-wrap: wrap; gap: 28px; padding-top: 24px; padding-bottom: 64px; }
-  .inputs { flex: 1 1 340px; min-width: 300px; max-width: 460px; }
-  .output { flex: 1 1 420px; min-width: 320px; }
+  main { display:flex; flex-wrap:wrap; gap:28px; padding-top:24px; padding-bottom:64px; }
+  .inputs { flex:1 1 340px; min-width:300px; max-width:460px; }
+  .output { flex:1 1 420px; min-width:320px; }
 
-  label {
-    display: block; font-size: 12px; font-weight: 700;
-    letter-spacing: 0.08em; color: var(--navy); margin: 0 0 6px;
-  }
-  label + label, textarea + label { margin-top: 18px; }
-  textarea {
-    width: 100%; padding: 12px; font-size: 13px; line-height: 1.45;
-    border: 1px solid var(--line); border-radius: 6px;
-    background: var(--paper); color: var(--ink);
-    font-family: inherit; resize: vertical;
-  }
-  textarea:focus { outline: 2px solid var(--action); outline-offset: 0; }
+  label { display:block; font-size:12px; font-weight:700; letter-spacing:.08em;
+    color:var(--navy); margin:0 0 6px; }
+  textarea + label { margin-top:18px; }
+  textarea, input[type=text] { width:100%; padding:12px; font-size:13px; line-height:1.45;
+    border:1px solid var(--line); border-radius:6px; background:var(--paper); color:var(--ink);
+    font-family:inherit; }
+  textarea { resize:vertical; }
+  textarea:focus, input:focus { outline:2px solid var(--action); outline-offset:0; }
 
-  #generate {
-    margin-top: 18px; width: 100%; padding: 13px 16px;
-    font-size: 15px; font-weight: 700; color: #fff;
-    background: var(--action); border: none; border-radius: 6px; cursor: pointer;
-    transition: background 120ms;
-  }
-  #generate:hover:not(:disabled) { background: var(--action-dark); }
-  #generate:disabled { background: var(--faded); cursor: wait; }
+  #generate { margin-top:18px; width:100%; padding:13px 16px; font-size:15px; font-weight:700;
+    color:#fff; background:var(--action); border:none; border-radius:6px; cursor:pointer;
+    transition:background .12s; }
+  #generate:hover { background:var(--action-dark); }
 
-  .error {
-    display: none; margin-top: 12px; font-size: 13px; color: #991B1B;
-    background: #FEF2F2; border: 1px solid #FECACA; border-radius: 6px; padding: 10px 12px;
-  }
-  .groundrule { margin-top: 16px; font-size: 12px; color: var(--faded); line-height: 1.5; }
+  .error { display:none; margin-top:12px; font-size:13px; color:#991B1B; background:#FEF2F2;
+    border:1px solid #FECACA; border-radius:6px; padding:10px 12px; }
+  .groundrule { margin-top:16px; font-size:12px; color:var(--faded); line-height:1.5; }
 
-  .sheet-bar { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 10px; }
-  .sheet-bar .label { font-size: 12px; font-weight: 700; letter-spacing: 0.08em; color: var(--navy); }
-  #wordcount { font-size: 12px; color: var(--faded); }
-  #wordcount.long { color: var(--flag); }
+  .sheet-bar { display:flex; align-items:baseline; justify-content:space-between; margin-bottom:10px; }
+  .sheet-bar .label { font-size:12px; font-weight:700; letter-spacing:.08em; color:var(--navy); }
+  #wordcount { font-size:12px; color:var(--faded); }
+  #wordcount.long { color:var(--flag); }
 
-  #sheet {
-    background: var(--paper);
-    border: 1px solid var(--desk-edge);
-    border-radius: 3px;
-    box-shadow: 0 1px 2px rgba(30,30,30,0.10), 0 12px 28px rgba(30,30,30,0.13);
-    padding: 44px 46px;
-    min-height: 560px;
-    font-family: 'Helvetica Neue', Calibri, Arial, sans-serif;
-    font-size: 12.5px;
-    line-height: 1.42;
-  }
-  .placeholder {
-    color: var(--faded); text-align: center; margin-top: 180px;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 14px;
-  }
-  .r-name { font-weight: 700; font-size: 1.35em; text-align: center; letter-spacing: 0.02em; }
-  .r-header { font-weight: 700; font-size: 0.82em; letter-spacing: 0.08em; margin-top: 0.9em; margin-bottom: 0.2em; }
-  .r-bullet { padding-left: 1.1em; text-indent: -0.85em; margin-bottom: 0.12em; }
-  .r-center { text-align: center; margin-bottom: 0.15em; }
-  .r-line { margin-bottom: 0.15em; }
-  .r-gap { height: 0.5em; }
+  #sheet { background:var(--paper); border:1px solid var(--desk-edge); border-radius:3px;
+    box-shadow:0 1px 2px rgba(30,30,30,.10),0 12px 28px rgba(30,30,30,.13);
+    padding:44px 46px; min-height:560px;
+    font-family:'Helvetica Neue',Calibri,Arial,sans-serif; font-size:12.5px; line-height:1.42; }
+  #sheet:focus { outline:2px dashed var(--action); outline-offset:4px; }
+  .placeholder { color:var(--faded); text-align:center; margin-top:180px;
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; font-size:14px; }
+  .r-name { font-weight:700; font-size:1.35em; text-align:center; letter-spacing:.02em; }
+  .r-header { font-weight:700; font-size:.82em; letter-spacing:.08em; margin-top:.9em; margin-bottom:.2em; }
+  .r-bullet { padding-left:1.1em; text-indent:-.85em; margin-bottom:.12em; }
+  .r-center { text-align:center; margin-bottom:.15em; }
+  .r-line { margin-bottom:.15em; }
+  .r-gap { height:.5em; }
+  .editnote { display:none; font-size:12px; color:var(--faded); margin-top:8px; }
 
-  .actions { display: none; gap: 10px; margin-top: 14px; }
-  .actions button {
-    flex: 1; padding: 11px 14px; font-size: 14px; font-weight: 600;
-    color: var(--navy); background: var(--paper);
-    border: 1px solid var(--line); border-radius: 6px; cursor: pointer;
-  }
-  .actions button:hover { background: #F5F4F0; }
+  .actions { display:none; gap:10px; margin-top:14px; }
+  .actions button { flex:1; padding:11px 14px; font-size:14px; font-weight:600; color:var(--navy);
+    background:var(--paper); border:1px solid var(--line); border-radius:6px; cursor:pointer; }
+  .actions button:hover { background:#F5F4F0; }
 
-  .flags { margin-top: 20px; }
-  .flagbox {
-    display: none;
-    background: var(--flag-bg); border: 1px solid var(--flag-border);
-    border-left: 4px solid var(--flag); border-radius: 6px;
-    padding: 12px 14px; margin-bottom: 12px;
-  }
-  .flagbox .flagtitle {
-    font-size: 12px; font-weight: 700; letter-spacing: 0.06em;
-    color: var(--flag); margin-bottom: 6px;
-  }
-  .flagbox ul { margin: 0; padding-left: 18px; font-size: 13px; line-height: 1.5; }
-  .flagbox li { margin-bottom: 4px; }
+  .flagbox { display:none; border-radius:6px; padding:12px 14px; margin-top:12px; }
+  .flagbox ul { margin:0; padding-left:18px; font-size:13px; line-height:1.5; }
+  .flagbox li { margin-bottom:4px; }
+  .flagbox .flagtitle { font-size:12px; font-weight:700; letter-spacing:.06em; margin-bottom:6px; }
+  #matchedBox { background:var(--ok-bg); border:1px solid var(--ok-border); border-left:4px solid var(--ok); }
+  #matchedBox .flagtitle { color:var(--ok); }
+  #matchedBox .kws { font-size:13px; line-height:1.7; }
+  #missingBox, #tipsBox { background:var(--flag-bg); border:1px solid var(--flag-border); border-left:4px solid var(--flag); }
+  #missingBox .flagtitle, #tipsBox .flagtitle { color:var(--flag); }
+  .kw { display:inline-block; background:rgba(255,255,255,.7); border:1px solid rgba(0,0,0,.08);
+    border-radius:4px; padding:1px 7px; margin:0 5px 5px 0; }
 
   @media print {
-    body * { visibility: hidden; }
-    #sheet, #sheet * { visibility: visible; }
-    #sheet { position: absolute; left: 0; top: 0; width: 100%; box-shadow: none; border: none; }
+    body * { visibility:hidden; }
+    #sheet, #sheet * { visibility:visible; }
+    #sheet { position:absolute; left:0; top:0; width:100%; box-shadow:none; border:none; }
   }
-  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+  @media (prefers-reduced-motion:reduce){ *{transition:none!important;} }
 </style>
 </head>
 <body>
@@ -130,21 +93,21 @@
 <header>
   <div class="wrap">
     <h1>The One-Page Resume Press</h1>
-    <p class="tagline">Paste what you have and the job you want. Get back a single page, formatted for applicant tracking systems, built only from things you've actually done &mdash; with anything you should double-check flagged in amber.</p>
+    <p class="tagline">Paste what you have and the posting you want. This page reorganizes your material into a one-page, ATS-friendly layout, shows which of the posting's keywords you already have and which you're missing, and lets you edit the sheet directly. Everything runs in your browser &mdash; nothing is sent anywhere.</p>
   </div>
 </header>
 
 <main class="wrap">
   <section class="inputs">
     <label for="resumeIn">1 &middot; YOUR CURRENT RESUME</label>
-    <textarea id="resumeIn" rows="13" placeholder="Paste your resume text here, however rough. Include your real jobs, dates, skills, education, and any numbers you know are true."></textarea>
+    <textarea id="resumeIn" rows="14" placeholder="Paste your resume text here, however rough. Include your real jobs, dates, skills, education, and any numbers you know are true."></textarea>
 
     <label for="jdIn">2 &middot; THE JOB POSTING</label>
-    <textarea id="jdIn" rows="9" placeholder="Paste the job description you're targeting. The rewrite mirrors its exact language wherever your experience genuinely supports it."></textarea>
+    <textarea id="jdIn" rows="9" placeholder="Paste the job description you're targeting. Its keywords are matched against your resume and used in the headline and summary."></textarea>
 
     <button id="generate">Press one page</button>
     <p class="error" id="error" role="alert"></p>
-    <p class="groundrule">The ground rule: nothing gets added that isn't in your source text. Stronger wording you should confirm, and job requirements you don't yet meet, appear as flags beside the page &mdash; never silently on it.</p>
+    <p class="groundrule">The ground rule: this tool only reorganizes what you paste &mdash; it never invents jobs, dates, numbers, or skills. Keywords the posting wants that your resume doesn't show appear as an amber list beside the page. Add them to the sheet only if they're genuinely true.</p>
   </section>
 
   <section class="output">
@@ -152,182 +115,347 @@
       <span class="label">THE PAGE</span>
       <span id="wordcount"></span>
     </div>
-    <div id="sheet">
-      <div class="placeholder" id="placeholder">Your finished page appears here,<br>set like the sheet a recruiter will actually see.</div>
-    </div>
+    <div id="sheet"><div class="placeholder">Your finished page appears here,<br>set like the sheet a recruiter will actually see.</div></div>
+    <p class="editnote" id="editnote">Click anywhere on the sheet to edit it directly. Reword the summary, trim bullets, fix anything &mdash; then copy or print.</p>
     <div class="actions" id="actions">
       <button id="copyBtn">Copy text</button>
       <button id="printBtn">Print / save PDF</button>
     </div>
-    <div class="flags">
-      <div class="flagbox" id="flagsBox">
-        <div class="flagtitle">CONFIRM BEFORE SENDING</div>
-        <ul id="flagsList"></ul>
-      </div>
-      <div class="flagbox" id="missingBox">
-        <div class="flagtitle">THE POSTING ASKS FOR THESE &mdash; ADD ONLY IF TRUE</div>
-        <ul id="missingList"></ul>
-      </div>
+
+    <div class="flagbox" id="matchedBox">
+      <div class="flagtitle">KEYWORDS YOU ALREADY MATCH</div>
+      <div class="kws" id="matchedList"></div>
+    </div>
+    <div class="flagbox" id="missingBox">
+      <div class="flagtitle">THE POSTING ASKS FOR THESE &mdash; ADD ONLY IF TRUE</div>
+      <div class="kws" id="missingList"></div>
+    </div>
+    <div class="flagbox" id="tipsBox">
+      <div class="flagtitle">BEFORE YOU SEND</div>
+      <ul id="tipsList"></ul>
     </div>
   </section>
 </main>
 
 <script>
-const $ = (id) => document.getElementById(id);
-let lastResume = "";
+"use strict";
+const $ = id => document.getElementById(id);
 
-function buildPrompt(resume, jd) {
-  return `You are an expert resume writer. Rewrite the candidate's resume below into a single-page, ATS-optimized resume targeted at the job description provided.
+/* ---------------- skill lexicon for keyword matching ---------------- */
+const LEXICON = [
+  // IT / support
+  "windows 10","windows 11","windows","macos","linux","ios","android","ipados","chrome os",
+  "microsoft 365","office 365","m365","outlook","excel","word","powerpoint","teams","sharepoint","onedrive",
+  "active directory","azure ad","entra id","group policy","intune","sccm","mdm","jamf",
+  "help desk","service desk","desktop support","technical support","it support","field support",
+  "ticketing","servicenow","zendesk","jira","freshdesk","remedy","ticket management",
+  "remote support","remote desktop","rdp","vpn","teamviewer","first contact resolution","first-contact resolution",
+  "troubleshooting","hardware","printers","printer support","peripherals","imaging","pc imaging","deployment",
+  "tcp/ip","dns","dhcp","lan","wan","wi-fi","wifi","ethernet","networking","network troubleshooting","cabling",
+  "escalation","sla","documentation","end user support","customer service","phone support","password resets",
+  "comptia a+","network+","security+","itil","ccna","google it support",
+  // software / data
+  "python","java","javascript","typescript","sql","postgresql","mysql","c#","c++","html","css","react","node",
+  "git","github","gitlab","powershell","bash","api","rest","excel formulas","vba","tableau","power bi",
+  "data entry","data analysis","reporting","quickbooks","salesforce","crm","erp","sap",
+  // pm / business
+  "project management","program management","pmp","agile","scrum","kanban","stakeholder management",
+  "budget","forecasting","scheduling","risk management","process improvement","vendor management",
+  "cross-functional","kpis","training","onboarding","procurement","compliance","quality assurance",
+  // defense / cleared
+  "dod","navair","niwc","secret clearance","top secret","ts/sci","rmf","emass","ato","cybersecurity",
+  "information assurance","acquisition","test and evaluation","t&e","systems integration","link-16",
+  "unmanned systems","uas","spectrum","fedramp","nist","dfars","far",
+  // healthcare / admin / general
+  "scheduling","medical records","hipaa","patient","billing","payroll","inventory","logistics","warehouse",
+  "forklift","cdl","osha","food safety","pos","retail","cash handling","bilingual","spanish",
+  "communication","teamwork","leadership","time management","problem solving","attention to detail"
+];
 
-STRICT HONESTY RULES (most important):
-- NEVER invent employers, job titles, dates, metrics, numbers, tools, technologies, degrees, or certifications that are not in the source resume.
-- You may reorganize, rephrase, and strengthen wording, but every claim must trace to the source.
-- Mirror the job description's exact terminology ONLY where the source resume supports that experience.
-- If the job description asks for something the source does not support, DO NOT add it to the resume. List it under "missing" instead.
-- If you strengthen any wording in a way the candidate should confirm is accurate (e.g. adding "escalation" to a phone-support bullet), list it under "flags".
+const STOP = new Set(("a,an,the,and,or,but,of,to,in,on,for,with,as,by,at,from,is,are,was,were,be,been,being,this,that,these,those,you,your,we,our,us,they,their,it,its,will,shall,may,can,could,would,should,must,have,has,had,do,does,did,not,no,yes,if,then,than,so,such,other,into,about,over,under,between,per,each,all,any,some,more,most,least,within,across,including,etc,eg,ie,role,job,position,candidate,applicant,work,working,team,company,required,requirements,preferred,qualifications,responsibilities,duties,ability,able,strong,excellent,good,great,years,year,experience,plus,bonus,benefits,salary,location,remote,onsite,hybrid,apply,description,summary,seeking,looking,join,us,who,what,when,where,how,degree,equivalent,related,relevant,knowledge,skills,skill,new,day,daily,provide,providing,support,supporting,ensure,ensuring,perform,performing,assist,assisting,help,helping,maintain,maintaining,manage,managing,including,using,use,used").split(","));
 
-FORMAT RULES:
-- One page: total resume under 460 words.
-- Structure, in this order: name; one contact line separated by | (keep whatever contact details exist, use [Phone] / [Email] placeholders if absent); one bold headline line of 3-5 pipe-separated target role titles drawn from the job description family; PROFESSIONAL SUMMARY (3-4 sentences, front-load the strongest quantified win and the job's top keywords); TECHNICAL SKILLS or CORE SKILLS as 3-5 labeled category lines ("Label: item, item, item"), most job-relevant category first; PROFESSIONAL EXPERIENCE reverse-chronological ("Title — Company | Dates" then 3-5 bullets, each one line, starting with strong verbs, quantified only with numbers from the source); EDUCATION on one line; then any CERTIFICATIONS / PROJECTS / ACHIEVEMENTS from the source, compressed.
-- Spell acronyms both ways once where the source supports the skill, e.g. "Microsoft 365 (M365)".
-- Plain text only. ALL-CAPS section headers on their own line. Bullets start with "\u2022 ". No markdown, no asterisks, no tables.
+/* ---------------- parsing helpers ---------------- */
+const SECTION_MAP = [
+  { key:"summary", re:/^(professional\s+summary|summary|objective|profile|about\s*me?)\b/i },
+  { key:"skills", re:/^(technical\s+skills|core\s+(skills|competencies|expertise)|skills?|areas?\s+of\s+expertise|expertise|technologies)\b/i },
+  { key:"experience", re:/^(professional\s+experience|work\s+experience|experience|employment(\s+history)?|relevant\s+experience|work\s+history|employment\s+and\s+volunteer.*)\b/i },
+  { key:"education", re:/^(education|academic|degrees?)\b/i },
+  { key:"certifications", re:/^(certifications?( and licenses)?|licenses?( and certifications?)?|credentials|professional\s+development)\b/i },
+  { key:"projects", re:/^(projects?|technical\s+projects|software\s+development|portfolio)\b/i },
+  { key:"achievements", re:/^(achievements?|awards?|honors?|accomplishments|activities|volunteer(ing)?(\s+service)?)\b/i },
+  { key:"references", re:/^references?\b/i }
+];
 
-Respond ONLY with valid JSON, no code fences, in exactly this shape:
-{"resume":"<full plain-text resume with \\\\n line breaks>","flags":["<claims to verify before sending>"],"missing":["<job requirements the source resume does not support - candidate should only add these if genuinely true>"]}
-
-SOURCE RESUME:
-${resume}
-
-TARGET JOB DESCRIPTION:
-${jd || "(none provided - optimize for the roles the source resume targets)"}`;
+function detectSection(line){
+  const t = line.trim();
+  if (t.length > 48) return null;
+  const bare = t.replace(/[:\-–—_]+$/,"").trim();
+  for (const s of SECTION_MAP) if (s.re.test(bare)) return s.key;
+  // an ALL-CAPS short line is very likely a header even if unrecognized
+  if (bare === bare.toUpperCase() && /[A-Z]{3}/.test(bare) && bare.split(/\s+/).length <= 5) return "other:"+bare;
+  return null;
 }
 
-function showError(msg) {
-  const e = $("error");
-  e.textContent = msg;
-  e.style.display = msg ? "block" : "none";
+function normalizeBullet(line){
+  return line.replace(/^\s*[•·▪◦*\-–—>]+\s*/,"").trim();
+}
+const isBulletLine = l => /^\s*[•·▪◦*\-–—>]\s+/.test(l);
+
+function parseResume(text){
+  const lines = text.replace(/\r/g,"").split("\n");
+  const r = { name:"", contact:[], sections:{}, order:[], raw:text };
+
+  // contact bits from anywhere
+  const email = text.match(/[\w.+-]+@[\w-]+\.[\w.]+/);
+  const phone = text.match(/(\(?\d{3}\)?[\s.\-]?\d{3}[\s.\-]?\d{4})/);
+  const linkedin = text.match(/linkedin\.com\/[\w\/\-]+/i);
+  const github = text.match(/github\.com\/[\w\/\-]+/i);
+  const loc = text.match(/([A-Z][a-zA-Z.\s]+,\s*(?:[A-Z]{2}|[A-Z][a-z]+))\b/);
+
+  // name: first non-empty line that isn't contact info
+  for (const l of lines){
+    const t = l.trim();
+    if (!t) continue;
+    if (/@|linkedin|github|\d{3}[\s.\-]\d{3}/.test(t)) continue;
+    r.name = t.replace(/\s{2,}/g," ");
+    break;
+  }
+  if (loc) r.contact.push(loc[1].trim());
+  if (phone) r.contact.push(phone[1].trim());
+  if (email) r.contact.push(email[0].trim());
+  if (linkedin) r.contact.push(linkedin[0].trim());
+  if (github) r.contact.push(github[0].trim());
+  if (!phone) r.contact.splice(loc?1:0,0,"[Phone]");
+  if (!email) r.contact.push("[Email]");
+
+  // section split
+  let cur = "preamble";
+  r.sections[cur] = [];
+  for (const l of lines){
+    const t = l.trim();
+    if (!t){ r.sections[cur].push(""); continue; }
+    const sec = detectSection(t);
+    if (sec){
+      cur = sec;
+      if (!r.sections[cur]){ r.sections[cur] = []; r.order.push(cur); }
+      continue;
+    }
+    r.sections[cur].push(t);
+  }
+  return r;
 }
 
-function renderResume(text) {
+/* ---------------- job description analysis ---------------- */
+function extractJDKeywords(jd){
+  const low = " " + jd.toLowerCase().replace(/[\u2013\u2014]/g,"-") + " ";
+  const found = [];
+  for (const k of LEXICON){
+    const esc = k.replace(/[+.^$*?()\[\]{}|\\\/]/g, "\\$&");
+    if (new RegExp("[^a-z0-9]"+esc+"[^a-z0-9]").test(low)) found.push(k);
+  }
+  // acronyms in the JD (2-6 caps) not already caught
+  const acr = jd.match(/\b[A-Z][A-Z0-9]{1,5}\b/g) || [];
+  const seen = new Set(found.map(f=>f.toLowerCase()));
+  for (const a of acr){
+    const al = a.toLowerCase();
+    if (!seen.has(al) && !STOP.has(al) && !/^\d+$/.test(a) && !["AND","THE","FOR","YOU","OUR","ALL","PTO","EOE","LLC","INC","USA","EST","PST"].includes(a)){
+      seen.add(al); found.push(a);
+    }
+  }
+  // repeated meaningful words (appear 3+ times)
+  const counts = {};
+  for (const w of low.split(/[^a-z0-9+#\/.\-]+/)){
+    if (w.length < 4 || STOP.has(w)) continue;
+    counts[w] = (counts[w]||0)+1;
+  }
+  for (const [w,c] of Object.entries(counts)){
+    if (c >= 3 && !seen.has(w)){ seen.add(w); found.push(w); }
+  }
+  return found.slice(0, 40);
+}
+
+function jdTitle(jd){
+  for (const l of jd.split("\n")){
+    const t = l.trim();
+    if (t && t.length < 70 && !/^https?:/.test(t)) return t.replace(/\s*\(.*\)\s*$/,"");
+  }
+  return "";
+}
+
+/* ---------------- output assembly ---------------- */
+function titleCase(s){ return s.replace(/\b\w/g, c=>c.toUpperCase()).replace(/\b(And|Or|Of|The|A|An|In|On|For|To|With)\b/g, m=>m.toLowerCase()); }
+
+function buildOutput(parsed, jd){
+  const jdKw = jd ? extractJDKeywords(jd) : [];
+  const resumeLow = parsed.raw.toLowerCase();
+  const matched = [], missing = [];
+  for (const k of jdKw){
+    const esc = k.toLowerCase().replace(/[+.^$*?()\[\]{}|\\\/]/g, "\\$&");
+    (new RegExp("(^|[^a-z0-9])"+esc+"($|[^a-z0-9])").test(resumeLow) ? matched : missing).push(k);
+  }
+
+  const L = [];
+  L.push(parsed.name || "[YOUR NAME]");
+  L.push(parsed.contact.join(" | "));
+
+  // headline: JD title + up to 3 role-ish matched keywords
+  const roleWords = matched.filter(k=>/support|desk|technician|analyst|manager|engineer|specialist|administrator|developer|coordinator/.test(k));
+  const head = [];
+  const jt = jdTitle(jd||"");
+  if (jt) head.push(titleCase(jt));
+  for (const rw of roleWords){ if (head.length>=4) break; const tc=titleCase(rw); if(!head.some(h=>h.toLowerCase()===tc.toLowerCase())) head.push(tc); }
+  if (head.length) L.push(head.join(" | "));
+  L.push("");
+
+  // summary: keep theirs if present, else draft from matched keywords
+  L.push("PROFESSIONAL SUMMARY");
+  const ownSummary = (parsed.sections.summary||[]).filter(Boolean).join(" ");
+  if (ownSummary){
+    L.push(ownSummary);
+  } else {
+    const top = matched.slice(0,6).map(titleCase);
+    L.push("[Edit me] Professional with hands-on experience in " +
+      (top.slice(0,3).join(", ") || "your strongest areas") +
+      (top.length>3 ? ", plus " + top.slice(3).join(", ") : "") +
+      (jt ? ". Seeking a " + titleCase(jt) + " role where reliability and strong communication add immediate value." :
+            ". Known for reliability, clear communication, and follow-through."));
+  }
+  L.push("");
+
+  // skills: their skills lines, cleaned; prepend matched JD terms not already present
+  L.push("CORE SKILLS");
+  const skillLines = (parsed.sections.skills||[]).filter(Boolean).map(normalizeBullet);
+  const skillsText = skillLines.join(", ");
+  const extraMatched = matched.filter(k => !new RegExp(k.replace(/[+.^$*?()\[\]{}|\\\/]/g,"\\$&"),"i").test(skillsText)).map(titleCase);
+  if (extraMatched.length) L.push("Matched to this posting: " + extraMatched.join(", "));
+  if (skillLines.length){
+    // compress: join single-word lines into one row, keep labeled lines intact
+    const labeled = skillLines.filter(s=>s.includes(":"));
+    const loose = skillLines.filter(s=>!s.includes(":"));
+    for (const s of labeled) L.push(s);
+    if (loose.length) L.push(loose.join(", "));
+  }
+  L.push("");
+
+  // experience: pass through with normalized bullets
+  L.push("PROFESSIONAL EXPERIENCE");
+  const exp = parsed.sections.experience || [];
+  let anyExp = false;
+  for (const raw of exp){
+    if (!raw){ continue; }
+    if (isBulletLine(raw)){ L.push("\u2022 " + normalizeBullet(raw)); }
+    else { if(anyExp) L.push(""); L.push(raw); }
+    anyExp = true;
+  }
+  if (!anyExp) L.push("[Paste included no experience section this tool could find \u2014 add roles here as: Title \u2014 Company | Dates, then \u2022 bullets]");
+  L.push("");
+
+  // education / certs / projects / achievements, compressed
+  const passthrough = (key, header) => {
+    const sec = (parsed.sections[key]||[]).filter(Boolean);
+    if (!sec.length) return;
+    L.push(header);
+    for (const s of sec){
+      L.push(isBulletLine(s) ? "\u2022 " + normalizeBullet(s) : s);
+    }
+    L.push("");
+  };
+  passthrough("education","EDUCATION");
+  passthrough("certifications","CERTIFICATIONS");
+  passthrough("projects","PROJECTS");
+  passthrough("achievements","ACHIEVEMENTS");
+
+  while (L.length && L[L.length-1]==="") L.pop();
+  return { text: L.join("\n"), matched, missing };
+}
+
+/* ---------------- render ---------------- */
+function renderResume(text){
   const sheet = $("sheet");
   sheet.innerHTML = "";
-  const lines = text.split("\n");
-  lines.forEach((raw, i) => {
-    const line = raw.replace(/\s+$/, "");
+  text.split("\n").forEach((raw,i)=>{
+    const line = raw.replace(/\s+$/,"");
     const div = document.createElement("div");
-    if (line.trim() === "") {
-      div.className = "r-gap";
-    } else if (i === 0) {
-      div.className = "r-name";
-      div.textContent = line;
-    } else if (
-      line === line.toUpperCase() && /[A-Z]/.test(line) &&
-      line.length < 60 && !line.includes("\u2022") && !line.includes("|")
-    ) {
-      div.className = "r-header";
-      div.textContent = line;
-    } else if (line.trim().startsWith("\u2022")) {
-      div.className = "r-bullet";
-      div.textContent = line.trim();
-    } else if (i <= 3 && line.includes("|")) {
-      div.className = "r-center";
-      div.textContent = line;
-    } else {
-      div.className = "r-line";
-      div.textContent = line;
+    if (line.trim()===""){ div.className="r-gap"; }
+    else if (i===0){ div.className="r-name"; div.textContent=line; }
+    else if (line===line.toUpperCase() && /[A-Z]/.test(line) && line.length<60 && !line.includes("\u2022") && !line.includes("|")){
+      div.className="r-header"; div.textContent=line;
     }
+    else if (line.trim().startsWith("\u2022")){ div.className="r-bullet"; div.textContent=line.trim(); }
+    else if (i<=3 && line.includes("|")){ div.className="r-center"; div.textContent=line; }
+    else { div.className="r-line"; div.textContent=line; }
     sheet.appendChild(div);
   });
+  sheet.contentEditable = "true";
+  sheet.spellcheck = true;
 }
 
-function renderFlags(listId, boxId, items) {
-  const box = $(boxId);
-  const list = $(listId);
-  list.innerHTML = "";
-  if (items && items.length) {
-    items.forEach((t) => {
-      const li = document.createElement("li");
-      li.textContent = t;
-      list.appendChild(li);
-    });
-    box.style.display = "block";
-  } else {
-    box.style.display = "none";
-  }
+function renderKw(id, boxId, items){
+  const box=$(boxId), el=$(id);
+  el.innerHTML="";
+  if (items.length){
+    items.forEach(k=>{ const s=document.createElement("span"); s.className="kw"; s.textContent=titleCase(k); el.appendChild(s); });
+    box.style.display="block";
+  } else box.style.display="none";
 }
 
-async function generate() {
+function sheetText(){
+  const out=[];
+  $("sheet").childNodes.forEach(n=>{
+    if (n.classList && n.classList.contains("r-gap")) out.push("");
+    else out.push(n.textContent);
+  });
+  return out.join("\n");
+}
+
+function updateCount(){
+  const wc = sheetText().trim().split(/\s+/).filter(Boolean).length;
+  const el=$("wordcount");
+  el.textContent = wc + " words " + (wc>480 ? "\u00b7 running long, consider a trim" : "\u00b7 fits one page");
+  el.className = wc>480 ? "long" : "";
+}
+
+function showError(m){ const e=$("error"); e.textContent=m; e.style.display=m?"block":"none"; }
+
+/* ---------------- events ---------------- */
+$("generate").addEventListener("click", ()=>{
   const resume = $("resumeIn").value.trim();
   const jd = $("jdIn").value.trim();
-  if (!resume) {
-    showError("Paste your current resume first. That text is the only source of truth this tool will use.");
-    return;
-  }
+  if (!resume){ showError("Paste your current resume first. That text is the only source this tool works from."); return; }
   showError("");
-  const btn = $("generate");
-  btn.disabled = true;
-  btn.textContent = "Setting the page\u2026";
-  $("sheet").innerHTML = '<div class="placeholder">Reading your history, matching the posting,<br>cutting to one page\u2026</div>';
-  $("actions").style.display = "none";
-  $("flagsBox").style.display = "none";
-  $("missingBox").style.display = "none";
-  $("wordcount").textContent = "";
+  const parsed = parseResume(resume);
+  const out = buildOutput(parsed, jd);
+  renderResume(out.text);
+  renderKw("matchedList","matchedBox", out.matched);
+  renderKw("missingList","missingBox", out.missing);
 
+  const tips = [];
+  if (out.text.includes("[Edit me]")) tips.push("The summary is a starter draft \u2014 click the sheet and rewrite it in your own words.");
+  if (out.text.includes("[Phone]") || out.text.includes("[Email]")) tips.push("Fill in the [Phone] / [Email] placeholders on the contact line.");
+  tips.push("Every line must be true and defensible in an interview. Cut anything you can't back up with a story.");
+  if (out.missing.length) tips.push("Only add the amber keywords to the sheet if you genuinely have that experience \u2014 otherwise they're interview landmines.");
+  tips.push("When pasting into Word: single column, standard font (Calibri or Arial, 10\u201312pt), no tables or text boxes, and save as .docx or PDF.");
+  const tl=$("tipsList"); tl.innerHTML="";
+  tips.forEach(t=>{ const li=document.createElement("li"); li.textContent=t; tl.appendChild(li); });
+  $("tipsBox").style.display="block";
+
+  $("actions").style.display="flex";
+  $("editnote").style.display="block";
+  updateCount();
+});
+
+$("sheet").addEventListener("input", updateCount);
+
+$("copyBtn").addEventListener("click", async ()=>{
   try {
-    const response = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: "claude-sonnet-4-6",
-        max_tokens: 1000,
-        messages: [{ role: "user", content: buildPrompt(resume, jd) }]
-      })
-    });
-    const data = await response.json();
-    const text = (data.content || [])
-      .filter((b) => b.type === "text")
-      .map((b) => b.text)
-      .join("\n");
-    const clean = text.replace(/```json|```/g, "").trim();
-    let parsed;
-    try { parsed = JSON.parse(clean); }
-    catch { parsed = { resume: clean, flags: [], missing: [] }; }
-    if (!parsed.resume) throw new Error("empty");
-
-    lastResume = parsed.resume;
-    renderResume(parsed.resume);
-    renderFlags("flagsList", "flagsBox", Array.isArray(parsed.flags) ? parsed.flags : []);
-    renderFlags("missingList", "missingBox", Array.isArray(parsed.missing) ? parsed.missing : []);
-    $("actions").style.display = "flex";
-
-    const wc = parsed.resume.trim().split(/\s+/).length;
-    const wcEl = $("wordcount");
-    wcEl.textContent = wc + " words " + (wc > 480 ? "\u00b7 running long, consider a trim" : "\u00b7 fits one page");
-    wcEl.className = wc > 480 ? "long" : "";
-  } catch (e) {
-    $("sheet").innerHTML = '<div class="placeholder">Nothing yet.</div>';
-    showError("The rewrite didn't come back. Check your connection and generate again.");
-  } finally {
-    btn.disabled = false;
-    btn.textContent = "Press one page";
-  }
-}
-
-$("generate").addEventListener("click", generate);
-
-$("copyBtn").addEventListener("click", async () => {
-  if (!lastResume) return;
-  try {
-    await navigator.clipboard.writeText(lastResume);
-    const b = $("copyBtn");
-    b.textContent = "Copied";
-    setTimeout(() => { b.textContent = "Copy text"; }, 2000);
+    await navigator.clipboard.writeText(sheetText());
+    const b=$("copyBtn"); b.textContent="Copied"; setTimeout(()=>b.textContent="Copy text",2000);
   } catch {
-    showError("Copy failed. Select the text on the page and copy it manually.");
+    showError("Copy failed. Select the sheet text and copy it manually.");
   }
 });
 
-$("printBtn").addEventListener("click", () => window.print());
+$("printBtn").addEventListener("click", ()=>window.print());
 </script>
 </body>
 </html>
