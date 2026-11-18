@@ -23,7 +23,7 @@
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <link rel="preload" href="assets/fonts/inter-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="stylesheet" href="assets/app.css?v=10">
+    <link rel="stylesheet" href="assets/app.css?v=11">
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-N10ZLNFZHE"></script>
     <script>
@@ -85,8 +85,8 @@
         <span class="brand-title">DIB Jobs</span>
     </a>
     <nav class="nav" id="mainTabs" aria-label="Sections">
-        <button class="nav-item" id="tab-explore" data-view="explore" aria-current="page">Find Jobs</button>
-        <button class="nav-item" id="tab-analyze" data-view="analyze">Check a job</button>
+        <button class="nav-item" id="tab-analyze" data-view="analyze" aria-current="page">Check a job</button>
+        <button class="nav-item" id="tab-explore" data-view="explore">Find Jobs</button>
         <button class="nav-item" id="tab-tracker" data-view="tracker">Tracker<span class="badge neutral" id="trackerBadge" hidden></span></button>
     </nav>
     <button class="nav-toggle" id="navToggle" aria-expanded="false" aria-controls="navMore">Menu<svg class="icon"><use href="#i-chevron"/></svg></button>
@@ -99,7 +99,7 @@
     <!-- ================================================================== -->
     <!-- ANALYZE                                                            -->
     <!-- ================================================================== -->
-    <section class="view" id="view-analyze" role="tabpanel" aria-labelledby="tab-analyze" hidden>
+    <section class="view" id="view-analyze" role="tabpanel" aria-labelledby="tab-analyze">
         <div class="page-intro">
             <p class="eyebrow">Job fit check &middot; for defense industry sales, BD and capture</p>
             <h1 class="h1">Should you go after this job?</h1>
@@ -547,20 +547,29 @@
     <!-- ================================================================== -->
     <!-- FIND ROLES                                                         -->
     <!-- ================================================================== -->
-    <section class="view" id="view-explore" role="tabpanel" aria-labelledby="tab-explore">
+    <section class="view" id="view-explore" role="tabpanel" aria-labelledby="tab-explore" hidden>
         <div class="page-intro">
             <p class="eyebrow">Job search &middot; for defense industry sales, BD and capture</p>
             <h1 class="h1">Find defense and federal jobs</h1>
-            <p class="lede">Search Google for openings, then bring a posting back to check your fit.</p>
+            <p class="lede">Search LinkedIn, the clearance boards or Google for openings, then bring a posting back to check your fit.</p>
         </div>
 
         <form class="panel stack" id="searchForm" novalidate>
             <h2 class="h3">1. Search for openings</h2>
-            <div class="search-fields">
+            <div class="search-fields three">
                 <label class="field"><span class="field-label">Job title or keywords</span>
-                    <input type="text" id="searchTitle" maxlength="80" autocomplete="off" enterkeyhint="search" placeholder="e.g. federal account executive"></label>
-                <label class="field"><span class="field-label">Location or work setup <span class="optional">optional</span></span>
-                    <input type="text" id="searchLocation" maxlength="60" autocomplete="off" enterkeyhint="search" placeholder="e.g. remote, Northern Virginia"></label>
+                    <input type="text" id="searchTitle" maxlength="80" autocomplete="off" enterkeyhint="search" placeholder="federal sales"></label>
+                <label class="field"><span class="field-label">Location <span class="optional">optional</span></span>
+                    <input type="text" id="searchLocation" maxlength="60" autocomplete="off" enterkeyhint="search" placeholder="e.g. remote, Virginia"></label>
+                <label class="field"><span class="field-label">Clearance keyword <span class="optional">optional</span></span>
+                    <select id="searchClearance">
+                        <option value="">None</option>
+                        <option value="public trust">Public trust</option>
+                        <option value="secret clearance">Secret</option>
+                        <option value="top secret">Top Secret</option>
+                        <option value="TS/SCI">TS/SCI</option>
+                        <option value="polygraph">TS/SCI with polygraph</option>
+                    </select></label>
             </div>
             <div>
                 <p class="body-sm muted" id="starterLabel">Start from a role family, then edit it</p>
@@ -569,36 +578,22 @@
                     <button type="button" class="chip" data-fill-title="capture manager">Capture</button>
                     <button type="button" class="chip" data-fill-title="federal business development">Business development</button>
                     <button type="button" class="chip" data-fill-title="federal partner sales">Partner sales</button>
+                    <button class="btn text" type="button" id="suggestBtn" data-action="suggest-terms">Suggest search terms from my resume</button>
                 </div>
             </div>
-            <details class="disclosure" id="clearanceRow">
-                <summary><svg class="icon"><use href="#i-tune"/></svg><span>Clearance keyword <span class="optional" id="clearanceState">none</span></span><svg class="icon chev"><use href="#i-chevron"/></svg></summary>
-                <div class="disclosure-body stack-sm">
-                    <label class="field sm"><span class="field-label">Add a clearance keyword to the search</span>
-                        <select id="searchClearance">
-                            <option value="">None</option>
-                            <option value="public trust">Public trust</option>
-                            <option value="secret clearance">Secret</option>
-                            <option value="top secret">Top Secret</option>
-                            <option value="TS/SCI">TS/SCI</option>
-                            <option value="polygraph">TS/SCI with polygraph</option>
-                        </select></label>
-                    <p class="body-sm muted">This is a keyword hint only. It asks Google for postings that mention the phrase. It can't confirm that you're eligible or that a posting is still open.</p>
-                </div>
-            </details>
-            <p class="field-error" id="searchError" role="alert" hidden></p>
-            <div class="search-actions">
-                <button class="btn primary" type="submit" id="searchBtn">Search Google <span aria-hidden="true">&#8599;</span><span class="sr">(opens in a new tab)</span></button>
-                <button class="btn text" type="button" id="suggestBtn" data-action="suggest-terms">Suggest search terms from my resume</button>
-            </div>
-            <p class="body-sm muted query-line" id="queryLine" hidden>Google search: <span id="queryPreview"></span></p>
             <div id="suggestBox" aria-live="polite" hidden></div>
-            <div id="employerBlock" hidden>
-                <h3 class="label-lg">Search employer postings</h3>
-                <p class="body-sm muted" style="margin-top:2px">The same search, limited to the hiring systems many employers post on. Each opens Google in a new tab.</p>
-                <div class="chips" id="employerLinks" style="margin-top:8px"></div>
+            <div class="search-out">
+                <p class="body-md">Searching for <strong id="queryPreview"></strong><span class="muted" id="queryHint"></span></p>
+                <div class="search-actions">
+                    <button class="btn primary" type="submit" id="searchBtn">Search LinkedIn <span aria-hidden="true">&#8599;</span><span class="sr">(past week, opens in a new tab)</span></button>
+                    <span class="chips" id="boardLinks"></span>
+                </div>
+                <div>
+                    <h3 class="label-lg">Employer career sites, through Google</h3>
+                    <div class="chips" id="employerLinks" style="margin-top:8px"></div>
+                </div>
             </div>
-            <p class="body-sm muted">Google shows the results. Only the title, location and clearance keyword above are sent to it. Your resume and tracker never are.</p>
+            <p class="body-sm muted">Every button opens the search on that site in a new tab. Only the title, location and clearance keyword above are sent. Your resume and tracker never are. The clearance keyword only asks for postings that mention the phrase; it can't confirm eligibility or that a posting is still open.</p>
         </form>
 
         <div class="panel accent stack" id="handoffCard">
@@ -627,13 +622,16 @@
             </form>
         </div>
 
-        <details class="disclosure boards" id="boardsRow">
-            <summary><span>Company job boards</span><svg class="icon chev"><use href="#i-chevron"/></svg></summary>
-            <div class="disclosure-body">
-                <p class="body-md muted" id="boardsNote">Each link is a Google search for that company's careers page.</p>
-                <div id="companyBoards"></div>
-            </div>
-        </details>
+        <div class="plain" id="boardsRow">
+            <h2 class="h3">Ready-to-use searches</h2>
+            <div class="grid-2" id="readySearches" style="margin-top:12px"></div>
+        </div>
+
+        <div class="plain">
+            <h2 class="h3">Company job boards</h2>
+            <p class="body-md muted" style="margin-top:4px">Each one opens that company's jobs page on LinkedIn.</p>
+            <div id="companyBoards"></div>
+        </div>
     </section>
 </main>
 
@@ -666,7 +664,7 @@
     <button class="icon-btn" data-action="dismiss-snackbar" aria-label="Dismiss"><svg class="icon"><use href="#i-close"/></svg></button>
 </div>
 
-<script src="assets/files.js?v=10"></script>
-<script src="assets/app.js?v=10"></script>
+<script src="assets/files.js?v=11"></script>
+<script src="assets/app.js?v=11"></script>
 </body>
 </html>

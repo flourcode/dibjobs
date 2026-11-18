@@ -181,8 +181,8 @@
         });
     }
 
-    const VIEW_ORDER = ['explore', 'analyze', 'tracker'];
-    const VIEW_HASH = { explore: '', analyze: '#check', tracker: '#tracker' };
+    const VIEW_ORDER = ['analyze', 'explore', 'tracker'];
+    const VIEW_HASH = { analyze: '', explore: '#find', tracker: '#tracker' };
     const HASH_VIEW = { '#check': 'analyze', '#analyze': 'analyze', '#tracker': 'tracker', '#explore': 'explore', '#find': 'explore' };
     const reducedMotion = () => window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -196,7 +196,7 @@
 
     function currentView() {
         const cur = document.querySelector('#mainTabs [aria-current="page"]');
-        return cur ? cur.dataset.view : 'explore';
+        return cur ? cur.dataset.view : 'analyze';
     }
 
     function showView(name) {
@@ -1626,31 +1626,41 @@
 
     // ======================================================================
     // FIND JOBS
-    // Discovery runs entirely in this browser. The page only builds ordinary
-    // Google links: it never fetches results, and no AI or backend call is made.
-    // Only the title, location and clearance keyword typed below go to Google.
+    // Discovery runs entirely in this browser. The page only builds ordinary search
+    // links (LinkedIn, ClearanceJobs, Indeed, Google): it never fetches results, and no
+    // AI or backend call is made. Only the title, location and clearance keyword go out.
     // ======================================================================
     const GOOGLE_SEARCH = 'https://www.google.com/search';
+    const DEFAULT_TITLE = 'federal sales';
     const EMPLOYER_SITES = [['Greenhouse', 'job-boards.greenhouse.io'], ['Lever', 'jobs.lever.co'], ['Ashby', 'jobs.ashbyhq.com'], ['Workday', 'myworkdayjobs.com']];
     const CLEARANCE_HINTS = ['public trust', 'secret clearance', 'top secret', 'TS/SCI', 'polygraph'];
-    // [name shown, name searched (when different)]
     const COMPANY_BOARDS = [
-        ['Defense primes and integrators', [['Lockheed Martin'], ['RTX (Raytheon)', 'RTX Raytheon'], ['GDIT'], ['Northrop Grumman'], ['Boeing'], ['Leidos'], ['BAE Systems'], ['L3Harris'], ['Booz Allen', 'Booz Allen Hamilton'], ['SAIC'], ['CACI'], ['ManTech'], ['Peraton'], ['Agile Defense'], ['Anduril'], ['Palantir'], ['Shield AI']]],
-        ['Cloud service providers', [['Amazon / AWS', 'AWS'], ['Microsoft / Azure', 'Microsoft'], ['Google Cloud', 'Google Public Sector'], ['Oracle Cloud', 'Oracle'], ['IBM Cloud', 'IBM']]],
-        ['SaaS and platforms', [['Salesforce'], ['ServiceNow'], ['Snowflake'], ['Databricks'], ['Atlassian'], ['Palo Alto Networks'], ['CrowdStrike'], ['Zscaler'], ['Tenable'], ['Okta'], ['Splunk']]],
-        ['Consulting and systems integrators', [['Accenture Federal', 'Accenture Federal Services'], ['Deloitte'], ['PwC'], ['EY'], ['KPMG'], ['Capgemini', 'Capgemini Government Solutions']]],
-        ['VARs and resellers', [['Carahsoft'], ['WWT', 'World Wide Technology'], ['Iron Bow', 'Iron Bow Technologies'], ['Presidio'], ['DXC Technology'], ['CGI Federal'], ['Red River', 'Red River Technology'], ['ThunderCat', 'ThunderCat Technology']]]
+        ['Defense primes and integrators', [['Lockheed Martin', 'lockheed-martin'], ['RTX (Raytheon)', 'rtx'], ['GDIT', 'gdit'], ['Northrop Grumman', 'northrop-grumman-corporation'], ['Boeing', 'boeing'], ['Leidos', 'leidos'], ['BAE Systems', 'bae-systems'], ['L3Harris', 'l3harris-technologies'], ['Booz Allen', 'booz-allen-hamilton'], ['SAIC', 'saicinc'], ['CACI', 'caci-international-inc'], ['ManTech', 'mantech'], ['Peraton', 'peraton'], ['Anduril', 'anduril'], ['Palantir', 'palantir-technologies'], ['Shield AI', 'shield-ai']]],
+        ['Cloud service providers', [['Amazon / AWS', 'amazon-web-services'], ['Microsoft / Azure', 'microsoft'], ['Google Cloud', 'google-cloud'], ['Oracle Cloud', 'oracle'], ['IBM Cloud', 'ibm']]],
+        ['SaaS and platforms', [['Salesforce', 'salesforce'], ['ServiceNow', 'servicenow'], ['Snowflake', 'snowflake-computing'], ['Databricks', 'databricks'], ['Atlassian', 'atlassian'], ['Palo Alto Networks', 'palo-alto-networks'], ['CrowdStrike', 'crowdstrike'], ['Zscaler', 'zscaler'], ['Tenable', 'tenableinc'], ['Okta', 'okta-inc-'], ['Splunk', 'splunk']]],
+        ['Consulting and systems integrators', [['Accenture Federal', 'accenturefederalservices'], ['Deloitte', 'deloitte'], ['PwC', 'pwc'], ['EY', 'ernstandyoung'], ['KPMG', 'kpmg-us'], ['Capgemini', 'capgemini']]],
+        ['VARs and resellers', [['Carahsoft', 'carahsoft'], ['WWT', 'world-wide-technology'], ['Iron Bow', 'iron-bow-technologies'], ['Presidio', 'presidio-'], ['DXC Technology', 'dxctechnology'], ['CGI Federal', 'cgi'], ['Red River', 'red-river-technology'], ['ThunderCat', 'thundercat-technology']]]
+    ];
+
+
+    const READY_SEARCHES = [
+        ['Federal account executive', 'Direct selling to agencies for software, cloud and cyber vendors', 'federal account executive'],
+        ['Capture manager', 'Running pursuits for primes and integrators', 'capture manager'],
+        ['Defense business development', 'Opening doors and shaping deals across DoD and the IC', 'defense business development'],
+        ['Federal sales director', 'Leading a public sector team or region', 'federal sales director'],
+        ['Channel and partner sales', 'Selling through primes, VARs and distributors', 'federal partner sales manager'],
+        ['Public sector account manager', 'Growing existing agency accounts', 'public sector account manager']
     ];
 
     const tidy = (s, max) => String(s || '').replace(/\s+/g, ' ').trim().substring(0, max);
 
     function searchCriteria() {
         const clearance = $('searchClearance').value;
-        return { title: tidy($('searchTitle').value, 80), location: tidy($('searchLocation').value, 60), clearance: CLEARANCE_HINTS.includes(clearance) ? clearance : '' };
+        const title = tidy($('searchTitle').value, 80);
+        return { title: title || DEFAULT_TITLE, typed: !!title, location: tidy($('searchLocation').value, 60), clearance: CLEARANCE_HINTS.includes(clearance) ? clearance : '' };
     }
 
-    // Broad:  capture manager Virginia "secret clearance" jobs
-    // Domain: site:jobs.lever.co capture manager Virginia "secret clearance"
+    // Google:  capture manager Virginia "secret clearance" jobs   (or site:jobs.lever.co ... for one hiring system)
     // The title is left unquoted on purpose: strict phrases hide relevant postings.
     function buildQuery(c, site) {
         const parts = [];
@@ -1661,41 +1671,44 @@
         if (!site && !/\bjobs?\b/i.test(c.title)) parts.push('jobs');
         return parts.join(' ');
     }
+    const withParams = (base, params) => { const url = new URL(base); url.search = new URLSearchParams(params).toString(); return url.href; };
+    const googleUrl = (query) => withParams(GOOGLE_SEARCH, { q: query });
+    const keywordsOf = (c) => c.title + (c.clearance ? ' "' + c.clearance + '"' : '');
 
-    function googleUrl(query) {
-        const url = new URL(GOOGLE_SEARCH);
-        url.search = new URLSearchParams({ q: query }).toString();
-        return url.href;
+    // LinkedIn job search, postings from the past week. "Remote" becomes LinkedIn's remote filter.
+    function linkedInUrl(c) {
+        const params = { keywords: keywordsOf(c), f_TPR: 'r604800' };
+        const place = c.location.replace(/\bremote\b/ig, '').replace(/^[\s,]+|[\s,]+$/g, '');
+        if (/\bremote\b/i.test(c.location)) params.f_WT = '2';
+        if (place) params.location = place;
+        return withParams('https://www.linkedin.com/jobs/search/', params);
     }
+    const clearanceJobsUrl = (c) => withParams('https://www.clearancejobs.com/jobs', { keywords: [c.title, c.location].filter(Boolean).join(' ') });
+    const indeedUrl = (c) => withParams('https://www.indeed.com/jobs', c.location ? { q: keywordsOf(c), l: c.location } : { q: keywordsOf(c) });
 
-    const googleLink = (query, label, cls) => `<a class="${cls || 'chip'}" href="${escapeHtml(googleUrl(query))}" target="_blank" rel="noopener noreferrer">${escapeHtml(label)}<span class="sr"> (Google search, opens in a new tab)</span></a>`;
+    const outLink = (href, label, cls) => `<a class="${cls || 'chip'}" href="${escapeHtml(href)}" target="_blank" rel="noopener noreferrer">${escapeHtml(label)}<span class="sr"> (opens in a new tab)</span></a>`;
+    const boardLinks = (c, cls) => outLink(clearanceJobsUrl(c), 'ClearanceJobs', cls) + outLink(indeedUrl(c), 'Indeed', cls) + outLink(googleUrl(buildQuery(c)), 'Google', cls);
 
     function updateSearchUi() {
         const c = searchCriteria();
-        $('searchError').hidden = true;
-        $('clearanceState').textContent = c.clearance ? $('searchClearance').selectedOptions[0].textContent : 'none';
-        $('queryLine').hidden = !c.title;
-        $('queryPreview').textContent = c.title ? buildQuery(c) : '';
-        $('employerBlock').hidden = !c.title;
-        $('employerLinks').innerHTML = c.title ? EMPLOYER_SITES.map(([name, site]) => googleLink(buildQuery(c, site), name)).join('') : '';
-        $('boardsNote').textContent = c.title
-            ? `Each link is a Google search for that company's careers page and "${c.title}".`
-            : 'Each link is a Google search for that company\'s careers page. Add a job title above to narrow it.';
-        $('companyBoards').innerHTML = COMPANY_BOARDS.map(([group, companies]) => `<p class="label-lg muted" style="margin:20px 0 8px">${group}</p><div class="chips">${
-            companies.map(([name, searched]) => googleLink(`${searched || name} careers${c.title ? ' ' + c.title : ''}`, name)).join('')}</div>`).join('');
+        $('queryPreview').textContent = [c.title, c.location, c.clearance ? `"${c.clearance}"` : ''].filter(Boolean).join(' · ');
+        $('queryHint').textContent = c.typed ? '' : '  (the default: type a title to change it)';
+        $('boardLinks').innerHTML = boardLinks(c);
+        $('employerLinks').innerHTML = EMPLOYER_SITES.map(([name, site]) => outLink(googleUrl(buildQuery(c, site)), name)).join('');
     }
 
-    // Runs straight from the click or Enter, so the browser treats it as a normal new-tab navigation.
+    function renderStaticSearches() {
+        $('readySearches').innerHTML = READY_SEARCHES.map(([title, blurb, query]) => { const c = { title: query, location: '', clearance: '' };
+            return `<div class="tool-card"><span class="title-md">${title}</span><span class="body-sm">${blurb}</span><div class="chips">${outLink(linkedInUrl(c), 'LinkedIn, past week', 'chip sm')}${boardLinks(c, 'chip sm')}</div></div>`; }).join('');
+        $('companyBoards').innerHTML = COMPANY_BOARDS.map(([group, companies]) => `<p class="label-lg muted" style="margin:20px 0 8px">${group}</p><div class="chips">${
+            companies.map(([name, slug]) => outLink(`https://www.linkedin.com/company/${slug}/jobs/`, name)).join('')}</div>`).join('');
+    }
+
+    // Enter or the blue button: LinkedIn, straight from the user's action so it opens as a normal new tab.
     function runSearch(e) {
         e.preventDefault();
-        const c = searchCriteria();
-        if (!c.title) {
-            $('searchError').textContent = 'Add a job title or keyword to search for.';
-            $('searchError').hidden = false;
-            return $('searchTitle').focus();
-        }
-        window.open(googleUrl(buildQuery(c)), '_blank', 'noopener,noreferrer');
-        track('search_google');
+        window.open(linkedInUrl(searchCriteria()), '_blank', 'noopener,noreferrer');
+        track('search_linkedin');
     }
 
     function fillTitle(title) {
@@ -1852,7 +1865,7 @@
     }
 
     function initFindJobs() {
-        updateSearchUi();
+        updateSearchUi(); renderStaticSearches();
         $('searchForm').addEventListener('submit', runSearch);
         ['searchTitle', 'searchLocation'].forEach(id => $(id).addEventListener('input', updateSearchUi));
         $('searchClearance').addEventListener('change', updateSearchUi);
@@ -2112,7 +2125,7 @@ Amazon is an Equal Opportunity Employer.`;
         updateTrackerBadge();
         // First visit (nothing saved yet): open on a worked example. Returning visitors get their own resume.
         setResultState('empty');
-        if (HASH_VIEW[location.hash] && HASH_VIEW[location.hash] !== 'explore') showView(HASH_VIEW[location.hash]);
+        if (HASH_VIEW[location.hash] && HASH_VIEW[location.hash] !== 'analyze') showView(HASH_VIEW[location.hash]);
 
         document.addEventListener('click', (e) => {
             const actionEl = e.target.closest('[data-action]');

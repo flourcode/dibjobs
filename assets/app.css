@@ -572,3 +572,13 @@ details.boards > summary { font: 900 20px/24px var(--font); letter-spacing: -0.0
 #jobLinkHelp a { word-break: break-all; color: var(--ink); }
 #jobLinkHelp .btn { margin: 0; }
 .search-actions .btn.text { white-space: normal; text-align: left; flex: 0 1 auto; min-width: 0; }
+
+/* v11: every search destination is visible up front */
+.search-fields.three { grid-template-columns: 5fr 3fr 3fr; }
+.search-fields.three select { width: 100%; min-height: 48px; }
+.search-out { border-top: 1px solid var(--hairline); padding-top: 16px; }
+.search-out > * + * { margin-top: 12px; }
+.search-out strong { word-break: break-word; }
+#starterChips .btn.text { min-height: 44px; }
+@media (max-width: 879px) { .search-fields.three { grid-template-columns: 1fr 1fr; } .search-fields.three > :first-child { grid-column: 1 / -1; } }
+#starterChips .btn.text { white-space: normal; text-align: left; min-width: 0; }
