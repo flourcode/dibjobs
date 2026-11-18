@@ -16,7 +16,8 @@
         resumes: 'dib_jobs_resumes',
         draft: 'dib_jobs_resume_draft',
         tracker: 'dougOMaticTracker',       // legacy name kept so existing users keep their data
-        military: 'dib_jobs_military'
+        military: 'dib_jobs_military',
+        theme: 'dib_jobs_theme'
     };
     const SHARE_URL = 'https://dibjobs.com/';
     const SHARE_TEXT = 'DIB Jobs: drop in your resume and a job description to get a fit score, clearance check, comp intel, and interview prep for defense industry roles.';
@@ -476,34 +477,101 @@
         });
     }
 
+    const VIEW_ORDER = ['analyze', 'tracker', 'explore'];
+    const reducedMotion = () => window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    function animateIn(el, cls) {
+        if (!el || reducedMotion()) return;
+        el.classList.remove('enter', 'enter-l', 'enter-r');
+        void el.offsetWidth;   // restart the animation
+        el.classList.add(cls);
+        el.addEventListener('animationend', () => el.classList.remove(cls), { once: true });
+    }
+
+    function currentView() {
+        const cur = document.querySelector('#mainTabs [aria-current="page"]');
+        return cur ? cur.dataset.view : 'analyze';
+    }
+
     function showView(name) {
-        const tab = document.querySelector(`#mainTabs [data-view="${name}"]`);
-        if (!tab) return;
-        selectTab($('mainTabs'), tab);
+        const item = document.querySelector(`#mainTabs [data-view="${name}"]`);
+        if (!item) return;
+        const from = VIEW_ORDER.indexOf(currentView()), to = VIEW_ORDER.indexOf(name);
+        document.querySelectorAll('#mainTabs .nav-item[data-view]').forEach(n => n === item ? n.setAttribute('aria-current', 'page') : n.removeAttribute('aria-current'));
         document.querySelectorAll('main > .view').forEach(v => { v.hidden = v.id !== 'view-' + name; });
+        if (from !== to) animateIn($('view-' + name), to > from ? 'enter-l' : 'enter-r');
         window.scrollTo({ top: 0 });
         if (name === 'tracker') renderTracker();
+        updateFab();
     }
 
     function showPanel(name) {
         const tab = document.querySelector(`#resultTabs [data-panel="${name}"]`);
         if (!tab) return;
+        const tabs = [...document.querySelectorAll('#resultTabs [role="tab"]')];
+        const from = tabs.findIndex(t => t.getAttribute('aria-selected') === 'true'), to = tabs.indexOf(tab);
         selectTab($('resultTabs'), tab);
-        document.querySelectorAll('#results .panel').forEach(p => { p.hidden = p.id !== 'panel-' + name; });
+        document.querySelectorAll('#results [role="tabpanel"]').forEach(p => { p.hidden = p.id !== 'panel-' + name; });
+        if (from !== to) animateIn($('panel-' + name), to > from ? 'enter-l' : 'enter-r');
+    }
+
+    function updateFab() { /* no floating action in this layout */ }
+
+    function closeMenus(except) {
+        document.querySelectorAll('.menu').forEach(m => {
+            if (m === except) return;
+            m.hidden = true;
+            const btn = document.querySelector(`[data-menu="${m.id}"]`);
+            if (btn) btn.setAttribute('aria-expanded', 'false');
+        });
+    }
+
+    function toggleMenu(id) {
+        const menu = $(id), btn = document.querySelector(`[data-menu="${id}"]`);
+        const show = menu.hidden;
+        closeMenus(menu);
+        menu.hidden = !show;
+        btn.setAttribute('aria-expanded', String(show));
+        if (show) { const first = menu.querySelector('.menu-item'); if (first) first.focus({ preventScroll: true }); }
+    }
+
+    function initMenus() {
+        document.addEventListener('click', (e) => {
+            const toggle = e.target.closest('[data-menu]');
+            if (toggle) { e.preventDefault(); toggleMenu(toggle.dataset.menu); return; }
+            // Choosing an item, or clicking anywhere outside, closes open menus.
+            if (e.target.closest('.menu-item') || !e.target.closest('.menu')) closeMenus();
+        }, true);
+        document.addEventListener('keydown', (e) => {
+            const menu = e.target.closest && e.target.closest('.menu');
+            if (e.key === 'Escape') {
+                const open = document.querySelector('.menu:not([hidden])');
+                if (open) { closeMenus(); const btn = document.querySelector(`[data-menu="${open.id}"]`); if (btn) btn.focus(); }
+            } else if (menu && (e.key === 'ArrowDown' || e.key === 'ArrowUp')) {
+                e.preventDefault();
+                const items = [...menu.querySelectorAll('.menu-item')];
+                const i = items.indexOf(document.activeElement);
+                items[(i + (e.key === 'ArrowDown' ? 1 : items.length - 1)) % items.length].focus();
+            }
+        });
     }
 
     function initTabs() {
-        [['mainTabs', t => showView(t.dataset.view)], ['resultTabs', t => showPanel(t.dataset.panel)]].forEach(([id, activate]) => {
-            const list = $(id);
-            list.addEventListener('click', (e) => { const t = e.target.closest('[role="tab"]'); if (t) activate(t); });
-            list.addEventListener('keydown', (e) => {
-                if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
-                const tabs = [...list.querySelectorAll('[role="tab"]')];
-                const i = tabs.indexOf(document.activeElement);
-                if (i < 0) return;
-                const next = tabs[(i + (e.key === 'ArrowRight' ? 1 : tabs.length - 1)) % tabs.length];
-                next.focus(); activate(next);
-            });
+        const nav = $('mainTabs'), navToggle = $('navToggle');
+        const setNav = (open) => { nav.classList.toggle('open', open); navToggle.setAttribute('aria-expanded', String(open)); };
+        nav.addEventListener('click', (e) => { const item = e.target.closest('.nav-item[data-view]'); if (item) { showView(item.dataset.view); setNav(false); } });
+        navToggle.addEventListener('click', () => setNav(!nav.classList.contains('open')));
+        document.addEventListener('click', (e) => { if (!e.target.closest('.site-header')) setNav(false); });
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && nav.classList.contains('open')) { setNav(false); navToggle.focus(); } });
+        const list = $('resultTabs');
+        list.addEventListener('click', (e) => { const t = e.target.closest('[role="tab"]'); if (t) showPanel(t.dataset.panel); });
+        list.addEventListener('keydown', (e) => {
+            if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+            const tabs = [...list.querySelectorAll('[role="tab"]')];
+            const i = tabs.indexOf(document.activeElement);
+            if (i < 0) return;
+            const next = tabs[(i + (e.key === 'ArrowRight' ? 1 : tabs.length - 1)) % tabs.length];
+            next.focus(); showPanel(next.dataset.panel);
         });
     }
 
@@ -512,19 +580,18 @@
     // ======================================================================
     const getSavedResumes = () => store.get(KEYS.resumes, {}) || {};
 
-    function updateResumeSelector(selected = '') {
-        const sel = $('resumeSelector');
-        const names = Object.keys(getSavedResumes());
-        sel.innerHTML = '<option value="">Saved resumes</option>';
-        names.forEach(n => sel.add(new Option(n, n)));
-        if (names.length) {
-            const group = document.createElement('optgroup');
-            group.label = 'Remove a saved resume';
-            names.forEach(n => group.appendChild(new Option('Remove "' + n + '"', '__del__' + n)));
-            sel.appendChild(group);
-        }
-        sel.value = names.includes(selected) ? selected : '';
-        sel.hidden = names.length === 0;
+    // The resume menu lists saved versions; the active one (if the text matches) is named under the title.
+    function updateResumeSelector() {
+        const resumes = getSavedResumes();
+        const names = Object.keys(resumes).sort((a, b) => (resumes[b].savedAt || '').localeCompare(resumes[a].savedAt || ''));
+        const current = $('resumeText').value.trim();
+        const active = names.find(n => resumes[n].text.trim() === current && current);
+        $('savedResumeItems').innerHTML = names.length
+            ? '<hr><p class="menu-empty">Saved versions</p>' + names.map(n => `<div class="row" style="flex-wrap:nowrap"><button class="menu-item saved" role="menuitemradio" aria-checked="${n === active}" data-load-resume="${escapeHtml(n)}"><svg class="icon"><use href="#i-doc"/></svg><span class="label">${escapeHtml(n)}</span><svg class="icon tick"><use href="#i-tick"/></svg></button><button class="icon-btn" data-delete-resume="${escapeHtml(n)}" aria-label="Remove ${escapeHtml(n)}" style="margin-right:8px"><svg class="icon"><use href="#i-trash"/></svg></button></div>`).join('')
+            : '<p class="menu-empty">Save versions for different kinds of roles. They stay in this browser.</p>';
+        const note = $('resumeVersionNote');
+        note.hidden = !active;
+        note.textContent = active ? `Using saved version "${active}"` : '';
     }
 
     async function saveCurrentResume() {
@@ -537,35 +604,33 @@
         if (!name) return;
         resumes[name.substring(0, 50)] = { text, savedAt: new Date().toISOString() };
         if (!store.set(KEYS.resumes, resumes)) return snackbar('Could not save. Browser storage may be full.');
-        updateResumeSelector(name.substring(0, 50));
+        updateResumeSelector();
         snackbar(`Saved "${name.substring(0, 50)}".`);
     }
 
-    async function onResumeSelect() {
-        const sel = $('resumeSelector');
-        const value = sel.value;
-        if (!value) return;
+    function loadSavedResume(name) {
         const resumes = getSavedResumes();
-        if (value.startsWith('__del__')) {
-            const name = value.slice(7);
-            sel.value = '';
-            const ok = await askDialog({ title: 'Remove saved resume?', body: `"${escapeHtml(name)}" will be removed from this browser.`, okText: 'Remove', danger: true });
-            if (ok) { delete resumes[name]; store.set(KEYS.resumes, resumes); snackbar(`Removed "${name}".`); }
-            updateResumeSelector();
-            return;
-        }
-        if (resumes[value]) {
-            $('resumeText').value = resumes[value].text;
-            state.fileFlags = null; state.fileName = '';
-            setFileStatus();
-            onResumeChanged();
-            snackbar(`Loaded "${value}".`);
-        }
+        if (!resumes[name]) return;
+        $('resumeText').value = resumes[name].text;
+        state.fileFlags = null; state.fileName = '';
+        setFileStatus();
+        onResumeChanged();
+        snackbar(`Loaded "${name}".`);
+    }
+
+    async function deleteSavedResume(name) {
+        closeMenus();
+        const ok = await askDialog({ title: 'Remove saved resume?', body: `"${escapeHtml(name)}" will be removed from this browser.`, okText: 'Remove', danger: true });
+        if (!ok) return;
+        const resumes = getSavedResumes();
+        delete resumes[name];
+        store.set(KEYS.resumes, resumes);
+        updateResumeSelector();
+        snackbar(`Removed "${name}".`);
     }
 
     function clearResume() {
         $('resumeText').value = '';
-        $('resumeSelector').value = '';
         state.resumeText = ''; state.pendingOcrFile = null; state.fileName = ''; state.fileFlags = null;
         setFileStatus();
         onResumeChanged();
@@ -619,7 +684,6 @@
         if (info.pages && info.pagesRead && info.pages > info.pagesRead) note += ` Only the first ${info.pagesRead} of ${info.pages} pages were read.`;
         const words = countWords(text);
         $('resumeText').value = text;
-        $('resumeSelector').value = '';
         state.fileName = fileName.replace(/\.[^.]+$/, '').substring(0, 50);
         state.fileFlags = Object.assign({ kind: info.kind }, info.flags || {});
         onResumeChanged();
@@ -712,6 +776,7 @@
 
     function onResumeChanged() {
         updateCounts();
+        updateResumeSelector();
         renderResumeCheck();
         clearTimeout(state.draftTimer);
         state.draftTimer = setTimeout(() => {
@@ -731,12 +796,12 @@
         if (draft.trim()) {
             $('resumeText').value = draft;
             $('resumeSavedNote').textContent = 'Remembered in this browser';
-            updateResumeSelector(Object.keys(resumes).find(n => resumes[n].text === draft) || '');
+            updateResumeSelector();
             return;
         }
         const names = Object.keys(resumes).sort((a, b) => (resumes[b].savedAt || '').localeCompare(resumes[a].savedAt || ''));
-        updateResumeSelector(names[0] || '');
         if (names[0]) $('resumeText').value = resumes[names[0]].text;
+        updateResumeSelector();
     }
 
     // Local, instant checks on the resume itself (no AI involved).
@@ -788,31 +853,22 @@
         el.hidden = !message;
     }
 
-    function showInputs() {
-        $('inputs').hidden = false;
-        $('analyzeBar').hidden = false;
-        $('inputSummary').hidden = true;
-        document.querySelector('#view-analyze .page-intro').hidden = !$('results').hidden;
+    // The inputs never move; the answer column swaps between empty, loading and ready.
+    function setResultState(mode) {
+        $('resultEmpty').hidden = mode !== 'empty';
+        $('loading').hidden = mode !== 'loading';
+        $('verdictWrap').hidden = mode !== 'ready';
+        $('results').hidden = mode !== 'ready';
     }
-
-    function collapseInputs() {
-        const a = state.analysis;
-        $('inputs').hidden = true;
-        $('analyzeBar').hidden = true;
-        $('inputSummary').hidden = false;
-        document.querySelector('#view-analyze .page-intro').hidden = true;
-        const company = knownCompany(a.company);
-        $('inputSummaryText').textContent = `Your resume (${countWords(state.resumeText).toLocaleString()} words) vs. ${a.job_title || 'this role'}${company ? ' at ' + company : ''}`;
-    }
+    function showInputs() { /* inputs are always visible in this layout */ }
 
     function startLoading() {
         const steps = [[15, 'Reading job description...'], [35, 'Extracting key requirements...'], [55, 'Comparing against your resume...'], [72, 'Checking clearance and fit signals...'], [86, 'Drafting interview prep...'], [94, 'Finishing up...']];
         let i = 0;
-        $('loading').hidden = false;
-        $('results').hidden = true;
+        setResultState('loading');
         $('loadingProgress').style.width = '5%';
         $('loadingStep').textContent = steps[0][1];
-        $('loading').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        $('resultCol').scrollIntoView({ behavior: 'smooth', block: 'start' });
         clearInterval(state.loadingTimer);
         state.loadingTimer = setInterval(() => {
             if (i < steps.length) { $('loadingProgress').style.width = steps[i][0] + '%'; $('loadingStep').textContent = steps[i][1]; i++; }
@@ -836,7 +892,7 @@
 
         const btn = $('analyzeBtn');
         btn.disabled = true;
-        $('btnText').textContent = 'Analyzing...';
+        $('btnText').textContent = 'Checking...';
         startLoading();
         let lastError = null;
         for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
@@ -859,6 +915,7 @@
                 const previous = state.lastScores[key];
                 state.lastScores[key] = data.score;
                 state.analysis = data;
+                state.isExample = false;
                 resetGenerated();
                 stopLoading();
                 renderResults(data, previous);
@@ -872,9 +929,10 @@
             }
         }
         btn.disabled = false;
-        $('btnText').textContent = 'Analyze job fit';
+        $('btnText').textContent = 'Check this job';
         if (lastError) {
             stopLoading();
+            setResultState(state.analysis ? 'ready' : 'empty');
             showInlineError(lastError.message);
             $('analyzeBar').scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
@@ -922,6 +980,26 @@
     // ======================================================================
     const scoreBand = (score) => score >= 75 ? 'high' : score >= 55 ? 'mid' : 'low';
 
+    function countUp(el, target) {
+        if (reducedMotion() || window.matchMedia('print').matches) { el.textContent = target; return; }
+        const start = performance.now(), dur = 900;
+        el.dataset.target = target;
+        const tick = (now) => {
+            if (el.dataset.target !== String(target)) return;      // a newer score took over
+            const t = Math.min(1, (now - start) / dur);
+            el.textContent = Math.round(target * (1 - Math.pow(1 - t, 3)));
+            if (t < 1) requestAnimationFrame(tick);
+        };
+        requestAnimationFrame(tick);
+    }
+
+    function setSaveButton(saved, label) {
+        const btn = $('saveToTrackerBtn');
+        btn.disabled = saved;
+        btn.querySelector('span').textContent = label || 'Save to tracker';
+        btn.querySelector('use').setAttribute('href', saved ? '#i-bookmark-fill' : '#i-bookmark');
+    }
+
     function resetGenerated() {
         state.tailored = null; state.chat = [];
         $('tailoredWrap').hidden = true;
@@ -939,32 +1017,29 @@
     }
 
     function renderResults(data, previousScore) {
-        $('results').hidden = false;
-        collapseInputs();
+        setResultState('ready');
         showPanel('overview');
 
-        // Hero
+        // Verdict: the number first, then the call, then why
         const score = Math.max(0, Math.min(100, Math.round(Number(data.score) || 0)));
-        const ring = $('scoreRing');
-        ring.className = 'score-ring ' + scoreBand(score);
-        ring.setAttribute('aria-label', `Fit score ${score} out of 100`);
-        $('scoreNum').textContent = score;
-        $('scoreArc').style.strokeDashoffset = 326.7;
-        requestAnimationFrame(() => requestAnimationFrame(() => { $('scoreArc').style.strokeDashoffset = (326.7 * (1 - score / 100)).toFixed(1); }));
-        $('verdict').textContent = data.verdict || '';
+        countUp($('scoreNum'), score);
+        $('railFill').style.width = '0%'; $('railMarker').style.left = '0%';
+        requestAnimationFrame(() => requestAnimationFrame(() => { $('railFill').style.width = score + '%'; $('railMarker').style.left = score + '%'; }));
+        $('scoreRail').setAttribute('aria-label', `Fit score ${score} out of 100. 55 and up is worth fixing your resume for; 75 and up is a strong fit.`);
+        $('exampleTag').hidden = !state.isExample;
         const company = knownCompany(data.company);
         $('roleLine').textContent = (data.job_title || 'Role') + (company ? ' at ' + company : '');
-        $('jobSummary').textContent = data.job_summary || '';
+        renderRecommendation(data, score);
         const delta = $('scoreDelta');
         if (typeof previousScore === 'number') {
             const d = score - previousScore;
             delta.hidden = false;
-            delta.className = 'chip sm ' + (d > 0 ? 'ok' : d < 0 ? 'bad' : 'tonal');
+            delta.className = 'chip sm';
             delta.textContent = d === 0 ? 'No change from last run' : `${d > 0 ? '+' : ''}${d} from last run`;
         } else delta.hidden = true;
-        const saveLabel = $('saveToTrackerBtn').querySelector('span');
-        saveLabel.textContent = 'Save to tracker';
-        $('saveToTrackerBtn').disabled = false;
+        setSaveButton(false);
+        $('printMeta').textContent = new Date().toLocaleDateString();
+        animateIn($('verdict'), 'enter');
 
         // Overview
         const { gaps, matches } = splitAnalysis(data);
@@ -999,28 +1074,61 @@
         // Outreach
         buildTemplates(data);
 
-        setTimeout(() => $('inputSummary').scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
+        ['strengthsList', 'gapsList', 'interviewQuestionsList', 'questionsToAskList'].forEach(id => $(id).classList.add('stagger'));
+        if (!state.isExample) $('resultCol').scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
+    // Clearance lives in the hero as a chip: green when met, gold when it is a gap or unclear.
     function renderClearance(data) {
-        const el = $('clearanceGate');
+        const el = $('clearanceChip');
         const c = data.clearance;
-        if (!c || !c.required || !c.status) { el.hidden = true; return; }
-        const status = ['meets', 'gap', 'not_required', 'unclear'].includes(c.status) ? c.status : 'unclear';
-        const kind = { meets: 'success', gap: 'error', not_required: 'info', unclear: 'warn' }[status];
-        const label = { meets: 'Meets the clearance requirement', gap: 'Clearance gap', not_required: 'No clearance required', unclear: 'Clearance unclear: confirm with the recruiter' }[status];
+        if (!c || !c.required || !c.status || c.status === 'not_required') { el.hidden = true; return; }
+        const status = ['meets', 'gap', 'unclear'].includes(c.status) ? c.status : 'unclear';
         el.hidden = false;
-        el.className = 'banner ' + kind;
-        el.innerHTML = `${icon({ success: 'check', error: 'x-circle', info: 'info', warn: 'alert' }[kind])}<span class="grow"><strong>${label}</strong><br>Role requires: ${escapeHtml(c.required)} &middot; Your resume shows: ${escapeHtml(c.candidate || 'Not stated')}${c.note ? `<br>${escapeHtml(c.note)}` : ''}</span>`;
+        el.className = 'chip sm';
+        el.innerHTML = `${icon(status === 'meets' ? 'check' : 'alert')}${status === 'meets' ? 'Clearance: you meet it' : status === 'gap' ? `Clearance gap: needs ${escapeHtml(c.required)}` : 'Clearance: confirm with recruiter'}`;
+        el.title = `Role requires: ${c.required}. Your resume shows: ${c.candidate || 'Not stated'}.${c.note ? ' ' + c.note : ''}`;
+    }
+
+    // The decision the job seeker came for. Uses the AI's call when present; otherwise a rule of thumb.
+    function deriveRecommendation(data, score) {
+        const r = data.recommendation;
+        if (r && ['apply', 'fix_first', 'skip'].includes(r.action) && r.headline) return r;
+        const { gaps } = splitAnalysis(data);
+        const clearanceGap = data.clearance && data.clearance.status === 'gap';
+        const action = score >= 75 && !clearanceGap ? 'apply' : score < 50 ? 'skip' : 'fix_first';
+        const headline = {
+            apply: 'You are a strong fit. Apply now, and lead with your best-matching results.',
+            fix_first: 'Worth pursuing, but close the biggest gaps in your resume before you apply.',
+            skip: 'This role is a reach on paper. Put your time into closer matches.'
+        }[action];
+        const reasons = [];
+        if (clearanceGap) reasons.push(`The role requires ${data.clearance.required}; your resume shows ${data.clearance.candidate || 'no clearance'}.`);
+        gaps.slice(0, clearanceGap ? 1 : 2).forEach(g => reasons.push(g.split(/\s*(?:→|->)\s*/)[0] + '.'));
+        return { action, headline, reasons, next_step: '' };
+    }
+
+    function renderRecommendation(data, score) {
+        const r = deriveRecommendation(data, score);
+        const label = { apply: ['check', 'Apply now.'], fix_first: ['fix', 'Fix your resume first.'], skip: ['skip', 'Probably skip this one.'] }[r.action];
+        $('recAction').textContent = label[1];
+        $('verdict').dataset.tone = { apply: 'good', fix_first: 'caution', skip: 'bad' }[r.action];
+        $('recHeadline').textContent = r.headline;
+        const reasons = (Array.isArray(r.reasons) ? r.reasons : []).filter(x => typeof x === 'string' && x.trim()).slice(0, 3);
+        $('recReasons').innerHTML = reasons.map(x => `<li>${escapeHtml(x)}</li>`).join('');
+        $('recNext').hidden = !r.next_step;
+        $('recNext').innerHTML = r.next_step ? `${icon('next')}<span>Next step: ${escapeHtml(r.next_step)}</span>` : '';
+        $('verdictChip').textContent = data.verdict || '';
+        $('verdictChip').hidden = !data.verdict;
     }
 
     function renderFitSignals(data) {
         const rows = Array.isArray(data.fit_signals) ? data.fit_signals.filter(s => s && s.signal) : [];
         $('fitSignalsBlock').hidden = !rows.length;
-        const chip = { strong: ['ok', 'Strong'], partial: ['warn', 'Partial'], missing: ['bad', 'Missing'] };
+        const chip = { strong: ['status-ok', 'Strong'], partial: ['warn', 'Partial'], missing: ['bad', 'Missing'] };
         $('fitSignalsBody').innerHTML = rows.map(s => {
             const [cls, text] = chip[s.status] || chip.partial;
-            return `<tr><th scope="row">${escapeHtml(s.signal)}</th><td>${escapeHtml(s.role_expects || 'Not stated')}</td><td>${escapeHtml(s.resume_shows || 'Not shown')}</td><td><span class="chip sm ${cls}">${text}</span></td></tr>`;
+            return `<tr><th scope="row">${escapeHtml(s.signal)}</th><td data-label="Role expects">${escapeHtml(s.role_expects || 'Not stated')}</td><td data-label="Your resume">${escapeHtml(s.resume_shows || 'Not shown')}</td><td class="status-cell"><span class="chip sm ${cls}">${text}</span></td></tr>`;
         }).join('');
     }
 
@@ -1239,7 +1347,6 @@
     function useTailoredAsResume() {
         if (!state.tailored) return;
         $('resumeText').value = tailoredToText(state.tailored);
-        $('resumeSelector').value = '';
         state.fileFlags = null;
         setFileStatus('success', '<span class="grow">Now using the tailored version. Use "Save" to keep it as a named resume.</span>');
         onResumeChanged();
@@ -1351,7 +1458,8 @@
         const a = state.analysis;
         if (!a) return;
         const company = knownCompany(a.company);
-        $('printHeader').textContent = `DIB Jobs job fit report · ${a.job_title || 'Role'}${company ? ' at ' + company : ''} · ${new Date().toLocaleDateString()} · dibjobs.com`;
+        $('printHeader').textContent = `${a.job_title || 'Role'}${company ? ' at ' + company : ''}`;
+        $('printMeta').innerHTML = `${escapeHtml(new Date().toLocaleDateString())}<br>dibjobs.com`;
         const prev = document.title;
         document.title = `DIB Jobs report - ${a.job_title || 'Role'}${company ? ' - ' + company : ''}`.replace(/[\\/:*?"<>|]/g, ' ');
         const restore = () => { document.title = prev; window.removeEventListener('afterprint', restore); };
@@ -1372,6 +1480,7 @@
     function saveToTracker() {
         const a = state.analysis;
         if (!a) return;
+        if (state.isExample) return snackbar('That\'s the example. Check a job of your own, then save it.');
         const company = knownCompany(a.company) || 'Unknown company', role = a.job_title || 'Unknown role';
         const existing = state.tracked.find(j => j.company === company && j.role === role);
         const link = /^https?:\/\/\S+$/i.test(state.jdSourceUrl || '') ? state.jdSourceUrl : '';
@@ -1384,8 +1493,7 @@
             if (!existing) state.tracked.shift();
             return snackbar('Could not save. Browser storage is full: remove an old job from the tracker and try again.', 7000);
         }
-        $('saveToTrackerBtn').querySelector('span').textContent = existing ? 'Updated in tracker' : 'Saved to tracker';
-        $('saveToTrackerBtn').disabled = true;
+        setSaveButton(true, existing ? 'Updated in tracker' : 'Saved to tracker');
         updateTrackerBadge();
         snackbar(existing ? 'Tracker entry updated with this analysis.' : 'Saved. Open the Tracker tab to set a follow-up date.');
         track('job_saved');
@@ -1634,7 +1742,7 @@
     // ======================================================================
     // SAMPLE DATA
     // ======================================================================
-    function loadSampleData() {
+    function loadSampleData(silent) {
         $('resumeText').value = `JOHN DOE
 Arlington, VA | johndoe@email.com | (703) 555-1234
 
@@ -1717,21 +1825,89 @@ Compensation: $200,000 - $280,000 OTE (base + variable)
 Location: Arlington, VA (customer site visits required)
 
 Amazon is an Equal Opportunity Employer.`;
-        $('resumeSelector').value = '';
         state.fileFlags = null; state.fileName = '';
-        setFileStatus('info', '<span class="grow">Sample resume and job loaded. Your own saved resume is untouched and comes back when you reload.</span>');
+        setFileStatus('info', silent
+            ? '<span class="grow"><strong>These are example values.</strong> Replace them with your resume and a real posting, then run the check.</span>'
+            : '<span class="grow">Sample resume and job loaded. Your own saved resume is untouched and comes back when you reload.</span>');
         updateCounts();          // the sample is intentionally not remembered
+        $('resumeSavedNote').textContent = '';
         renderResumeCheck();
         showInlineError('');
-        snackbar('Sample loaded. Choose "Analyze job fit" to see it work.');
+        if (!silent) snackbar('Sample loaded. Choose "Check this job" to run it.');
+    }
+
+    // A worked example, shown on a first visit so the page answers "what do I get?" before asking for anything.
+    // It is a fixed, pre-written result for the sample resume and job above (no AI call is made to show it).
+    const EXAMPLE_ANALYSIS = {
+        job_title: 'Principal DoD Sales Representative', company: 'Amazon Web Services (AWS)',
+        job_summary: 'Own the full sales cycle for a portfolio of DoD cloud accounts.',
+        score: 72, verdict: 'Good match with gaps',
+        analysis: [
+            'Match: DoD quota attainment → 145% of quota in FY23 and 138% in FY22 on a $180M territory',
+            'Match: Large federal deals → Closed a $95M multi-year Army agreement and led a $45M Navy IDIQ capture',
+            'Match: Partner selling → Built a 25-partner ecosystem driving 40% of pipeline',
+            'Match: Procurement vehicles → IDIQ/GWAC and FAR/DFARS experience across Army, Navy, Air Force and DISA',
+            'Match: Sales methodology → MEDDIC certified',
+            'Gap: Clearance → The role requires TS/SCI with Full Scope Poly; the resume shows Top Secret',
+            'Gap: Cloud infrastructure → Experience is cybersecurity and enterprise software, not AWS, Azure or GCP',
+            'Gap: Advanced degree → MBA preferred; the resume shows a B.S.'
+        ],
+        tailored_summary: 'Senior federal sales executive with 15+ years selling enterprise software and cybersecurity to the Department of Defense and Intelligence Community. Carries a $180M DoD territory at 145% of quota, with a $95M Army enterprise agreement and a $45M Navy IDIQ among recent wins. Builds partner ecosystems with defense primes and systems integrators and works alongside solutions architects through ATO.',
+        interview_questions: [
+            { question: 'Walk me through the largest DoD deal you have closed.', suggested_answer: 'Use the $95M multi-year Army enterprise license agreement: how you found the requirement, who you sold to, how partners were involved, and how long it took.' },
+            { question: 'You have sold security and software. How will you sell cloud infrastructure?', suggested_answer: 'Point to the 8 accounts you moved from on-premise to cloud and the ATO work with solutions architects, then be direct that consumption selling is new and say how you will ramp.' },
+            { question: 'How do you work with partners without channel conflict?', suggested_answer: 'Describe the 25-partner ecosystem that drives 40% of your pipeline and the joint pursuits with Lockheed Martin, Northrop Grumman and GDIT.' }
+        ],
+        gap_strategies: [
+            { gap: 'Full Scope Polygraph', strategy: 'Raise it in the first recruiter call rather than waiting for them to find it.', talking_points: 'I hold an active Top Secret. Is the polygraph something you sponsor for the right candidate?' },
+            { gap: 'Cloud infrastructure selling', strategy: 'Tie your software and security wins to cloud adoption, and name the AWS certification you already have.', talking_points: 'Eight of my accounts moved to cloud on my watch, and I worked the ATO side with our architects.' }
+        ],
+        keywords: [
+            { term: 'DoD', in_resume: true, importance: 'critical' }, { term: 'Quota attainment', in_resume: true, importance: 'critical' },
+            { term: 'TS/SCI', in_resume: false, importance: 'critical' }, { term: 'Full Scope Polygraph', in_resume: false, importance: 'critical' },
+            { term: 'IDIQ', in_resume: true, importance: 'important' }, { term: 'GWAC', in_resume: true, importance: 'important' },
+            { term: 'ATO', in_resume: true, importance: 'important' }, { term: 'MEDDIC', in_resume: true, importance: 'important' },
+            { term: 'FedRAMP', in_resume: false, importance: 'important' }, { term: 'IL5', in_resume: false, importance: 'important' },
+            { term: 'Cloud infrastructure', in_resume: false, importance: 'important' }, { term: 'Territory plan', in_resume: false, importance: 'nice-to-have' }
+        ],
+        clearance: { required: 'TS/SCI with Full Scope Poly', candidate: 'Top Secret', status: 'gap', note: 'The posting lists it as a basic qualification.' },
+        bullet_rewrites: [
+            { original: 'Lead DoD sales territory generating $180M+ annual revenue', improved: 'Own a $180M+ DoD territory across DISA, Army, Navy and Air Force, finishing FY23 at 145% of quota', why: 'Puts quota attainment, the first thing this role screens on, in the opening bullet.' },
+            { original: 'Transitioned 8 accounts from on-premise to cloud solutions', improved: 'Moved 8 Army and Intelligence Community accounts from on-premise to cloud solutions', why: 'Names the customers and brings your cloud experience forward.' }
+        ],
+        fit_signals: [
+            { signal: 'Annual quota', role_expects: '$50M+', resume_shows: '$180M territory at 145%', status: 'strong' },
+            { signal: 'Years selling to DoD', role_expects: '7+', resume_shows: '15+', status: 'strong' },
+            { signal: 'Product sold', role_expects: 'Cloud infrastructure', resume_shows: 'Cybersecurity and enterprise software', status: 'partial' },
+            { signal: 'Clearance', role_expects: 'TS/SCI with Full Scope Poly', resume_shows: 'Top Secret', status: 'missing' }
+        ],
+        questions_to_ask: [
+            { question: 'How many reps on this team hit quota last year?', why: 'If few did, the number is a wish, not a plan.' },
+            { question: 'Why is this seat open?', why: 'A promotion is good news. A string of departures is not.' },
+            { question: 'Will you sponsor the polygraph, and how long does it usually take?', why: 'It decides whether this job is real for you this year.' }
+        ],
+        recommendation: { action: 'fix_first', headline: "You clear the sales bar easily. The polygraph is what stands between you and this job.", reasons: ['Your $180M territory at 145% is well past the $50M quota they ask for.', 'The posting lists TS/SCI with Full Scope Poly as a basic qualification; your resume shows Top Secret.', 'Your cloud experience is real but buried in an older role.'], next_step: 'Ask the recruiter whether they sponsor the polygraph before you spend time tailoring.' },
+        salary_intel: { low: 200, mid: 240, high: 280, is_variable_comp: true, base_low: 130, base_high: 160, pay_mix: '55/45', comp_questions: ['What is the quota, and how was it set?', 'How long is the ramp, and is it guaranteed?', 'Are there accelerators past 100%, and is there a cap?', 'Which accounts are in the territory today?'], notes: 'Anchored to the range in the posting.' },
+        competition: { level: 'Low', reasoning: 'The polygraph requirement shrinks the pool sharply.' },
+        company_intel: { known: true, type: 'Cloud service provider', size: 'Large', reputation: 'Strong in federal' },
+        timeline: { screen_weeks: '1-2', interview_weeks: '3-5', offer_weeks: '6-8', notes: 'Expect a multi-interview loop.' }
+    };
+
+    function showExample() {
+        loadSampleData(true);
+        state.analysis = EXAMPLE_ANALYSIS;
+        state.isExample = true;
+        state.resumeText = $('resumeText').value.trim();
+        state.jd = $('jobDescription').value.trim();
+        renderResults(EXAMPLE_ANALYSIS);
     }
 
     function newJob() {
         $('jobDescription').value = '';
-        $('results').hidden = true;
-        state.analysis = null; state.jd = '';
+        state.analysis = null; state.jd = ''; state.isExample = false;
         resetGenerated();
-        showInputs(); showInlineError(''); updateCounts();
+        setResultState('empty');
+        showInlineError(''); updateCounts();
         $('jobDescription').focus();
     }
 
@@ -1744,7 +1920,6 @@ Amazon is an Equal Opportunity Employer.`;
         'save-resume': () => saveCurrentResume(),
         'clear-resume': () => clearResume(),
         'ocr': () => readResumeWithAI(),
-        'edit-inputs': () => { showInputs(); $('inputs').scrollIntoView({ behavior: 'smooth', block: 'start' }); },
         'new-job': () => newJob(),
         'save-job': () => saveToTracker(),
         'download-report': () => downloadReport(),
@@ -1771,14 +1946,18 @@ Amazon is an Equal Opportunity Employer.`;
     function init() {
         state.tracked = (store.get(KEYS.tracker, []) || []).filter(j => j && typeof j === 'object');
         $('militaryToggle').checked = store.getRaw(KEYS.military) === '1';
+        $('militaryChip').hidden = !$('militaryToggle').checked;
         loadInitialResume();
         initTabs();
+        initMenus();
         initFileDrop();
         initTrackerEvents();
         renderCompanyBoards();
         updateCounts();
         renderResumeCheck();
         updateTrackerBadge();
+        // First visit (nothing saved yet): open on a worked example. Returning visitors get their own resume.
+        if (!$('resumeText').value.trim() && !state.tracked.length) showExample(); else setResultState('empty');
 
         document.addEventListener('click', (e) => {
             const actionEl = e.target.closest('[data-action]');
@@ -1791,11 +1970,14 @@ Amazon is an Equal Opportunity Employer.`;
             if (tpl) return showTemplate(tpl.dataset.template);
             const askEl = e.target.closest('[data-ask]');
             if (askEl) return askRecruiter(askEl.dataset.ask);
+            const loadEl = e.target.closest('[data-load-resume]');
+            if (loadEl) return loadSavedResume(loadEl.dataset.loadResume);
+            const delEl = e.target.closest('[data-delete-resume]');
+            if (delEl) return deleteSavedResume(delEl.dataset.deleteResume);
         });
         $('resumeText').addEventListener('input', onResumeChanged);
         $('jobDescription').addEventListener('input', updateCounts);
-        $('resumeSelector').addEventListener('change', onResumeSelect);
-        $('militaryToggle').addEventListener('change', (e) => store.set(KEYS.military, e.target.checked ? '1' : '0'));
+        $('militaryToggle').addEventListener('change', (e) => { store.set(KEYS.military, e.target.checked ? '1' : '0'); $('militaryChip').hidden = !e.target.checked; });
         $('restoreFile').addEventListener('change', (e) => restoreData(e.target.files[0]));
         // Ctrl/Cmd + Enter: analyze from either input, send from the chat box
         ['resumeText', 'jobDescription', 'recruiterQuestion'].forEach(id => $(id).addEventListener('keydown', (e) => {

@@ -16,9 +16,9 @@
 //   GEMINI_API_KEY             required
 //   GEMINI_MODEL               default gemini-3.5-flash-lite
 //   GEMINI_TIMEOUT_MS          per Gemini call, default 25000. Keep it a few seconds under the Lambda timeout.
-//   SEND_CORS_HEADERS          default true: this function adds the CORS headers itself. If CORS is ALSO
-//                              configured on the Function URL in the AWS console, set this to false, because
-//                              browsers reject the duplicated headers.
+//   SEND_CORS_HEADERS          default false: CORS is configured on the Function URL in the AWS console, and
+//                              AWS adds the headers. Adding our own as well makes browsers reject the
+//                              duplicates. Set to true only if the Function URL's CORS setting is removed.
 //   ALLOWED_ORIGINS            comma list, e.g. https://dibjobs.com,https://www.dibjobs.com (default *)
 //   RATE_LIMIT_PER_MINUTE      requests per visitor (IP), default 30
 //   RATE_LIMIT_PER_HOUR        requests per visitor (IP), default 300
@@ -27,7 +27,7 @@
 // site's copy ("Your resume is not stored on our servers").
 
 const env = process.env;
-const VERSION = '3.1.0';
+const VERSION = '3.2.0';
 
 function clampInt(v, def, min, max) {
     const n = Number.parseInt(v, 10);
@@ -77,7 +77,7 @@ function rateLimited(ip) {
 // =============================================================================
 const allowedOrigins = () => (env.ALLOWED_ORIGINS || '*').split(',').map(s => s.trim()).filter(Boolean);
 function corsHeaders(origin) {
-    if (String(env.SEND_CORS_HEADERS).toLowerCase() === 'false') return {};
+    if (String(env.SEND_CORS_HEADERS).toLowerCase() !== 'true') return {};
     const allowed = allowedOrigins();
     const allow = allowed.includes('*') ? '*' : allowed.includes(origin) ? origin : allowed[0];
     return { 'Access-Control-Allow-Origin': allow, 'Access-Control-Allow-Methods': 'GET, POST, OPTIONS', 'Access-Control-Allow-Headers': 'content-type', 'Access-Control-Max-Age': '86400', Vary: 'Origin' };
@@ -339,6 +339,14 @@ ${militaryTransition ? `
 14. **Military Translation:**
    List 3-6 items from the resume: the military role, term, or achievement ("military") and how to phrase it for this employer ("civilian"). Use only facts from the resume.
 ` : ''}
+FINAL TASK - **Recommendation:**
+   Make the call the candidate came for, consistent with the score and gaps above:
+   - "action": "apply" (strong fit, apply now), "fix_first" (worth pursuing once the resume or a gap is addressed), or "skip" (a poor use of their time, e.g. a hard requirement they cannot meet soon)
+   - "headline": one plain sentence with the call and the main reason, written to the candidate ("you")
+   - "reasons": 2-3 short reasons, each tied to specific evidence from the resume or the job description
+   - "next_step": the single most useful thing to do next (e.g. "Add your $95M Army agreement to the summary, then apply")
+   A clearance the candidate does not hold and the job lists as a basic requirement usually means "fix_first" or "skip", not "apply".
+
 OUTPUT VALID JSON ONLY (no markdown, no backticks):
 {
     "job_title": "string",
@@ -403,7 +411,13 @@ OUTPUT VALID JSON ONLY (no markdown, no backticks):
             "question": "string",
             "why": "string"
         }
-    ]${militaryTransition ? `,
+    ],
+    "recommendation": {
+        "action": "apply" | "fix_first" | "skip",
+        "headline": "string",
+        "reasons": ["string"],
+        "next_step": "string"
+    }${militaryTransition ? `,
     "military_translation": [
         {
             "military": "string",
