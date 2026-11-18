@@ -10,7 +10,7 @@
     // CONFIG + STATE
     // ======================================================================
     const API_ENDPOINT = 'https://pchkhu4vitpzuppdmtnrlxx2sy0idjzp.lambda-url.us-east-1.on.aws/';
-    const MAX_RETRIES = 3;
+    const MAX_RETRIES = 2;
     const RETRY_DELAY_MS = 2000;
     const KEYS = {
         resumes: 'dib_jobs_resumes',
@@ -83,7 +83,8 @@
     async function api(payload) {
         let response;
         try {
-            response = await fetch(API_ENDPOINT, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+            // Sent as text/plain so the browser skips the CORS preflight request (the Lambda parses it as JSON).
+            response = await fetch(API_ENDPOINT, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=UTF-8' }, body: JSON.stringify(payload) });
         } catch (e) {
             const err = new Error('Could not reach the analysis service. Check your connection and try again.');
             err.transient = true; throw err;
@@ -93,12 +94,19 @@
             const err = new Error('The analysis service is temporarily unavailable. Please try again.');
             err.transient = true; throw err;
         }
-        if (response.status === 429) {
+        let status = response.status;
+        // If the Function URL is in streaming mode but the Lambda's buffered handler is deployed, the real
+        // answer arrives wrapped as { statusCode, body }. Unwrap it so the page still works.
+        if (data && typeof data.statusCode === 'number' && typeof data.body === 'string') {
+            status = data.statusCode;
+            try { data = JSON.parse(data.body || '{}'); } catch (e) { data = {}; }
+        }
+        if (status === 429) {
             throw new Error(data.error || 'Too many requests. Please wait a few minutes and try again.');
         }
-        if (!response.ok || data.error) {
+        if (status < 200 || status >= 300 || data.error) {
             const err = new Error(/unknown request type/i.test(data.error || '') ? 'This feature is not available yet. Please try again later.' : (data.error || 'Something went wrong. Please try again.'));
-            err.transient = response.status >= 500 && /unavailable|timed out/i.test(data.error || '');
+            err.transient = [502, 503, 504].includes(status);
             throw err;
         }
         return data;
