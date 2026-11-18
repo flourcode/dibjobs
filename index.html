@@ -23,7 +23,7 @@
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <link rel="preload" href="assets/fonts/inter-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="stylesheet" href="assets/app.css?v=7">
+    <link rel="stylesheet" href="assets/app.css?v=10">
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-N10ZLNFZHE"></script>
     <script>
@@ -84,20 +84,22 @@
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="currentColor" aria-hidden="true"><path d="M93.764,38.143l-42-30.515c-1.053-0.764-2.475-0.764-3.527,0l-42,30.515c-1.051,0.764-1.491,2.118-1.09,3.354l16.043,49.374c0.402,1.236,1.554,2.073,2.854,2.073h51.914c1.3,0,2.451-0.837,2.854-2.073l16.043-49.374C95.255,40.261,94.814,38.907,93.764,38.143z M73.777,86.944H26.223L11.526,41.716L50,13.764l38.474,27.953L73.777,86.944z"/><path d="M48.236,32.35L29.748,45.782c-1.051,0.764-1.491,2.118-1.09,3.354l7.062,21.735c0.402,1.236,1.554,2.073,2.854,2.073h22.854c1.3,0,2.451-0.837,2.854-2.073l7.062-21.735c0.401-1.236-0.039-2.59-1.09-3.354L51.764,32.35C50.711,31.586,49.289,31.586,48.236,32.35z M64.962,49.355l-5.715,17.589H40.753l-5.715-17.589L50,38.485L64.962,49.355z"/></svg>
         <span class="brand-title">DIB Jobs</span>
     </a>
-    <button class="nav-toggle" id="navToggle" aria-expanded="false" aria-controls="mainTabs">Menu<svg class="icon"><use href="#i-chevron"/></svg></button>
     <nav class="nav" id="mainTabs" aria-label="Sections">
-        <button class="nav-item" id="tab-analyze" data-view="analyze" aria-current="page">Check a job</button>
+        <button class="nav-item" id="tab-explore" data-view="explore" aria-current="page">Find Jobs</button>
+        <button class="nav-item" id="tab-analyze" data-view="analyze">Check a job</button>
         <button class="nav-item" id="tab-tracker" data-view="tracker">Tracker<span class="badge neutral" id="trackerBadge" hidden></span></button>
-        <button class="nav-item" id="tab-explore" data-view="explore">Find roles</button>
-        <a class="nav-item" href="https://dibjobs.com/screen/">For recruiters</a>
     </nav>
+    <button class="nav-toggle" id="navToggle" aria-expanded="false" aria-controls="navMore">Menu<svg class="icon"><use href="#i-chevron"/></svg></button>
+    <div class="nav-more" id="navMore">
+        <a class="nav-item" href="screen/">For recruiters</a>
+    </div>
 </header>
 
 <main>
     <!-- ================================================================== -->
     <!-- ANALYZE                                                            -->
     <!-- ================================================================== -->
-    <section class="view" id="view-analyze" role="tabpanel" aria-labelledby="tab-analyze">
+    <section class="view" id="view-analyze" role="tabpanel" aria-labelledby="tab-analyze" hidden>
         <div class="page-intro">
             <p class="eyebrow">Job fit check &middot; for defense industry sales, BD and capture</p>
             <h1 class="h1">Should you go after this job?</h1>
@@ -118,56 +120,81 @@
                     </div>
                 </div>
 
-                <div class="verdict" data-tone="neutral" id="resultEmpty">
-                    <p class="eyebrow">Your answer shows up here</p>
-                    <p class="verdict-label" style="margin-top:8px">Add a resume and a job, then run the check.</p>
-                    <p class="verdict-explain">You'll get a fit score, a call on whether to apply, and the reasons behind it.</p>
+                <div id="resultEmpty">
+                    <div class="verdict" data-tone="neutral" id="emptyPlain">
+                        <p class="eyebrow">Your answer shows up here</p>
+                        <p class="verdict-label" style="margin-top:8px">Add the job and your resume, then run the check.</p>
+                        <p class="verdict-explain">You get a call on whether it's worth your time, the reason, and what to do next.</p>
+                    </div>
+                    <div class="verdict preview" data-tone="caution" id="examplePreview" hidden>
+                        <p class="eyebrow"><span class="example-tag">Example</span>What you get back</p>
+                        <div class="verdict-head">
+                            <div class="verdict-num"><b id="previewScore"></b><span>resume fit<br>out of 100</span></div>
+                            <p class="verdict-label" id="previewLabel"></p>
+                        </div>
+                        <p class="verdict-explain" id="previewHeadline"></p>
+                        <div class="row" style="margin-top:16px"><button class="btn ink" data-action="example">See the full example</button></div>
+                    </div>
                 </div>
 
                 <div id="verdictWrap" class="stack" hidden>
                     <div class="verdict" id="verdict" data-tone="neutral">
                         <p class="eyebrow"><span class="example-tag" id="exampleTag" hidden>Example</span><span id="roleLine"></span></p>
-                        <div class="verdict-num"><b id="scoreNum">0</b><span>fit score<br>out of 100</span></div>
-                        <p class="verdict-label" id="recAction" aria-live="polite"></p>
+                        <div class="verdict-head">
+                            <div class="verdict-num"><b id="scoreNum">0</b><span>resume fit<br>out of 100</span></div>
+                            <p class="verdict-label" id="recAction" aria-live="polite"></p>
+                        </div>
                         <p class="verdict-explain" id="recHeadline"></p>
+                        <div class="evidence" id="recEvidence" hidden>
+                            <div><span>The posting asks for</span><b id="evidenceRequired"></b></div>
+                            <div><span>Your resume shows</span><b id="evidenceCandidate"></b></div>
+                        </div>
                         <ul class="rec-reasons" id="recReasons"></ul>
+                        <div class="ask-box" id="recQuestionBox" hidden>
+                            <p class="eyebrow">Question to send the recruiter</p>
+                            <p class="body-md" id="recQuestion"></p>
+                        </div>
                         <p class="rec-next" id="recNext" hidden></p>
                         <div class="chips verdict-chips">
                             <span class="chip sm" id="verdictChip"></span>
-                            <span class="chip sm" id="clearanceChip" hidden></span>
                             <span class="chip sm" id="scoreDelta" hidden></span>
                         </div>
                     </div>
 
-                    <div class="rail-block">
-                        <div class="rail" id="scoreRail" role="img" aria-label="Fit score against the usual cut-offs">
-                            <span class="rail-fill" id="railFill"></span>
-                            <span class="rail-tick" style="left:55%"><i>55</i></span>
-                            <span class="rail-tick" style="left:75%"><i>75</i></span>
-                            <span class="rail-marker" id="railMarker"></span>
-                        </div>
-                        <div class="rail-legend"><span>Long shot</span><span style="left:65%">Fix first</span><span style="left:87.5%">Apply</span></div>
+                    <div class="row" id="actionBar">
+                        <button class="btn primary" id="primaryActionBtn" data-action="primary-action"><svg class="icon"><use href="#i-copy"/></svg><span id="primaryActionText">Next step</span></button>
+                        <button class="btn" id="saveToTrackerBtn" data-action="save-job"><svg class="icon"><use href="#i-bookmark"/></svg><span>Save to tracker</span></button>
+                        <button class="btn" data-action="download-report"><svg class="icon"><use href="#i-pdf"/></svg><span>Report</span></button>
+                        <button class="btn" data-action="new-job"><svg class="icon"><use href="#i-add"/></svg><span>New job</span></button>
                     </div>
 
                     <div class="rows" id="breakdown">
                         <div class="row-item"><span>Strengths</span><b id="strengthsCount">0</b></div>
                         <div class="row-item"><span>Gaps</span><b id="gapsCount">0</b></div>
                         <div class="row-item"><span>Keywords matched</span><b id="keywordsPercent">0%</b></div>
-                        <div class="row-item"><span id="salaryEstimateLabel">Est. target pay</span><b id="salaryEstimate">...</b></div>
-                    </div>
-
-                    <div class="row" id="actionBar">
-                        <button class="btn primary" id="saveToTrackerBtn" data-action="save-job"><svg class="icon"><use href="#i-bookmark"/></svg><span>Save to tracker</span></button>
-                        <button class="btn" data-action="download-report"><svg class="icon"><use href="#i-pdf"/></svg><span>Report</span></button>
-                        <button class="btn" data-action="new-job"><svg class="icon"><use href="#i-add"/></svg><span>New job</span></button>
+                        <div class="row-item"><span id="salaryEstimateLabel">Pay</span><b id="salaryEstimate">...</b></div>
+                        <div class="row-item" id="baseRow" hidden><span id="baseEstimateLabel">Base</span><b id="baseEstimate"></b></div>
                     </div>
                 </div>
             </section>
 
             <section class="calc-inputs" id="inputs" aria-label="Your resume and the job">
+            <div class="panel stack" id="jobCard">
+                <h2 class="h3">1. The job</h2>
+                <label class="field" id="jobField">
+                    <span class="field-label">Job link or description</span>
+                    <textarea id="jobDescription" rows="4" placeholder="Paste a link to the posting or the job description. You can also drop a PDF or Word file here."></textarea>
+                    <span class="supporting"><span id="jobCount"></span><span>Ctrl / &#8984; + Enter to run</span></span>
+                </label>
+                <div class="banner info" id="jobLinkHelp" hidden>
+                    <span class="grow"><span id="jobLinkMsg"></span> <a id="jobLinkAnchor" href="#" target="_blank" rel="noopener noreferrer"></a></span>
+                    <button class="btn" type="button" id="pasteInsteadBtn" data-action="paste-instead">Paste the job description instead</button>
+                </div>
+            </div>
+
             <div class="panel stack" id="resumeCard">
                 <div class="row between">
-                    <h2 class="h3">1. Your resume</h2>
+                    <h2 class="h3">2. Your resume</h2>
                     <div class="menu-anchor">
                         <button class="icon-btn" id="resumeMenuBtn" data-menu="resumeMenu" aria-label="Resume options: saved versions, save, clear" aria-haspopup="menu" aria-expanded="false"><svg class="icon"><use href="#i-more"/></svg></button>
                         <div class="menu" id="resumeMenu" role="menu" hidden>
@@ -179,20 +206,32 @@
                     </div>
                 </div>
                 <p class="body-sm muted" id="resumeVersionNote" hidden></p>
-                <div id="resumeDrop" class="dropzone" role="button" tabindex="0">
-                    <span class="dz-icon"><svg class="icon"><use href="#i-upload"/></svg></span>
-                    <span>
-                        <span class="body-lg" id="resumeDropMain">Drop your resume here or <u>choose a file</u></span>
-                        <span class="body-sm muted" style="display:block">PDF, Word (.docx), or text. Read in your browser, not uploaded.</span>
-                    </span>
-                </div>
-                <input type="file" id="resumeFile" accept=".pdf,.docx,.txt,.md,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain" hidden>
                 <div id="resumeFileStatus" role="status" aria-live="polite" hidden></div>
-                <label class="field">
-                    <span class="field-label">Resume text</span>
-                    <textarea id="resumeText" placeholder="...or paste your resume text here"></textarea>
-                    <span class="supporting"><span id="resumeCount"></span><span id="resumeSavedNote"></span></span>
-                </label>
+                <div class="resume-summary" id="resumeSummary" hidden>
+                    <svg class="icon"><use href="#i-check"/></svg>
+                    <span class="grow"><span class="title-sm" id="resumeSummaryTitle">Using your saved resume</span><span class="body-sm muted" id="resumeSummaryMeta" style="display:block"></span></span>
+                    <button class="btn" data-action="change-resume">Change</button>
+                </div>
+                <div id="resumeEditor" class="stack">
+                    <div id="resumeDrop" class="dropzone" role="button" tabindex="0">
+                        <span class="dz-icon"><svg class="icon"><use href="#i-upload"/></svg></span>
+                        <span>
+                            <span class="body-lg" id="resumeDropMain">Drop your resume here or <u>choose a file</u></span>
+                            <span class="body-sm muted" style="display:block">PDF, Word (.docx), or text.</span>
+                        </span>
+                    </div>
+                    <input type="file" id="resumeFile" accept=".pdf,.docx,.txt,.md,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain" hidden>
+                    <details class="disclosure" id="pasteRow">
+                        <summary><svg class="icon"><use href="#i-edit"/></svg><span id="pasteRowLabel">Paste text instead</span><svg class="icon chev"><use href="#i-chevron"/></svg></summary>
+                        <div class="disclosure-body">
+                            <label class="field">
+                                <span class="field-label">Resume text</span>
+                                <textarea id="resumeText" placeholder="Paste your resume text here"></textarea>
+                                <span class="supporting"><span id="resumeCount"></span><span id="resumeSavedNote"></span></span>
+                            </label>
+                        </div>
+                    </details>
+                </div>
                 <details class="disclosure" id="resumeCheck" hidden>
                     <summary><svg class="icon"><use href="#i-check"/></svg><span id="resumeCheckSummary">Resume check</span><svg class="icon chev"><use href="#i-chevron"/></svg></summary>
                     <div class="disclosure-body"><ul class="checklist" id="resumeCheckList"></ul></div>
@@ -219,24 +258,12 @@
                 </details>
             </div>
 
-            <div class="panel stack" id="jobCard">
-                <div class="row between">
-                    <h2 class="h3">2. The job</h2>
-                    <button class="btn text" data-action="sample">Try a sample</button>
-                </div>
-                <label class="field" id="jobField">
-                    <span class="field-label">Job description</span>
-                    <textarea id="jobDescription" style="min-height: 268px" placeholder="Paste the job description text or a link to the posting. You can also drop a PDF or Word file here."></textarea>
-                    <span class="supporting"><span id="jobCount"></span><span>Ctrl / &#8984; + Enter to run</span></span>
-                </label>
-            </div>
-        <div class="analyze-bar" id="analyzeBar">
-            <p class="field-error" id="inlineError" role="alert" hidden></p>
-            <div class="row" style="justify-content:center">
+            <div class="analyze-bar" id="analyzeBar">
+                <p class="field-error" id="inlineError" role="alert" hidden></p>
                 <button id="analyzeBtn" class="btn primary lg" data-action="analyze"><span id="btnText">Check this job</span><svg class="icon"><use href="#i-next"/></svg></button>
+                <p class="body-sm muted">We read your resume file in your browser. When you run a check, we send the extracted text for AI analysis.</p>
+                <button class="btn text" data-action="example" id="exampleLink">See an example</button>
             </div>
-        </div>
-
             </section>
         </div>
 
@@ -249,7 +276,7 @@
                     <button class="tab" role="tab" data-panel="resume" aria-selected="false" tabindex="-1">Resume</button>
                     <button class="tab" role="tab" data-panel="interview" aria-selected="false" tabindex="-1">Interview</button>
                     <button class="tab" role="tab" data-panel="outreach" aria-selected="false" tabindex="-1">Outreach</button>
-                    <button class="tab" role="tab" data-panel="ask" aria-selected="false" tabindex="-1">Ask a recruiter</button>
+                    <button class="tab" role="tab" data-panel="ask" aria-selected="false" tabindex="-1">Ask AI</button>
                 </div>
 
                 <!-- Overview -->
@@ -431,10 +458,10 @@
                 </div>
 
                 <!-- Ask -->
-                <div class="panel" id="panel-ask" data-title="Ask a recruiter" role="tabpanel" style="padding-top:24px" hidden>
+                <div class="panel" id="panel-ask" data-title="Ask AI about this role" role="tabpanel" style="padding-top:24px" hidden>
                     <div class="row" style="margin-bottom:16px">
                         <img src="arti.png" alt="" class="avatar">
-                        <div><p class="title-md">Simulated federal recruiter</p><p class="body-sm muted">An AI that has read your resume, this job, and the analysis.</p></div>
+                        <div><p class="title-md">Ask AI about this role</p><p class="body-sm muted">An AI that has read your resume, this posting, and the analysis. It is not a person. For a real answer from the employer, send their recruiter a question.</p></div>
                     </div>
                     <div class="chips" id="askSuggestions" style="margin-bottom:16px">
                         <button class="chip" data-ask="Is this pay range competitive for my background?">Is the pay competitive?</button>
@@ -447,6 +474,7 @@
                         <textarea id="recruiterQuestion" style="min-height:72px" placeholder="Ask about the role, pay, your gaps, or how to approach the application"></textarea>
                     </label>
                     <div class="row end" style="margin-top:8px">
+                        <button class="btn text" data-action="copy-recruiter-question">Copy a question for the recruiter</button>
                         <button class="btn text" data-action="clear-chat">Clear chat</button>
                         <button class="btn primary" id="askBtn" data-action="ask"><svg class="icon"><use href="#i-send"/></svg><span>Ask</span></button>
                     </div>
@@ -466,7 +494,8 @@
                 <p class="body-md muted" id="trackerCount">Saved in this browser only.</p>
             </div>
             <div class="row" style="flex-wrap:nowrap">
-                <button class="btn" id="compareBtn" data-action="compare" disabled><svg class="icon"><use href="#i-compare"/></svg><span>Compare</span></button>
+                <button class="btn" id="compareBtn" data-action="compare"><svg class="icon"><use href="#i-compare"/></svg><span>Compare</span></button>
+                <button class="btn text" id="compareCancelBtn" data-action="compare-cancel" hidden>Cancel</button>
                 <div class="menu-anchor">
                     <button class="icon-btn" data-menu="trackerMenu" aria-label="More tracker actions" aria-haspopup="menu" aria-expanded="false"><svg class="icon"><use href="#i-more"/></svg></button>
                     <div class="menu" id="trackerMenu" role="menu" hidden>
@@ -479,9 +508,9 @@
             </div>
         </div>
 
-        <div class="panel accent" id="insightsCard" hidden>
-            <h2 class="title-md">Patterns across your saved jobs</h2>
-            <div id="insightsBody" class="stack-sm" style="margin-top:8px"></div>
+        <div id="followUps" hidden>
+            <h2 class="h3">Needs follow-up</h2>
+            <div class="rows" id="followUpList" style="margin-top:12px"></div>
         </div>
 
         <div class="panel" id="compareSection" hidden>
@@ -492,7 +521,17 @@
             <div class="table-wrap"><table class="data" id="compareTable"></table></div>
         </div>
 
-        <div class="stack-sm" id="trackerList"></div>
+        <div id="savedBlock" hidden>
+            <h2 class="h3" id="savedHeading">Saved jobs</h2>
+            <p class="body-sm muted" id="compareHint" hidden>Pick two or three jobs, then choose "Show comparison".</p>
+            <div class="stack-sm" id="trackerList" style="margin-top:12px"></div>
+        </div>
+
+        <div class="panel accent" id="insightsCard" hidden>
+            <h2 class="title-md">Patterns across your saved jobs</h2>
+            <div id="insightsBody" class="stack-sm" style="margin-top:8px"></div>
+        </div>
+
         <div class="empty" id="trackerEmpty">
             <svg class="art" viewBox="0 0 260 160" aria-hidden="true">
                 <rect class="a-surface" x="46" y="34" width="168" height="40" rx="12"/><rect class="a-high" x="62" y="48" width="70" height="12" rx="6"/><circle class="a-pc" cx="186" cy="54" r="12"/>
@@ -500,45 +539,101 @@
                 <rect class="a-surface" x="46" y="104" width="168" height="40" rx="12"/><rect class="a-high" x="62" y="118" width="54" height="12" rx="6"/><circle class="a-tertiary" cx="186" cy="124" r="8"/>
             </svg>
             <p class="h3">No jobs saved yet</p>
-            <p class="body-md">Analyze a job and save it here. Save two or more to compare them side by side and see what keeps coming up as a gap.</p>
-            <button class="btn primary" data-view-link="analyze" style="margin-top:8px">Analyze a job</button>
+            <p class="body-md">Save a posting from Find Jobs, or check a job and save the result. Save two or more checked jobs to compare them side by side.</p>
+            <div class="row" style="margin-top:8px"><button class="btn primary" data-view-link="explore">Find jobs</button><button class="btn" data-view-link="analyze">Check a job</button></div>
         </div>
     </section>
 
     <!-- ================================================================== -->
     <!-- FIND ROLES                                                         -->
     <!-- ================================================================== -->
-    <section class="view" id="view-explore" role="tabpanel" aria-labelledby="tab-explore" hidden>
+    <section class="view" id="view-explore" role="tabpanel" aria-labelledby="tab-explore">
         <div class="page-intro">
-            <p class="eyebrow">Find roles</p>
-            <h1 class="h1">What should you be searching for?</h1>
-            <p class="lede">Start with titles that fit your background, then browse who is hiring.</p>
+            <p class="eyebrow">Job search &middot; for defense industry sales, BD and capture</p>
+            <h1 class="h1">Find defense and federal jobs</h1>
+            <p class="lede">Search Google for openings, then bring a posting back to check your fit.</p>
         </div>
 
-        <div class="panel">
-            <div class="row between">
-                <div class="grow" style="min-width:240px">
-                    <h2 class="h3">Titles that fit your resume</h2>
-                    <p class="body-md muted" id="rolesHeadline">Uses the resume on the Analyze tab to suggest what to search for, including a stretch and an adjacent move.</p>
-                </div>
-                <button class="btn primary" id="suggestBtn" data-action="suggest-roles"><svg class="icon"><use href="#i-spark"/></svg><span>Suggest roles</span></button>
+        <form class="panel stack" id="searchForm" novalidate>
+            <h2 class="h3">1. Search for openings</h2>
+            <div class="search-fields">
+                <label class="field"><span class="field-label">Job title or keywords</span>
+                    <input type="text" id="searchTitle" maxlength="80" autocomplete="off" enterkeyhint="search" placeholder="e.g. federal account executive"></label>
+                <label class="field"><span class="field-label">Location or work setup <span class="optional">optional</span></span>
+                    <input type="text" id="searchLocation" maxlength="60" autocomplete="off" enterkeyhint="search" placeholder="e.g. remote, Northern Virginia"></label>
             </div>
-            <div id="rolesList" style="margin-top:16px">
-                <div class="empty" style="padding: 16px 0 0">
-                    <svg class="art" viewBox="0 0 260 150" aria-hidden="true">
-                        <path class="a-line" d="M30 120 C80 120 70 40 130 40 S190 100 232 30"/>
-                        <circle class="a-surface" cx="130" cy="78" r="56"/><circle class="a-pc" cx="130" cy="78" r="38"/><circle class="a-primary" cx="130" cy="78" r="18"/><circle class="a-tc" cx="130" cy="78" r="7"/>
-                        <rect class="a-tc" x="196" y="16" width="50" height="24" rx="12"/><rect class="a-high" x="14" y="106" width="50" height="24" rx="12"/><rect class="a-high" x="190" y="100" width="56" height="24" rx="12"/>
-                    </svg>
+            <div>
+                <p class="body-sm muted" id="starterLabel">Start from a role family, then edit it</p>
+                <div class="chips" id="starterChips" role="group" aria-labelledby="starterLabel" style="margin-top:8px">
+                    <button type="button" class="chip" data-fill-title="federal sales">Federal sales</button>
+                    <button type="button" class="chip" data-fill-title="capture manager">Capture</button>
+                    <button type="button" class="chip" data-fill-title="federal business development">Business development</button>
+                    <button type="button" class="chip" data-fill-title="federal partner sales">Partner sales</button>
                 </div>
             </div>
+            <details class="disclosure" id="clearanceRow">
+                <summary><svg class="icon"><use href="#i-tune"/></svg><span>Clearance keyword <span class="optional" id="clearanceState">none</span></span><svg class="icon chev"><use href="#i-chevron"/></svg></summary>
+                <div class="disclosure-body stack-sm">
+                    <label class="field sm"><span class="field-label">Add a clearance keyword to the search</span>
+                        <select id="searchClearance">
+                            <option value="">None</option>
+                            <option value="public trust">Public trust</option>
+                            <option value="secret clearance">Secret</option>
+                            <option value="top secret">Top Secret</option>
+                            <option value="TS/SCI">TS/SCI</option>
+                            <option value="polygraph">TS/SCI with polygraph</option>
+                        </select></label>
+                    <p class="body-sm muted">This is a keyword hint only. It asks Google for postings that mention the phrase. It can't confirm that you're eligible or that a posting is still open.</p>
+                </div>
+            </details>
+            <p class="field-error" id="searchError" role="alert" hidden></p>
+            <div class="search-actions">
+                <button class="btn primary" type="submit" id="searchBtn">Search Google <span aria-hidden="true">&#8599;</span><span class="sr">(opens in a new tab)</span></button>
+                <button class="btn text" type="button" id="suggestBtn" data-action="suggest-terms">Suggest search terms from my resume</button>
+            </div>
+            <p class="body-sm muted query-line" id="queryLine" hidden>Google search: <span id="queryPreview"></span></p>
+            <div id="suggestBox" aria-live="polite" hidden></div>
+            <div id="employerBlock" hidden>
+                <h3 class="label-lg">Search employer postings</h3>
+                <p class="body-sm muted" style="margin-top:2px">The same search, limited to the hiring systems many employers post on. Each opens Google in a new tab.</p>
+                <div class="chips" id="employerLinks" style="margin-top:8px"></div>
+            </div>
+            <p class="body-sm muted">Google shows the results. Only the title, location and clearance keyword above are sent to it. Your resume and tracker never are.</p>
+        </form>
+
+        <div class="panel accent stack" id="handoffCard">
+            <div>
+                <h2 class="h3">2. Found a posting?</h2>
+                <p class="body-md muted" style="margin-top:4px">Bring it back here. Check it against your resume now, or save it and decide later.</p>
+            </div>
+            <label class="field"><span class="field-label">Posting link or job description</span>
+                <textarea id="handoffInput" rows="3" placeholder="Paste the link to the posting (https://...) or the full job description"></textarea></label>
+            <p class="field-error" id="handoffError" role="alert" hidden></p>
+            <div class="row" id="handoffActions">
+                <button class="btn primary" type="button" data-action="handoff-check">Check my fit<svg class="icon"><use href="#i-next"/></svg></button>
+                <button class="btn" type="button" data-action="handoff-save"><svg class="icon"><use href="#i-bookmark"/></svg><span>Save for later</span></button>
+            </div>
+            <form class="save-form stack" id="saveForm" hidden novalidate>
+                <p class="title-md">Save to your tracker</p>
+                <div class="search-fields">
+                    <label class="field sm"><span class="field-label">Job title <span class="optional">optional</span></span><input type="text" id="saveTitle" maxlength="120" autocomplete="off" placeholder="e.g. Capture manager"></label>
+                    <label class="field sm"><span class="field-label">Company <span class="optional">optional</span></span><input type="text" id="saveCompany" maxlength="80" autocomplete="off"></label>
+                </div>
+                <p class="body-sm muted">Saved in this browser only, marked "Not checked" until you run a fit check.</p>
+                <div class="row">
+                    <button class="btn ink" type="submit">Save</button>
+                    <button class="btn text" type="button" data-action="handoff-save-cancel">Cancel</button>
+                </div>
+            </form>
         </div>
 
-        <div class="plain">
-            <h2 class="h3">Who is hiring</h2>
-            <p class="body-md muted">Each link opens that company's jobs page on LinkedIn.</p>
-            <div id="companyBoards"></div>
-        </div>
+        <details class="disclosure boards" id="boardsRow">
+            <summary><span>Company job boards</span><svg class="icon chev"><use href="#i-chevron"/></svg></summary>
+            <div class="disclosure-body">
+                <p class="body-md muted" id="boardsNote">Each link is a Google search for that company's careers page.</p>
+                <div id="companyBoards"></div>
+            </div>
+        </details>
     </section>
 </main>
 
@@ -571,6 +666,7 @@
     <button class="icon-btn" data-action="dismiss-snackbar" aria-label="Dismiss"><svg class="icon"><use href="#i-close"/></svg></button>
 </div>
 
-<script src="assets/app.js?v=7"></script>
+<script src="assets/files.js?v=10"></script>
+<script src="assets/app.js?v=10"></script>
 </body>
 </html>

@@ -36,6 +36,11 @@
         templates: {},
         tracked: [],
         compareIds: new Set(),
+        runId: 0,              // bumped whenever the job on screen changes; late replies for an older job are dropped
+        trackedId: null,       // tracker entry the job on screen came from (so saving upgrades it)
+        postingUrl: '',        // link to the posting on screen, kept even when the text is pasted
+        linkedText: '',        // the job text those two belong to; a different job in the box breaks the link
+        linkHelp: null,        // null | 'failed' | 'kept'
         loadingTimer: null,
         snackTimer: null,
         draftTimer: null
@@ -51,6 +56,7 @@
     const track = (event, params) => { if (typeof gtag === 'function') gtag('event', event, params || {}); };
     const isMilitary = () => $('militaryToggle').checked;
     const knownCompany = (c) => (c && !/not specified|unknown/i.test(c)) ? c : '';
+    const isUrl = (s) => { const v = String(s || '').trim(); if (!/^https?:\/\/\S+$/i.test(v)) return false; try { return new URL(v).hostname.includes('.'); } catch (e) { return false; } };
     const todayISO = () => { const d = new Date(); return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10); };
 
     const store = {
@@ -126,310 +132,8 @@
         finally { button.disabled = false; label.textContent = original; if (spin) spin.replaceWith(ic); }
     }
 
-    // ======================================================================
-    // FILE READING (PDF, Word .docx, text) - runs entirely in the browser
-    // ======================================================================
-    const VENDOR = {
-        pdf: 'vendor/pdf.min.js',
-        pdfWorker: 'vendor/pdf.worker.min.js',
-        mammoth: 'vendor/mammoth.browser.min.js'
-    };
-    const MAX_FILE_BYTES = 10 * 1024 * 1024;   // 10 MB to read locally
-    const MAX_OCR_BYTES = 4 * 1024 * 1024;     // 4 MB to send for AI reading
-    const MAX_PDF_PAGES = 15;
-    const MAX_RESUME_CHARS = 30000;            // matches the backend limit
-    const MAX_JD_CHARS = 15000;
-    const scriptPromises = {};
-
-    function loadScript(src) {
-        if (!scriptPromises[src]) {
-            scriptPromises[src] = new Promise((resolve, reject) => {
-                const el = document.createElement('script');
-                el.src = src;
-                el.onload = resolve;
-                el.onerror = () => { delete scriptPromises[src]; reject(new Error('Could not load the file reader. Check your connection and try again.')); };
-                document.head.appendChild(el);
-            });
-        }
-        return scriptPromises[src];
-    }
-
-    function countWords(text) {
-        const m = (text || '').trim().match(/\S+/g);
-        return m ? m.length : 0;
-    }
-
-    // Clean up what comes out of PDFs / Word files so the AI sees tidy text
-    function normalizeExtractedText(text) {
-        return (text || '')
-            .replace(/\r\n?/g, '\n')
-            .replace(/\u0000/g, '')
-            .replace(/[  -   　]/g, ' ')
-            .replace(/[​-‍﻿­]/g, '')
-            .replace(/ﬀ/g, 'ff').replace(/ﬁ/g, 'fi').replace(/ﬂ/g, 'fl')
-            .replace(/ﬃ/g, 'ffi').replace(/ﬄ/g, 'ffl')
-            .replace(/[‘’]/g, "'").replace(/[“”]/g, '"')
-            .replace(/^[ \t]*[•●○▪■◦‣⁃∙➢❖o][ \t]+(?=\S)/gm, '- ')
-            .replace(/^[ \t]*(page\s+)?\d+\s+(of|\/)\s+\d+[ \t]*$/gim, '')
-            .replace(/[ \t]+/g, ' ')
-            .replace(/ *\n */g, '\n')
-            .replace(/\n{3,}/g, '\n\n')
-            .trim();
-    }
-
-    async function extractPdfText(buffer) {
-        await loadScript(VENDOR.pdf);
-        const pdfjsLib = window.pdfjsLib;
-        if (!pdfjsLib) throw new Error('Could not load the PDF reader. Please paste your text instead.');
-        pdfjsLib.GlobalWorkerOptions.workerSrc = VENDOR.pdfWorker;
-        let pdf;
-        try {
-            pdf = await pdfjsLib.getDocument({ data: new Uint8Array(buffer) }).promise;
-        } catch (e) {
-            if (e && e.name === 'PasswordException') {
-                throw new Error('This PDF is password-protected. Remove the password, or paste the text instead.');
-            }
-            throw new Error('This PDF could not be opened. It may be damaged. Try re-saving it, or paste the text instead.');
-        }
-        const pageCount = pdf.numPages;
-        const pagesToRead = Math.min(pageCount, MAX_PDF_PAGES);
-        const pages = [];
-        let multiColumn = false;
-        for (let p = 1; p <= pagesToRead; p++) {
-            const page = await pdf.getPage(p);
-            const content = await page.getTextContent();
-            pages.push(pdfItemsToText(content.items));
-            if (looksMultiColumn(content.items, page.view[2] - page.view[0])) multiColumn = true;
-        }
-        try { pdf.destroy(); } catch (e) { /* ignore */ }
-        return { text: pages.join('\n\n'), pages: pageCount, pagesRead: pagesToRead, multiColumn };
-    }
-
-    // Rebuild lines from positioned PDF text fragments (keeps the PDF's own
-    // reading order, which is what keeps two-column resumes in sequence).
-    function pdfItemsToText(items) {
-        let out = '';
-        let line = '';
-        let lastY = null, lastEndX = null, lastH = 10;
-        const flush = (extraBreak) => {
-            if (line.trim()) out += line.replace(/\s+$/, '') + '\n';
-            if (extraBreak && out && !out.endsWith('\n\n')) out += '\n';
-            line = '';
-        };
-        for (const item of items) {
-            const str = item.str || '';
-            const x = item.transform[4];
-            const y = item.transform[5];
-            const h = item.height || Math.abs(item.transform[3]) || lastH;
-            if (lastY !== null) {
-                const dy = Math.abs(y - lastY);
-                if (dy > Math.max(2, Math.min(h, lastH) * 0.5)) {
-                    flush(dy > Math.max(h, lastH) * 1.9);
-                    lastEndX = null;
-                } else if (lastEndX !== null && str.trim()) {
-                    const gap = x - lastEndX;
-                    if (gap > h * 0.18 && !/\s$/.test(line) && !/^\s/.test(str)) line += ' ';
-                    else if (gap < -h * 2 && !/\s$/.test(line)) line += ' ';
-                }
-            }
-            line += str;
-            if (str.trim() || lastY === null) {
-                lastY = y;
-                lastH = h || lastH;
-                lastEndX = x + (item.width || 0);
-            }
-            if (item.hasEOL) { flush(false); lastEndX = null; }
-        }
-        flush(false);
-        return out;
-    }
-
-    // Many substantial lines starting well to the right AND many starting at
-    // the left margin = sidebar / two-column layout.
-    function looksMultiColumn(items, pageWidth) {
-        if (!pageWidth) return false;
-        const starts = [];
-        let lastY = null, startX = 0, len = 0;
-        const close = () => { if (len >= 12) starts.push(startX); };
-        for (const item of items) {
-            if (!item.str || !item.str.trim()) continue;
-            const y = item.transform[5];
-            if (lastY === null || Math.abs(y - lastY) > 2) {
-                if (lastY !== null) close();
-                startX = item.transform[4]; len = 0;
-            }
-            len += item.str.length;
-            lastY = y;
-        }
-        close();
-        if (starts.length < 12) return false;
-        const margin = Math.min(...starts);
-        const left = starts.filter(x => x < margin + pageWidth * 0.08).length;
-        const right = starts.filter(x => x > margin + pageWidth * 0.22).length;
-        return right >= 6 && left >= 6;
-    }
-
-    async function extractDocxText(buffer) {
-        await loadScript(VENDOR.mammoth);
-        if (!window.mammoth) throw new Error('Could not load the Word reader. Please paste your text instead.');
-        let html;
-        try {
-            const result = await window.mammoth.convertToHtml({ arrayBuffer: buffer }, { convertImage: window.mammoth.images.imgElement(() => Promise.resolve({ src: '' })) });
-            html = result.value || '';
-        } catch (e) {
-            throw new Error('This Word file could not be read. Re-save it as .docx or PDF, or paste the text instead.');
-        }
-        let text = htmlToText(html);
-        const flags = { tables: (html.match(/<table/g) || []).length, headerContact: false };
-        // Word headers/footers (where many resumes keep name + contact info)
-        // are not part of the document body, so read them separately.
-        try {
-            const headerText = await extractDocxHeaderText(buffer);
-            if (headerText) {
-                const bodyLower = text.toLowerCase();
-                const fresh = headerText.split('\n').filter(l => l.trim() && !bodyLower.includes(l.trim().toLowerCase()));
-                if (fresh.length) {
-                    text = fresh.join('\n') + '\n\n' + text;
-                    flags.headerContact = /@|\d{3}[\s.-]\d{4}/.test(fresh.join(' '));
-                }
-            }
-        } catch (e) { /* headers are a bonus; ignore failures */ }
-        return { text, flags };
-    }
-
-    function htmlToText(html) {
-        const doc = new DOMParser().parseFromString(html, 'text/html');
-        const lines = [];
-        const walk = (node) => {
-            for (const el of node.children) {
-                const tag = el.tagName.toLowerCase();
-                if (tag === 'ul' || tag === 'ol') {
-                    for (const li of el.children) {
-                        const nested = li.querySelector('ul, ol');
-                        let own = '';
-                        li.childNodes.forEach(n => { if (!(n.nodeType === 1 && /^(ul|ol)$/i.test(n.tagName))) own += n.textContent; });
-                        if (own.trim()) lines.push('- ' + own.trim());
-                        if (nested) walk(li);
-                    }
-                } else if (tag === 'table') {
-                    for (const row of el.querySelectorAll('tr')) {
-                        const cells = [...row.children].map(c => {
-                            const sub = [];
-                            const before = lines.length;
-                            walk(c);
-                            while (lines.length > before) sub.unshift(lines.pop());
-                            return sub.length ? sub.join('\n') : c.textContent.trim();
-                        }).filter(Boolean);
-                        if (cells.length) lines.push(cells.join(cells.some(c => c.includes('\n')) ? '\n' : '  |  '));
-                    }
-                    lines.push('');
-                } else if (/^h[1-6]$/.test(tag)) {
-                    lines.push('', el.textContent.trim());
-                } else if (tag === 'p') {
-                    const clone = el.cloneNode(true);
-                    clone.querySelectorAll('br').forEach(br => br.replaceWith('\n'));
-                    lines.push(clone.textContent.trim());
-                } else {
-                    walk(el);
-                }
-            }
-        };
-        walk(doc.body);
-        return lines.join('\n');
-    }
-
-    // Minimal .docx (zip) reader for word/header*.xml, using the browser's
-    // built-in decompression. Returns '' when unsupported.
-    async function extractDocxHeaderText(buffer) {
-        if (typeof DecompressionStream === 'undefined') return '';
-        const view = new DataView(buffer);
-        const bytes = new Uint8Array(buffer);
-        let eocd = -1;
-        for (let i = bytes.length - 22; i >= Math.max(0, bytes.length - 66000); i--) {
-            if (view.getUint32(i, true) === 0x06054b50) { eocd = i; break; }
-        }
-        if (eocd < 0) return '';
-        const count = view.getUint16(eocd + 10, true);
-        let ptr = view.getUint32(eocd + 16, true);
-        const decoder = new TextDecoder();
-        const out = [];
-        for (let n = 0; n < count && ptr + 46 <= bytes.length; n++) {
-            if (view.getUint32(ptr, true) !== 0x02014b50) break;
-            const method = view.getUint16(ptr + 10, true);
-            const compSize = view.getUint32(ptr + 20, true);
-            const nameLen = view.getUint16(ptr + 28, true);
-            const extraLen = view.getUint16(ptr + 30, true);
-            const commentLen = view.getUint16(ptr + 32, true);
-            const localOffset = view.getUint32(ptr + 42, true);
-            const name = decoder.decode(bytes.subarray(ptr + 46, ptr + 46 + nameLen));
-            ptr += 46 + nameLen + extraLen + commentLen;
-            if (!/^word\/header\d*\.xml$/i.test(name)) continue;
-            const lNameLen = view.getUint16(localOffset + 26, true);
-            const lExtraLen = view.getUint16(localOffset + 28, true);
-            const start = localOffset + 30 + lNameLen + lExtraLen;
-            const data = bytes.subarray(start, start + compSize);
-            let xml;
-            if (method === 0) {
-                xml = decoder.decode(data);
-            } else if (method === 8) {
-                const stream = new Blob([data]).stream().pipeThrough(new DecompressionStream('deflate-raw'));
-                xml = await new Response(stream).text();
-            } else continue;
-            const xdoc = new DOMParser().parseFromString(xml, 'application/xml');
-            for (const p of xdoc.getElementsByTagName('w:p')) {
-                let lineText = '';
-                for (const node of p.getElementsByTagName('*')) {
-                    if (node.tagName === 'w:t') lineText += node.textContent;
-                    else if (node.tagName === 'w:tab') lineText += '  ';
-                    else if (node.tagName === 'w:br') lineText += '\n';
-                }
-                if (lineText.trim() && !/^\s*(page\s*)?\d*\s*$/i.test(lineText)) out.push(lineText.trim());
-            }
-        }
-        return [...new Set(out)].join('\n');
-    }
-
-    function sniffFileType(file, bytes) {
-        const name = (file.name || '').toLowerCase();
-        const head = String.fromCharCode(...bytes.subarray(0, 5));
-        if (head.startsWith('%PDF')) return 'pdf';
-        if (bytes[0] === 0x50 && bytes[1] === 0x4B) {
-            if (/\.(pages|odt|xlsx|pptx|zip)$/.test(name)) return 'unsupported';
-            return 'docx';
-        }
-        if (bytes[0] === 0xD0 && bytes[1] === 0xCF && bytes[2] === 0x11 && bytes[3] === 0xE0) return 'doc';
-        if (head.startsWith('{\\rtf')) return 'rtf';
-        if (/\.pdf$/.test(name)) return 'pdf';
-        if (/\.docx$/.test(name)) return 'docx';
-        if (/\.doc$/.test(name)) return 'doc';
-        if (/\.(txt|md|text)$/.test(name) || (file.type || '').startsWith('text/')) return 'text';
-        if (/\.(png|jpe?g|heic|gif|webp)$/.test(name) || (file.type || '').startsWith('image/')) return 'image';
-        return 'unsupported';
-    }
-
-    // Returns { text, kind, pages, pagesRead, scanned }
-    async function readDocumentFile(file) {
-        if (file.size > MAX_FILE_BYTES) throw new Error('That file is over 10 MB. Export a smaller PDF, or paste the text instead.');
-        if (file.size === 0) throw new Error('That file is empty.');
-        const buffer = await file.arrayBuffer();
-        const kind = sniffFileType(file, new Uint8Array(buffer, 0, Math.min(8, buffer.byteLength)));
-        if (kind === 'doc') throw new Error('Older .doc files can\'t be read here. In Word, use File > Save As and choose .docx or PDF, then drop that in.');
-        if (kind === 'rtf') throw new Error('RTF files aren\'t supported. Save as .docx or PDF, or paste the text.');
-        if (kind === 'image') throw new Error('That\'s an image. Please use a PDF or Word file, or paste the text.');
-        if (kind === 'unsupported') throw new Error('That file type isn\'t supported. Use a PDF, a Word .docx, or a text file.');
-        if (kind === 'text') {
-            return { kind, text: normalizeExtractedText(new TextDecoder().decode(buffer)) };
-        }
-        if (kind === 'docx') {
-            const res = await extractDocxText(buffer);
-            return { kind, text: normalizeExtractedText(res.text), flags: res.flags };
-        }
-        const res = await extractPdfText(buffer);
-        const text = normalizeExtractedText(res.text);
-        // Little or no text layer = scanned or image-only PDF
-        const scanned = text.length < Math.max(200, 80 * res.pagesRead);
-        return { kind, text, pages: res.pages, pagesRead: res.pagesRead, scanned, flags: { multiColumn: res.multiColumn, pages: res.pages } };
-    }
+    // File reading (PDF, Word, text) lives in assets/files.js and is shared with the recruiter page.
+    const { readDocumentFile, normalizeExtractedText, countWords, MAX_OCR_BYTES, MAX_RESUME_CHARS, MAX_JD_CHARS } = window.DIBFiles;
 
     // ======================================================================
     // UI SHELL: snackbar, dialog, tabs
@@ -477,7 +181,9 @@
         });
     }
 
-    const VIEW_ORDER = ['analyze', 'tracker', 'explore'];
+    const VIEW_ORDER = ['explore', 'analyze', 'tracker'];
+    const VIEW_HASH = { explore: '', analyze: '#check', tracker: '#tracker' };
+    const HASH_VIEW = { '#check': 'analyze', '#analyze': 'analyze', '#tracker': 'tracker', '#explore': 'explore', '#find': 'explore' };
     const reducedMotion = () => window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     function animateIn(el, cls) {
@@ -490,7 +196,7 @@
 
     function currentView() {
         const cur = document.querySelector('#mainTabs [aria-current="page"]');
-        return cur ? cur.dataset.view : 'analyze';
+        return cur ? cur.dataset.view : 'explore';
     }
 
     function showView(name) {
@@ -502,7 +208,7 @@
         if (from !== to) animateIn($('view-' + name), to > from ? 'enter-l' : 'enter-r');
         window.scrollTo({ top: 0 });
         if (name === 'tracker') renderTracker();
-        updateFab();
+        try { history.replaceState(null, '', VIEW_HASH[name] || location.pathname + location.search); } catch (e) { /* ignore */ }
     }
 
     function showPanel(name) {
@@ -557,12 +263,12 @@
     }
 
     function initTabs() {
-        const nav = $('mainTabs'), navToggle = $('navToggle');
-        const setNav = (open) => { nav.classList.toggle('open', open); navToggle.setAttribute('aria-expanded', String(open)); };
+        const nav = $('mainTabs'), more = $('navMore'), navToggle = $('navToggle');
+        const setNav = (open) => { more.classList.toggle('open', open); navToggle.setAttribute('aria-expanded', String(open)); };
         nav.addEventListener('click', (e) => { const item = e.target.closest('.nav-item[data-view]'); if (item) { showView(item.dataset.view); setNav(false); } });
-        navToggle.addEventListener('click', () => setNav(!nav.classList.contains('open')));
-        document.addEventListener('click', (e) => { if (!e.target.closest('.site-header')) setNav(false); });
-        document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && nav.classList.contains('open')) { setNav(false); navToggle.focus(); } });
+        navToggle.addEventListener('click', () => setNav(!more.classList.contains('open')));
+        document.addEventListener('click', (e) => { if (!e.target.closest('#navToggle, #navMore')) setNav(false); });
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && more.classList.contains('open')) { setNav(false); navToggle.focus(); } });
         const list = $('resultTabs');
         list.addEventListener('click', (e) => { const t = e.target.closest('[role="tab"]'); if (t) showPanel(t.dataset.panel); });
         list.addEventListener('keydown', (e) => {
@@ -612,9 +318,10 @@
         const resumes = getSavedResumes();
         if (!resumes[name]) return;
         $('resumeText').value = resumes[name].text;
-        state.fileFlags = null; state.fileName = '';
+        state.fileFlags = null; state.fileName = ''; state.resumeSource = 'saved';
         setFileStatus();
         onResumeChanged();
+        setResumeMode(false);
         snackbar(`Loaded "${name}".`);
     }
 
@@ -631,9 +338,27 @@
 
     function clearResume() {
         $('resumeText').value = '';
-        state.resumeText = ''; state.pendingOcrFile = null; state.fileName = ''; state.fileFlags = null;
+        state.resumeText = ''; state.pendingOcrFile = null; state.fileName = ''; state.fileFlags = null; state.resumeSource = '';
         setFileStatus();
         onResumeChanged();
+        $('pasteRow').open = false;
+        setResumeMode(true);
+    }
+
+    // With a resume in hand the card collapses to one line ("Using ... · Change"); the editor is one tap away.
+    function setResumeMode(editing) {
+        const text = $('resumeText').value.trim();
+        const has = text.length >= 100;
+        const summary = has && !editing;
+        $('resumeSummary').hidden = !summary;
+        $('resumeEditor').hidden = summary;
+        $('pasteRowLabel').textContent = has ? 'Review or edit the text' : 'Paste text instead';
+        if (!summary) return;
+        const resumes = getSavedResumes();
+        const saved = Object.keys(resumes).find(n => resumes[n].text.trim() === text);
+        $('resumeSummaryTitle').textContent = state.resumeSource === 'example' ? 'Using the example resume'
+            : state.fileName ? `Using ${state.fileName}` : saved ? `Using "${saved}"` : 'Using your saved resume';
+        $('resumeSummaryMeta').textContent = `${countWords(text).toLocaleString()} words${state.resumeSource === 'example' ? ' · not yours, replace it to run your own check' : ''}`;
     }
 
     function setFileStatus(kind, html) {
@@ -690,8 +415,10 @@
         const pageInfo = info.pages ? `${info.pages} page${info.pages !== 1 ? 's' : ''}, ` : '';
         const thin = words < 150;
         setFileStatus(thin || note ? 'warn' : 'success', `<span class="grow"><strong>${escapeHtml(fileName)}</strong> &middot; ${pageInfo}${words.toLocaleString()} words read${info.viaAI ? ' by AI' : ''}.<br>${thin
-            ? 'That is less text than a typical resume. Check the text below and paste anything that is missing.'
-            : 'Skim the text below to confirm it looks right. You can edit it before analyzing.'}${escapeHtml(note)}</span>`);
+            ? 'That is less text than a typical resume. Choose Change to check it and paste anything that is missing.'
+            : 'Choose Change if you want to review or edit the text.'}${escapeHtml(note)}</span>`);
+        state.resumeSource = 'file';
+        setResumeMode(false);
         track('resume_file_loaded', { file_kind: info.kind || 'unknown' });
     }
 
@@ -728,6 +455,7 @@
         try {
             const res = await readDocumentFile(file);
             if (res.scanned || !res.text) throw new Error('No readable text was found in that file. Please paste the job description text instead.');
+            jobReplaced();
             box.value = res.text.substring(0, MAX_JD_CHARS);
             updateCounts();
             snackbar(`Job description loaded from ${file.name}`);
@@ -767,7 +495,14 @@
         });
     }
 
+    function fitJobBox() {
+        const el = $('jobDescription');
+        el.style.height = 'auto';
+        el.style.height = Math.min(el.scrollHeight + 4, 280) + 'px';
+    }
+
     function updateCounts() {
+        fitJobBox();
         const resume = $('resumeText').value, job = $('jobDescription').value;
         const fmt = (t) => t.trim() ? `${countWords(t).toLocaleString()} words` : '';
         $('resumeCount').textContent = fmt(resume) + (resume.length > MAX_RESUME_CHARS ? ` (only the first ${MAX_RESUME_CHARS.toLocaleString()} characters are analyzed)` : '');
@@ -797,11 +532,13 @@
             $('resumeText').value = draft;
             $('resumeSavedNote').textContent = 'Remembered in this browser';
             updateResumeSelector();
+            setResumeMode(false);
             return;
         }
         const names = Object.keys(resumes).sort((a, b) => (resumes[b].savedAt || '').localeCompare(resumes[a].savedAt || ''));
         if (names[0]) $('resumeText').value = resumes[names[0]].text;
         updateResumeSelector();
+        setResumeMode(false);
     }
 
     // Local, instant checks on the resume itself (no AI involved).
@@ -859,6 +596,19 @@
         $('loading').hidden = mode !== 'loading';
         $('verdictWrap').hidden = mode !== 'ready';
         $('results').hidden = mode !== 'ready';
+        document.querySelector('.calc').classList.toggle('has-result', mode !== 'empty');
+        if (mode === 'empty') {
+            // A first-time visitor sees a compact example of the answer; everyone else gets a plain prompt.
+            const firstVisit = !$('resumeText').value.trim() && !$('jobDescription').value.trim() && !state.tracked.length;
+            $('examplePreview').hidden = !firstVisit;
+            $('emptyPlain').hidden = firstVisit;
+            if (firstVisit) {
+                const r = EXAMPLE_ANALYSIS.recommendation;
+                $('previewScore').textContent = EXAMPLE_ANALYSIS.score;
+                $('previewLabel').textContent = r.label;
+                $('previewHeadline').textContent = r.headline;
+            }
+        }
     }
     function showInputs() { /* inputs are always visible in this layout */ }
 
@@ -882,6 +632,40 @@
 
     const jobKey = (jd) => jd.replace(/\s+/g, ' ').trim().substring(0, 160) + '|' + jd.length;
 
+    // Anything that swaps the job on screen calls this first, so a slow reply for the old job is ignored.
+    function resetAnalyzeUi() {
+        state.runId++;
+        stopLoading();
+        $('analyzeBtn').disabled = false;
+        $('btnText').textContent = 'Check this job';
+    }
+
+    const textHead = (t) => String(t || '').replace(/\s+/g, ' ').trim().substring(0, 80).toLowerCase();
+
+    // The job box was replaced by hand: forget which posting or tracker entry it used to be.
+    function jobReplaced() {
+        if (state.linkHelp === 'kept') return;      // the link was kept on purpose while the text is pasted in
+        state.postingUrl = ''; state.trackedId = null; state.linkedText = '';
+        if (state.linkHelp) { state.linkHelp = null; renderLinkHelp(); }
+    }
+
+    function renderLinkHelp() {
+        const mode = state.linkHelp, box = $('jobLinkHelp');
+        box.hidden = !mode || !isUrl(state.postingUrl);
+        if (box.hidden) return;
+        $('jobLinkMsg').textContent = mode === 'failed' ? 'We couldn\'t read this link:' : 'Link kept for your tracker:';
+        $('jobLinkAnchor').textContent = state.postingUrl;
+        $('jobLinkAnchor').href = state.postingUrl;
+        $('pasteInsteadBtn').hidden = mode !== 'failed';
+    }
+
+    function pasteInstead() {
+        state.linkHelp = 'kept';
+        $('jobDescription').value = '';
+        showInlineError(''); updateCounts(); renderLinkHelp();
+        $('jobDescription').focus();
+    }
+
     async function analyzeJob() {
         const jd = $('jobDescription').value.trim();
         const resume = $('resumeText').value.trim().substring(0, MAX_RESUME_CHARS);
@@ -889,7 +673,16 @@
         if (!resume) return showInlineError(state.pendingOcrFile ? 'Your PDF had no readable text. Use "Read with AI" in the resume section, or paste your resume text.' : 'Add your resume first: drop in a PDF or Word file, or paste the text.');
         if (resume.length < 100) return showInlineError('That resume is too short to analyze. Add more detail.');
         if (!jd) return showInlineError('Add a job description: paste the text or a link to the posting.');
+        if (state.resumeSource === 'example' && resume === state.exampleResume && jd !== state.exampleJd) return showInlineError('That is the example resume, not yours. Choose Change and add your own resume to check a real job.');
 
+        resetAnalyzeUi();
+        const run = state.runId, stale = () => run !== state.runId;
+        const jdIsUrl = isUrl(jd);
+        // If the box now holds a different job than the one a link or tracker entry was attached to, drop that attachment.
+        if (jdIsUrl) { const t = state.trackedId != null ? findJob(state.trackedId) : null; if (state.trackedId != null && !(t && sameUrl(t.url, jd))) state.trackedId = null; }
+        else if (state.linkedText && textHead(jd) !== textHead(state.linkedText)) jobReplaced();
+        if (jdIsUrl) { state.postingUrl = jd; state.linkHelp = null; }
+        renderLinkHelp();
         const btn = $('analyzeBtn');
         btn.disabled = true;
         $('btnText').textContent = 'Checking...';
@@ -897,19 +690,23 @@
         let lastError = null;
         for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
             try {
-                if (attempt > 1) { $('btnText').textContent = `Retrying (${attempt} of ${MAX_RETRIES})...`; await sleep(RETRY_DELAY_MS); }
+                if (attempt > 1) { $('btnText').textContent = `Retrying (${attempt} of ${MAX_RETRIES})...`; await sleep(RETRY_DELAY_MS); if (stale()) return; }
                 const data = await api({ request_type: 'resume_match', job_description: jd, resume_text: resume, military_transition: isMilitary() });
+                if (stale()) return;          // the user moved on to another job while this was running
                 // If a link was given, the backend returns the text it fetched:
                 // show it and use it for every follow-up call.
                 state.jd = jd;
-                state.jdSourceUrl = /^https?:\/\/\S+$/i.test(jd) ? jd : '';
                 if (data.job_description_text) {
                     state.jd = data.job_description_text;
                     $('jobDescription').value = state.jd;
                     delete data.job_description_text;
                     updateCounts();
                 }
+                state.linkHelp = null; renderLinkHelp();
+                state.linkedText = state.jd;
                 state.resumeText = resume;
+                if (state.resumeSource === 'example' && resume !== state.exampleResume) state.resumeSource = '';
+                setResumeMode(false);
                 verifyKeywords(data, resume);
                 const key = jobKey(state.jd);
                 const previous = state.lastScores[key];
@@ -919,11 +716,14 @@
                 resetGenerated();
                 stopLoading();
                 renderResults(data, previous);
+                // A job opened from the tracker is already the user's saved record: fill it in.
+                if (state.trackedId != null && findJob(state.trackedId)) saveToTracker({ quiet: true });
                 fetchMarketIntel();
                 track('analysis_complete', { score: data.score, military: isMilitary() });
                 lastError = null;
                 break;
             } catch (e) {
+                if (stale()) return;
                 lastError = e;
                 if (!e.transient) break;
             }
@@ -934,6 +734,7 @@
             stopLoading();
             setResultState(state.analysis ? 'ready' : 'empty');
             showInlineError(lastError.message);
+            if (jdIsUrl) { state.linkHelp = 'failed'; renderLinkHelp(); }
             $('analyzeBar').scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
     }
@@ -944,6 +745,7 @@
             const intel = await api({ request_type: 'market_intel', job_description: state.jd, job_title: requestedFor.job_title, company: requestedFor.company });
             if (state.analysis !== requestedFor) return;   // user moved on to another job
             Object.assign(requestedFor, { salary_intel: intel.salary_intel, competition: intel.competition, company_intel: intel.company_intel, timeline: intel.timeline });
+            if (state.tracked.some(j => j.analysis === requestedFor)) persistTracker();   // already saved: keep the pay data with it
             renderIntel(requestedFor);
             buildTemplates(requestedFor);
         } catch (e) {
@@ -1023,9 +825,6 @@
         // Verdict: the number first, then the call, then why
         const score = Math.max(0, Math.min(100, Math.round(Number(data.score) || 0)));
         countUp($('scoreNum'), score);
-        $('railFill').style.width = '0%'; $('railMarker').style.left = '0%';
-        requestAnimationFrame(() => requestAnimationFrame(() => { $('railFill').style.width = score + '%'; $('railMarker').style.left = score + '%'; }));
-        $('scoreRail').setAttribute('aria-label', `Fit score ${score} out of 100. 55 and up is worth fixing your resume for; 75 and up is a strong fit.`);
         $('exampleTag').hidden = !state.isExample;
         const company = knownCompany(data.company);
         $('roleLine').textContent = (data.job_title || 'Role') + (company ? ' at ' + company : '');
@@ -1043,7 +842,6 @@
 
         // Overview
         const { gaps, matches } = splitAnalysis(data);
-        renderClearance(data);
         $('strengthsCount').textContent = matches.length;
         $('gapsCount').textContent = gaps.length;
         listItems($('strengthsList'), matches, 'ok');
@@ -1078,48 +876,80 @@
         if (!state.isExample) $('resultCol').scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
-    // Clearance lives in the hero as a chip: green when met, gold when it is a gap or unclear.
-    function renderClearance(data) {
-        const el = $('clearanceChip');
-        const c = data.clearance;
-        if (!c || !c.required || !c.status || c.status === 'not_required') { el.hidden = true; return; }
-        const status = ['meets', 'gap', 'unclear'].includes(c.status) ? c.status : 'unclear';
-        el.hidden = false;
-        el.className = 'chip sm';
-        el.innerHTML = `${icon(status === 'meets' ? 'check' : 'alert')}${status === 'meets' ? 'Clearance: you meet it' : status === 'gap' ? `Clearance gap: needs ${escapeHtml(c.required)}` : 'Clearance: confirm with recruiter'}`;
-        el.title = `Role requires: ${c.required}. Your resume shows: ${c.candidate || 'Not stated'}.${c.note ? ' ' + c.note : ''}`;
-    }
+    // The decision the job seeker came for: is this role worth my time, and what do I do next?
+    // Uses the AI's call when present; otherwise a rule of thumb from the score and clearance.
+    const ACTIONS_META = {
+        apply:               { tone: 'good',    label: 'Apply now.',                     cta: ['spark', 'Write intro email'] },
+        fix_first:           { tone: 'caution', label: 'Tailor your resume first.',      cta: ['spark', 'Build tailored resume'] },
+        confirm_requirement: { tone: 'caution', label: 'Confirm a requirement first.',   cta: ['copy', 'Copy recruiter question'] },
+        skip:                { tone: 'bad',     label: 'Prioritize other roles.',        cta: ['next', 'Explore other roles'] }
+    };
 
-    // The decision the job seeker came for. Uses the AI's call when present; otherwise a rule of thumb.
     function deriveRecommendation(data, score) {
         const r = data.recommendation;
-        if (r && ['apply', 'fix_first', 'skip'].includes(r.action) && r.headline) return r;
+        if (r && ACTIONS_META[r.action] && r.headline) return r;
         const { gaps } = splitAnalysis(data);
-        const clearanceGap = data.clearance && data.clearance.status === 'gap';
-        const action = score >= 75 && !clearanceGap ? 'apply' : score < 50 ? 'skip' : 'fix_first';
+        const c = data.clearance || {};
+        const clearanceGap = c.status === 'gap';
+        const action = score < 50 ? 'skip' : clearanceGap ? 'confirm_requirement' : score >= 75 ? 'apply' : 'fix_first';
         const headline = {
             apply: 'You are a strong fit. Apply now, and lead with your best-matching results.',
             fix_first: 'Worth pursuing, but close the biggest gaps in your resume before you apply.',
+            confirm_requirement: `The rest of your record fits, but the posting requires ${c.required}. Ask whether that is firm before you spend time tailoring.`,
             skip: 'This role is a reach on paper. Put your time into closer matches.'
         }[action];
         const reasons = [];
-        if (clearanceGap) reasons.push(`The role requires ${data.clearance.required}; your resume shows ${data.clearance.candidate || 'no clearance'}.`);
-        gaps.slice(0, clearanceGap ? 1 : 2).forEach(g => reasons.push(g.split(/\s*(?:→|->)\s*/)[0] + '.'));
-        return { action, headline, reasons, next_step: '' };
+        gaps.slice(0, 2).forEach(g => reasons.push(g.split(/\s*(?:→|->)\s*/)[0] + '.'));
+        return { action, headline, reasons, next_step: '', label: action === 'confirm_requirement' ? 'Confirm the clearance first.' : '' };
+    }
+
+    // A message the candidate can send as-is. The AI writes it for "confirm" verdicts; this is the fallback.
+    function recruiterQuestion(data, r) {
+        if (r.recruiter_question && r.recruiter_question.trim()) return r.recruiter_question.trim();
+        const role = data.job_title || 'this';
+        const c = data.clearance || {};
+        if (c.status === 'gap') return `Hi [Name], I'm interested in the ${role} role. The posting lists ${c.required}, and I currently hold ${c.candidate && !/not stated/i.test(c.candidate) ? c.candidate : 'no active clearance'}. Would you consider a candidate at my level and sponsor the upgrade, or is it required on day one? Thank you.`;
+        return `Hi [Name], I'm interested in the ${role} role. Before I apply, could you tell me which of the listed requirements are firm and which are flexible? Thank you.`;
     }
 
     function renderRecommendation(data, score) {
         const r = deriveRecommendation(data, score);
-        const label = { apply: ['check', 'Apply now.'], fix_first: ['fix', 'Fix your resume first.'], skip: ['skip', 'Probably skip this one.'] }[r.action];
-        $('recAction').textContent = label[1];
-        $('verdict').dataset.tone = { apply: 'good', fix_first: 'caution', skip: 'bad' }[r.action];
+        const meta = ACTIONS_META[r.action];
+        state.primaryAction = r.action;
+        state.recruiterQuestion = recruiterQuestion(data, r);
+        $('recAction').textContent = (typeof r.label === 'string' && r.label.trim()) || meta.label;
+        $('verdict').dataset.tone = meta.tone;
         $('recHeadline').textContent = r.headline;
+
+        // Evidence for the deciding requirement: clearance, when it is what stands in the way
+        const c = data.clearance || {};
+        const showEvidence = c.status === 'gap' && !!c.required;
+        $('recEvidence').hidden = !showEvidence;
+        if (showEvidence) { $('evidenceRequired').textContent = c.required; $('evidenceCandidate').textContent = c.candidate || 'Not stated'; }
+
         const reasons = (Array.isArray(r.reasons) ? r.reasons : []).filter(x => typeof x === 'string' && x.trim()).slice(0, 3);
         $('recReasons').innerHTML = reasons.map(x => `<li>${escapeHtml(x)}</li>`).join('');
-        $('recNext').hidden = !r.next_step;
+        const showQuestion = r.action === 'confirm_requirement';
+        $('recQuestionBox').hidden = !showQuestion;
+        $('recQuestion').textContent = showQuestion ? state.recruiterQuestion : '';
+        $('recNext').hidden = !r.next_step || showQuestion;
         $('recNext').innerHTML = r.next_step ? `${icon('next')}<span>Next step: ${escapeHtml(r.next_step)}</span>` : '';
         $('verdictChip').textContent = data.verdict || '';
         $('verdictChip').hidden = !data.verdict;
+        $('primaryActionText').textContent = meta.cta[1];
+        $('primaryActionBtn').querySelector('use').setAttribute('href', '#i-' + meta.cta[0]);
+    }
+
+    // One primary button, tied to the verdict.
+    function runPrimaryAction() {
+        if (!state.analysis) return;
+        switch (state.primaryAction) {
+            case 'confirm_requirement': copyText(state.recruiterQuestion, 'Question copied. Paste it into a message to the recruiter.'); break;
+            case 'fix_first': showPanel('resume'); $('tailorBlock').scrollIntoView({ behavior: 'smooth', block: 'start' }); if (!state.tailored) buildTailoredResume($('tailorBtn')); break;
+            case 'apply': showPanel('outreach'); $('emailBtn').scrollIntoView({ behavior: 'smooth', block: 'center' }); if ($('emailWrap').hidden) writeIntroEmail($('emailBtn')); break;
+            default: showView('explore');
+        }
+        track('primary_action', { action: state.primaryAction });
     }
 
     function renderFitSignals(data) {
@@ -1162,11 +992,14 @@
         if (sal && Number(sal.low) > 0 && Number(sal.high) >= Number(sal.low)) {
             const variable = !!sal.is_variable_comp;
             const mid = Number(sal.mid) || (sal.low + sal.high) / 2;
-            $('compLabel').textContent = variable ? 'ON-TARGET EARNINGS (EST.)' : 'ESTIMATED PAY';
-            $('salaryEstimateLabel').textContent = variable ? 'Est. OTE' : 'Est. pay';
-            $('salaryRange').textContent = `${k(sal.low)} to ${k(sal.high)}`;
-            $('salaryEstimate').textContent = k(mid);
+            const src = (v) => v === 'posting' ? 'From the posting' : 'AI estimate';
             const hasBase = variable && Number(sal.base_low) > 0 && Number(sal.base_high) >= Number(sal.base_low);
+            $('compLabel').textContent = `${variable ? 'ON-TARGET EARNINGS' : 'PAY'} · ${src(sal.pay_source).toUpperCase()}`;
+            $('salaryEstimateLabel').innerHTML = `${variable ? 'On-target earnings' : 'Pay'}<small>${src(sal.pay_source)}</small>`;
+            $('salaryRange').textContent = `${k(sal.low)} to ${k(sal.high)}`;
+            $('salaryEstimate').textContent = `${k(sal.low)} to ${k(sal.high)}`;
+            $('baseRow').hidden = !hasBase;
+            if (hasBase) { $('baseEstimateLabel').innerHTML = `Base salary<small>${src(sal.base_source || 'estimate')}</small>`; $('baseEstimate').textContent = `${k(sal.base_low)} to ${k(sal.base_high)}`; }
             const min = (hasBase ? Math.min(sal.base_low, sal.low) : sal.low) * 0.92, max = sal.high * 1.04;
             const pct = (v) => Math.max(0, Math.min(100, (v - min) / (max - min) * 100));
             $('compBar').hidden = false;
@@ -1182,9 +1015,11 @@
             $('compQuestionsSection').hidden = !cq.length;
             $('compQuestionsList').innerHTML = cq.map(q => `<li>${escapeHtml(q)}</li>`).join('');
         } else {
-            $('compLabel').textContent = 'ESTIMATED PAY';
+            $('compLabel').textContent = 'PAY';
             $('salaryRange').textContent = 'Loading...';
+            $('salaryEstimateLabel').textContent = 'Pay';
             $('salaryEstimate').textContent = '...';
+            $('baseRow').hidden = true;
         }
         const tl = data.timeline || {};
         const wk = (v) => v === undefined || v === null || v === '' ? '...' : (/wk|week|day|month/i.test(String(v)) ? String(v) : `${v} wks`);
@@ -1221,7 +1056,9 @@
     async function buildTailoredResume(button) {
         if (!state.analysis) return;
         await withBusy(button, 'Writing your resume...', async () => {
+            const forJob = state.analysis;
             const data = await api({ request_type: 'tailor_resume', job_description: state.jd, resume_text: state.resumeText, analysis_data: slimAnalysis(), military_transition: isMilitary() });
+            if (state.analysis !== forJob) return;
             state.tailored = data.resume;
             renderTailored(data.resume);
             track('tailored_resume_built');
@@ -1359,7 +1196,9 @@
     async function writeLinkedInNotes(button) {
         if (!state.analysis) return;
         await withBusy(button, 'Writing...', async () => {
+            const forJob = state.analysis;
             const data = await api({ request_type: 'generate_linkedin_messages', job_description: state.jd, resume_text: state.resumeText, analysis_data: slimAnalysis() });
+            if (state.analysis !== forJob) return;
             $('linkedinList').innerHTML = data.messages.filter(m => m && m.text).map((m, i) => {
                 const limit = /accept|follow/i.test(m.audience || '') ? 600 : 200;
                 const over = m.text.length > limit;
@@ -1373,7 +1212,9 @@
     async function writeIntroEmail(button) {
         if (!state.analysis) return;
         await withBusy(button, 'Writing...', async () => {
+            const forJob = state.analysis;
             const data = await api({ request_type: 'generate_intro_email', job_description: state.jd, resume_text: state.resumeText, analysis_data: slimAnalysis() });
+            if (state.analysis !== forJob) return;
             if (!data.intro_email) throw new Error('No email came back. Please try again.');
             $('emailDisplay').textContent = data.intro_email.trim();
             $('emailWrap').hidden = false;
@@ -1431,13 +1272,16 @@
         const thinking = addMessage('thinking assistant', 'Thinking...');
         const btn = $('askBtn');
         btn.disabled = true;
+        const forJob = state.analysis;
         try {
             const data = await api({ request_type: 'ask_expert', question, job_description: state.jd, resume_text: state.resumeText, analysis_data: slimAnalysis(), chat_history: state.chat.slice(-10) });
             thinking.remove();
+            if (state.analysis !== forJob) return;
             addMessage('assistant', data.response || '');
             state.chat.push({ role: 'assistant', content: data.response || '' });
         } catch (e) {
             thinking.remove();
+            if (state.analysis !== forJob) return;
             state.chat.pop();
             snackbar(e.message, 7000);
         } finally {
@@ -1477,27 +1321,63 @@
     const isOverdue = (j) => !!j.nextDate && j.nextDate < todayISO() && !['offered', 'rejected'].includes(j.status);
     const findJob = (id) => state.tracked.find(j => String(j.id) === String(id));
 
-    function saveToTracker() {
+    // A job is "unchecked" when it was saved from Find Jobs and has never been scored.
+    const isUnchecked = (j) => !j.analysis && j.score == null;
+    const TRACKING_PARAMS = /^(utm_.+|gclid|fbclid|msclkid|dclid|mc_cid|mc_eid|_hsenc|_hsmi|igshid|trk|trackingid|refid|ref|src|source|gh_src|lever-source|lever-origin)$/i;
+
+    // Used only to tell whether two links are the same posting. The original link is what gets opened.
+    function normalizeUrl(link) {
+        try {
+            const u = new URL(String(link).trim());
+            const keep = [...u.searchParams.entries()].filter(([k]) => !TRACKING_PARAMS.test(k)).sort((a, b) => a[0].localeCompare(b[0]) || a[1].localeCompare(b[1]));
+            return u.hostname.toLowerCase().replace(/^www\./, '') + u.pathname.replace(/\/+$/, '') + (keep.length ? '?' + new URLSearchParams(keep).toString() : '');
+        } catch (e) { return String(link || '').trim(); }
+    }
+    const sameUrl = (a, b) => isUrl(a) && isUrl(b) && normalizeUrl(a) === normalizeUrl(b);
+    const STORAGE_FULL = 'Could not save. Browser storage is full: remove an old job from the tracker and try again.';
+
+    function saveToTracker(opts = {}) {
         const a = state.analysis;
         if (!a) return;
         if (state.isExample) return snackbar('That\'s the example. Check a job of your own, then save it.');
         const company = knownCompany(a.company) || 'Unknown company', role = a.job_title || 'Unknown role';
-        const existing = state.tracked.find(j => j.company === company && j.role === role);
-        const link = /^https?:\/\/\S+$/i.test(state.jdSourceUrl || '') ? state.jdSourceUrl : '';
+        const link = isUrl(state.postingUrl) ? state.postingUrl.trim() : '';
+        const jd = state.jd.substring(0, MAX_JD_CHARS);
+        // 1. the entry this job was opened from, 2. the same posting link, 3. the same saved text,
+        // 4. same company and title (older entries), but never across two different posting links.
+        let existing = state.trackedId != null ? findJob(state.trackedId) : null;
+        if (!existing && link) existing = state.tracked.find(j => sameUrl(j.url, link));
+        if (!existing) existing = state.tracked.find(j => isUnchecked(j) && j.jd && jobKey(j.jd) === jobKey(jd));
+        if (!existing) existing = state.tracked.find(j => j.company === company && j.role === role && !(link && isUrl(j.url) && !sameUrl(j.url, link)));
+        const index = existing ? state.tracked.indexOf(existing) : -1;
+        const before = existing ? Object.assign({}, existing) : null;
+        let entry = existing;
         if (existing) {
-            Object.assign(existing, { score: a.score, analysis: a, jd: state.jd.substring(0, MAX_JD_CHARS) });
+            const wasBare = !existing.analysis;
+            Object.assign(existing, { score: a.score || 0, analysis: a, jd });
+            if (wasBare) {
+                if (existing.autoLabel || !existing.role) existing.role = role;
+                if (!existing.company) existing.company = company;
+                delete existing.autoLabel;
+            }
+            if (!existing.url && link) existing.url = link;
         } else {
-            state.tracked.unshift({ id: Date.now(), company, role, score: a.score || 0, status: 'saved', date: new Date().toLocaleDateString(), jd: state.jd.substring(0, MAX_JD_CHARS), analysis: a, url: link, notes: '', nextAction: '', nextDate: '' });
+            entry = { id: newJobId(), company, role, score: a.score || 0, status: 'saved', date: new Date().toLocaleDateString(), jd, analysis: a, url: link, notes: '', nextAction: '', nextDate: '' };
+            state.tracked.unshift(entry);
         }
         if (!persistTracker()) {
-            if (!existing) state.tracked.shift();
-            return snackbar('Could not save. Browser storage is full: remove an old job from the tracker and try again.', 7000);
+            if (existing) state.tracked[index] = before; else state.tracked.shift();
+            return snackbar(STORAGE_FULL, 7000);
         }
+        state.trackedId = entry.id; state.linkedText = state.jd;
         setSaveButton(true, existing ? 'Updated in tracker' : 'Saved to tracker');
         updateTrackerBadge();
-        snackbar(existing ? 'Tracker entry updated with this analysis.' : 'Saved. Open the Tracker tab to set a follow-up date.');
+        if (!opts.quiet) snackbar(existing ? 'Tracker entry updated with this analysis.' : 'Saved. Open Tracker to set a follow-up date.');
+        else snackbar('Your saved job now has this fit check.');
         track('job_saved');
     }
+
+    function newJobId() { let id = Date.now(); while (findJob(id)) id++; return id; }
 
     function updateTrackerBadge() {
         const badge = $('trackerBadge');
@@ -1508,23 +1388,43 @@
         badge.title = overdue ? `${overdue} follow-up${overdue > 1 ? 's' : ''} overdue` : `${state.tracked.length} saved`;
     }
 
+    const statusLabel = (v) => (STATUSES.find(x => x[0] === v) || ['', v])[1];
+    function dueLabel(date) {
+        const days = Math.round((new Date(date + 'T00:00:00') - new Date(todayISO() + 'T00:00:00')) / 86400000);
+        return days < 0 ? `${-days} day${days === -1 ? '' : 's'} overdue` : days === 0 ? 'Due today' : days === 1 ? 'Due tomorrow' : `Due in ${days} days`;
+    }
+
     function renderTracker() {
         const jobs = state.tracked;
         const overdue = jobs.filter(isOverdue).length;
         $('trackerEmpty').hidden = jobs.length > 0;
+        $('savedBlock').hidden = jobs.length === 0;
         $('exportCsvBtn').hidden = jobs.length === 0;
         $('trackerCount').textContent = jobs.length ? `${jobs.length} job${jobs.length !== 1 ? 's' : ''} saved in this browser${overdue ? ` · ${overdue} follow-up${overdue > 1 ? 's' : ''} overdue` : ''}` : 'Saved in this browser only.';
         [...state.compareIds].forEach(id => { if (!findJob(id)) state.compareIds.delete(id); });
+        if (jobs.filter(j => j.analysis).length < 2) state.compareMode = false;
+
+        // Needs follow-up: anything due within two days, or overdue, on a job that is still live
+        const soon = new Date(Date.now() + 2 * 86400000 - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+        const due = jobs.filter(j => j.nextDate && j.nextDate <= soon && !['offered', 'rejected'].includes(j.status)).sort((a, b) => a.nextDate.localeCompare(b.nextDate));
+        $('followUps').hidden = due.length === 0;
+        $('followUpList').innerHTML = due.map(j => `<div class="row-item follow-row" data-id="${j.id}">
+            <span class="grow"><button class="link-btn" data-open>${escapeHtml(j.role)}</button><span class="job-sub">${escapeHtml(j.company)} · ${escapeHtml(statusLabel(j.status))} · ${escapeHtml(j.nextAction || 'Follow up')}</span></span>
+            <span class="due${isOverdue(j) ? ' late' : ''}">${dueLabel(j.nextDate)}</span></div>`).join('');
+
+        $('savedHeading').textContent = due.length ? 'All saved jobs' : 'Saved jobs';
+        $('compareHint').hidden = !state.compareMode;
         $('trackerList').innerHTML = jobs.map(j => {
             const od = isOverdue(j);
+            const bare = isUnchecked(j), canCheck = !j.analysis && (j.jd || isUrl(j.url));
             const sub = [j.company, j.nextDate ? `${od ? 'Overdue: ' : 'Next: '}${j.nextAction || 'follow up'} (${j.nextDate})` : `saved ${j.date || ''}`].filter(Boolean).join(' · ');
             return `<div class="job-card${od ? ' overdue' : ''}" data-id="${j.id}">
-                <div class="job-row">
-                    <input type="checkbox" class="checkbox" data-compare aria-label="Select ${escapeHtml(j.role)} to compare"${state.compareIds.has(String(j.id)) ? ' checked' : ''}>
-                    <div style="min-width:0"><div class="job-title">${escapeHtml(j.role)}</div><div class="job-sub"${od ? ' style="color:var(--error)"' : ''}>${escapeHtml(sub)}</div></div>
-                    <span class="score-pill ${scoreBand(j.score)}" title="Fit score">${Math.round(j.score) || 0}</span>
-                    <button class="icon-btn" data-toggle-details aria-expanded="false" aria-label="Details for ${escapeHtml(j.role)}">${icon('chevron')}</button>
-                    <div class="status-cell"><select class="select sm" data-field="status" aria-label="Status">${STATUSES.map(([v, l]) => `<option value="${v}"${j.status === v ? ' selected' : ''}>${l}</option>`).join('')}</select></div>
+                <div class="job-row${state.compareMode ? ' selecting' : ''}">
+                    ${state.compareMode ? (j.analysis ? `<input type="checkbox" class="checkbox" data-compare aria-label="Select ${escapeHtml(j.role)} to compare"${state.compareIds.has(String(j.id)) ? ' checked' : ''}>` : '<span class="checkbox-gap"></span>') : ''}
+                    <div class="jr-title"><button class="link-btn job-title" data-open>${escapeHtml(j.role)}</button><div class="job-sub">${escapeHtml(sub)}</div></div>
+                    ${bare ? '<span class="score-pill none">Not checked</span>' : `<span class="score-pill ${scoreBand(j.score)}" title="Resume fit">${Math.round(j.score) || 0}</span>`}
+                    <button class="icon-btn" data-toggle-details aria-expanded="false" aria-label="Follow-up and notes for ${escapeHtml(j.role)}">${icon('chevron')}</button>
+                    <div class="status-cell"><select class="select sm" data-field="status" aria-label="Status of ${escapeHtml(j.role)}">${STATUSES.map(([v, l]) => `<option value="${v}"${j.status === v ? ' selected' : ''}>${l}</option>`).join('')}</select></div>
                 </div>
                 <div class="details stack" hidden>
                     <div class="details-grid">
@@ -1534,9 +1434,9 @@
                     <label class="field sm"><span class="field-label">Link to posting</span><input type="url" data-field="url" maxlength="500" placeholder="https://" value="${escapeHtml(j.url || '')}"></label>
                     <label class="field sm"><span class="field-label">Notes</span><textarea data-field="notes" maxlength="2000" placeholder="Who you talked to, what they said, referral names">${escapeHtml(j.notes || '')}</textarea></label>
                     <div class="row end">
-                        ${/^https?:\/\//i.test(j.url || '') ? `<a class="btn text" href="${escapeHtml(j.url)}" target="_blank" rel="noopener">${icon('open')}Open posting</a>` : ''}
+                        ${isUrl(j.url) ? `<a class="btn text" href="${escapeHtml(j.url)}" target="_blank" rel="noopener noreferrer">${icon('open')}Open posting</a>` : ''}
                         <button class="btn text danger" data-remove>Remove</button>
-                        <button class="btn tonal" data-open>Open analysis</button>
+                        ${j.analysis ? '<button class="btn" data-open>Open analysis</button>' : canCheck ? '<button class="btn" data-open>Check my fit</button>' : ''}
                     </div>
                 </div>
             </div>`;
@@ -1547,14 +1447,31 @@
         if ($('compareSection').hidden === false) renderCompare();
     }
 
+    // Compare is a mode: checkboxes only appear once someone asks to compare.
     function updateCompareButton() {
-        const n = state.compareIds.size;
-        $('compareBtn').disabled = n < 2 || n > 3;
-        $('compareBtn').querySelector('span').textContent = n > 3 ? 'Compare (pick up to 3)' : n ? `Compare (${n})` : 'Compare';
+        const n = state.compareIds.size, btn = $('compareBtn');
+        btn.hidden = state.tracked.filter(j => j.analysis).length < 2;
+        $('compareCancelBtn').hidden = !state.compareMode;
+        btn.classList.toggle('primary', !!state.compareMode && n >= 2 && n <= 3);
+        btn.disabled = !!state.compareMode && (n < 2 || n > 3);
+        btn.querySelector('span').textContent = !state.compareMode ? 'Compare' : n > 3 ? 'Pick up to 3' : n >= 2 ? `Show comparison (${n})` : 'Pick 2 or 3';
+    }
+
+    function onCompareClick() {
+        if (!state.compareMode) { state.compareMode = true; renderTracker(); $('savedBlock').scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
+        renderCompare();
+        $('compareSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function cancelCompare() {
+        state.compareMode = false; state.compareIds.clear();
+        $('compareSection').hidden = true;
+        renderTracker();
     }
 
     function initTrackerEvents() {
         const list = $('trackerList');
+        $('followUpList').addEventListener('click', (e) => { const row = e.target.closest('[data-id]'); const job = row && findJob(row.dataset.id); if (job && e.target.closest('[data-open]')) openTrackedJob(job); });
         list.addEventListener('click', async (e) => {
             const card = e.target.closest('.job-card');
             if (!card) return;
@@ -1596,21 +1513,31 @@
     }
 
     function openTrackedJob(job) {
-        if (!job.analysis) return snackbar('This entry has no saved analysis.');
+        if (!job.analysis) {
+            // Saved but never checked: hand it to Check a job. Nothing is analyzed until the user asks.
+            const text = job.jd || (isUrl(job.url) ? job.url.trim() : '');
+            if (!text) return snackbar('This entry has no posting saved. Add a link in its details first.');
+            return prepareJob(text, { trackedId: job.id, url: job.url });
+        }
+        resetAnalyzeUi();
+        dropExampleResume();
         $('jobDescription').value = job.jd || '';
         state.jd = job.jd || '';
         state.resumeText = $('resumeText').value.trim().substring(0, MAX_RESUME_CHARS);
         state.analysis = job.analysis;
+        state.isExample = false;
+        state.trackedId = job.id; state.postingUrl = isUrl(job.url) ? job.url.trim() : ''; state.linkHelp = null; state.linkedText = job.jd || '';
         resetGenerated();
-        updateCounts();
+        showInlineError(''); updateCounts(); renderLinkHelp();
         showView('analyze');
         renderResults(job.analysis);
+        setSaveButton(true, 'In your tracker');
     }
 
     const topLine = (analysis, kind) => { const s = splitAnalysis(analysis || {}); const l = (kind === 'gap' ? s.gaps : s.matches)[0]; return l ? l.split(/\s*(?:→|->)\s*/)[0] : 'n/a'; };
 
     function renderCompare() {
-        const jobs = [...state.compareIds].map(findJob).filter(Boolean).slice(0, 3);
+        const jobs = [...state.compareIds].map(findJob).filter(j => j && j.analysis).slice(0, 3);
         if (jobs.length < 2) { $('compareSection').hidden = true; return; }
         const best = Math.max(...jobs.map(j => j.score || 0));
         const pay = (a) => a.salary_intel && a.salary_intel.low ? `$${Math.round(a.salary_intel.low)}K to $${Math.round(a.salary_intel.high)}K${a.salary_intel.is_variable_comp ? ' OTE' : ''}` : 'n/a';
@@ -1663,7 +1590,7 @@
         if (!state.tracked.length) return;
         const cell = (v) => { let s = String(v ?? ''); if (/^[=+\-@]/.test(s)) s = "'" + s; return '"' + s.replace(/"/g, '""') + '"'; };
         const rows = [['Company', 'Role', 'Fit score', 'Status', 'Date saved', 'Next step', 'Due', 'Link', 'Notes', 'Verdict', 'Pay low ($K)', 'Pay high ($K)', 'Clearance required']];
-        state.tracked.forEach(j => { const a = j.analysis || {}; rows.push([j.company, j.role, j.score, j.status, j.date, j.nextAction, j.nextDate, j.url, j.notes, a.verdict, a.salary_intel?.low, a.salary_intel?.high, a.clearance?.required]); });
+        state.tracked.forEach(j => { const a = j.analysis || {}; rows.push([j.company, j.role, isUnchecked(j) ? '' : j.score, j.status, j.date, j.nextAction, j.nextDate, j.url, j.notes, a.verdict, a.salary_intel?.low, a.salary_intel?.high, a.clearance?.required]); });
         downloadBlob(new Blob(['﻿' + rows.map(r => r.map(cell).join(',')).join('\r\n')], { type: 'text/csv;charset=utf-8' }), `dib-jobs-tracker-${todayISO()}.csv`);
     }
 
@@ -1679,7 +1606,7 @@
             if (file.size > 20 * 1024 * 1024) throw new Error('too large');
             const data = JSON.parse(await file.text());
             if (data.app !== 'dibjobs' || !Array.isArray(data.tracker) || typeof data.resumes !== 'object') throw new Error('not a backup');
-            const jobs = data.tracker.filter(j => j && typeof j === 'object' && j.role).map(j => Object.assign({}, j, { id: Number(j.id) || Date.now() + Math.random(), score: Number(j.score) || 0, status: STATUSES.some(s => s[0] === j.status) ? j.status : 'saved' }));
+            const jobs = data.tracker.filter(j => j && typeof j === 'object' && j.role).map(j => Object.assign({}, j, { id: Number(j.id) || Date.now() + Math.random(), score: (j.score == null && !j.analysis) ? null : Number(j.score) || 0, status: STATUSES.some(s => s[0] === j.status) ? j.status : 'saved' }));
             const resumes = {};
             Object.entries(data.resumes || {}).forEach(([n, r]) => { if (r && typeof r.text === 'string') resumes[String(n).substring(0, 50)] = { text: r.text, savedAt: r.savedAt || '' }; });
             const ok = await askDialog({ title: 'Restore this backup?', body: `Backup from ${escapeHtml(new Date(data.exportedAt).toLocaleDateString())} with ${jobs.length} tracked job${jobs.length !== 1 ? 's' : ''} and ${Object.keys(resumes).length} saved resume${Object.keys(resumes).length !== 1 ? 's' : ''}.<br><br>This replaces what is in this browser now.`, okText: 'Restore' });
@@ -1698,45 +1625,240 @@
     }
 
     // ======================================================================
-    // FIND ROLES
+    // FIND JOBS
+    // Discovery runs entirely in this browser. The page only builds ordinary
+    // Google links: it never fetches results, and no AI or backend call is made.
+    // Only the title, location and clearance keyword typed below go to Google.
     // ======================================================================
+    const GOOGLE_SEARCH = 'https://www.google.com/search';
+    const EMPLOYER_SITES = [['Greenhouse', 'job-boards.greenhouse.io'], ['Lever', 'jobs.lever.co'], ['Ashby', 'jobs.ashbyhq.com'], ['Workday', 'myworkdayjobs.com']];
+    const CLEARANCE_HINTS = ['public trust', 'secret clearance', 'top secret', 'TS/SCI', 'polygraph'];
+    // [name shown, name searched (when different)]
     const COMPANY_BOARDS = [
-        ['Defense primes and integrators', [['Lockheed Martin', 'lockheed-martin'], ['RTX (Raytheon)', 'rtx'], ['GDIT', 'gdit'], ['Northrop Grumman', 'northrop-grumman-corporation'], ['Boeing', 'boeing'], ['Leidos', 'leidos'], ['BAE Systems', 'bae-systems'], ['L3Harris', 'l3harris-technologies'], ['Booz Allen', 'booz-allen-hamilton'], ['SAIC', 'saicinc'], ['CACI', 'caci-international-inc'], ['ManTech', 'mantech'], ['Peraton', 'peraton'], ['Anduril', 'anduril'], ['Palantir', 'palantir-technologies'], ['Shield AI', 'shield-ai']]],
-        ['Cloud service providers', [['Amazon / AWS', 'amazon-web-services'], ['Microsoft / Azure', 'microsoft'], ['Google Cloud', 'google-cloud'], ['Oracle Cloud', 'oracle'], ['IBM Cloud', 'ibm']]],
-        ['SaaS and platforms', [['Salesforce', 'salesforce'], ['ServiceNow', 'servicenow'], ['Snowflake', 'snowflake-computing'], ['Databricks', 'databricks'], ['Atlassian', 'atlassian'], ['Palo Alto Networks', 'palo-alto-networks'], ['CrowdStrike', 'crowdstrike'], ['Zscaler', 'zscaler'], ['Tenable', 'tenableinc'], ['Okta', 'okta-inc-'], ['Splunk', 'splunk']]],
-        ['Consulting and systems integrators', [['Accenture Federal', 'accenturefederalservices'], ['Deloitte', 'deloitte'], ['PwC', 'pwc'], ['EY', 'ernstandyoung'], ['KPMG', 'kpmg-us'], ['Capgemini', 'capgemini']]],
-        ['VARs and resellers', [['Carahsoft', 'carahsoft'], ['WWT', 'world-wide-technology'], ['Iron Bow', 'iron-bow-technologies'], ['Presidio', 'presidio-'], ['DXC Technology', 'dxctechnology'], ['CGI Federal', 'cgi'], ['Red River', 'red-river-technology'], ['ThunderCat', 'thundercat-technology']]]
+        ['Defense primes and integrators', [['Lockheed Martin'], ['RTX (Raytheon)', 'RTX Raytheon'], ['GDIT'], ['Northrop Grumman'], ['Boeing'], ['Leidos'], ['BAE Systems'], ['L3Harris'], ['Booz Allen', 'Booz Allen Hamilton'], ['SAIC'], ['CACI'], ['ManTech'], ['Peraton'], ['Agile Defense'], ['Anduril'], ['Palantir'], ['Shield AI']]],
+        ['Cloud service providers', [['Amazon / AWS', 'AWS'], ['Microsoft / Azure', 'Microsoft'], ['Google Cloud', 'Google Public Sector'], ['Oracle Cloud', 'Oracle'], ['IBM Cloud', 'IBM']]],
+        ['SaaS and platforms', [['Salesforce'], ['ServiceNow'], ['Snowflake'], ['Databricks'], ['Atlassian'], ['Palo Alto Networks'], ['CrowdStrike'], ['Zscaler'], ['Tenable'], ['Okta'], ['Splunk']]],
+        ['Consulting and systems integrators', [['Accenture Federal', 'Accenture Federal Services'], ['Deloitte'], ['PwC'], ['EY'], ['KPMG'], ['Capgemini', 'Capgemini Government Solutions']]],
+        ['VARs and resellers', [['Carahsoft'], ['WWT', 'World Wide Technology'], ['Iron Bow', 'Iron Bow Technologies'], ['Presidio'], ['DXC Technology'], ['CGI Federal'], ['Red River', 'Red River Technology'], ['ThunderCat', 'ThunderCat Technology']]]
     ];
 
-    const searchLinks = (query) => {
-        const q = encodeURIComponent(query);
-        const link = (href, label) => `<a class="chip sm" href="${href}" target="_blank" rel="noopener">${label}</a>`;
-        return link(`https://www.linkedin.com/jobs/search/?keywords=${q}&f_TPR=r604800`, 'LinkedIn, past week')
-            + link(`https://www.clearancejobs.com/jobs?keywords=${q}`, 'ClearanceJobs')
-            + link(`https://www.indeed.com/jobs?q=${q}`, 'Indeed');
-    };
+    const tidy = (s, max) => String(s || '').replace(/\s+/g, ' ').trim().substring(0, max);
 
-    function renderCompanyBoards() {
-        $('companyBoards').innerHTML = COMPANY_BOARDS.map(([title, companies]) => `<p class="label-lg muted" style="margin:20px 0 8px">${title}</p><div class="chips">${
-            companies.map(([name, slug]) => `<a class="chip" href="https://www.linkedin.com/company/${slug}/jobs/" target="_blank" rel="noopener">${name}</a>`).join('')}</div>`).join('')
-            + `<p class="label-lg muted" style="margin:20px 0 8px">Job boards</p><div class="chips"><a class="chip" href="https://www.clearancejobs.com/jobs" target="_blank" rel="noopener">ClearanceJobs</a><a class="chip" href="https://www.linkedin.com/jobs/search/?keywords=federal%20sales&f_TPR=r604800" target="_blank" rel="noopener">LinkedIn: federal sales, past week</a><a class="chip" href="https://www.indeed.com/jobs?q=federal+sales" target="_blank" rel="noopener">Indeed: federal sales</a></div>`;
+    function searchCriteria() {
+        const clearance = $('searchClearance').value;
+        return { title: tidy($('searchTitle').value, 80), location: tidy($('searchLocation').value, 60), clearance: CLEARANCE_HINTS.includes(clearance) ? clearance : '' };
     }
 
-    async function suggestRoles(button) {
-        const resume = $('resumeText').value.trim().substring(0, MAX_RESUME_CHARS);
-        if (resume.length < 100) { showView('analyze'); showInputs(); return snackbar('Add your resume first, then come back to Find roles.'); }
-        await withBusy(button, 'Reading your resume...', async () => {
-            const data = await api({ request_type: 'suggest_roles', resume_text: resume, military_transition: isMilitary() });
-            const fit = { core: ['ok', 'Strong fit'], stretch: ['warn', 'Stretch'], adjacent: ['tonal', 'Adjacent move'] };
-            if (data.headline) $('rolesHeadline').textContent = data.headline;
-            $('rolesList').innerHTML = `<div class="list">${data.roles.filter(r => r && r.title).map(r => {
-                const [cls, label] = fit[r.fit] || fit.core;
-                return `<div class="list-item"><div class="grow"><div class="row"><span class="headline-text">${escapeHtml(r.title)}</span><span class="chip sm ${cls}">${label}</span></div>
-                    <div class="support-text">${escapeHtml(r.why || '')}${r.employer_types ? ` Look at: ${escapeHtml(r.employer_types)}.` : ''}</div>
-                    <div class="chips" style="margin-top:8px">${searchLinks(r.search_query || r.title)}</div></div></div>`;
-            }).join('')}</div>`;
-            track('roles_suggested');
-        });
+    // Broad:  capture manager Virginia "secret clearance" jobs
+    // Domain: site:jobs.lever.co capture manager Virginia "secret clearance"
+    // The title is left unquoted on purpose: strict phrases hide relevant postings.
+    function buildQuery(c, site) {
+        const parts = [];
+        if (site) parts.push('site:' + site);
+        parts.push(c.title);
+        if (c.location) parts.push(c.location);
+        if (c.clearance) parts.push('"' + c.clearance + '"');
+        if (!site && !/\bjobs?\b/i.test(c.title)) parts.push('jobs');
+        return parts.join(' ');
+    }
+
+    function googleUrl(query) {
+        const url = new URL(GOOGLE_SEARCH);
+        url.search = new URLSearchParams({ q: query }).toString();
+        return url.href;
+    }
+
+    const googleLink = (query, label, cls) => `<a class="${cls || 'chip'}" href="${escapeHtml(googleUrl(query))}" target="_blank" rel="noopener noreferrer">${escapeHtml(label)}<span class="sr"> (Google search, opens in a new tab)</span></a>`;
+
+    function updateSearchUi() {
+        const c = searchCriteria();
+        $('searchError').hidden = true;
+        $('clearanceState').textContent = c.clearance ? $('searchClearance').selectedOptions[0].textContent : 'none';
+        $('queryLine').hidden = !c.title;
+        $('queryPreview').textContent = c.title ? buildQuery(c) : '';
+        $('employerBlock').hidden = !c.title;
+        $('employerLinks').innerHTML = c.title ? EMPLOYER_SITES.map(([name, site]) => googleLink(buildQuery(c, site), name)).join('') : '';
+        $('boardsNote').textContent = c.title
+            ? `Each link is a Google search for that company's careers page and "${c.title}".`
+            : 'Each link is a Google search for that company\'s careers page. Add a job title above to narrow it.';
+        $('companyBoards').innerHTML = COMPANY_BOARDS.map(([group, companies]) => `<p class="label-lg muted" style="margin:20px 0 8px">${group}</p><div class="chips">${
+            companies.map(([name, searched]) => googleLink(`${searched || name} careers${c.title ? ' ' + c.title : ''}`, name)).join('')}</div>`).join('');
+    }
+
+    // Runs straight from the click or Enter, so the browser treats it as a normal new-tab navigation.
+    function runSearch(e) {
+        e.preventDefault();
+        const c = searchCriteria();
+        if (!c.title) {
+            $('searchError').textContent = 'Add a job title or keyword to search for.';
+            $('searchError').hidden = false;
+            return $('searchTitle').focus();
+        }
+        window.open(googleUrl(buildQuery(c)), '_blank', 'noopener,noreferrer');
+        track('search_google');
+    }
+
+    function fillTitle(title) {
+        $('searchTitle').value = title;
+        updateSearchUi();
+        $('searchTitle').focus();
+    }
+
+    // ---- Search terms from the resume: a plain lookup table, matched in the browser ----
+    const TERM_MAP = [
+        { titles: ['Federal partner sales', 'Public sector alliances', 'Federal channel account manager'],
+          signals: [/\bchannel\b/i, /\balliances?\b/i, /partner (sales|ecosystem|manager|program|network)/i, /systems? integrators?/i, /\b(resellers?|distributors?|VARs?)\b/] },
+        { titles: ['Capture manager', 'Federal business development'],
+          signals: [/\bcapture\b/i, /\brecompetes?\b/i, /\bproposals?\b/i, /\bIDIQ\b/, /\b(RFPs?|GWACs?|pursuits?)\b/, /business development/i] },
+        { titles: ['Federal account executive', 'Defense sales director'],
+          signals: [/federal (accounts?|sales)/i, /\bquota\b/i, /\b(DoD|Department of Defense)\b/, /account executive/i, /\bterritory\b/i, /President'?s Club/i] },
+        { titles: ['Federal sales director', 'Public sector sales leader'],
+          signals: [/\b(VP|vice president|director),? (of )?(federal |public sector )?sales\b/i, /sales (director|leader|manager)\b/i, /(led|managed|built|hired) (a |the )?(team|\d+)/i, /\bregional\b/i] },
+        { titles: ['Federal solutions engineer', 'Public sector solutions architect'],
+          signals: [/solutions? (engineer|architect|consultant)/i, /\bpre-?sales\b/i, /\bdemos?\b/i, /proofs? of concept|\bPOCs?\b/i, /sales engineer/i] },
+        { titles: ['Public sector account manager', 'Federal customer success manager'],
+          signals: [/customer success/i, /\brenewals?\b/i, /account manage(r|ment)/i, /\b(upsell|expansion|retention|adoption)\b/i] },
+        { titles: ['Federal program manager', 'Defense program manager'],
+          signals: [/program manage(r|ment)/i, /\bPMP\b/, /\b(CDRLs?|period of performance|program of record|earned value)\b/i, /cost,? schedule/i] },
+        { titles: ['Proposal manager', 'Federal contracts manager'],
+          signals: [/proposal (manager|management|writer)/i, /contracts? (manager|administrat)/i, /\bFAR\b/, /\b(color team|Shipley|compliance matrix)\b/i] }
+    ];
+
+    // The user's own resume, never the built-in example.
+    function realResumeText() {
+        const current = $('resumeText').value.trim();
+        if (state.resumeSource !== 'example' && current !== (state.exampleResume || null)) return current;
+        const draft = store.getRaw(KEYS.draft).trim();
+        if (draft && draft !== state.exampleResume) return draft;
+        const saved = getSavedResumes();
+        const newest = Object.keys(saved).sort((a, b) => (saved[b].savedAt || '').localeCompare(saved[a].savedAt || ''))[0];
+        return newest ? saved[newest].text.trim() : '';
+    }
+
+    function termsFromResume(text) {
+        const groups = TERM_MAP.map(g => ({ titles: g.titles, hits: g.signals.filter(re => re.test(text)).length })).filter(g => g.hits >= 2).sort((a, b) => b.hits - a.hits).slice(0, 3);
+        const out = [];
+        for (let i = 0; out.length < 3 && i < 3; i++) groups.forEach(g => { if (g.titles[i] && out.length < 3 && !out.includes(g.titles[i])) out.push(g.titles[i]); });
+        return out;
+    }
+
+    function suggestSearchTerms() {
+        const box = $('suggestBox');
+        const resume = realResumeText();
+        const exampleOnly = !resume && state.resumeSource === 'example';
+        box.hidden = false;
+        if (resume.length < 100) {
+            box.innerHTML = `<p class="body-md">${exampleOnly ? 'The example resume doesn\'t count. ' : ''}Add your resume and this will suggest search terms from it. The matching happens in your browser.</p>
+                <div class="row" style="margin-top:8px"><button type="button" class="btn" data-action="add-resume">Add my resume</button></div>`;
+            return;
+        }
+        const terms = termsFromResume(resume);
+        box.innerHTML = terms.length
+            ? `<p class="body-md">From your resume. Pick one to fill in the title, then edit it or search.</p><div class="chips">${terms.map(t => `<button type="button" class="chip" data-fill-title="${escapeHtml(t)}">${escapeHtml(t)}</button>`).join('')}</div><p class="body-sm muted" style="margin-top:8px">Matched in your browser. Your resume was not sent anywhere.</p>`
+            : '<p class="body-md">Your resume doesn\'t point clearly at one role family. Start from one of the role chips above and edit it.</p>';
+        track('search_terms_suggested');
+    }
+
+    // ---- Found a posting? ----
+    function handoffError(message) {
+        const el = $('handoffError');
+        el.textContent = message || '';
+        el.hidden = !message;
+    }
+
+    // Returns { kind: 'url' | 'text', value, truncated } or shows why the input can't be used.
+    function readPosting() {
+        const raw = $('handoffInput').value.trim();
+        handoffError('');
+        const fail = (message) => { handoffError(message); $('handoffInput').focus(); return null; };
+        if (!raw) return fail('Paste a link to the posting, or the job description, first.');
+        if (!/\s/.test(raw)) {
+            if (!isUrl(raw)) return fail('That looks like a link, but it isn\'t complete. Use the full address, starting with https://');
+            return { kind: 'url', value: raw };
+        }
+        if (raw.length < 40 || countWords(raw) < 8) return fail('That\'s too short to be a job description. Paste the full posting text, or its link.');
+        return { kind: 'text', value: raw.substring(0, MAX_JD_CHARS), truncated: raw.length > MAX_JD_CHARS };
+    }
+
+    // Put a real posting on Check a job. Nothing is analyzed until the user chooses "Check this job".
+    function prepareJob(text, opts = {}) {
+        resetAnalyzeUi();
+        dropExampleResume();
+        $('jobDescription').value = text;
+        state.analysis = null; state.jd = ''; state.isExample = false;
+        state.trackedId = opts.trackedId ?? null;
+        state.postingUrl = isUrl(text) ? text.trim() : isUrl(opts.url) ? opts.url.trim() : '';
+        state.linkHelp = null; state.linkedText = isUrl(text) ? '' : text;
+        resetGenerated();
+        setResultState('empty');
+        showInlineError(''); updateCounts(); renderLinkHelp();
+        showView('analyze');
+        const ready = $('resumeText').value.trim().length >= 100;
+        if (!ready) setResumeMode(true);
+        (ready ? $('analyzeBtn') : $('resumeDrop')).focus();
+    }
+
+    function handoffCheck() {
+        const posting = readPosting();
+        if (!posting) return;
+        closeSaveForm();
+        prepareJob(posting.value);
+        if (posting.truncated) snackbar(`That posting is long: the first ${MAX_JD_CHARS.toLocaleString()} characters will be checked.`, 6000);
+        track('posting_handoff');
+    }
+
+    function openSaveForm() {
+        const posting = readPosting();
+        if (!posting) return;
+        if (posting.kind === 'text' && !$('saveTitle').value) {
+            const first = (posting.value.split('\n').find(l => l.trim()) || '').trim();
+            if (first.length >= 3 && first.length <= 90) $('saveTitle').value = first;
+        }
+        $('saveForm').hidden = false;
+        $('handoffActions').hidden = true;
+        $('saveTitle').focus();
+    }
+
+    function closeSaveForm() {
+        $('saveForm').hidden = true;
+        $('handoffActions').hidden = false;
+    }
+
+    function savePostingForLater(e) {
+        e.preventDefault();
+        const posting = readPosting();
+        if (!posting) return;
+        const title = tidy($('saveTitle').value, 120), company = tidy($('saveCompany').value, 80);
+        const dup = posting.kind === 'url' ? state.tracked.find(j => sameUrl(j.url, posting.value)) : state.tracked.find(j => j.jd && jobKey(j.jd) === jobKey(posting.value));
+        if (dup) return handoffError(`That posting is already in your tracker as "${dup.role}".`);
+        let fallback = 'Saved posting';
+        if (posting.kind === 'url') { try { fallback = 'Posting at ' + new URL(posting.value).hostname.replace(/^www\./, ''); } catch (err) { /* keep default */ } }
+        else { const first = (posting.value.split('\n').find(l => l.trim()) || '').trim(); if (first) fallback = first.length > 60 ? first.substring(0, 57) + '...' : first; }
+        const entry = { id: newJobId(), company, role: title || fallback, status: 'saved', date: new Date().toLocaleDateString(),
+            url: posting.kind === 'url' ? posting.value : '', jd: posting.kind === 'text' ? posting.value : '',
+            score: null, analysis: null, notes: '', nextAction: '', nextDate: '' };
+        if (!title) entry.autoLabel = true;      // replaced by the real title once the job is checked
+        state.tracked.unshift(entry);
+        if (!persistTracker()) {                 // keep everything the user typed
+            state.tracked.shift();
+            handoffError(STORAGE_FULL);
+            return snackbar(STORAGE_FULL, 7000);
+        }
+        $('handoffInput').value = ''; $('saveTitle').value = ''; $('saveCompany').value = '';
+        closeSaveForm();
+        updateTrackerBadge();
+        snackbar('Saved to your tracker as "Not checked".');
+        track('posting_saved');
+    }
+
+    function initFindJobs() {
+        updateSearchUi();
+        $('searchForm').addEventListener('submit', runSearch);
+        ['searchTitle', 'searchLocation'].forEach(id => $(id).addEventListener('input', updateSearchUi));
+        $('searchClearance').addEventListener('change', updateSearchUi);
+        $('view-explore').addEventListener('click', (e) => { const chip = e.target.closest('[data-fill-title]'); if (chip) fillTitle(chip.dataset.fillTitle); });
+        $('saveForm').addEventListener('submit', savePostingForLater);
+        $('handoffInput').addEventListener('input', () => handoffError(''));
     }
 
     // ======================================================================
@@ -1825,9 +1947,9 @@ Compensation: $200,000 - $280,000 OTE (base + variable)
 Location: Arlington, VA (customer site visits required)
 
 Amazon is an Equal Opportunity Employer.`;
-        state.fileFlags = null; state.fileName = '';
+        state.fileFlags = null; state.fileName = ''; state.resumeSource = 'example'; state.exampleResume = $('resumeText').value.trim(); state.exampleJd = $('jobDescription').value.trim();
         setFileStatus('info', silent
-            ? '<span class="grow"><strong>These are example values.</strong> Replace them with your resume and a real posting, then run the check.</span>'
+            ? '<span class="grow"><strong>This is the example.</strong> Choose New job, then add your own posting and resume to run a real check.</span>'
             : '<span class="grow">Sample resume and job loaded. Your own saved resume is untouched and comes back when you reload.</span>');
         updateCounts();          // the sample is intentionally not remembered
         $('resumeSavedNote').textContent = '';
@@ -1886,28 +2008,51 @@ Amazon is an Equal Opportunity Employer.`;
             { question: 'Why is this seat open?', why: 'A promotion is good news. A string of departures is not.' },
             { question: 'Will you sponsor the polygraph, and how long does it usually take?', why: 'It decides whether this job is real for you this year.' }
         ],
-        recommendation: { action: 'fix_first', headline: "You clear the sales bar easily. The polygraph is what stands between you and this job.", reasons: ['Your $180M territory at 145% is well past the $50M quota they ask for.', 'The posting lists TS/SCI with Full Scope Poly as a basic qualification; your resume shows Top Secret.', 'Your cloud experience is real but buried in an older role.'], next_step: 'Ask the recruiter whether they sponsor the polygraph before you spend time tailoring.' },
-        salary_intel: { low: 200, mid: 240, high: 280, is_variable_comp: true, base_low: 130, base_high: 160, pay_mix: '55/45', comp_questions: ['What is the quota, and how was it set?', 'How long is the ramp, and is it guaranteed?', 'Are there accelerators past 100%, and is there a cap?', 'Which accounts are in the territory today?'], notes: 'Anchored to the range in the posting.' },
+        recommendation: { action: 'confirm_requirement', label: 'Confirm clearance sponsorship first.', decisive_requirement: 'TS/SCI with Full Scope Poly',
+            headline: 'Your DoD sales record clears the bar. The posting requires a polygraph your resume does not show, so ask whether they will sponsor it before you spend time tailoring.',
+            reasons: ['Your $180M territory at 145% is well past the $50M quota they ask for.', 'Your cloud experience is real but buried in an older role; worth fixing if the clearance question comes back yes.'],
+            next_step: 'Send the recruiter the question below.',
+            recruiter_question: "Hi [Name], I'm interested in the Principal DoD Sales Representative role. I hold an active Top Secret and carry a $180M DoD territory at 145% of quota. The posting lists TS/SCI with Full Scope Poly: do you consider candidates who would need to be processed for it, or is it required on day one? Thank you." },
+        salary_intel: { low: 200, mid: 240, high: 280, pay_source: 'posting', base_source: 'estimate', is_variable_comp: true, base_low: 130, base_high: 160, pay_mix: '55/45', comp_questions: ['What is the quota, and how was it set?', 'How long is the ramp, and is it guaranteed?', 'Are there accelerators past 100%, and is there a cap?', 'Which accounts are in the territory today?'], notes: 'The on-target range is from the posting. The base range is an estimate.' },
         competition: { level: 'Low', reasoning: 'The polygraph requirement shrinks the pool sharply.' },
         company_intel: { known: true, type: 'Cloud service provider', size: 'Large', reputation: 'Strong in federal' },
         timeline: { screen_weeks: '1-2', interview_weeks: '3-5', offer_weeks: '6-8', notes: 'Expect a multi-interview loop.' }
     };
 
     function showExample() {
+        resetAnalyzeUi();
+        state.trackedId = null; state.postingUrl = ''; state.linkHelp = null; state.linkedText = ''; renderLinkHelp();
         loadSampleData(true);
         state.analysis = EXAMPLE_ANALYSIS;
         state.isExample = true;
         state.resumeText = $('resumeText').value.trim();
         state.jd = $('jobDescription').value.trim();
+        setResumeMode(false);
         renderResults(EXAMPLE_ANALYSIS);
+        $('resultCol').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        track('example_viewed');
+    }
+
+    // The example resume is never carried into a real job.
+    function dropExampleResume() {
+        if (state.resumeSource !== 'example') return;
+        $('resumeText').value = ''; state.resumeSource = ''; state.resumeText = '';
+        setFileStatus();
+        const draft = store.getRaw(KEYS.draft);
+        if (draft.trim() && draft.trim() !== state.exampleResume) $('resumeText').value = draft;
+        else { const r = getSavedResumes(); const n = Object.keys(r).sort((a, b) => (r[b].savedAt || '').localeCompare(r[a].savedAt || ''))[0]; if (n) $('resumeText').value = r[n].text; }
+        updateResumeSelector(); renderResumeCheck(); setResumeMode(false);
     }
 
     function newJob() {
+        resetAnalyzeUi();
         $('jobDescription').value = '';
+        dropExampleResume();
         state.analysis = null; state.jd = ''; state.isExample = false;
+        state.trackedId = null; state.postingUrl = ''; state.linkHelp = null; state.linkedText = '';
         resetGenerated();
         setResultState('empty');
-        showInlineError(''); updateCounts();
+        showInlineError(''); updateCounts(); renderLinkHelp();
         $('jobDescription').focus();
     }
 
@@ -1916,7 +2061,10 @@ Amazon is an Equal Opportunity Employer.`;
     // ======================================================================
     const ACTIONS = {
         'analyze': () => analyzeJob(),
-        'sample': () => loadSampleData(),
+        'example': () => showExample(),
+        'change-resume': () => { setResumeMode(true); $('pasteRow').open = true; },
+        'primary-action': () => runPrimaryAction(),
+        'copy-recruiter-question': () => state.recruiterQuestion ? copyText(state.recruiterQuestion, 'Question copied. Paste it into a message to the recruiter.') : snackbar('Check a job first.'),
         'save-resume': () => saveCurrentResume(),
         'clear-resume': () => clearResume(),
         'ocr': () => readResumeWithAI(),
@@ -1934,12 +2082,18 @@ Amazon is an Equal Opportunity Employer.`;
         'email': (b) => writeIntroEmail(b),
         'ask': () => askRecruiter(),
         'clear-chat': () => { state.chat = []; $('chat').innerHTML = ''; },
-        'compare': () => { renderCompare(); $('compareSection').scrollIntoView({ behavior: 'smooth', block: 'start' }); },
-        'close-compare': () => { $('compareSection').hidden = true; },
+        'compare': () => onCompareClick(),
+        'compare-cancel': () => cancelCompare(),
+        'close-compare': () => cancelCompare(),
         'export-csv': () => exportTrackerCSV(),
         'backup': () => backupData(),
         'restore': () => $('restoreFile').click(),
-        'suggest-roles': (b) => suggestRoles(b),
+        'suggest-terms': () => suggestSearchTerms(),
+        'add-resume': () => { showView('analyze'); setResumeMode(true); $('resumeDrop').focus(); },
+        'handoff-check': () => handoffCheck(),
+        'handoff-save': () => openSaveForm(),
+        'handoff-save-cancel': () => closeSaveForm(),
+        'paste-instead': () => pasteInstead(),
         'dismiss-snackbar': () => $('snackbar').classList.remove('show')
     };
 
@@ -1952,12 +2106,13 @@ Amazon is an Equal Opportunity Employer.`;
         initMenus();
         initFileDrop();
         initTrackerEvents();
-        renderCompanyBoards();
+        initFindJobs();
         updateCounts();
         renderResumeCheck();
         updateTrackerBadge();
         // First visit (nothing saved yet): open on a worked example. Returning visitors get their own resume.
-        if (!$('resumeText').value.trim() && !state.tracked.length) showExample(); else setResultState('empty');
+        setResultState('empty');
+        if (HASH_VIEW[location.hash] && HASH_VIEW[location.hash] !== 'explore') showView(HASH_VIEW[location.hash]);
 
         document.addEventListener('click', (e) => {
             const actionEl = e.target.closest('[data-action]');
@@ -1976,7 +2131,8 @@ Amazon is an Equal Opportunity Employer.`;
             if (delEl) return deleteSavedResume(delEl.dataset.deleteResume);
         });
         $('resumeText').addEventListener('input', onResumeChanged);
-        $('jobDescription').addEventListener('input', updateCounts);
+        $('jobDescription').addEventListener('input', (e) => { if (!e.target.value.trim()) jobReplaced(); updateCounts(); });
+        $('jobDescription').addEventListener('paste', (e) => { const t = e.target; if (t.selectionStart === 0 && t.selectionEnd === t.value.length) jobReplaced(); });
         $('militaryToggle').addEventListener('change', (e) => { store.set(KEYS.military, e.target.checked ? '1' : '0'); $('militaryChip').hidden = !e.target.checked; });
         $('restoreFile').addEventListener('change', (e) => restoreData(e.target.files[0]));
         // Ctrl/Cmd + Enter: analyze from either input, send from the chat box

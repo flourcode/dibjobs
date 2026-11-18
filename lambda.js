@@ -27,7 +27,7 @@
 // site's copy ("Your resume is not stored on our servers").
 
 const env = process.env;
-const VERSION = '3.2.0';
+const VERSION = '3.3.0';
 
 function clampInt(v, def, min, max) {
     const n = Number.parseInt(v, 10);
@@ -340,12 +340,19 @@ ${militaryTransition ? `
    List 3-6 items from the resume: the military role, term, or achievement ("military") and how to phrase it for this employer ("civilian"). Use only facts from the resume.
 ` : ''}
 FINAL TASK - **Recommendation:**
-   Make the call the candidate came for, consistent with the score and gaps above:
-   - "action": "apply" (strong fit, apply now), "fix_first" (worth pursuing once the resume or a gap is addressed), or "skip" (a poor use of their time, e.g. a hard requirement they cannot meet soon)
-   - "headline": one plain sentence with the call and the main reason, written to the candidate ("you")
-   - "reasons": 2-3 short reasons, each tied to specific evidence from the resume or the job description
-   - "next_step": the single most useful thing to do next (e.g. "Add your $95M Army agreement to the summary, then apply")
-   A clearance the candidate does not hold and the job lists as a basic requirement usually means "fix_first" or "skip", not "apply".
+   Answer the question the candidate came with: "Is this role worth my time, and what do I do next?" Decide on the whole picture, not the score alone.
+   - "action": exactly one of
+       "apply"               - strong fit with no open blocker. Apply now.
+       "fix_first"           - worth pursuing, and the thing in the way is the resume itself (evidence they have but have not shown, wording, missing keywords that are true for them).
+       "confirm_requirement" - there is one hard requirement the resume does not show and the candidate cannot fix by editing (a clearance or polygraph level, a degree, a certification, citizenship, location, travel). They should ask the recruiter about it BEFORE spending time tailoring.
+       "skip"                - a poor use of their time: several hard requirements missing, or the wrong field or seniority. They should prioritize other roles.
+     If a clearance or polygraph the posting lists as a basic requirement is higher than what the resume shows, use "confirm_requirement" unless the fit is otherwise weak, in which case use "skip". Do not answer "fix_first" for something a resume edit cannot fix.
+   - "label": the call in 3-6 words, sentence case, ending with a period (e.g. "Apply now.", "Tailor your resume first.", "Confirm clearance sponsorship first.", "Prioritize other roles.")
+   - "headline": one or two plain sentences with the call and the deciding reason, written to the candidate ("you")
+   - "decisive_requirement": the single requirement or fact that decided it, as a short phrase (e.g. "TS/SCI with Full Scope Poly", "$50M+ quota record")
+   - "reasons": 2-3 short reasons, each tied to specific evidence from the resume or the posting
+   - "next_step": the single most useful thing to do next, one sentence
+   - "recruiter_question": when action is "confirm_requirement", a short, polite message the candidate can send a recruiter as-is to resolve it (2-3 sentences, first person, no placeholders except "[Name]", mentions the role, states what they hold, asks the specific question). Otherwise an empty string.
 
 OUTPUT VALID JSON ONLY (no markdown, no backticks):
 {
@@ -413,10 +420,13 @@ OUTPUT VALID JSON ONLY (no markdown, no backticks):
         }
     ],
     "recommendation": {
-        "action": "apply" | "fix_first" | "skip",
+        "action": "apply" | "fix_first" | "confirm_requirement" | "skip",
+        "label": "string",
         "headline": "string",
+        "decisive_requirement": "string",
         "reasons": ["string"],
-        "next_step": "string"
+        "next_step": "string",
+        "recruiter_question": "string"
     }${militaryTransition ? `,
     "military_translation": [
         {
@@ -455,7 +465,7 @@ PROVIDE THE FOLLOWING MARKET INTELLIGENCE:
    - Estimate realistic salary range for this specific role
    - Consider: job title seniority, company type, clearance premium, location
    - Provide low/mid/high in thousands (e.g., 180 for $180K). These are TOTAL target cash compensation (for sales roles: on-target earnings, base + variable).
-   - If the JD states a pay range, anchor to it and say so in the notes.
+   - If the JD states a pay range, use it and set "pay_source" to "posting". Otherwise estimate and set "pay_source" to "estimate". If the posting gives only part of it (for example OTE but not base), use what it gives, estimate the rest, and set "base_source" accordingly.
    - "is_variable_comp": true for sales, BD, capture, channel, or account roles that normally carry quota or bonus plans.
    - When is_variable_comp is true also estimate "base_low" and "base_high" (base salary only, in thousands) and "pay_mix" (base/variable split such as "50/50" or "60/40"). Otherwise set those three to null.
    - "comp_questions": 4 short questions this candidate should ask about the pay plan (for sales: quota size, ramp, accelerators, caps, territory; for others: bonus, equity, clearance or billable bonuses).
@@ -490,6 +500,8 @@ OUTPUT VALID JSON ONLY:
         "low": number,
         "mid": number,
         "high": number,
+        "pay_source": "posting" | "estimate",
+        "base_source": "posting" | "estimate",
         "is_variable_comp": boolean,
         "base_low": number | null,
         "base_high": number | null,
