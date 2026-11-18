@@ -1263,9 +1263,9 @@
         const input = $('recruiterQuestion');
         const question = (preset || input.value).trim();
         if (!question) return snackbar('Type a question first.');
-        if (!state.analysis) return snackbar('Analyze a job first.');
+        if (!state.analysis) return snackbar('Check a job first.');
         if (!state.resumeText) state.resumeText = $('resumeText').value.trim().substring(0, MAX_RESUME_CHARS);
-        if (!state.resumeText) return snackbar('Add your resume on the Analyze tab first.');
+        if (!state.resumeText) return snackbar('Add your resume on Check a job first.');
         addMessage('user', question);
         state.chat.push({ role: 'user', content: question });
         input.value = '';

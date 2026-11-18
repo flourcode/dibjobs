@@ -3,14 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DIB Jobs Recruiter // Candidate Screening Tool</title>
-    <meta name="description" content="Screen and rank candidates against a defense industry job description. Drop in resumes, get a ranked shortlist with strengths, gaps, and interview questions.">
+    <title>DIB Jobs for recruiters: who should you send to the hiring manager?</title>
+    <meta name="description" content="Screen and rank candidates against a defense industry job description. Drop in resumes and get a ranked shortlist with strengths, gaps and interview questions.">
     <meta name="theme-color" content="#ffffff">
+    <meta name="color-scheme" content="light">
     <link rel="canonical" href="https://dibjobs.com/screen/">
+    <!-- Open Graph / LinkedIn -->
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="DIB Jobs">
+    <meta property="og:locale" content="en_US">
+    <meta property="og:title" content="DIB Jobs for recruiters: rank candidates against a role">
+    <meta property="og:description" content="Drop in resumes and a defense industry job description. Get a ranked shortlist with strengths, gaps and interview questions.">
+    <meta property="og:url" content="https://dibjobs.com/screen/">
+    <meta property="og:image" content="https://dibjobs.com/og-image.png">
+    <meta property="og:image:type" content="image/png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="DIB Jobs: Should you go after this job? An example result showing a 72 resume fit and the advice to confirm clearance sponsorship first.">
+    <!-- Twitter / X card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="DIB Jobs for recruiters: rank candidates against a role">
+    <meta name="twitter:description" content="Drop in resumes and a defense industry job description. Get a ranked shortlist with strengths, gaps and interview questions.">
+    <meta name="twitter:image" content="https://dibjobs.com/og-image.png">
+    <meta name="twitter:image:alt" content="An example DIB Jobs result: 72 resume fit, confirm clearance sponsorship first.">
+    <!-- Icons -->
+    <link rel="icon" href="../favicon.ico" sizes="48x48">
     <link rel="icon" type="image/svg+xml" href="../favicon.svg">
-    <link rel="icon" type="image/x-icon" href="../favicon.ico">
+    <link rel="apple-touch-icon" href="../apple-touch-icon.png">
+    <link rel="manifest" href="../site.webmanifest">
     <link rel="preload" href="../assets/fonts/inter-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="stylesheet" href="../assets/app.css?v=9">
+    <link rel="stylesheet" href="../assets/app.css?v=12">
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-N10ZLNFZHE"></script>
     <script>
@@ -21,6 +43,7 @@
     </script>
 </head>
 <body>
+<noscript><p style="margin:24px;font:17px/25px sans-serif">DIB Jobs needs JavaScript to read your resume and check a job. Please turn it on and reload.</p></noscript>
 <!-- Icons: Material Symbols Rounded (Apache 2.0), inlined -->
 <svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
     <symbol id="i-upload" viewBox="0 -960 960 960"><path d="M452-403v171q0 12.75 8.68 21.37 8.67 8.63 21.5 8.63 12.82 0 21.32-8.63 8.5-8.62 8.5-21.37v-171l61 61q3 3 15-2t22.5-9q10.5-4 14.5-3.5T615-342q9-9 8.5-21t-9.5-21L501-494q-5-5-10.13-7-5.14-2-11-2-5.87 0-10.87 2-5 2-10 7L347-382q-9 9-9 21t9 21.39q9 8.61 21 8.61t21-9l63-63ZM220-80q-24 0-42-18t-18-42v-680q0-24 18-42t42-18h336q12.44 0 23.72 5T599-862l183 183q8 8 13 19.28 5 11.28 5 23.72v496q0 24-18 42t-42 18H220Zm331-584v-156H220v680h520v-494H581q-12.75 0-21.37-8.63Q551-651.25 551-664ZM220-820v186-186 680-680Z"/></symbol>
@@ -41,16 +64,18 @@
 <div class="app">
 <header class="site-header">
     <a class="brand" href="../">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="currentColor" aria-hidden="true"><path d="M93.764,38.143l-42-30.515c-1.053-0.764-2.475-0.764-3.527,0l-42,30.515c-1.051,0.764-1.491,2.118-1.09,3.354l16.043,49.374c0.402,1.236,1.554,2.073,2.854,2.073h51.914c1.3,0,2.451-0.837,2.854-2.073l16.043-49.374C95.255,40.261,94.814,38.907,93.764,38.143z M73.777,86.944H26.223L11.526,41.716L50,13.764l38.474,27.953L73.777,86.944z"/><path d="M48.236,32.35L29.748,45.782c-1.051,0.764-1.491,2.118-1.09,3.354l7.062,21.735c0.402,1.236,1.554,2.073,2.854,2.073h22.854c1.3,0,2.451-0.837,2.854-2.073l7.062-21.735c0.401-1.236-0.039-2.59-1.09-3.354L51.764,32.35C50.711,31.586,49.289,31.586,48.236,32.35z M64.962,49.355l-5.715,17.589H40.753l-5.715-17.589L50,38.485L64.962,49.355z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" aria-hidden="true"><path fill="#2b8fd9" d="M50 5.5 95.2 38.3 77.9 91.5H22.1L4.8 38.3z"/><path fill="#fff" d="M50 31 71.4 46.5 63.2 71.7H36.8L28.6 46.5z"/></svg>
         <span class="brand-title">DIB Jobs</span>
     </a>
-    <button class="nav-toggle" id="navToggle" aria-expanded="false" aria-controls="mainTabs">Menu<svg class="icon"><use href="#i-chevron"/></svg></button>
     <nav class="nav" id="mainTabs" aria-label="Sections">
         <a class="nav-item" href="../">Check a job</a>
+        <a class="nav-item" href="../#find">Find Jobs</a>
         <a class="nav-item" href="../#tracker">Tracker</a>
-        <a class="nav-item" href="../#explore">Explore roles</a>
-        <a class="nav-item" href="./" aria-current="page">For recruiters</a>
     </nav>
+    <button class="nav-toggle" id="navToggle" aria-expanded="false" aria-controls="navMore">Menu<svg class="icon"><use href="#i-chevron"/></svg></button>
+    <div class="nav-more" id="navMore">
+        <a class="nav-item" href="./" aria-current="page">For recruiters</a>
+    </div>
 </header>
 
 <main>
@@ -178,7 +203,7 @@
     <button class="icon-btn" data-action="dismiss-snackbar" aria-label="Dismiss"><svg class="icon"><use href="#i-close"/></svg></button>
 </div>
 
-<script src="../assets/files.js?v=9"></script>
-<script src="screen.js?v=9"></script>
+<script src="../assets/files.js?v=12"></script>
+<script src="screen.js?v=12"></script>
 </body>
 </html>

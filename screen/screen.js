@@ -430,10 +430,10 @@
         });
 
         // Header menu on narrow screens
-        const nav = $('mainTabs'), toggle = $('navToggle');
+        const nav = $('navMore'), toggle = $('navToggle');
         const setNav = (open) => { nav.classList.toggle('open', open); toggle.setAttribute('aria-expanded', String(open)); };
         toggle.addEventListener('click', () => setNav(!nav.classList.contains('open')));
-        document.addEventListener('click', (e) => { if (!e.target.closest('.site-header')) setNav(false); });
+        document.addEventListener('click', (e) => { if (!e.target.closest('#navToggle, #navMore')) setNav(false); });
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape' && nav.classList.contains('open')) { setNav(false); toggle.focus(); }
             if (e.key === 'Enter' && (e.ctrlKey || e.metaKey) && e.target.id === 'jobDescription' && !running) { e.preventDefault(); analyzeAll(); }
