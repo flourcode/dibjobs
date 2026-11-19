@@ -2,8 +2,8 @@
    DIB Jobs Recruiter - candidate screening
    Queue resumes against one job description, rank them, and show a
    send / review / pass call for each. File reading is shared with the main
-   site (assets/files.js). The backend call is unchanged from the previous
-   version of this page.
+   site (assets/files.js) and so is the backend: the DIB Jobs Lambda's
+   "recruiter_screen" request.
    ========================================================================== */
 (() => {
     'use strict';
@@ -11,7 +11,10 @@
     // ======================================================================
     // CONFIG + STATE
     // ======================================================================
-    const API_ENDPOINT = 'https://76unm1rlj0.execute-api.us-east-1.amazonaws.com/default/grumpy2';
+    // The same Lambda as the job seeker pages (assets/app.js); the recruiter analysis is its "recruiter_screen" request.
+    const API_ENDPOINT = 'https://pchkhu4vitpzuppdmtnrlxx2sy0idjzp.lambda-url.us-east-1.on.aws/';
+    const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+    const RATE_WAIT_MS = (window.DIB_TEST && window.DIB_TEST.rateWaitMs) || 25000;
     const { readDocumentFile, countWords, MAX_RESUME_CHARS, MAX_JD_CHARS } = window.DIBFiles;
 
     let queue = [];              // { id, name, resumeText, status: pending|analyzing|complete|error, result, error }
@@ -204,29 +207,55 @@
     // ======================================================================
     // ANALYSIS (one candidate at a time, to stay inside rate limits)
     // ======================================================================
-    async function analyzeCandidate(jobDescription, resumeText) {
+    async function callScreen(jobDescription, resumeText) {
         let response;
         try {
+            // Sent as text/plain so the browser skips the CORS preflight request (the Lambda parses it as JSON).
             response = await fetch(API_ENDPOINT, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ request_type: 'resume_match', job_description: jobDescription, resume_text: resumeText })
+                headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
+                body: JSON.stringify({ request_type: 'recruiter_screen', job_description: jobDescription, resume_text: resumeText })
             });
         } catch (e) {
-            throw new Error('Could not reach the screening service');
+            const err = new Error('Could not reach the screening service'); err.transient = true; throw err;
         }
         let data;
-        try { data = await response.json(); } catch (e) { throw new Error('The screening service is unavailable'); }
-        if (!response.ok || data.error) throw new Error(data.error || 'Screening failed');
+        try { data = await response.json(); } catch (e) { const err = new Error('The screening service is unavailable'); err.transient = true; throw err; }
+        let status = response.status;
+        // A Function URL in streaming mode with the buffered handler wraps the answer as { statusCode, body }.
+        if (data && typeof data.statusCode === 'number' && typeof data.body === 'string') {
+            status = data.statusCode;
+            try { data = JSON.parse(data.body || '{}'); } catch (e) { data = {}; }
+        }
+        if (status < 200 || status >= 300 || data.error) {
+            const err = new Error(/unknown request type/i.test(data.error || '') ? 'Screening is not available yet' : (data.error || 'Screening failed'));
+            err.transient = [502, 503, 504].includes(status);
+            err.rateLimited = status === 429;
+            throw err;
+        }
         if (typeof data.score !== 'number') throw new Error('The answer came back incomplete');
         data.score = Math.max(0, Math.min(100, Math.round(data.score)));
         return data;
     }
 
+    // One retry for a network blip. If the service says "slow down", wait and carry on with the same candidate.
+    async function analyzeCandidate(jobDescription, resumeText, onWait) {
+        let waits = 0;
+        for (let attempt = 1; ; attempt++) {
+            try { return await callScreen(jobDescription, resumeText); }
+            catch (e) {
+                if (e.rateLimited && waits < 3) { waits++; attempt--; if (onWait) onWait(RATE_WAIT_MS / 1000); await sleep(RATE_WAIT_MS); continue; }
+                if (e.transient && attempt < 2) { await sleep(1500); continue; }
+                throw e;
+            }
+        }
+    }
+
     async function analyzeAll() {
-        const jd = $('jobDescription').value.trim().substring(0, MAX_JD_CHARS);
+        let jd = $('jobDescription').value.trim().substring(0, MAX_JD_CHARS);
         showInlineError('');
-        if (jd.length < 50) return showInlineError('Add the job description in step 1 first.');
+        const jdIsUrl = /^https?:\/\/\S+$/i.test(jd);
+        if (jd.length < 50 && !jdIsUrl) return showInlineError('Add the job description in step 1 first.');
         if (!queue.length) return showInlineError('Add at least one resume in step 2.');
         if (running) return;
         running = true;
@@ -239,7 +268,10 @@
             c.status = 'analyzing'; c.error = '';
             renderQueue();
             try {
-                const result = await analyzeCandidate(jd, c.resumeText);
+                const label = `Screening ${done + 1} of ${queue.length}...`;
+                const result = await analyzeCandidate(jd, c.resumeText, (secs) => { $('analyzeText').textContent = `Pausing ${secs} seconds, then continuing...`; setTimeout(() => { if (running) $('analyzeText').textContent = label; }, secs * 1000); });
+                // A link was given: the service returns the posting text it read. Show it and reuse it for the rest.
+                if (result.job_description_text) { jd = result.job_description_text.substring(0, MAX_JD_CHARS); $('jobDescription').value = jd; updateJobCount(); delete result.job_description_text; }
                 c.status = 'complete'; c.result = result;
                 results.push({ id: c.id, name: c.name, resumeText: c.resumeText, ...result });
             } catch (e) {
@@ -357,10 +389,11 @@
                 <div class="verdict-num" style="margin-top:0"><b>${r.score}</b><span>fit score<br>out of 100</span></div>
                 <p class="verdict-label">${call.label}${r.verdict ? `: ${escapeHtml(r.verdict)}` : ''}</p>
             </div>
+            ${r.clearance && r.clearance.required && !/^none/i.test(r.clearance.required) && r.clearance.status !== 'not_required' ? `<div class="rows"><div class="row-item"><span>Clearance the job asks for</span><b>${escapeHtml(r.clearance.required)}</b></div><div class="row-item"><span>Resume shows</span><b>${escapeHtml(r.clearance.candidate || 'Not stated')}</b></div></div>` : ''}
             ${r.tailored_summary ? `<div><p class="eyebrow">Summary for the hiring manager</p><div class="paper prose" id="detailSummary" style="margin-top:8px">${escapeHtml(r.tailored_summary)}</div><div class="row" style="margin-top:8px"><button class="btn" data-copy="#detailSummary">${icon('copy')}Copy summary</button></div></div>` : ''}
             <div><p class="eyebrow">Strengths (${matches.length})</p><div style="margin-top:8px">${listHtml(matches, 'ok')}</div></div>
             <div><p class="eyebrow">Gaps and concerns (${gaps.length || strategies.length})</p><div style="margin-top:8px">${listHtml(gaps.length ? gaps : strategies.map(s => s.gap), 'gap')}</div></div>
-            ${strategies.length ? `<div><p class="eyebrow">How the candidate could address them</p><div class="stack-sm" style="margin-top:8px">${strategies.map(s => `<div class="rewrite"><div class="before"><span class="tag">Gap</span>${escapeHtml(s.gap)}</div><div class="after"><span class="tag">Strategy</span>${escapeHtml(s.strategy || '')}${s.talking_points ? `<div class="why">${escapeHtml(s.talking_points)}</div>` : ''}</div></div>`).join('')}</div></div>` : ''}
+            ${strategies.length ? `<div><p class="eyebrow">What to check</p><div class="stack-sm" style="margin-top:8px">${strategies.map(s => `<div class="rewrite"><div class="before"><span class="tag">Gap</span>${escapeHtml(s.gap)}</div><div class="after"><span class="tag">Check</span>${escapeHtml(s.strategy || '')}${s.talking_points ? `<div class="why">${escapeHtml(s.talking_points)}</div>` : ''}</div></div>`).join('')}</div></div>` : ''}
             ${questions.length ? `<div><p class="eyebrow">Interview questions</p><div id="interviewQuestionsList" style="margin-top:8px">${questions.map((q, i) => `<details class="disclosure qa"${i === 0 ? ' open' : ''}><summary><span>${escapeHtml(q.question)}</span>${icon('chevron', 'icon chev')}</summary>${q.answer ? `<div class="disclosure-body"><p class="label-md muted">WHAT A STRONG ANSWER DRAWS ON</p><p class="body-md">${escapeHtml(q.answer)}</p></div>` : ''}</details>`).join('')}</div></div>` : ''}
             ${keywords.length ? `<div><p class="eyebrow">Keywords from the posting</p><div class="chips" style="margin-top:8px">${keywords.map(k => `<span class="chip sm ${k.in_resume ? 'ok' : 'miss'}">${k.in_resume ? icon('check') : ''}${escapeHtml(k.term)}</span>`).join('')}</div></div>` : ''}`;
         $('detailDialog').showModal();

@@ -7,7 +7,7 @@ Static site (plain HTML, CSS and JavaScript) plus one AWS Lambda that calls Goog
 | Path | What it is |
 | --- | --- |
 | `index.html`, `assets/` | The main app: Check a job, Find Jobs, Tracker |
-| `screen/` | Recruiter page (uses its own, separate backend) |
+| `screen/` | Recruiter page. Uses the same Lambda (`recruiter_screen` request) |
 | `onepage/` | One-page resume tool (standalone) |
 | `vendor/` | pdf.js and mammoth, used to read resume files in the browser |
 | `favicon.*`, `apple-touch-icon.png`, `icon-*.png`, `site.webmanifest` | Icons |
