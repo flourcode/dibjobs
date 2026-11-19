@@ -32,7 +32,7 @@
     <link rel="apple-touch-icon" href="../apple-touch-icon.png">
     <link rel="manifest" href="../site.webmanifest">
     <link rel="preload" href="../assets/fonts/inter-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="stylesheet" href="../assets/app.css?v=12">
+    <link rel="stylesheet" href="../assets/app.css?v=13">
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-N10ZLNFZHE"></script>
     <script>
@@ -99,6 +99,7 @@
                     <div class="analyze-bar" id="queueActions">
                         <button class="btn primary lg" id="analyzeAllBtn" data-action="analyze"><span id="analyzeText">Rank these candidates</span><svg class="icon"><use href="#i-next"/></svg></button>
                         <button class="btn text" data-action="clear-queue" id="clearQueueBtn" hidden>Clear all candidates</button>
+                        <button class="btn text" data-action="example" id="exampleBtn">See an example</button>
                     </div>
                 </div>
             </section>
@@ -149,8 +150,12 @@
 
         <!-- RESULTS -->
         <div id="resultsCard" class="stack" hidden>
+            <div class="banner warn" id="exampleBanner" hidden>
+                <span class="grow"><strong>This is an example.</strong> The job and all four candidates are made up, and nothing was sent anywhere. Open any candidate to see the full write-up.</span>
+                <button class="btn ink" type="button" data-action="clear-example">Screen your own candidates</button>
+            </div>
             <div class="verdict" id="summaryVerdict" data-tone="neutral" aria-live="polite">
-                <p class="eyebrow" id="summaryRole"></p>
+                <p class="eyebrow"><span class="example-tag" id="exampleTag" hidden>Example</span><span id="summaryRole"></span></p>
                 <div class="verdict-num"><b id="sendCount">0</b><span id="sendUnit">worth<br>sending</span></div>
                 <p class="verdict-label" id="summaryLabel"></p>
                 <p class="verdict-explain" id="summaryExplain"></p>
@@ -203,7 +208,7 @@
     <button class="icon-btn" data-action="dismiss-snackbar" aria-label="Dismiss"><svg class="icon"><use href="#i-close"/></svg></button>
 </div>
 
-<script src="../assets/files.js?v=12"></script>
-<script src="screen.js?v=12"></script>
+<script src="../assets/files.js?v=13"></script>
+<script src="screen.js?v=13"></script>
 </body>
 </html>

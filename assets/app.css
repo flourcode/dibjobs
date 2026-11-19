@@ -582,3 +582,4 @@ details.boards > summary { font: 900 20px/24px var(--font); letter-spacing: -0.0
 #starterChips .btn.text { min-height: 44px; }
 @media (max-width: 879px) { .search-fields.three { grid-template-columns: 1fr 1fr; } .search-fields.three > :first-child { grid-column: 1 / -1; } }
 #starterChips .btn.text { white-space: normal; text-align: left; min-width: 0; }
+#exampleBanner { align-items: center; flex-wrap: wrap; } #exampleBanner .btn { margin: 0; }

@@ -20,6 +20,7 @@
     let sort = { column: 'score', direction: 'desc' };
     let nextId = 1;
     let running = false;
+    let isExample = false;       // the built-in example is on screen (made-up job and candidates)
     let snackTimer = null;
 
     const $ = (id) => document.getElementById(id);
@@ -100,7 +101,8 @@
     function renderQueue() {
         const n = queue.length;
         $('queueCount').textContent = `${n} candidate${n !== 1 ? 's' : ''}`;
-        $('clearQueueBtn').hidden = n === 0;
+        $('clearQueueBtn').hidden = n === 0 || isExample;
+        $('exampleBtn').hidden = n > 0;
         $('candidateQueue').innerHTML = n ? queue.map(c => {
             let status = `${countWords(c.resumeText).toLocaleString()} words, ready`;
             let score = '';
@@ -124,6 +126,7 @@
     async function handleResumeFiles(fileList) {
         const files = [...fileList];
         if (!files.length) return;
+        clearExample();
         $('resumeDrop').classList.add('busy');
         $('resumeDropMain').textContent = `Reading ${files.length} file${files.length > 1 ? 's' : ''}...`;
         const added = [], skipped = [];
@@ -147,6 +150,7 @@
     }
 
     async function handleJobFile(file) {
+        clearExample();
         const box = $('jobDescription');
         const prev = box.placeholder;
         box.placeholder = `Reading ${file.name}...`;
@@ -362,6 +366,104 @@
     }
 
     // ======================================================================
+    // EXAMPLE: one made-up role and four made-up candidates, already ranked.
+    // Nothing here is sent anywhere; it only shows what a finished screen looks like.
+    // ======================================================================
+    const EXAMPLE_JD = `Federal Account Executive, DoD
+Northgate Cloud (fictional example company) - Arlington, VA or remote
+
+Sell our FedRAMP High cloud data platform to Department of Defense customers.
+
+What you will do
+- Own a named list of Army and Air Force accounts and carry a $4M annual quota
+- Build pipeline with program offices, CIO staff and the integrators that support them
+- Move deals through contract vehicles such as SEWP, ESI and OTAs, working with resellers
+
+What we need
+- 7+ years selling software or cloud services to the DoD
+- A record of meeting quota, with deals over $1M
+- Active Secret clearance (TS/SCI preferred)
+- Working knowledge of the federal budget cycle and acquisition process`;
+
+    const EXAMPLE_JOB = { job_title: 'Federal Account Executive, DoD', company: 'Northgate Cloud' };
+    const EXAMPLE_KEYWORDS = ['DoD', 'quota', 'FedRAMP', 'SEWP', 'Secret clearance', 'Army', 'Air Force', 'resellers'];
+    const kw = (...have) => EXAMPLE_KEYWORDS.map(term => ({ term, in_resume: have.includes(term) }));
+
+    const EXAMPLE_CANDIDATES = [
+        { name: 'Maya Okafor',
+          resume: 'MAYA OKAFOR (fictional example)\nSenior Federal Account Executive, cloud software. Nine years selling to Army and Air Force program offices. 118% average quota attainment on a $4.5M number. Closed a $6.2M Army data platform deal through SEWP with a reseller partner. Active TS/SCI clearance.',
+          result: { score: 88, verdict: 'Strong fit',
+            recruiter_summary: { risk_level: 'green', top_strength: 'Nine years selling cloud to the Army and Air Force, above quota', dealbreaker: '' },
+            analysis: ['Match: 7+ years selling to the DoD → nine years, Army and Air Force accounts', 'Match: Quota record with $1M+ deals → 118% average on $4.5M, including a $6.2M Army deal', 'Match: Active Secret, TS/SCI preferred → holds an active TS/SCI', 'Match: Contract vehicles and resellers → closed through SEWP with a reseller', 'Gap: OTA experience → not mentioned'],
+            tailored_summary: 'Maya has sold cloud software to the Army and Air Force for nine years and has averaged 118% of a $4.5M quota. Her largest deal, $6.2M, ran through SEWP with a reseller, which is how this role sells. She holds an active TS/SCI. The one thing to ask about is OTAs, which her resume does not mention.',
+            gap_strategies: [{ gap: 'No OTA deals shown', strategy: 'Ask whether she has supported an OTA or worked beside a team that did.', talking_points: 'Her SEWP and reseller experience covers most of how this role transacts.' }],
+            interview_questions: [{ question: 'Walk me through the $6.2M Army deal from first meeting to award.', suggested_answer: 'Who the buyer was, how the vehicle was chosen, and what she did herself versus the reseller.' }, { question: 'Which of your current accounts would carry over to our named list?', suggested_answer: 'Specific program offices and relationships, without sharing anything proprietary.' }],
+            keywords: kw('DoD', 'quota', 'SEWP', 'Army', 'Air Force', 'resellers') } },
+        { name: 'Daniel Reyes',
+          resume: 'DANIEL REYES (fictional example)\nRegional Sales Manager, federal cybersecurity. Eleven years selling to DoD and the intelligence community. Closed $9M in 2025 against a $7M quota. Works through Carahsoft and SEWP. Secret clearance, inactive since 2023 after moving to a role that did not require it.',
+          result: { score: 79, verdict: 'Strong seller, clearance to confirm',
+            recruiter_summary: { risk_level: 'yellow', top_strength: 'Eleven years of DoD selling, $9M closed last year', dealbreaker: '' },
+            analysis: ['Match: 7+ years selling to the DoD → eleven years across DoD and the IC', 'Match: Quota record with $1M+ deals → $9M closed against a $7M quota in 2025', 'Match: Contract vehicles and resellers → sells through Carahsoft and SEWP', 'Gap: Active Secret clearance → Secret has been inactive since 2023', 'Gap: Cloud data platform experience → background is cybersecurity, not data'],
+            tailored_summary: 'Daniel has the strongest sales numbers of the four: $9M closed against $7M last year, across eleven years of DoD and IC selling. Two things hold him at review. His Secret clearance has been inactive since 2023, and the role asks for an active one. His products have been cybersecurity, not data platforms. If the clearance can be reinstated quickly, he belongs on the shortlist.',
+            gap_strategies: [{ gap: 'Secret clearance inactive since 2023', strategy: 'Confirm with your security officer whether it can be reinstated without a new investigation.', talking_points: 'Ask the hiring manager whether an interim period without access is workable.' }, { gap: 'No data platform sales', strategy: 'Probe how fast he learned his last product line.', talking_points: 'His buyers and vehicles are the same ones this role uses.' }],
+            interview_questions: [{ question: 'What is the exact status of your clearance, and when was your last investigation?', suggested_answer: 'Dates, the sponsoring employer, and whether it is still within the reinstatement window.' }, { question: 'How would you sell a data platform to an account that knows you for security products?', suggested_answer: 'Which existing relationships transfer and which buyers are new to him.' }],
+            keywords: kw('DoD', 'quota', 'SEWP', 'Secret clearance', 'resellers') } },
+        { name: 'Priya Shah',
+          resume: 'PRIYA SHAH (fictional example)\nEnterprise Account Executive, commercial SaaS data analytics. Six years selling to Fortune 500 financial services and healthcare. 135% of a $3M quota in 2025, largest deal $2.4M. Supported one state government pilot. No security clearance.',
+          result: { score: 62, verdict: 'Good seller, no federal background',
+            recruiter_summary: { risk_level: 'yellow', top_strength: 'Sells data platforms, 135% of quota last year', dealbreaker: '' },
+            analysis: ['Match: Quota record with $1M+ deals → 135% of $3M, largest deal $2.4M', 'Match: Cloud data platform experience → six years selling data analytics SaaS', 'Gap: 7+ years selling to the DoD → no federal selling; one state government pilot', 'Gap: Active Secret clearance → no clearance', 'Gap: Contract vehicles and acquisition process → not shown'],
+            tailored_summary: 'Priya knows the product category better than anyone else in this group and beat a $3M quota by 35% last year. She has not sold to the federal government and holds no clearance, so she would need sponsorship and a long ramp. Worth a conversation only if the hiring manager is open to a commercial seller.',
+            gap_strategies: [{ gap: 'No DoD selling experience', strategy: 'Ask the hiring manager whether a commercial hire is on the table before spending her time.', talking_points: 'Her data platform knowledge would shorten product ramp, not account ramp.' }, { gap: 'No clearance', strategy: 'Confirm the company will sponsor a Secret and how long the role can run without it.', talking_points: '' }],
+            interview_questions: [{ question: 'What did you learn from the state government pilot about selling to the public sector?', suggested_answer: 'Procurement steps, timelines, and how it differed from her commercial deals.' }],
+            keywords: kw('quota') } },
+        { name: 'Tom Becker',
+          resume: 'TOM BECKER (fictional example)\nProgram Analyst supporting an Air Force program office as a contractor. Four years tracking budgets, schedules and deliverables. Wrote sections of two proposal responses. Active Secret clearance. No sales or quota-carrying experience.',
+          result: { score: 41, verdict: 'Not a sales profile',
+            recruiter_summary: { risk_level: 'red', top_strength: 'Knows an Air Force program office from the inside', dealbreaker: 'No sales or quota-carrying experience' },
+            analysis: ['Match: Active Secret clearance → holds an active Secret', 'Match: Knowledge of the budget cycle → four years tracking program budgets', 'Gap: 7+ years selling to the DoD → no sales experience', 'Gap: Quota record with $1M+ deals → has never carried a quota', 'Gap: Contract vehicles and resellers → not shown'],
+            tailored_summary: 'Tom understands how an Air Force program office works and holds an active Secret clearance, but he has never sold or carried a quota. This role needs seven years of DoD selling. He may suit a sales development or solutions role if one opens.',
+            gap_strategies: [{ gap: 'No sales experience', strategy: 'Pass for this role. Keep him in mind for a sales development or customer success opening.', talking_points: '' }],
+            interview_questions: [],
+            keywords: kw('DoD', 'Secret clearance', 'Air Force') } }
+    ];
+
+    function showExample() {
+        if (running) return;
+        if (queue.length && !isExample) return snackbar('Clear your candidates first, then open the example.', 6000);
+        isExample = true;
+        $('jobDescription').value = EXAMPLE_JD;
+        $('jobFileInfo').textContent = '';
+        queue = EXAMPLE_CANDIDATES.map(c => ({ id: nextId++, name: c.name, resumeText: c.resume, status: 'complete', result: { ...EXAMPLE_JOB, ...c.result } }));
+        results = queue.map(c => ({ id: c.id, name: c.name, resumeText: c.resumeText, ...c.result }));
+        filter = 'all'; sort = { column: 'score', direction: 'desc' };
+        document.querySelectorAll('#filterTabs [role="tab"]').forEach(t => { const on = t.dataset.filter === 'all'; t.setAttribute('aria-selected', String(on)); t.tabIndex = on ? 0 : -1; });
+        setFileStatus(); showInlineError(''); updateJobCount();
+        applySort(); renderQueue(); renderResults(); renderExampleState();
+        $('resultsCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        track('recruiter_example');
+    }
+
+    // Leave the example. keepJob: the recruiter has started typing their own job over the sample.
+    function clearExample(keepJob) {
+        if (!isExample) return;
+        isExample = false;
+        queue = []; results = [];
+        if (!keepJob) { $('jobDescription').value = ''; updateJobCount(); }
+        if ($('detailDialog').open) $('detailDialog').close();
+        showInlineError('');
+        renderQueue(); renderResults(); renderExampleState();
+    }
+
+    function renderExampleState() {
+        $('exampleBanner').hidden = !isExample;
+        $('exampleTag').hidden = !isExample;
+        $('exampleBtn').hidden = isExample || queue.length > 0;
+        $('clearQueueBtn').hidden = isExample || queue.length === 0;
+        $('analyzeText').textContent = isExample ? 'Screen your own candidates' : results.length ? 'Run the ranking again' : 'Rank these candidates';
+    }
+
+    // ======================================================================
     // CSV EXPORT (blank Decision and Notes columns for the recruiter)
     // ======================================================================
     function exportCSV() {
@@ -388,10 +490,13 @@
     // INIT + EVENTS
     // ======================================================================
     const ACTIONS = {
-        'analyze': () => analyzeAll(),
-        'clear-job': () => { $('jobDescription').value = ''; $('jobFileInfo').textContent = ''; updateJobCount(); $('jobDescription').focus(); },
+        'analyze': () => { if (isExample) { clearExample(); $('jobDescription').focus(); return snackbar('Example cleared. Add your job and resumes.'); } analyzeAll(); },
+        'clear-job': () => { clearExample(); $('jobDescription').value = ''; $('jobFileInfo').textContent = ''; updateJobCount(); $('jobDescription').focus(); },
         'clear-queue': () => { if (running) return; queue = []; results = []; setFileStatus(); showInlineError(''); $('analyzeText').textContent = 'Rank these candidates'; renderQueue(); renderResults(); },
+        'example': () => showExample(),
+        'clear-example': () => { clearExample(); $('jobDescription').focus(); window.scrollTo({ top: 0, behavior: 'smooth' }); },
         'add-pasted': () => {
+            clearExample();
             const out = addToQueue($('candidateResume').value, $('candidateName').value.trim());
             if (!out.ok) return snackbar(out.reason === 'too short to be a resume' ? 'Paste a full resume first (at least 100 characters).' : 'That resume is already in the list.');
             $('candidateResume').value = ''; $('candidateName').value = '';
@@ -404,10 +509,10 @@
     };
 
     function init() {
-        renderQueue();
+        renderQueue(); renderExampleState();
         initFileDrop();
         updateJobCount();
-        $('jobDescription').addEventListener('input', updateJobCount);
+        $('jobDescription').addEventListener('input', () => { clearExample(true); updateJobCount(); });
 
         // Sortable column headers
         const heads = document.querySelectorAll('#resultsTable thead th');
@@ -417,7 +522,7 @@
             const action = e.target.closest('[data-action]');
             if (action && ACTIONS[action.dataset.action]) return ACTIONS[action.dataset.action]();
             const remove = e.target.closest('[data-remove]');
-            if (remove && !running) { const id = Number(remove.dataset.remove); queue = queue.filter(c => c.id !== id); results = results.filter(r => r.id !== id); renderQueue(); renderResults(); return; }
+            if (remove && !running) { const id = Number(remove.dataset.remove); queue = queue.filter(c => c.id !== id); results = results.filter(r => r.id !== id); if (isExample && !queue.length) clearExample(); renderQueue(); renderResults(); return; }
             const details = e.target.closest('[data-details]');
             if (details) return showDetails(details.dataset.details);
             const sortBtn = e.target.closest('[data-sort]');
