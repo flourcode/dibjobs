@@ -11,7 +11,7 @@ Static site (plain HTML, CSS and JavaScript) plus one AWS Lambda that calls Goog
 | `onepage/` | One-page resume tool (standalone) |
 | `vendor/` | pdf.js and mammoth, used to read resume files in the browser |
 | `favicon.*`, `apple-touch-icon.png`, `icon-*.png`, `site.webmanifest` | Icons |
-| `og-fit-83.png` | 1200x630 share image. Give it a new filename whenever it changes, because LinkedIn caches by address (`og-image.png` and `dibjobs.png` are copies kept for old links) |
+| `og-fit-83-2x.png` | 2400x1260 share image. Give it a new filename whenever it changes, because LinkedIn caches by address (`og-fit-83.png`, `og-image.png` and `dibjobs.png` are copies kept for old links) |
 | `robots.txt`, `sitemap.xml` | Search engine files |
 | `lambda.js` | Backend source. Deploy it to Lambda as `index.mjs`. It does not need to be on the web server. |
 
