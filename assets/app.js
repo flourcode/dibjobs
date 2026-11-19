@@ -598,16 +598,10 @@
         $('results').hidden = mode !== 'ready';
         document.querySelector('.calc').classList.toggle('has-result', mode !== 'empty');
         if (mode === 'empty') {
-            // A first-time visitor sees a compact example of the answer; everyone else gets a plain prompt.
-            const firstVisit = !$('resumeText').value.trim() && !$('jobDescription').value.trim() && !state.tracked.length;
-            $('examplePreview').hidden = !firstVisit;
-            $('emptyPlain').hidden = firstVisit;
-            if (firstVisit) {
-                const r = EXAMPLE_ANALYSIS.recommendation;
-                $('previewScore').textContent = EXAMPLE_ANALYSIS.score;
-                $('previewLabel').textContent = r.label;
-                $('previewHeadline').textContent = r.headline;
-            }
+            $('examplePreview').hidden = true;
+            $('emptyPlain').hidden = false;
+            document.body.classList.remove('example-compact');
+            if (isFirstVisit()) showExamplePreview();
         }
     }
     function showInputs() { /* inputs are always visible in this layout */ }
@@ -826,6 +820,9 @@
         const score = Math.max(0, Math.min(100, Math.round(Number(data.score) || 0)));
         countUp($('scoreNum'), score);
         $('exampleTag').hidden = !state.isExample;
+        $('exampleNote').hidden = !state.isExample;
+        $('exampleLink').hidden = state.isExample;
+        document.body.classList.toggle('example-compact', !!(state.isExample && state.previewOnly));
         const company = knownCompany(data.company);
         $('roleLine').textContent = (data.job_title || 'Role') + (company ? ' at ' + company : '');
         renderRecommendation(data, score);
@@ -923,7 +920,7 @@
 
         // Evidence for the deciding requirement: clearance, when it is what stands in the way
         const c = data.clearance || {};
-        const showEvidence = c.status === 'gap' && !!c.required;
+        const showEvidence = (c.status === 'gap' || c.status === 'meets') && !!c.required;
         $('recEvidence').hidden = !showEvidence;
         if (showEvidence) { $('evidenceRequired').textContent = c.required; $('evidenceCandidate').textContent = c.candidate || 'Not stated'; }
 
@@ -1877,11 +1874,11 @@
     // ======================================================================
     // SAMPLE DATA
     // ======================================================================
-    function loadSampleData(silent) {
-        $('resumeText').value = `JOHN DOE
+    // The made-up resume and posting behind the example.
+    const SAMPLE_RESUME = `JOHN DOE
 Arlington, VA | johndoe@email.com | (703) 555-1234
 
-CLEARANCE: Top Secret
+CLEARANCE: Active TS/SCI
 
 SUMMARY
 Senior Federal Sales Executive with 15+ years driving revenue growth across Department of Defense and Intelligence Community accounts. Proven track record of closing $500M+ in federal IT contracts. Deep relationships with DoD CIOs, program executives, and acquisition leaders. Expert in navigating complex federal procurement cycles and building strategic partner ecosystems.
@@ -1923,7 +1920,7 @@ CERTIFICATIONS
 
 SKILLS
 Federal Sales, Strategic Partnerships, Account Planning, Contract Negotiations, IDIQ/GWAC, FAR/DFARS, Executive Relationships, Pipeline Management, Salesforce, Quota Achievement`;
-        $('jobDescription').value = `Principal DoD Sales Representative
+    const SAMPLE_JD = `Principal DoD Sales Representative
 Amazon Web Services (AWS) - Arlington, VA
 
 About the Role:
@@ -1931,7 +1928,7 @@ AWS is seeking an experienced Principal DoD Sales Representative to drive adopti
 
 Basic Qualifications:
 - 10+ years of enterprise sales experience, with 7+ years selling to DoD customers
-- Active Top Secret/SCI clearance with Full Scope Polygraph
+- Active Top Secret/SCI clearance
 - Track record of exceeding sales quotas of $50M+ annually
 - Experience selling cloud, SaaS, or enterprise software solutions
 - Bachelor's degree required
@@ -1960,6 +1957,10 @@ Compensation: $200,000 - $280,000 OTE (base + variable)
 Location: Arlington, VA (customer site visits required)
 
 Amazon is an Equal Opportunity Employer.`;
+
+    function loadSampleData(silent) {
+        $('resumeText').value = SAMPLE_RESUME;
+        $('jobDescription').value = SAMPLE_JD;
         state.fileFlags = null; state.fileName = ''; state.resumeSource = 'example'; state.exampleResume = $('resumeText').value.trim(); state.exampleJd = $('jobDescription').value.trim();
         setFileStatus('info', silent
             ? '<span class="grow"><strong>This is the example.</strong> Choose New job, then add your own posting and resume to run a real check.</span>'
@@ -1976,36 +1977,36 @@ Amazon is an Equal Opportunity Employer.`;
     const EXAMPLE_ANALYSIS = {
         job_title: 'Principal DoD Sales Representative', company: 'Amazon Web Services (AWS)',
         job_summary: 'Own the full sales cycle for a portfolio of DoD cloud accounts.',
-        score: 72, verdict: 'Good match with gaps',
+        score: 83, verdict: 'Strong match',
         analysis: [
             'Match: DoD quota attainment → 145% of quota in FY23 and 138% in FY22 on a $180M territory',
+            'Match: Clearance → The role requires an active TS/SCI; the resume shows an active TS/SCI',
             'Match: Large federal deals → Closed a $95M multi-year Army agreement and led a $45M Navy IDIQ capture',
             'Match: Partner selling → Built a 25-partner ecosystem driving 40% of pipeline',
             'Match: Procurement vehicles → IDIQ/GWAC and FAR/DFARS experience across Army, Navy, Air Force and DISA',
             'Match: Sales methodology → MEDDIC certified',
-            'Gap: Clearance → The role requires TS/SCI with Full Scope Poly; the resume shows Top Secret',
             'Gap: Cloud infrastructure → Experience is cybersecurity and enterprise software, not AWS, Azure or GCP',
             'Gap: Advanced degree → MBA preferred; the resume shows a B.S.'
         ],
-        tailored_summary: 'Senior federal sales executive with 15+ years selling enterprise software and cybersecurity to the Department of Defense and Intelligence Community. Carries a $180M DoD territory at 145% of quota, with a $95M Army enterprise agreement and a $45M Navy IDIQ among recent wins. Builds partner ecosystems with defense primes and systems integrators and works alongside solutions architects through ATO.',
+        tailored_summary: 'Senior federal sales executive with 15+ years selling enterprise software and cybersecurity to the Department of Defense and Intelligence Community. Carries a $180M DoD territory at 145% of quota, with a $95M Army enterprise agreement and a $45M Navy IDIQ among recent wins. Active TS/SCI. Builds partner ecosystems with defense primes and systems integrators and works alongside solutions architects through ATO.',
         interview_questions: [
             { question: 'Walk me through the largest DoD deal you have closed.', suggested_answer: 'Use the $95M multi-year Army enterprise license agreement: how you found the requirement, who you sold to, how partners were involved, and how long it took.' },
             { question: 'You have sold security and software. How will you sell cloud infrastructure?', suggested_answer: 'Point to the 8 accounts you moved from on-premise to cloud and the ATO work with solutions architects, then be direct that consumption selling is new and say how you will ramp.' },
             { question: 'How do you work with partners without channel conflict?', suggested_answer: 'Describe the 25-partner ecosystem that drives 40% of your pipeline and the joint pursuits with Lockheed Martin, Northrop Grumman and GDIT.' }
         ],
         gap_strategies: [
-            { gap: 'Full Scope Polygraph', strategy: 'Raise it in the first recruiter call rather than waiting for them to find it.', talking_points: 'I hold an active Top Secret. Is the polygraph something you sponsor for the right candidate?' },
-            { gap: 'Cloud infrastructure selling', strategy: 'Tie your software and security wins to cloud adoption, and name the AWS certification you already have.', talking_points: 'Eight of my accounts moved to cloud on my watch, and I worked the ATO side with our architects.' }
+            { gap: 'Cloud infrastructure selling', strategy: 'Tie your software and security wins to cloud adoption, and name the AWS certification you already have.', talking_points: 'Eight of my accounts moved to cloud on my watch, and I worked the ATO side with our architects.' },
+            { gap: 'No MBA', strategy: 'It is listed as preferred, not required. Let the quota record carry it and do not raise it yourself.', talking_points: 'If asked: fifteen years of DoD selling and four straight years over quota.' }
         ],
         keywords: [
             { term: 'DoD', in_resume: true, importance: 'critical' }, { term: 'Quota attainment', in_resume: true, importance: 'critical' },
-            { term: 'TS/SCI', in_resume: false, importance: 'critical' }, { term: 'Full Scope Polygraph', in_resume: false, importance: 'critical' },
+            { term: 'TS/SCI', in_resume: true, importance: 'critical' },
             { term: 'IDIQ', in_resume: true, importance: 'important' }, { term: 'GWAC', in_resume: true, importance: 'important' },
             { term: 'ATO', in_resume: true, importance: 'important' }, { term: 'MEDDIC', in_resume: true, importance: 'important' },
             { term: 'FedRAMP', in_resume: false, importance: 'important' }, { term: 'IL5', in_resume: false, importance: 'important' },
             { term: 'Cloud infrastructure', in_resume: false, importance: 'important' }, { term: 'Territory plan', in_resume: false, importance: 'nice-to-have' }
         ],
-        clearance: { required: 'TS/SCI with Full Scope Poly', candidate: 'Top Secret', status: 'gap', note: 'The posting lists it as a basic qualification.' },
+        clearance: { required: 'Active TS/SCI', candidate: 'Active TS/SCI', status: 'meets', note: 'The posting lists it as a basic qualification.' },
         bullet_rewrites: [
             { original: 'Lead DoD sales territory generating $180M+ annual revenue', improved: 'Own a $180M+ DoD territory across DISA, Army, Navy and Air Force, finishing FY23 at 145% of quota', why: 'Puts quota attainment, the first thing this role screens on, in the opening bullet.' },
             { original: 'Transitioned 8 accounts from on-premise to cloud solutions', improved: 'Moved 8 Army and Intelligence Community accounts from on-premise to cloud solutions', why: 'Names the customers and brings your cloud experience forward.' }
@@ -2013,31 +2014,47 @@ Amazon is an Equal Opportunity Employer.`;
         fit_signals: [
             { signal: 'Annual quota', role_expects: '$50M+', resume_shows: '$180M territory at 145%', status: 'strong' },
             { signal: 'Years selling to DoD', role_expects: '7+', resume_shows: '15+', status: 'strong' },
-            { signal: 'Product sold', role_expects: 'Cloud infrastructure', resume_shows: 'Cybersecurity and enterprise software', status: 'partial' },
-            { signal: 'Clearance', role_expects: 'TS/SCI with Full Scope Poly', resume_shows: 'Top Secret', status: 'missing' }
+            { signal: 'Clearance', role_expects: 'Active TS/SCI', resume_shows: 'Active TS/SCI', status: 'strong' },
+            { signal: 'Product sold', role_expects: 'Cloud infrastructure', resume_shows: 'Cybersecurity and enterprise software', status: 'partial' }
         ],
         questions_to_ask: [
             { question: 'How many reps on this team hit quota last year?', why: 'If few did, the number is a wish, not a plan.' },
             { question: 'Why is this seat open?', why: 'A promotion is good news. A string of departures is not.' },
-            { question: 'Will you sponsor the polygraph, and how long does it usually take?', why: 'It decides whether this job is real for you this year.' }
+            { question: 'Which accounts would I inherit, and what is already in the pipeline?', why: 'It tells you how much of the first-year number you have to build from nothing.' }
         ],
-        recommendation: { action: 'confirm_requirement', label: 'Confirm clearance sponsorship first.', decisive_requirement: 'TS/SCI with Full Scope Poly',
-            headline: 'Your DoD sales record clears the bar. The posting requires a polygraph your resume does not show, so ask whether they will sponsor it before you spend time tailoring.',
-            reasons: ['Your $180M territory at 145% is well past the $50M quota they ask for.', 'Your cloud experience is real but buried in an older role; worth fixing if the clearance question comes back yes.'],
-            next_step: 'Send the recruiter the question below.',
-            recruiter_question: "Hi [Name], I'm interested in the Principal DoD Sales Representative role. I hold an active Top Secret and carry a $180M DoD territory at 145% of quota. The posting lists TS/SCI with Full Scope Poly: do you consider candidates who would need to be processed for it, or is it required on day one? Thank you." },
+        recommendation: { action: 'apply', label: 'Apply now.', decisive_requirement: 'Active TS/SCI',
+            headline: 'Your DoD sales record and your clearance both clear the bar. Move your cloud work to the top of your resume, then send it.',
+            reasons: ['Your $180M territory at 145% is well past the $50M quota they ask for.', 'Your cloud experience is real but buried in an older role. Ten minutes of tailoring fixes that.'],
+            next_step: 'Tailor the two bullets under Your resume, then write to the hiring team.',
+            recruiter_question: "Hi [Name], I'm interested in the Principal DoD Sales Representative role. I hold an active TS/SCI and carry a $180M DoD territory at 145% of quota. Is the team still interviewing, and who is the hiring manager? Thank you." },
         salary_intel: { low: 200, mid: 240, high: 280, pay_source: 'posting', base_source: 'estimate', is_variable_comp: true, base_low: 130, base_high: 160, pay_mix: '55/45', comp_questions: ['What is the quota, and how was it set?', 'How long is the ramp, and is it guaranteed?', 'Are there accelerators past 100%, and is there a cap?', 'Which accounts are in the territory today?'], notes: 'The on-target range is from the posting. The base range is an estimate.' },
-        competition: { level: 'Low', reasoning: 'The polygraph requirement shrinks the pool sharply.' },
+        competition: { level: 'Moderate', reasoning: 'The TS/SCI requirement narrows the pool, but strong DoD sellers will apply.' },
         company_intel: { known: true, type: 'Cloud service provider', size: 'Large', reputation: 'Strong in federal' },
         timeline: { screen_weeks: '1-2', interview_weeks: '3-5', offer_weeks: '6-8', notes: 'Expect a multi-interview loop.' }
     };
+
+    // First visit: show the example answer straight away, with the job and resume boxes left empty and ready.
+    const isFirstVisit = () => !$('resumeText').value.trim() && !$('jobDescription').value.trim() && !state.tracked.length && !Object.keys(getSavedResumes()).length;
+    function showExamplePreview() {
+        state.analysis = EXAMPLE_ANALYSIS;
+        state.isExample = true; state.previewOnly = true;
+        state.resumeText = SAMPLE_RESUME; state.jd = SAMPLE_JD;      // so the example's own tools (Ask AI, tailoring) have something to work on
+        resetGenerated();
+        renderResults(EXAMPLE_ANALYSIS);
+    }
+    function expandExample() {
+        state.previewOnly = false;
+        document.body.classList.remove('example-compact');
+        $('verdict').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        track('example_viewed');
+    }
 
     function showExample() {
         resetAnalyzeUi();
         state.trackedId = null; state.postingUrl = ''; state.linkHelp = null; state.linkedText = ''; renderLinkHelp();
         loadSampleData(true);
         state.analysis = EXAMPLE_ANALYSIS;
-        state.isExample = true;
+        state.isExample = true; state.previewOnly = false;
         state.resumeText = $('resumeText').value.trim();
         state.jd = $('jobDescription').value.trim();
         setResumeMode(false);
@@ -2101,6 +2118,7 @@ Amazon is an Equal Opportunity Employer.`;
         'export-csv': () => exportTrackerCSV(),
         'backup': () => backupData(),
         'restore': () => $('restoreFile').click(),
+        'example-expand': () => expandExample(),
         'suggest-terms': () => suggestSearchTerms(),
         'add-resume': () => { showView('analyze'); setResumeMode(true); $('resumeDrop').focus(); },
         'handoff-check': () => handoffCheck(),

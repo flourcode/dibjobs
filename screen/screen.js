@@ -20,6 +20,7 @@
     let sort = { column: 'score', direction: 'desc' };
     let nextId = 1;
     let running = false;
+    const USED_KEY = 'dib_jobs_recruiter_used';
     let isExample = false;       // the built-in example is on screen (made-up job and candidates)
     let snackTimer = null;
 
@@ -260,6 +261,7 @@
             snackbar(`Ranked ${results.length} candidate${results.length > 1 ? 's' : ''}${failed ? `; ${failed} could not be screened` : ''}.`);
             $('resultsCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
+        if (results.length) { try { localStorage.setItem(USED_KEY, '1'); } catch (e) { /* not essential */ } }
         track('recruiter_ranking_complete', { count: results.length });
     }
 
@@ -428,11 +430,12 @@ What we need
             keywords: kw('DoD', 'Secret clearance', 'Air Force') } }
     ];
 
-    function showExample() {
+    // auto: shown on arrival for a first-time visitor. The job box stays empty and the page does not scroll.
+    function showExample(auto) {
         if (running) return;
         if (queue.length && !isExample) return snackbar('Clear your candidates first, then open the example.', 6000);
         isExample = true;
-        $('jobDescription').value = EXAMPLE_JD;
+        $('jobDescription').value = auto === true ? '' : EXAMPLE_JD;
         $('jobFileInfo').textContent = '';
         queue = EXAMPLE_CANDIDATES.map(c => ({ id: nextId++, name: c.name, resumeText: c.resume, status: 'complete', result: { ...EXAMPLE_JOB, ...c.result } }));
         results = queue.map(c => ({ id: c.id, name: c.name, resumeText: c.resumeText, ...c.result }));
@@ -440,8 +443,7 @@ What we need
         document.querySelectorAll('#filterTabs [role="tab"]').forEach(t => { const on = t.dataset.filter === 'all'; t.setAttribute('aria-selected', String(on)); t.tabIndex = on ? 0 : -1; });
         setFileStatus(); showInlineError(''); updateJobCount();
         applySort(); renderQueue(); renderResults(); renderExampleState();
-        $('resultsCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
-        track('recruiter_example');
+        if (auto !== true) { $('resultsCard').scrollIntoView({ behavior: 'smooth', block: 'start' }); track('recruiter_example'); }
     }
 
     // Leave the example. keepJob: the recruiter has started typing their own job over the sample.
@@ -457,6 +459,8 @@ What we need
 
     function renderExampleState() {
         $('exampleBanner').hidden = !isExample;
+        $('queueExampleNote').hidden = !isExample;
+        document.querySelector('.calc').classList.toggle('has-result', isExample);   // on phones, the ranked example leads
         $('exampleTag').hidden = !isExample;
         $('exampleBtn').hidden = isExample || queue.length > 0;
         $('clearQueueBtn').hidden = isExample || queue.length === 0;
@@ -493,7 +497,7 @@ What we need
         'analyze': () => { if (isExample) { clearExample(); $('jobDescription').focus(); return snackbar('Example cleared. Add your job and resumes.'); } analyzeAll(); },
         'clear-job': () => { clearExample(); $('jobDescription').value = ''; $('jobFileInfo').textContent = ''; updateJobCount(); $('jobDescription').focus(); },
         'clear-queue': () => { if (running) return; queue = []; results = []; setFileStatus(); showInlineError(''); $('analyzeText').textContent = 'Rank these candidates'; renderQueue(); renderResults(); },
-        'example': () => showExample(),
+        'example': () => showExample(false),
         'clear-example': () => { clearExample(); $('jobDescription').focus(); window.scrollTo({ top: 0, behavior: 'smooth' }); },
         'add-pasted': () => {
             clearExample();
@@ -510,6 +514,9 @@ What we need
 
     function init() {
         renderQueue(); renderExampleState();
+        // First visit: show the ranked example straight away. Skipped once this browser has run a real ranking.
+        let used = false; try { used = localStorage.getItem(USED_KEY) === '1'; } catch (e) { /* storage blocked: treat as a first visit */ }
+        if (!used) showExample(true);
         initFileDrop();
         updateJobCount();
         $('jobDescription').addEventListener('input', () => { clearExample(true); updateJobCount(); });
