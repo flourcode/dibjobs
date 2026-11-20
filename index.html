@@ -32,7 +32,7 @@
     <link rel="apple-touch-icon" href="apple-touch-icon.png">
     <link rel="manifest" href="site.webmanifest">
     <link rel="preload" href="assets/fonts/inter-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="stylesheet" href="assets/app.css?v=17">
+    <link rel="stylesheet" href="assets/app.css?v=18">
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-N10ZLNFZHE"></script>
     <script>
@@ -148,7 +148,22 @@
                     </div>
                 </div>
 
+                <div id="batchWrap" class="stack" hidden>
+                    <div class="verdict" id="batchVerdict" data-tone="neutral" aria-live="polite">
+                        <p class="eyebrow" id="batchKind"></p>
+                        <h2 class="verdict-label batch-title" id="batchTitle"></h2>
+                        <p class="verdict-explain" id="batchWhy"></p>
+                    </div>
+                    <div class="row">
+                        <button class="btn primary" type="button" id="batchOpenTop" data-batch-open="0"><span id="batchOpenTopText">Open the top job</span><svg class="icon"><use href="#i-next"/></svg></button>
+                        <button class="btn" type="button" id="batchSaveAll" data-action="batch-save-all"><svg class="icon"><use href="#i-bookmark"/></svg><span id="batchSaveAllText">Save all to tracker</span></button>
+                        <button class="btn text" type="button" data-action="new-job">Start over</button>
+                    </div>
+                    <div class="batch-list" id="batchList"></div>
+                    <p class="body-sm muted">Scores are resume fit out of 100. Each row opens the full result, with nothing re-run.</p>
+                </div>
                 <div id="verdictWrap" class="stack" hidden>
+                    <button class="btn text back-link" type="button" id="backToBatch" data-action="back-to-batch" hidden><svg class="icon flip"><use href="#i-next"/></svg>Back to the comparison</button>
                     <p class="example-note" id="exampleNote" hidden><strong>This is an example</strong> from a made-up resume and posting. Add your own job and resume to get your answer.</p>
                     <div class="verdict" id="verdict" data-tone="neutral">
                         <p class="eyebrow"><span class="example-tag" id="exampleTag" hidden>Example</span><span id="roleLine"></span></p>
@@ -203,6 +218,15 @@
                     <span class="grow"><span id="jobLinkMsg"></span> <a id="jobLinkAnchor" href="#" target="_blank" rel="noopener noreferrer"></a></span>
                     <button class="btn" type="button" id="pasteInsteadBtn" data-action="paste-instead">Paste the job description instead</button>
                 </div>
+                <details class="disclosure" id="moreJobsRow">
+                    <summary><svg class="icon"><use href="#i-compare"/></svg><span>Compare several jobs <span class="optional" id="moreJobsState">optional</span></span><svg class="icon chev"><use href="#i-chevron"/></svg></summary>
+                    <div class="disclosure-body stack-sm">
+                        <p class="body-sm muted">Add up to three more postings. Each is checked against your resume and they come back ranked, so you know where to start.</p>
+                        <label class="field sm"><span class="field-label">Job 2</span><textarea id="extraJob1" class="extra-job" rows="2" placeholder="Paste a link or the job description"></textarea></label>
+                        <label class="field sm"><span class="field-label">Job 3</span><textarea id="extraJob2" class="extra-job" rows="2" placeholder="Paste a link or the job description"></textarea></label>
+                        <label class="field sm"><span class="field-label">Job 4</span><textarea id="extraJob3" class="extra-job" rows="2" placeholder="Paste a link or the job description"></textarea></label>
+                    </div>
+                </details>
             </div>
 
             <div class="panel stack" id="resumeCard">
@@ -245,6 +269,7 @@
                         </div>
                     </details>
                 </div>
+                <button class="btn text" type="button" id="compareVersionsBtn" data-action="compare-versions" hidden><svg class="icon"><use href="#i-compare"/></svg><span id="compareVersionsText">Compare my resume versions for this job</span></button>
                 <details class="disclosure" id="resumeCheck" hidden>
                     <summary><svg class="icon"><use href="#i-check"/></svg><span id="resumeCheckSummary">Resume check</span><svg class="icon chev"><use href="#i-chevron"/></svg></summary>
                     <div class="disclosure-body"><ul class="checklist" id="resumeCheckList"></ul></div>
@@ -677,7 +702,7 @@
     <button class="icon-btn" data-action="dismiss-snackbar" aria-label="Dismiss"><svg class="icon"><use href="#i-close"/></svg></button>
 </div>
 
-<script src="assets/files.js?v=17"></script>
-<script src="assets/app.js?v=17"></script>
+<script src="assets/files.js?v=18"></script>
+<script src="assets/app.js?v=18"></script>
 </body>
 </html>

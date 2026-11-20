@@ -36,6 +36,7 @@
         templates: {},
         tracked: [],
         compareIds: new Set(),
+        batch: null,           // a finished comparison: several jobs, or several resume versions
         runId: 0,              // bumped whenever the job on screen changes; late replies for an older job are dropped
         trackedId: null,       // tracker entry the job on screen came from (so saving upgrades it)
         postingUrl: '',        // link to the posting on screen, kept even when the text is pasted
@@ -298,6 +299,7 @@
         const note = $('resumeVersionNote');
         note.hidden = !active;
         note.textContent = active ? `Using saved version "${active}"` : '';
+        updateBatchUi();
     }
 
     async function saveCurrentResume() {
@@ -507,6 +509,7 @@
         const fmt = (t) => t.trim() ? `${countWords(t).toLocaleString()} words` : '';
         $('resumeCount').textContent = fmt(resume) + (resume.length > MAX_RESUME_CHARS ? ` (only the first ${MAX_RESUME_CHARS.toLocaleString()} characters are analyzed)` : '');
         $('jobCount').textContent = /^https?:\/\/\S+$/i.test(job.trim()) ? 'Link detected: we will fetch the posting' : fmt(job);
+        updateBatchUi();
     }
 
     function onResumeChanged() {
@@ -595,6 +598,7 @@
         $('resultEmpty').hidden = mode !== 'empty';
         $('loading').hidden = mode !== 'loading';
         $('verdictWrap').hidden = mode !== 'ready';
+        $('batchWrap').hidden = mode !== 'batch';
         $('results').hidden = mode !== 'ready';
         document.querySelector('.calc').classList.toggle('has-result', mode !== 'empty');
         if (mode === 'empty') {
@@ -629,9 +633,11 @@
     // Anything that swaps the job on screen calls this first, so a slow reply for the old job is ignored.
     function resetAnalyzeUi() {
         state.runId++;
+        state.batch = null;
+        $('compareVersionsBtn').disabled = false;
         stopLoading();
         $('analyzeBtn').disabled = false;
-        $('btnText').textContent = 'Check this job';
+        $('btnText').textContent = idleLabel();
     }
 
     const textHead = (t) => String(t || '').replace(/\s+/g, ' ').trim().substring(0, 80).toLowerCase();
@@ -723,7 +729,7 @@
             }
         }
         btn.disabled = false;
-        $('btnText').textContent = 'Check this job';
+        $('btnText').textContent = idleLabel();
         if (lastError) {
             stopLoading();
             setResultState(state.analysis ? 'ready' : 'empty');
@@ -731,6 +737,210 @@
             if (jdIsUrl) { state.linkHelp = 'failed'; renderLinkHelp(); }
             $('analyzeBar').scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
+    }
+
+    // ======================================================================
+    // COMPARE: several jobs for one resume, or several resume versions for one job.
+    // Each pairing is one ordinary fit check; the results are kept in memory
+    // and ranked, and any one of them opens as a normal full result.
+    // ======================================================================
+    const EXTRA_JOB_IDS = ['extraJob1', 'extraJob2', 'extraJob3'];
+    const MAX_VERSIONS = 5;
+    const extraJobs = () => EXTRA_JOB_IDS.map(id => $(id).value.trim()).filter(Boolean);
+    const idleLabel = () => { const n = extraJobs().length; return n ? `Compare ${n + 1} jobs` : 'Check this job'; };
+
+    // The user's resume versions: saved ones (newest first), plus what is in the box if it is not one of them.
+    function resumeVersions() {
+        const saved = getSavedResumes();
+        const list = Object.keys(saved).sort((a, b) => (saved[b].savedAt || '').localeCompare(saved[a].savedAt || ''))
+            .map(name => ({ name, text: (saved[name].text || '').trim().substring(0, MAX_RESUME_CHARS) })).filter(v => v.text.length >= 100);
+        const current = $('resumeText').value.trim().substring(0, MAX_RESUME_CHARS);
+        if (current.length >= 100 && state.resumeSource !== 'example' && !list.some(v => v.text === current)) list.unshift({ name: 'Resume in the box (not saved)', text: current });
+        return list.slice(0, MAX_VERSIONS);
+    }
+
+    function updateBatchUi() {
+        const n = extraJobs().length;
+        $('moreJobsState').textContent = n ? `${n} added` : 'optional';
+        if (!$('analyzeBtn').disabled) $('btnText').textContent = idleLabel();
+        const versions = resumeVersions().length, btn = $('compareVersionsBtn');
+        btn.hidden = versions < 2;
+        $('compareVersionsText').textContent = `Compare my ${versions} resume versions for this job`;
+    }
+
+    function runCheck() { return extraJobs().length ? compareJobs() : analyzeJob(); }
+
+    function compareJobs() {
+        const resume = $('resumeText').value.trim().substring(0, MAX_RESUME_CHARS);
+        showInlineError('');
+        if (resume.length < 100) return showInlineError('Add your resume first: drop in a PDF or Word file, or paste the text.');
+        if (state.resumeSource === 'example') return showInlineError('That is the example resume, not yours. Choose Change and add your own resume first.');
+        const first = $('jobDescription').value.trim();
+        if (!first) return showInlineError('Add the first job in "1. The job", then the others below it.');
+        const seen = new Set(), jobs = [];
+        [first, ...extraJobs()].forEach(jd => { const key = isUrl(jd) ? normalizeUrl(jd) : jobKey(jd); if (!seen.has(key)) { seen.add(key); jobs.push(jd); } });
+        if (jobs.length < 2) return showInlineError('Those are the same job. Add a different posting to compare.');
+        return runBatch('jobs', jobs.map((jd, i) => ({ jd, resumeText: resume, slot: i })));
+    }
+
+    function compareVersions() {
+        showInlineError('');
+        const jd = $('jobDescription').value.trim();
+        if (!jd) return showInlineError('Add the job in "1. The job" first, then compare your resume versions against it.');
+        const versions = resumeVersions();
+        if (versions.length < 2) return showInlineError('Save at least two versions of your resume to compare them.');
+        return runBatch('versions', versions.map(v => ({ jd, resumeText: v.text, resumeName: v.name })));
+    }
+
+    async function batchCall(item) {
+        for (let attempt = 1; ; attempt++) {
+            try { return await api({ request_type: 'resume_match', job_description: item.jd, resume_text: item.resumeText, military_transition: isMilitary() }); }
+            catch (e) { if (!e.transient || attempt >= MAX_RETRIES) throw e; await sleep(RETRY_DELAY_MS); }
+        }
+    }
+
+    async function runBatch(kind, items) {
+        resetAnalyzeUi();
+        const run = state.runId, stale = () => run !== state.runId;
+        state.batch = { kind, items };
+        state.analysis = null; state.isExample = false; state.previewOnly = false;
+        state.trackedId = null; state.postingUrl = ''; state.linkHelp = null; state.linkedText = '';
+        resetGenerated(); renderLinkHelp();
+        document.body.classList.remove('example-compact');
+        $('analyzeBtn').disabled = true; $('compareVersionsBtn').disabled = true;
+        setResultState('loading');
+        clearInterval(state.loadingTimer);
+        $('resultCol').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        for (let i = 0; i < items.length; i++) {
+            const item = items[i];
+            $('btnText').textContent = `Checking ${i + 1} of ${items.length}...`;
+            $('loadingStep').textContent = kind === 'jobs' ? `Checking job ${i + 1} of ${items.length} against your resume...` : `Checking "${item.resumeName}" (${i + 1} of ${items.length})...`;
+            $('loadingProgress').style.width = Math.round(8 + (i / items.length) * 88) + '%';
+            try {
+                const data = await batchCall(item);
+                if (stale()) return;
+                if (isUrl(item.jd)) item.url = item.jd;
+                if (data.job_description_text) {
+                    // A link was given: keep the text that was read, and reuse it for the remaining versions of the same job.
+                    const text = data.job_description_text; delete data.job_description_text;
+                    if (kind === 'versions') items.forEach(other => { other.url = item.url; other.jd = text; });
+                    item.jd = text;
+                }
+                verifyKeywords(data, item.resumeText);
+                item.analysis = data;
+            } catch (e) {
+                if (stale()) return;
+                item.error = e.message || 'This one could not be checked.';
+            }
+        }
+        $('analyzeBtn').disabled = false; $('compareVersionsBtn').disabled = false;
+        $('btnText').textContent = idleLabel();
+        stopLoading();
+        if (!items.some(it => it.analysis)) {
+            state.batch = null;
+            setResultState('empty');
+            showInlineError(items[0].error || 'The comparison could not be run. Try again.');
+            return $('analyzeBar').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        // Rank by fit; anything that failed goes last.
+        state.batch.ranked = items.filter(it => it.analysis).sort((a, b) => (b.analysis.score || 0) - (a.analysis.score || 0)).concat(items.filter(it => !it.analysis));
+        restoreBatchInputs();
+        renderBatch();
+        track('compare_complete', { kind, count: items.length });
+    }
+
+    // After a jobs comparison the first box shows job 1 again (as text, if it was a link).
+    function restoreBatchInputs() {
+        const b = state.batch;
+        if (!b) return;
+        const first = b.kind === 'jobs' ? b.items.find(it => it.slot === 0) : b.items[0];
+        if (first && first.jd) { $('jobDescription').value = first.jd; updateCounts(); }
+    }
+
+    const batchRole = (a) => (a.job_title || 'Role') + (knownCompany(a.company) ? ' at ' + knownCompany(a.company) : '');
+    const batchCall4 = (a) => { const rec = deriveRecommendation(a, a.score || 0); return { rec, meta: ACTIONS_META[rec.action] || ACTIONS_META.fix_first, label: (rec.label || (ACTIONS_META[rec.action] || {}).label || '').replace(/\.$/, '') }; };
+
+    function renderBatch() {
+        const b = state.batch;
+        if (!b) return;
+        const ok = b.ranked.filter(it => it.analysis), top = ok[0], second = ok[1];
+        const isJobs = b.kind === 'jobs';
+        const lead = second ? Math.round(top.analysis.score) - Math.round(second.analysis.score) : null;
+        const topCall = batchCall4(top.analysis);
+        $('batchVerdict').dataset.tone = topCall.meta.tone;
+        $('batchKind').textContent = isJobs ? `${ok.length} jobs, ranked for your resume` : `${ok.length} resume versions, ranked for ${batchRole(top.analysis)}`;
+        $('batchTitle').textContent = isJobs ? `Start with ${batchRole(top.analysis)}.` : `Send "${top.resumeName}".`;
+        let why;
+        if (lead === null) why = isJobs ? 'Only one of these could be checked.' : 'Only one version could be checked.';
+        else if (lead <= 2) why = isJobs ? `It is close: the top two are within ${lead === 0 ? 'a point' : lead + (lead === 1 ? ' point' : ' points')} of each other, so let pay, location and the hiring team decide.`
+            : `It is close: the top two versions are within ${lead === 0 ? 'a point' : lead + (lead === 1 ? ' point' : ' points')}. Open each to see which requirements one covers that the other does not.`;
+        else why = isJobs ? `It leads the next job by ${lead} points of resume fit. Open any job for the full answer.` : `It leads the next version by ${lead} points for this job. Open it to see the full answer.`;
+        $('batchWhy').textContent = why;
+        $('batchList').innerHTML = b.ranked.map((it, i) => {
+            const idx = b.items.indexOf(it);
+            if (!it.analysis) return `<div class="batch-row failed"><span class="batch-rank">${icon('alert')}</span><span class="batch-text"><span class="title-sm">${escapeHtml(isJobs ? `Job ${it.slot + 1} could not be checked` : it.resumeName)}</span><span class="body-sm">${escapeHtml(it.error)}</span></span></div>`;
+            const a = it.analysis, call = batchCall4(a), { matches: strengths, gaps } = splitAnalysis(a);
+            const kws = Array.isArray(a.keywords) ? a.keywords : [], kwPct = kws.length ? Math.round(kws.filter(k => k.in_resume).length / kws.length * 100) : null;
+            const firstGap = gaps[0] ? gaps[0].replace(/^Gap:\s*/i, '').split(/\s*(?:→|->)\s*/)[0] : '';
+            const sub = isJobs
+                ? [call.label, firstGap ? 'Biggest gap: ' + firstGap : 'No major gaps']
+                : [call.label, `${strengths.length} ${strengths.length === 1 ? 'match' : 'matches'}, ${gaps.length} ${gaps.length === 1 ? 'gap' : 'gaps'}`, kwPct === null ? '' : `${kwPct}% of keywords`];
+            return `<button type="button" class="batch-row" data-batch-open="${idx}"><span class="batch-rank">${i + 1}</span><span class="batch-text"><span class="title-sm">${escapeHtml(isJobs ? batchRole(a) : it.resumeName)}</span><span class="body-sm">${escapeHtml(sub.filter(Boolean).join(' · '))}</span></span><span class="score-pill ${scoreBand(a.score)}" title="Resume fit">${Math.round(a.score) || 0}</span>${icon('chevron')}<span class="sr">Open the full result</span></button>`;
+        }).join('');
+        $('batchOpenTop').dataset.batchOpen = String(b.items.indexOf(top));
+        $('batchOpenTopText').textContent = isJobs ? 'Open the top job' : 'Use the top version';
+        const saveAll = $('batchSaveAll');
+        saveAll.hidden = !isJobs;
+        saveAll.disabled = !!b.savedAll;
+        $('batchSaveAllText').textContent = b.savedAll ? 'Saved to tracker' : `Save all ${ok.length} to tracker`;
+        setResultState('batch');
+    }
+
+    function openBatchItem(index) {
+        const b = state.batch, it = b && b.items[index];
+        if (!it || !it.analysis) return;
+        $('jobDescription').value = it.jd;
+        state.jd = it.jd; state.postingUrl = it.url || ''; state.linkedText = it.jd; state.linkHelp = null;
+        state.trackedId = it.trackedId != null && findJob(it.trackedId) ? it.trackedId : null;
+        if (b.kind === 'versions' && $('resumeText').value.trim().substring(0, MAX_RESUME_CHARS) !== it.resumeText) {
+            $('resumeText').value = it.resumeText;
+            state.fileFlags = null; state.fileName = ''; state.resumeSource = 'saved';
+            setFileStatus(); onResumeChanged(); setResumeMode(false);
+        }
+        state.resumeText = it.resumeText;
+        state.analysis = it.analysis; state.isExample = false;
+        resetGenerated(); updateCounts(); renderLinkHelp();
+        renderResults(it.analysis);
+        if (state.trackedId != null) setSaveButton(true, 'In your tracker');
+        if (!it.analysis.salary_intel && !it.intelAsked) { it.intelAsked = true; fetchMarketIntel(); }
+        $('resultCol').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function backToBatch() {
+        if (!state.batch) return;
+        state.analysis = null; state.trackedId = null; state.postingUrl = ''; state.linkedText = '';
+        resetGenerated();
+        restoreBatchInputs();
+        renderBatch();
+        $('resultCol').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    // Saves every checked job with its analysis, through the same path as the Save button.
+    function saveBatchJobs() {
+        const b = state.batch;
+        if (!b || b.kind !== 'jobs') return;
+        const keep = { analysis: state.analysis, jd: state.jd, postingUrl: state.postingUrl, trackedId: state.trackedId, linkedText: state.linkedText };
+        let saved = 0, failed = false;
+        for (const it of b.items) {
+            if (!it.analysis) continue;
+            Object.assign(state, { analysis: it.analysis, jd: it.jd, postingUrl: it.url || '', trackedId: null });
+            if (saveToTracker({ silent: true }) === true) { saved++; it.trackedId = state.trackedId; } else { failed = true; break; }
+        }
+        Object.assign(state, keep);
+        if (failed) return;                      // saveToTracker has already said why
+        b.savedAll = true;
+        renderBatch();
+        snackbar(`${saved} jobs saved to your tracker with their scores.`);
     }
 
     async function fetchMarketIntel() {
@@ -815,6 +1025,7 @@
     function renderResults(data, previousScore) {
         setResultState('ready');
         showPanel('overview');
+        $('backToBatch').hidden = !state.batch;
 
         // Verdict: the number first, then the call, then why
         const score = Math.max(0, Math.min(100, Math.round(Number(data.score) || 0)));
@@ -1369,9 +1580,11 @@
         state.trackedId = entry.id; state.linkedText = state.jd;
         setSaveButton(true, existing ? 'Updated in tracker' : 'Saved to tracker');
         updateTrackerBadge();
-        if (!opts.quiet) snackbar(existing ? 'Tracker entry updated with this analysis.' : 'Saved. Open Tracker to set a follow-up date.');
+        if (opts.silent) { /* the caller reports once for the whole batch */ }
+        else if (!opts.quiet) snackbar(existing ? 'Tracker entry updated with this analysis.' : 'Saved. Open Tracker to set a follow-up date.');
         else snackbar('Your saved job now has this fit check.');
         track('job_saved');
+        return true;
     }
 
     function newJobId() { let id = Date.now(); while (findJob(id)) id++; return id; }
@@ -2094,7 +2307,10 @@ Amazon is an Equal Opportunity Employer.`;
     // INIT + EVENT WIRING
     // ======================================================================
     const ACTIONS = {
-        'analyze': () => analyzeJob(),
+        'analyze': () => runCheck(),
+        'compare-versions': () => compareVersions(),
+        'back-to-batch': () => backToBatch(),
+        'batch-save-all': () => saveBatchJobs(),
         'example': () => showExample(),
         'change-resume': () => { setResumeMode(true); $('pasteRow').open = true; },
         'primary-action': () => runPrimaryAction(),
@@ -2142,6 +2358,8 @@ Amazon is an Equal Opportunity Employer.`;
         initFileDrop();
         initTrackerEvents();
         initFindJobs();
+        EXTRA_JOB_IDS.forEach(id => $(id).addEventListener('input', updateBatchUi));
+        $('resultCol').addEventListener('click', (e) => { const row = e.target.closest('[data-batch-open]'); if (row) openBatchItem(Number(row.dataset.batchOpen)); });
         updateCounts();
         renderResumeCheck();
         updateTrackerBadge();
@@ -2175,7 +2393,7 @@ Amazon is an Equal Opportunity Employer.`;
             if (e.key !== 'Enter' || !(e.ctrlKey || e.metaKey)) return;
             e.preventDefault();
             if (id === 'recruiterQuestion') askRecruiter();
-            else if (!$('analyzeBtn').disabled) analyzeJob();
+            else if (!$('analyzeBtn').disabled) runCheck();
         }));
     }
 

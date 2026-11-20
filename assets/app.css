@@ -606,3 +606,24 @@ details.boards > summary { font: 900 20px/24px var(--font); letter-spacing: -0.0
     body.example-compact .verdict-num { margin-top: 6px; }
     body.example-compact #verdictWrap { gap: 10px; }
 }
+
+/* v18: comparisons (several jobs, or several resume versions) */
+.batch-title { font-size: 28px; line-height: 30px; margin: 6px 0 0; }
+.batch-list { border-radius: var(--r-md); background: var(--panel); overflow: hidden; }
+.batch-row { display: grid; grid-template-columns: 28px minmax(0, 1fr) auto 20px; gap: 12px; align-items: center; width: 100%; min-height: 64px; padding: 12px 14px; border: 0; background: none; text-align: left; font: inherit; color: var(--ink); cursor: pointer; }
+.batch-row + .batch-row { border-top: 1px solid var(--hairline); }
+button.batch-row:hover { background: var(--control); }
+button.batch-row:focus-visible { outline: 3px solid var(--ink); outline-offset: -3px; }
+.batch-row.failed { cursor: default; grid-template-columns: 28px minmax(0, 1fr); }
+.batch-rank { font: 900 20px/24px var(--font); letter-spacing: -0.03em; text-align: center; }
+.batch-rank .icon { width: 20px; height: 20px; }
+.batch-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.batch-text .title-sm { overflow-wrap: anywhere; }
+.batch-text .body-sm { color: var(--muted); }
+.batch-row > .icon { width: 20px; height: 20px; transform: rotate(-90deg); }
+.back-link { align-self: flex-start; }
+.icon.flip { transform: scaleX(-1); }
+.extra-job { min-height: 64px; max-height: 200px; }
+#compareVersionsBtn { align-self: flex-start; white-space: normal; text-align: left; }
+@media print { #batchWrap, #backToBatch { display: none !important; } }
+#batchWhy { font-size: 18px; line-height: 25px; }
