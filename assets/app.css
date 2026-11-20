@@ -213,7 +213,7 @@ details.disclosure > .disclosure-body { padding: 4px 0 8px; }
 .calc-inputs .panel details.disclosure { border-top: 1px solid var(--hairline); margin-top: 12px !important; padding-top: 4px; }
 .checklist li { display: flex; gap: 10px; align-items: flex-start; padding: 6px 0; font: 400 15px/22px var(--font); }
 .checklist .pass .icon { color: var(--good-ink); }
-.checklist .flag .icon { color: var(--ink); }
+.checklist .flag .icon { color: var(--danger-ink); }
 .bullets li { position: relative; padding: 3px 0 3px 18px; font: 400 15px/22px var(--font); color: var(--muted); }
 .bullets li::before { content: ''; position: absolute; left: 4px; top: 12px; width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
 
@@ -256,7 +256,8 @@ details.disclosure > .disclosure-body { padding: 4px 0 8px; }
 .list { border-radius: var(--r-md); background: var(--panel); padding: 0 16px; }
 .list-item { display: flex; gap: 12px; align-items: flex-start; padding: 14px 0; }
 .list-item + .list-item { border-top: 1px solid var(--hairline); }
-.list-item .lead { width: 22px; height: 22px; flex: none; margin-top: 2px; }
+/* Green circled check for a strength, red circled minus for a gap. */
+.list-item .lead { width: 22px; height: 22px; flex: none; margin-top: 1px; }
 .list-item .lead.ok { color: var(--good-ink); }
 .list-item .lead.gap { color: var(--danger-ink); }
 .list-item .headline-text { font: 700 17px/24px var(--font); letter-spacing: -0.01em; }
@@ -627,3 +628,7 @@ button.batch-row:focus-visible { outline: 3px solid var(--ink); outline-offset: 
 #compareVersionsBtn { align-self: flex-start; white-space: normal; text-align: left; }
 @media print { #batchWrap, #backToBatch { display: none !important; } }
 #batchWhy { font-size: 18px; line-height: 25px; }
+
+#resumeCheck > summary > .icon:first-child { color: var(--good-ink); }
+#resumeCheck.flagged > summary > .icon:first-child { color: var(--danger-ink); }
+.batch-row.failed .batch-rank .icon { color: var(--danger-ink); }

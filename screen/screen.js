@@ -124,7 +124,7 @@
         const el = $('fileStatus');
         el.hidden = !html;
         el.className = 'banner ' + (kind || '');
-        el.innerHTML = html ? icon({ warn: 'alert', error: 'x-circle' }[kind] || 'check') + `<span class="grow">${html}</span>` : '';
+        el.innerHTML = html ? icon({ warn: 'minus', error: 'x-circle' }[kind] || 'check') + `<span class="grow">${html}</span>` : '';
     }
 
     async function handleResumeFiles(fileList) {
@@ -380,7 +380,7 @@
             .filter(q => q.question.trim() && !q.question.includes('[object')).slice(0, 5);
         const keywords = (Array.isArray(r.keywords) ? r.keywords : []).filter(k => k && k.term);
         const listHtml = (items, kind) => items.length
-            ? `<div class="list">${items.map(x => { const [head, ...rest] = x.split(/\s*(?:→|->)\s*/); return `<div class="list-item">${icon(kind === 'ok' ? 'check' : 'alert', 'icon lead ' + kind)}<div><div class="headline-text">${escapeHtml(head)}</div>${rest.length ? `<div class="support-text">${escapeHtml(rest.join(' '))}</div>` : ''}</div></div>`; }).join('')}</div>`
+            ? `<div class="list">${items.map(x => { const [head, ...rest] = x.split(/\s*(?:→|->)\s*/); return `<div class="list-item">${icon(kind === 'ok' ? 'check' : 'minus', 'icon lead ' + kind)}<div><div class="headline-text">${escapeHtml(head)}</div>${rest.length ? `<div class="support-text">${escapeHtml(rest.join(' '))}</div>` : ''}</div></div>`; }).join('')}</div>`
             : '<p class="body-md muted">None identified.</p>';
         $('detailEyebrow').textContent = r.job_title ? `For ${r.job_title}` : 'Candidate';
         $('detailTitle').textContent = r.name || 'Candidate';

@@ -366,7 +366,7 @@
     function setFileStatus(kind, html) {
         const el = $('resumeFileStatus');
         el.hidden = !html;
-        const iconName = { success: 'check', warn: 'alert', error: 'x-circle' }[kind] || 'info';
+        const iconName = { success: 'check', warn: 'minus', error: 'x-circle' }[kind] || 'info';
         el.className = 'banner ' + (kind || '');
         el.innerHTML = html ? icon(iconName) + html : '';
     }
@@ -579,9 +579,10 @@
         const flagged = items.filter(i => !i.ok);
         wrap.hidden = false;
         $('resumeCheckSummary').textContent = flagged.length ? `Resume check: ${flagged.length} thing${flagged.length > 1 ? 's' : ''} to fix` : 'Resume check: looks good';
-        wrap.querySelector('summary .icon use').setAttribute('href', flagged.length ? '#i-alert' : '#i-check');
+        wrap.querySelector('summary .icon use').setAttribute('href', flagged.length ? '#i-minus' : '#i-check');
+        wrap.classList.toggle('flagged', flagged.length > 0);
         $('resumeCheckList').innerHTML = [...flagged, ...items.filter(i => i.ok)]
-            .map(i => `<li class="${i.ok ? 'pass' : 'flag'}">${icon(i.ok ? 'check' : 'alert')}<span>${escapeHtml(i.msg)}</span></li>`).join('');
+            .map(i => `<li class="${i.ok ? 'pass' : 'flag'}">${icon(i.ok ? 'check' : 'minus')}<span>${escapeHtml(i.msg)}</span></li>`).join('');
     }
 
     // ======================================================================
@@ -878,7 +879,7 @@
         $('batchWhy').textContent = why;
         $('batchList').innerHTML = b.ranked.map((it, i) => {
             const idx = b.items.indexOf(it);
-            if (!it.analysis) return `<div class="batch-row failed"><span class="batch-rank">${icon('alert')}</span><span class="batch-text"><span class="title-sm">${escapeHtml(isJobs ? `Job ${it.slot + 1} could not be checked` : it.resumeName)}</span><span class="body-sm">${escapeHtml(it.error)}</span></span></div>`;
+            if (!it.analysis) return `<div class="batch-row failed"><span class="batch-rank">${icon('minus')}</span><span class="batch-text"><span class="title-sm">${escapeHtml(isJobs ? `Job ${it.slot + 1} could not be checked` : it.resumeName)}</span><span class="body-sm">${escapeHtml(it.error)}</span></span></div>`;
             const a = it.analysis, call = batchCall4(a), { matches: strengths, gaps } = splitAnalysis(a);
             const kws = Array.isArray(a.keywords) ? a.keywords : [], kwPct = kws.length ? Math.round(kws.filter(k => k.in_resume).length / kws.length * 100) : null;
             const firstGap = gaps[0] ? gaps[0].replace(/^Gap:\s*/i, '').split(/\s*(?:→|->)\s*/)[0] : '';
@@ -1018,7 +1019,7 @@
     function listItems(container, lines, kind) {
         container.innerHTML = lines.length ? lines.map(line => {
             const [head, ...rest] = line.split(/\s*(?:→|->|=>)\s*/);
-            return `<div class="list-item"><svg class="icon lead ${kind}" aria-hidden="true"><use href="#i-${kind === 'ok' ? 'check' : 'alert'}"/></svg><div><div class="headline-text">${escapeHtml(head)}</div>${rest.length ? `<div class="support-text">${escapeHtml(rest.join(' '))}</div>` : ''}</div></div>`;
+            return `<div class="list-item"><svg class="icon lead ${kind}" aria-hidden="true"><use href="#i-${kind === 'ok' ? 'check' : 'minus'}"/></svg><div><div class="headline-text">${escapeHtml(head)}</div>${rest.length ? `<div class="support-text">${escapeHtml(rest.join(' '))}</div>` : ''}</div></div>`;
         }).join('') : `<div class="list-item"><div class="support-text">${kind === 'ok' ? 'No clear strengths were identified.' : 'No significant gaps were identified.'}</div></div>`;
     }
 
