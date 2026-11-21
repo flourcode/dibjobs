@@ -591,7 +591,7 @@ details.boards > summary { font: 900 20px/24px var(--font); letter-spacing: -0.0
 #exampleExpand { display: none; align-self: flex-start; }
 @media (max-width: 879px) {
     /* On small screens the example stays compact so the inputs are still on the first screen */
-    body.example-compact #recEvidence, body.example-compact #recReasons, body.example-compact #recNext,
+    body.example-compact #recEvidence, body.example-compact #recReasons, body.example-compact #recNext, body.example-compact #tailorTeaser,
     body.example-compact #actionBar, body.example-compact #breakdown, body.example-compact #results,
     body.example-compact #verdictChip, body.example-compact #scoreDelta { display: none !important; }
     body.example-compact #exampleExpand { display: inline-flex; }
@@ -637,3 +637,14 @@ button.batch-row:focus-visible { outline: 3px solid var(--ink); outline-offset: 
 #exampleBanner > .grow, #jobLinkHelp > .grow { flex: 1 1 260px; }
 #exampleBanner, #jobLinkHelp { padding: 14px 16px; }
 @media (max-width: 699px) { #exampleBanner .btn, #jobLinkHelp .btn { flex: 1 1 100%; justify-content: center; } }
+
+/* v22: the tailored resume is promoted next to the verdict */
+.tailor-teaser { display: flex; align-items: center; flex-wrap: wrap; gap: 10px 14px; padding: 14px 16px; border-radius: var(--r-md); background: var(--panel); }
+.tailor-teaser > .icon { width: 22px; height: 22px; flex: none; }
+.tailor-teaser > .grow { flex: 1 1 200px; }
+.tailor-teaser .body-sm { color: var(--muted); margin-top: 2px; }
+.score-shift { flex: none; padding: 4px 10px; border-radius: var(--r-seg); background: var(--good); font: 900 18px/24px var(--font); letter-spacing: -0.02em; white-space: nowrap; }
+.row.tight { gap: 8px; }
+.banner.success { background: var(--good); }
+#tailorScoreLine { align-items: center; }
+@media print { .tailor-teaser { display: none !important; } }

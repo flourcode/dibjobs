@@ -32,7 +32,7 @@
     <link rel="apple-touch-icon" href="apple-touch-icon.png">
     <link rel="manifest" href="site.webmanifest">
     <link rel="preload" href="assets/fonts/inter-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="stylesheet" href="assets/app.css?v=21">
+    <link rel="stylesheet" href="assets/app.css?v=22">
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-N10ZLNFZHE"></script>
     <script>
@@ -192,9 +192,17 @@
                     <button class="btn" type="button" id="exampleExpand" data-action="example-expand">See the full example<svg class="icon"><use href="#i-chevron"/></svg></button>
                     <div class="row" id="actionBar">
                         <button class="btn primary" id="primaryActionBtn" data-action="primary-action"><svg class="icon"><use href="#i-copy"/></svg><span id="primaryActionText">Next step</span></button>
+                        <button class="btn" id="tailorActionBtn" data-action="view-tailored" hidden><svg class="icon"><use href="#i-spark"/></svg><span id="tailorActionText">Get a tailored resume</span></button>
                         <button class="btn" id="saveToTrackerBtn" data-action="save-job"><svg class="icon"><use href="#i-bookmark"/></svg><span>Save to tracker</span></button>
                         <button class="btn" data-action="download-report"><svg class="icon"><use href="#i-pdf"/></svg><span>Report</span></button>
                         <button class="btn" data-action="new-job"><svg class="icon"><use href="#i-add"/></svg><span>New job</span></button>
+                    </div>
+
+                    <div class="tailor-teaser" id="tailorTeaser" hidden>
+                        <svg class="icon"><use href="#i-spark"/></svg>
+                        <div class="grow"><p class="title-sm" id="tailorTeaserTitle">Your tailored resume is ready</p><p class="body-sm" id="tailorTeaserText"></p></div>
+                        <span class="score-shift" id="tailorTeaserScore" hidden></span>
+                        <div class="row tight"><button class="btn" data-action="view-tailored">View it</button><button class="btn" data-action="download-docx"><svg class="icon"><use href="#i-download"/></svg>Word</button></div>
                     </div>
 
                     <div class="rows" id="breakdown">
@@ -393,8 +401,9 @@
                             <div class="row">
                                 <button class="btn" data-action="download-docx"><svg class="icon"><use href="#i-download"/></svg>Download Word (.docx)</button>
                                 <button class="btn" data-action="copy-tailored"><svg class="icon"><use href="#i-copy"/></svg>Copy as text</button>
-                                <button class="btn text" data-action="use-tailored">Use as my resume and re-score</button>
+                                <button class="btn text" id="useTailoredBtn" data-action="use-tailored">Use as my resume and re-score</button>
                             </div>
+                            <div class="banner info" id="tailorScoreLine" hidden></div>
                             <div class="banner info" id="tailorChanges"></div>
                             <div class="paper resume-preview" id="tailoredPreview"></div>
                             <p class="body-sm muted">Read every line before you send it. The AI is told not to add anything, but you are the one signing it.</p>
@@ -703,7 +712,7 @@
     <button class="icon-btn" data-action="dismiss-snackbar" aria-label="Dismiss"><svg class="icon"><use href="#i-close"/></svg></button>
 </div>
 
-<script src="assets/files.js?v=21"></script>
-<script src="assets/app.js?v=21"></script>
+<script src="assets/files.js?v=22"></script>
+<script src="assets/app.js?v=22"></script>
 </body>
 </html>

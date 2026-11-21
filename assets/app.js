@@ -1008,8 +1008,9 @@
     }
 
     function resetGenerated() {
-        state.tailored = null; state.chat = [];
+        state.tailored = null; state.tailorScore = null; state.chat = [];
         $('tailoredWrap').hidden = true;
+        syncTailorUi();
         $('linkedinList').innerHTML = '';
         $('emailWrap').hidden = true;
         $('chat').innerHTML = '';
@@ -1038,6 +1039,7 @@
         const company = knownCompany(data.company);
         $('roleLine').textContent = (data.job_title || 'Role') + (company ? ' at ' + company : '');
         renderRecommendation(data, score);
+        syncTailorUi();
         const delta = $('scoreDelta');
         if (typeof previousScore === 'number') {
             const d = score - previousScore;
@@ -1154,7 +1156,7 @@
         if (!state.analysis) return;
         switch (state.primaryAction) {
             case 'confirm_requirement': copyText(state.recruiterQuestion, 'Question copied. Paste it into a message to the recruiter.'); break;
-            case 'fix_first': showPanel('resume'); $('tailorBlock').scrollIntoView({ behavior: 'smooth', block: 'start' }); if (!state.tailored) buildTailoredResume($('tailorBtn')); break;
+            case 'fix_first': viewTailored(); break;
             case 'apply': showPanel('outreach'); $('emailBtn').scrollIntoView({ behavior: 'smooth', block: 'center' }); if ($('emailWrap').hidden) writeIntroEmail($('emailBtn')); break;
             default: showView('explore');
         }
@@ -1270,8 +1272,59 @@
             if (state.analysis !== forJob) return;
             state.tailored = data.resume;
             renderTailored(data.resume);
+            scoreTailored(forJob);          // not awaited: the resume is usable while its score is checked
             track('tailored_resume_built');
         });
+    }
+
+    // Check the tailored version against the same job, so the user sees whether it actually fits better.
+    async function scoreTailored(forJob) {
+        const before = Math.round(forJob.score || 0);
+        state.tailorScore = { before, pending: true };
+        syncTailorUi();
+        try {
+            const data = await api({ request_type: 'resume_match', job_description: state.jd, resume_text: tailoredToText(state.tailored).substring(0, MAX_RESUME_CHARS), military_transition: isMilitary() });
+            if (state.analysis !== forJob) return;
+            state.tailorScore = typeof data.score === 'number' ? { before, after: Math.round(data.score) } : null;
+        } catch (e) {
+            if (state.analysis !== forJob) return;
+            state.tailorScore = null;      // the resume is still good to use; only the comparison is missing
+        }
+        syncTailorUi();
+    }
+
+    // One place that keeps the tailored-resume button, the strip under the verdict and the score line in step.
+    function syncTailorUi() {
+        const built = !!state.tailored, t = state.tailorScore;
+        const btn = $('tailorActionBtn');
+        btn.hidden = !state.analysis || (state.primaryAction === 'fix_first' && !built);
+        $('tailorActionText').textContent = built ? 'View tailored resume' : 'Get a tailored resume';
+        $('useTailoredBtn').hidden = !!state.isExample;
+        let shift = '', note = '';
+        if (t && t.pending) note = 'Checking how the new version scores...';
+        else if (t && t.after > t.before) { shift = `${t.before} \u2192 ${t.after}`; note = `Resume fit for this job went from ${t.before} to ${t.after}.`; }
+        else if (t && t.after === t.before) note = `Resume fit is unchanged at ${t.before}. The wording now follows the posting more closely.`;
+        else if (t) note = `This version scores ${t.after}, below your original ${t.before}. Keep your original for this job.`;
+        const teaser = $('tailorTeaser');
+        teaser.hidden = !built;
+        if (built) {
+            $('tailorTeaserTitle').textContent = state.isExample ? 'A tailored resume, written for this job' : 'Your tailored resume is ready';
+            const changes = arr(state.tailored.changes);
+            $('tailorTeaserText').textContent = note || changes[0] || 'Reordered and reworded for this role, using only facts already in your resume.';
+            $('tailorTeaserScore').hidden = !shift;
+            $('tailorTeaserScore').textContent = shift;
+        }
+        const line = $('tailorScoreLine');
+        line.hidden = !note;
+        line.className = 'banner ' + (shift ? 'success' : 'info');
+        line.innerHTML = note ? `${shift ? `<span class="score-shift">${escapeHtml(shift)}</span>` : icon('info')}<span class="grow">${escapeHtml(note)}</span>` : '';
+    }
+
+    function viewTailored() {
+        showPanel('resume');
+        $('tailorBlock').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        if (!state.tailored) buildTailoredResume($('tailorBtn'));
+        track('tailored_resume_opened');
     }
 
     // Send only what the backend prompts use, not the whole result object.
@@ -1282,7 +1335,7 @@
 
     const arr = (v) => Array.isArray(v) ? v.filter(x => typeof x === 'string' && x.trim()) : [];
 
-    function renderTailored(r) {
+    function renderTailored(r, quiet) {
         const section = (title, html) => html ? `<h4>${title}</h4>${html}` : '';
         const lines = (list) => arr(list).map(x => `<p>${escapeHtml(x)}</p>`).join('');
         const jobs = (Array.isArray(r.experience) ? r.experience : []).map(j => `<div class="job"><b>${escapeHtml(j.title || '')}</b>${j.company ? ', ' + escapeHtml(j.company) : ''}${j.location ? ' &middot; ' + escapeHtml(j.location) : ''}${j.dates ? ' &middot; ' + escapeHtml(j.dates) : ''}<ul>${arr(j.bullets).map(b => `<li>${escapeHtml(b)}</li>`).join('')}</ul></div>`).join('');
@@ -1296,7 +1349,8 @@
         $('tailorChanges').hidden = !changes.length;
         $('tailorChanges').innerHTML = `${icon('info')}<span class="grow"><strong>What changed</strong><br>${changes.map(escapeHtml).join('<br>')}</span>`;
         $('tailoredWrap').hidden = false;
-        $('tailoredWrap').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        syncTailorUi();
+        if (!quiet) $('tailoredWrap').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
 
     function tailoredToText(r) {
@@ -2251,6 +2305,42 @@ Amazon is an Equal Opportunity Employer.`;
         timeline: { screen_weeks: '1-2', interview_weeks: '3-5', offer_weeks: '6-8', notes: 'Expect a multi-interview loop.' }
     };
 
+    // The example's tailored resume. Every fact in it comes from SAMPLE_RESUME; only the order and wording change.
+    const EXAMPLE_TAILORED = {
+        name: 'JOHN DOE',
+        headline: 'Principal DoD Sales Executive | Enterprise Software, Cybersecurity and Cloud Adoption',
+        contact: 'Arlington, VA | johndoe@email.com | (703) 555-1234',
+        clearance: 'Active TS/SCI',
+        summary: 'Senior federal sales executive with 15+ years selling to the Department of Defense and Intelligence Community. Carries a $180M+ DoD territory at 145% of quota across DISA, Army, Navy and Air Force. Moved 8 Army and Intelligence Community accounts from on-premise to cloud solutions and works with solutions architects through ATO. Builds partner ecosystems with defense primes and systems integrators.',
+        skills: ['DoD and Intelligence Community sales', 'Quota attainment', 'Cloud adoption and ATO support', 'IDIQ/GWAC', 'FAR/DFARS', 'Partner ecosystems', 'Strategic account planning', 'MEDDIC', 'Contract negotiations', 'Salesforce'],
+        experience: [
+            { title: 'Account Manager', company: 'Major Cybersecurity Provider', location: '', dates: '2019-Present', bullets: [
+                'Own a $180M+ DoD territory across DISA, Army, Navy and Air Force, finishing FY23 at 145% of quota and FY22 at 138% (President\'s Club both years)',
+                'Closed a $95M multi-year enterprise license agreement with an Army customer',
+                'Built a partner ecosystem of 25+ defense contractors that drives 40% of pipeline',
+                'Work with solutions architects on technical requirements and ATO support' ] },
+            { title: 'Senior Account Executive, Defense', company: 'Enterprise Software Company', location: '', dates: '2015-2019', bullets: [
+                'Grew a DoD territory from $12M to $67M in annual recurring revenue',
+                'Led capture of a $45M IDIQ contract with a Navy customer',
+                'Exceeded quota four years running: 112%, 128%, 135%, 141%',
+                'Built strategic account plans for the top 15 DoD accounts and ran joint pursuits with Lockheed Martin, Northrop Grumman and GDIT' ] },
+            { title: 'Federal Account Manager', company: 'Defense Contractor', location: '', dates: '2010-2015', bullets: [
+                'Moved 8 Army and Intelligence Community accounts from on-premise to cloud solutions',
+                'Managed a $35M book of business across Army and Intelligence Community accounts',
+                'Sales lead on a $200M program capture, working with contracting officers and program managers' ] },
+            { title: 'Sales Representative', company: 'Technology Reseller', location: '', dates: '2007-2010', bullets: [
+                'Developed new business in federal civilian and DoD markets; Rookie of the Year, promoted twice in three years' ] }
+        ],
+        education: ['B.S. Business Administration, Penn State University'],
+        certifications: ['AWS AI Practitioner', 'MEDDIC Sales Methodology Certified', 'Salesforce Certified Administrator'],
+        additional: [],
+        changes: [
+            'Brought the cloud work forward: the 8 accounts moved to cloud and the ATO support now appear in the summary, and the AWS certification is listed first.',
+            'Opened the current role with the quota numbers this posting screens on.',
+            'Reworded skills to match the posting\'s terms. Nothing was added that is not in the original.'
+        ]
+    };
+
     // First visit: show the example answer straight away, with the job and resume boxes left empty and ready.
     const isFirstVisit = () => !$('resumeText').value.trim() && !$('jobDescription').value.trim() && !state.tracked.length && !Object.keys(getSavedResumes()).length;
     function showExamplePreview() {
@@ -2259,6 +2349,13 @@ Amazon is an Equal Opportunity Employer.`;
         state.resumeText = SAMPLE_RESUME; state.jd = SAMPLE_JD;      // so the example's own tools (Ask AI, tailoring) have something to work on
         resetGenerated();
         renderResults(EXAMPLE_ANALYSIS);
+        showExampleTailored();
+    }
+    // The example arrives with its tailored resume already written, so the before and after are visible at once.
+    function showExampleTailored() {
+        state.tailored = EXAMPLE_TAILORED;
+        state.tailorScore = { before: EXAMPLE_ANALYSIS.score, after: 89 };
+        renderTailored(EXAMPLE_TAILORED, true);
     }
     function expandExample() {
         state.previewOnly = false;
@@ -2276,7 +2373,9 @@ Amazon is an Equal Opportunity Employer.`;
         state.resumeText = $('resumeText').value.trim();
         state.jd = $('jobDescription').value.trim();
         setResumeMode(false);
+        resetGenerated();
         renderResults(EXAMPLE_ANALYSIS);
+        showExampleTailored();
         $('resultCol').scrollIntoView({ behavior: 'smooth', block: 'start' });
         track('example_viewed');
     }
@@ -2325,6 +2424,7 @@ Amazon is an Equal Opportunity Employer.`;
         'share': () => shareTool(),
         'copy-link': () => { copyText(SHARE_URL, 'Link copied. Paste it anywhere.'); track('share', { method: 'copy_link' }); },
         'tailor': (b) => buildTailoredResume(b),
+        'view-tailored': () => viewTailored(),
         'download-docx': () => downloadTailoredDocx(),
         'copy-tailored': () => state.tailored && copyText(tailoredToText(state.tailored), 'Resume text copied.'),
         'use-tailored': () => useTailoredAsResume(),
