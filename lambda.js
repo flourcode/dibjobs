@@ -29,7 +29,7 @@
 // site's copy ("Your resume is not stored on our servers").
 
 const env = process.env;
-const VERSION = '3.4.0';
+const VERSION = '3.4.1';
 
 function clampInt(v, def, min, max) {
     const n = Number.parseInt(v, 10);
@@ -439,7 +439,7 @@ OUTPUT VALID JSON ONLY (no markdown, no backticks):
 }`;
     const parsed = await callGemini({
         prompt, json: true, label: 'resume_match',
-        maxTokens: CONFIG.AI_MAX_TOKENS, temperature: CONFIG.AI_TEMPERATURE
+        maxTokens: CONFIG.AI_MAX_TOKENS, temperature: 0.2       // low, so the same resume and job score alike from run to run
     });
     if (typeof parsed.score !== 'number' || !parsed.tailored_summary) {
         throw incomplete('resume_match');

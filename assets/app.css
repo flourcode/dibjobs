@@ -648,3 +648,4 @@ button.batch-row:focus-visible { outline: 3px solid var(--ink); outline-offset: 
 .banner.success { background: var(--good); }
 #tailorScoreLine { align-items: center; }
 @media print { .tailor-teaser { display: none !important; } }
+.tailor-teaser .score-shift, #tailorScoreLine .score-shift { font-size: 16px; }

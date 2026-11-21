@@ -1008,7 +1008,7 @@
     }
 
     function resetGenerated() {
-        state.tailored = null; state.tailorScore = null; state.chat = [];
+        state.tailored = null; state.tailorScore = null; state.tailorKeywords = null; state.chat = [];
         $('tailoredWrap').hidden = true;
         syncTailorUi();
         $('linkedinList').innerHTML = '';
@@ -1271,8 +1271,10 @@
             const data = await api({ request_type: 'tailor_resume', job_description: state.jd, resume_text: state.resumeText, analysis_data: slimAnalysis(), military_transition: isMilitary() });
             if (state.analysis !== forJob) return;
             state.tailored = data.resume;
+            state.tailorKeywords = keywordShift(forJob, state.resumeText, tailoredToText(data.resume));   // instant
+            state.tailorScore = { before: Math.round(forJob.score || 0), pending: true };
             renderTailored(data.resume);
-            scoreTailored(forJob);          // not awaited: the resume is usable while its score is checked
+            scoreTailored(forJob);          // starts at once, not awaited: the resume is usable while its score is checked
             track('tailored_resume_built');
         });
     }
@@ -1293,31 +1295,62 @@
         syncTailorUi();
     }
 
+    // How many of the posting's keywords each version covers. Worked out in the browser the moment the
+    // resume arrives, so it is instant and gives the same answer every time (the AI score does not).
+    const SCORE_NOISE = 2;      // AI scores move a point or two between identical runs; inside this band is "the same"
+    function keywordShift(analysis, originalText, tailoredText) {
+        const kws = (Array.isArray(analysis.keywords) ? analysis.keywords : []).filter(k => k && typeof k.term === 'string');
+        if (!kws.length) return null;
+        const norm = (x) => String(x).toLowerCase().replace(/[^a-z0-9+#./&-]+/g, ' ').trim();
+        const h0 = ' ' + norm(originalText) + ' ', h1 = ' ' + norm(tailoredText) + ' ';
+        const has = (hay, term) => { const n = norm(term); return n.length >= 2 && hay.includes(' ' + n + ' '); };
+        let was = 0, now = 0; const added = [], lost = [];
+        kws.forEach(k => {
+            const before = !!k.in_resume;
+            // Counted as covered if the words are there, or if the original covered it in other words and still does.
+            const after = has(h1, k.term) || (before && !has(h0, k.term));
+            if (before) was++;
+            if (after) now++;
+            if (after && !before) added.push(k.term);
+            if (before && !after) lost.push(k.term);
+        });
+        return { total: kws.length, was, now, added, lost };
+    }
+
     // One place that keeps the tailored-resume button, the strip under the verdict and the score line in step.
     function syncTailorUi() {
-        const built = !!state.tailored, t = state.tailorScore;
+        const built = !!state.tailored, t = state.tailorScore, k = state.tailorKeywords;
         const btn = $('tailorActionBtn');
         btn.hidden = !state.analysis || (state.primaryAction === 'fix_first' && !built);
         $('tailorActionText').textContent = built ? 'View tailored resume' : 'Get a tailored resume';
         $('useTailoredBtn').hidden = !!state.isExample;
-        let shift = '', note = '';
-        if (t && t.pending) note = 'Checking how the new version scores...';
-        else if (t && t.after > t.before) { shift = `${t.before} \u2192 ${t.after}`; note = `Resume fit for this job went from ${t.before} to ${t.after}.`; }
-        else if (t && t.after === t.before) note = `Resume fit is unchanged at ${t.before}. The wording now follows the posting more closely.`;
-        else if (t) note = `This version scores ${t.after}, below your original ${t.before}. Keep your original for this job.`;
+        const lines = []; let shift = '', caution = '';
+        if (k) {
+            lines.push(k.now > k.was ? `Covers ${k.now} of ${k.total} keywords from the posting, up from ${k.was}.`
+                : k.now === k.was ? `Covers ${k.now} of ${k.total} keywords from the posting, the same as your original.`
+                : `Covers ${k.now} of ${k.total} keywords from the posting, down from ${k.was}. Dropped: ${k.lost.join(', ')}.`);
+            if (k.now > k.was) shift = `${k.was} \u2192 ${k.now} keywords`;
+            if (k.added.length) caution = `New in this version: ${k.added.join(', ')}. Make sure each is true for you before you send it.`;
+        }
+        if (t && t.pending) lines.push('Checking the fit score...');
+        else if (t) {
+            const d = t.after - t.before;
+            if (d > SCORE_NOISE) { lines.push(`Fit score went from ${t.before} to ${t.after}.`); shift = `${t.before} \u2192 ${t.after}`; }
+            else if (d < -SCORE_NOISE) lines.push(`Fit score came back lower: ${t.after}, against ${t.before} for your original. Read both before you choose.`);
+            else lines.push(`Fit score is about the same: ${t.after}, against ${t.before} for your original. A point or two either way is normal between runs.`);
+        }
         const teaser = $('tailorTeaser');
         teaser.hidden = !built;
         if (built) {
             $('tailorTeaserTitle').textContent = state.isExample ? 'A tailored resume, written for this job' : 'Your tailored resume is ready';
-            const changes = arr(state.tailored.changes);
-            $('tailorTeaserText').textContent = note || changes[0] || 'Reordered and reworded for this role, using only facts already in your resume.';
+            $('tailorTeaserText').textContent = lines.join(' ') || arr(state.tailored.changes)[0] || 'Reordered and reworded for this role, using only facts already in your resume.';
             $('tailorTeaserScore').hidden = !shift;
             $('tailorTeaserScore').textContent = shift;
         }
         const line = $('tailorScoreLine');
-        line.hidden = !note;
+        line.hidden = !built || !lines.length;
         line.className = 'banner ' + (shift ? 'success' : 'info');
-        line.innerHTML = note ? `${shift ? `<span class="score-shift">${escapeHtml(shift)}</span>` : icon('info')}<span class="grow">${escapeHtml(note)}</span>` : '';
+        line.innerHTML = lines.length ? `${shift ? `<span class="score-shift">${escapeHtml(shift)}</span>` : icon('info')}<span class="grow">${lines.map(escapeHtml).join('<br>')}${caution ? `<br><strong>${escapeHtml(caution)}</strong>` : ''}</span>` : '';
     }
 
     function viewTailored() {
@@ -2355,6 +2388,7 @@ Amazon is an Equal Opportunity Employer.`;
     function showExampleTailored() {
         state.tailored = EXAMPLE_TAILORED;
         state.tailorScore = { before: EXAMPLE_ANALYSIS.score, after: 89 };
+        state.tailorKeywords = keywordShift(EXAMPLE_ANALYSIS, SAMPLE_RESUME, tailoredToText(EXAMPLE_TAILORED));
         renderTailored(EXAMPLE_TAILORED, true);
     }
     function expandExample() {
