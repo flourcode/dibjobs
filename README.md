@@ -29,3 +29,11 @@ Upload everything except `lambda.js` and this README to the web root. When `asse
 ## Privacy
 
 Resume files are parsed in the browser. Text is sent to the Lambda only when the user runs a check. The Lambda does not log or store resumes, job descriptions or questions. Saved resumes and the tracker live in the browser's localStorage. Find Jobs only builds links to LinkedIn, ClearanceJobs, Indeed and Google.
+
+
+## Pages added in v37
+
+- `about/`, `privacy/` and `terms/` are plain pages that share `assets/app.css`. Upload the three folders next to `index.html`.
+- The About page is written in Mark's name from the QuotaBird About page; edit it freely.
+- The Privacy and Terms pages describe what this build actually does. If you change what is sent, stored or counted, update the Privacy page and its date. Have the Terms reviewed by a lawyer before relying on them.
+- Contact address used on these pages: mark@quotabird.com (search the three files to change it).

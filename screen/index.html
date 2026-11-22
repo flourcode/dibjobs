@@ -32,7 +32,7 @@
     <link rel="apple-touch-icon" href="../apple-touch-icon.png">
     <link rel="manifest" href="../site.webmanifest">
     <link rel="preload" href="../assets/fonts/inter-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="stylesheet" href="../assets/app.css?v=33">
+    <link rel="stylesheet" href="../assets/app.css?v=35">
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-N10ZLNFZHE"></script>
     <script>
@@ -207,13 +207,21 @@
                 </div>
                 <p class="body-sm muted">Every candidate was checked against the same must-haves you confirmed. "Confirm" means the resume hints at it but does not say so plainly, so ask.</p>
             </div>
+            <div class="feedback" id="feedback" hidden>
+                <span class="grow" id="feedbackAsk" aria-live="polite">Was this ranking useful?</span>
+                <button class="btn" type="button" data-feedback="up" aria-pressed="false">Yes</button>
+                <button class="btn" type="button" data-feedback="down" aria-pressed="false">No</button>
+            </div>
             <p class="body-sm" id="decisionNote"><strong>This supports your decision. It does not make it.</strong> Scores and calls are AI estimates built from the resume text and the must-haves you confirmed. Read each resume and make the call yourself.</p>
         </div>
     </section>
 </main>
 
 <footer class="site-footer">
-    <p style="margin-top:0">Resume files are read in your browser; only their text is sent, to Google's Gemini AI, for analysis, and nothing is stored on our servers. Results are AI-generated estimates, not hiring decisions.</p>
+    <nav class="foot-links" aria-label="About this site">
+        <a href="../about/">About</a><a href="../privacy/">Privacy</a><a href="../terms/">Terms</a><a href="../">Check a job</a>
+    </nav>
+    <p>Resume files are read in your browser; only their text is sent, to Google's Gemini AI, for analysis, and nothing is stored on our servers. Results are AI-generated estimates, not hiring decisions.</p>
 </footer>
 </div>
 
@@ -232,7 +240,7 @@
     <button class="icon-btn" data-action="dismiss-snackbar" aria-label="Dismiss"><svg class="icon"><use href="#i-close"/></svg></button>
 </div>
 
-<script src="../assets/files.js?v=33"></script>
-<script src="screen.js?v=33"></script>
+<script src="../assets/files.js?v=35"></script>
+<script src="screen.js?v=35"></script>
 </body>
 </html>

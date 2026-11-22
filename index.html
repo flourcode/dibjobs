@@ -32,7 +32,7 @@
     <link rel="apple-touch-icon" href="apple-touch-icon.png">
     <link rel="manifest" href="site.webmanifest">
     <link rel="preload" href="assets/fonts/inter-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="stylesheet" href="assets/app.css?v=33">
+    <link rel="stylesheet" href="assets/app.css?v=35">
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-N10ZLNFZHE"></script>
     <script>
@@ -220,6 +220,19 @@
                         <div class="row-item"><span>Keywords matched</span><b id="keywordsPercent">0%</b></div>
                         <div class="row-item"><span id="salaryEstimateLabel">Pay</span><b id="salaryEstimate">...</b></div>
                         <div class="row-item" id="baseRow" hidden><span id="baseEstimateLabel">Base</span><b id="baseEstimate"></b></div>
+                    </div>
+
+                    <div class="feedback" id="feedback" hidden>
+                        <span class="grow" id="feedbackAsk" aria-live="polite">Was this verdict right?</span>
+                        <button class="btn" type="button" data-feedback="up" aria-pressed="false">Yes</button>
+                        <button class="btn" type="button" data-feedback="down" aria-pressed="false">No</button>
+                        <div class="feedback-why" id="feedbackWhy" hidden>
+                            <span class="body-sm muted">What was off? Pick one if you like. Only your choice is recorded, never your resume or the posting.</span>
+                            <button class="btn" type="button" data-why="score_too_high">Score too high</button>
+                            <button class="btn" type="button" data-why="score_too_low">Score too low</button>
+                            <button class="btn" type="button" data-why="missed_resume">Missed something on my resume</button>
+                            <button class="btn" type="button" data-why="misread_posting">Misread the posting</button>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -700,7 +713,10 @@
         <a class="btn" href="https://www.linkedin.com/sharing/share-offsite/?url=https%3A%2F%2Fdibjobs.com%2F" target="_blank" rel="noopener">Share on LinkedIn</a>
         <button class="btn text" data-action="copy-link">Copy link</button>
     </div>
-    <p>Free to use. Resume files are read in your browser and never stored on our servers.<br>Results are AI-generated estimates, not hiring decisions or career advice.</p>
+    <nav class="foot-links" aria-label="About this site">
+        <a href="about/">About</a><a href="privacy/">Privacy</a><a href="terms/">Terms</a><a href="screen/">For recruiters</a>
+    </nav>
+    <p>Free to use. Resume files are read in your browser and never stored on our servers.<br>Results are AI-generated estimates, not hiring decisions or career advice. Not affiliated with the U.S. government or Amazon.</p>
 </footer>
 </div><!-- /.app -->
 
@@ -724,7 +740,7 @@
     <button class="icon-btn" data-action="dismiss-snackbar" aria-label="Dismiss"><svg class="icon"><use href="#i-close"/></svg></button>
 </div>
 
-<script src="assets/files.js?v=33"></script>
-<script src="assets/app.js?v=33"></script>
+<script src="assets/files.js?v=35"></script>
+<script src="assets/app.js?v=35"></script>
 </body>
 </html>

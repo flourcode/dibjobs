@@ -420,6 +420,7 @@
         }
         running = false;
         rankedBlind = blind;
+        $('feedbackAsk').textContent = 'Was this ranking useful?'; document.querySelectorAll('#feedback [data-feedback]').forEach(b => b.setAttribute('aria-pressed', 'false'));
         btn.disabled = false;
         renderExampleState();
         renderQueue();
@@ -521,6 +522,7 @@
         const cols = ranked.length ? mustOf(ranked[0]).map(m => m.requirement) : [];
         $('gridCard').hidden = !cols.length;
         $('blindNote').hidden = !(hideNames && results.length && !rankedBlind && !isExample);
+        $('feedback').hidden = isExample || !results.length;
         if (!cols.length) return;
         $('gridHead').innerHTML = `<tr><th>Candidate</th><th>Call</th>${cols.map(c => `<th>${escapeHtml(c)}</th>`).join('')}</tr>`;
         $('gridBody').innerHTML = ranked.map(r => {
@@ -803,6 +805,12 @@ What we need
                 // Undo puts the candidate back where they were, ranking included. (Not offered inside the example.)
                 if (gone && !isExample && !stash) snackbar(`Removed ${hideNames ? 'the candidate' : gone.name}.`, 10000, { label: 'Undo', run: () => { queue = was.queue; results = was.results; applySort(); renderQueue(); renderResults(); renderExampleState(); persist(); } });
                 return;
+            }
+            const fb = e.target.closest('#feedback [data-feedback]');
+            if (fb) {
+                document.querySelectorAll('#feedback [data-feedback]').forEach(b => b.setAttribute('aria-pressed', String(b === fb)));
+                $('feedbackAsk').textContent = fb.dataset.feedback === 'up' ? 'Thanks. Good to know it helped.' : 'Thanks. That helps fix the ranking.';
+                return track('recruiter_feedback', { vote: fb.dataset.feedback, count: results.length });
             }
             const sub = e.target.closest('[data-submittal]');
             if (sub) return copySubmittal(sub.dataset.submittal);

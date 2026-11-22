@@ -247,6 +247,8 @@
 
     function initMenus() {
         document.addEventListener('click', (e) => {
+            const fb = e.target.closest('#feedback [data-feedback]'); if (fb) return giveFeedback(fb.dataset.feedback);
+            const why = e.target.closest('#feedback [data-why]'); if (why) return giveFeedbackReason(why.dataset.why, why.textContent.trim());
             const toggle = e.target.closest('[data-menu]');
             if (toggle) { e.preventDefault(); toggleMenu(toggle.dataset.menu); return; }
             // Choosing an item, or clicking anywhere outside, closes open menus.
@@ -1227,7 +1229,30 @@
     }
     const requirementRows = (rows) => rows.map(r => `<div class="req"><div class="req-main"><span class="req-what">${r.type ? `<span class="req-tag">${r.type === 'required' ? 'Required' : 'Preferred'}</span>` : ''}<b>${escapeHtml(r.requirement)}</b></span><span class="req-shows">Your resume: ${escapeHtml(r.shows || 'Not shown')}</span></div><span class="chip sm ${REQ_STATUS[r.status][0]}">${REQ_STATUS[r.status][1]}</span></div>`).join('');
 
+    // "Was this verdict right?": one tap, recorded as a count only (the vote, the score and the chosen reason).
+    function resetFeedback() {
+        $('feedback').hidden = state.isExample;
+        $('feedbackAsk').textContent = 'Was this verdict right?';
+        $('feedbackWhy').hidden = true;
+        document.querySelectorAll('#feedback [data-feedback]').forEach(b => { b.hidden = false; b.setAttribute('aria-pressed', 'false'); });
+        document.querySelectorAll('#feedback [data-why]').forEach(b => { b.hidden = false; });
+    }
+    function giveFeedback(vote) {
+        const a = state.analysis; if (!a) return;
+        document.querySelectorAll('#feedback [data-feedback]').forEach(b => { b.setAttribute('aria-pressed', String(b.dataset.feedback === vote)); });
+        $('feedbackWhy').hidden = vote !== 'down';
+        $('feedbackAsk').textContent = vote === 'up' ? 'Thanks. Good to know it held up.' : 'Thanks. That helps fix the scoring.';
+        track('verdict_feedback', { vote, score: a.score, action: state.primaryAction || '' });
+    }
+    function giveFeedbackReason(why, text) {
+        const a = state.analysis; if (!a) return;
+        document.querySelectorAll('#feedback [data-why]').forEach(b => { b.hidden = b.dataset.why !== why; });
+        $('feedbackAsk').textContent = `Thanks. Noted: ${text.toLowerCase()}.`;
+        track('verdict_feedback_reason', { reason: why, score: a.score });
+    }
+
     function renderRecommendation(data, score) {
+        resetFeedback();
         const r = deriveRecommendation(data, score);
         const meta = ACTIONS_META[r.action];
         state.primaryAction = r.action;
