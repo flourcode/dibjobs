@@ -727,3 +727,37 @@ button.batch-row:focus-visible { outline: 3px solid var(--ink); outline-offset: 
 #jobLinkHelp a { word-break: break-all; }
 #jobDescription[readonly] { color: var(--muted); }
 #jobLinkHelp .btn.text { background: transparent; color: var(--ink); text-decoration: underline; flex: none; padding: 0; min-height: 24px; justify-content: flex-start; }
+
+/* v31: one summary above the tailored resume; the preview holds nothing but the resume */
+.tailor-summary { align-items: flex-start !important; }
+.tailor-summary .grow { display: flex; flex-direction: column; gap: 6px; }
+.tailor-summary .grow strong { font-weight: 700; }
+.tailor-summary .tailor-caution { font-weight: 600; padding: 8px 10px; border-radius: var(--r-seg); background: var(--caution); }
+.resume-preview li.check { background: var(--caution); box-shadow: 0 0 0 4px var(--caution); border-radius: 4px; margin: 6px 0; }
+@media print { .resume-preview li.check { background: none; box-shadow: none; } }
+
+/* v32: screen-out checks lead the requirement list */
+.req-tally { font: 700 15px/21px var(--font); padding: 2px 0 6px; }
+.req-head.rest { margin-top: 6px; border-top: 1px solid rgba(11, 18, 21, .14); padding-top: 12px; }
+.req-head + .req, .req-tally + .req { border-top: 0; }
+
+/* v32 recruiter: must-have confirmation, the candidate grid, submittal */
+.criteria { padding: 14px 16px; border-radius: var(--r-sm); background: var(--page); }
+.criteria > * + * { margin-top: 8px; }
+.criterion { display: flex; align-items: center; gap: 4px; }
+.criterion + .criterion { margin-top: 6px; }
+.criterion input { flex: 1; min-width: 0; min-height: 44px; padding: 9px 12px; border: 1.5px solid var(--hairline); border-radius: var(--r-sm); background: var(--page); font: 400 15px/22px var(--font); color: var(--ink); }
+.criterion input:focus-visible { outline: 3px solid var(--ink); outline-offset: 1px; }
+.grid-evidence { display: block; margin-top: 4px; font: 400 13px/18px var(--font); color: var(--muted); }
+table.grid-table th, table.grid-table td { vertical-align: top; }
+table.grid-table thead th { min-width: 150px; }
+table.grid-table thead th:first-child, table.grid-table thead th:nth-child(2) { min-width: 0; }
+.must-row { align-items: flex-start; }
+table.ranking td.actions { white-space: nowrap; }
+table.ranking td.actions .btn.text { margin-left: 4px; }
+@media (max-width: 699px) {
+    table.data.stackable.grid-table td[data-label] { color: var(--ink); padding-top: 8px; }
+    table.data.stackable.grid-table td[data-label]::before { display: block; content: attr(data-label); margin-bottom: 4px; }
+    table.ranking td.actions { white-space: normal; }
+}
+.must-name { font-weight: 700; }

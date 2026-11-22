@@ -1193,7 +1193,8 @@
         let rows = (Array.isArray(data.requirements) ? data.requirements : []).map(r => r && ({
             requirement: clean(r.requirement), shows: clean(r.resume_shows),
             type: /^pref/i.test(r.type) ? 'preferred' : /^req/i.test(r.type) ? 'required' : '',
-            status: REQ_STATUS[r.status] ? r.status : 'verify'
+            status: REQ_STATUS[r.status] ? r.status : 'verify',
+            knockout: r.screen_out === true
         })).filter(r => r && r.requirement);
         if (!rows.length) {
             // Older answers have no requirement list: build one from the clearance check and the fit signals.
@@ -1204,7 +1205,20 @@
                 rows.push({ requirement: [f.signal, f.role_expects].filter(Boolean).join(': '), shows: clean(f.resume_shows) || 'Not shown', type: '', status: { strong: 'met', partial: 'partial', missing: 'missing' }[f.status] || 'verify' });
             });
         }
-        return rows.slice(0, 4);
+        // Screen-out checks lead: a recruiter rejects on these before reading anything else.
+        const knock = rows.filter(r => r.knockout).slice(0, 4);
+        return knock.length ? [...knock, ...rows.filter(r => !r.knockout).slice(0, Math.max(2, 5 - knock.length))] : rows.slice(0, 4);
+    }
+    // The requirement list in the answer: screen-out checks first with a one-line tally, then the rest.
+    function requirementList(rows) {
+        if (!rows.length) return '';
+        const knock = rows.filter(r => r.knockout), rest = rows.filter(r => !r.knockout);
+        if (!knock.length) return `<p class="req-head">The posting asks for</p>${requirementRows(rows)}`;
+        const open = knock.filter(r => r.status !== 'met');
+        const tally = !open.length ? (knock.length === 1 ? 'Your resume shows it.' : `Your resume shows all ${knock.length}.`)
+            : `${open.length} of ${knock.length} ${open.length === 1 ? 'is' : 'are'} not clear on your resume. Fix or confirm ${open.length === 1 ? 'it' : 'them'} before you apply.`;
+        return `<p class="req-head">Recruiters screen on ${knock.length === 1 ? 'this' : 'these'} first</p><p class="req-tally${open.length ? ' open' : ''}" id="knockoutTally">${escapeHtml(tally)}</p>${requirementRows(knock)}`
+            + (rest.length ? `<p class="req-head rest">Other requirements</p>${requirementRows(rest)}` : '');
     }
     const requirementRows = (rows) => rows.map(r => `<div class="req"><div class="req-main"><span class="req-what">${r.type ? `<span class="req-tag">${r.type === 'required' ? 'Required' : 'Preferred'}</span>` : ''}<b>${escapeHtml(r.requirement)}</b></span><span class="req-shows">Your resume: ${escapeHtml(r.shows || 'Not shown')}</span></div><span class="chip sm ${REQ_STATUS[r.status][0]}">${REQ_STATUS[r.status][1]}</span></div>`).join('');
 
@@ -1222,7 +1236,7 @@
         const showEvidence = (c.status === 'gap' || c.status === 'meets') && !!c.required;
         const reqs = keyRequirements(data);
         $('recEvidence').hidden = !reqs.length;
-        $('recEvidence').innerHTML = reqs.length ? `<p class="req-head">The posting asks for</p>${requirementRows(reqs)}` : '';
+        $('recEvidence').innerHTML = requirementList(reqs);
 
         const reasons = (Array.isArray(r.reasons) ? r.reasons : []).filter(x => typeof x === 'string' && x.trim()).slice(0, 3);
         $('recReasons').innerHTML = reasons.map(x => `<li>${escapeHtml(x)}</li>`).join('');
@@ -1413,7 +1427,7 @@
     }
 
     // Lines in "what changed" that describe the AI's own instructions rather than the resume are dropped.
-    const META_NOTE = /\b(json|markdown|plain[- ]text|no[- ]invention|instructions?|hard rules?|rules|compliance|output|formatting requirements?)\b/i;
+    const META_NOTE = /\b(json|markdown|plain[- ]text|no[- ]invention|instruct\w*|as (requested|required|directed)|hard rules?|rules|compliance|output|formatting requirements?|without (alteration|changes?|modification)|(retained|kept|preserved|left) (all|every|the exact|exact))\b/i;
     const tailorChangesList = (r) => arr(r && r.changes).filter(x => !META_NOTE.test(x));
 
     // Pairs each rewritten bullet with the original line it came from, so the change can be shown side by side.
@@ -1458,22 +1472,23 @@
         const tailorBtn = $('tailorBtn');
         if (!tailorBtn.disabled) { tailorBtn.classList.toggle('primary', !built); tailorBtn.querySelector('span').textContent = built ? 'Rewrite it again' : 'Tailor my resume to this job'; }
 
-        const lines = []; let shift = '', caution = '';
+        // One headline (the score), one short summary, and a warning only when something needs checking.
+        const lines = []; let shift = '', caution = '', headline = '';
         if (k) {
-            lines.push(k.now > k.was ? `Covers ${k.now} of ${k.total} keywords from the posting, up from ${k.was}.`
-                : k.now === k.was ? `Covers ${k.now} of ${k.total} keywords from the posting, the same as your original.`
-                : `Covers ${k.now} of ${k.total} keywords from the posting, down from ${k.was}. Dropped: ${k.lost.join(', ')}.`);
-            if (k.now > k.was) shift = `${k.was} → ${k.now} keywords`;
+            if (k.now > k.was) { lines.push(`Covers ${k.now} of ${k.total} keywords from the posting, up from ${k.was}.`); shift = `${k.was} → ${k.now} keywords`; }
+            else if (k.now < k.was) lines.push(`Covers ${k.now} of ${k.total} keywords from the posting, down from ${k.was}. Dropped: ${k.lost.join(', ')}.`);
             if (k.added.length) caution = `New in this version: ${k.added.join(', ')}. Make sure each is true for you before you send it.`;
         }
-        if (built && state.tailorUnmatched) caution = `${state.tailorUnmatched} ${state.tailorUnmatched === 1 ? 'line has' : 'lines have'} no close match in your original resume and ${state.tailorUnmatched === 1 ? 'is' : 'are'} marked below. ` + caution;
-        if (t && t.pending) lines.push('Checking the fit score...');
+        if (built && state.tailorUnmatched) caution = `${state.tailorUnmatched} highlighted ${state.tailorUnmatched === 1 ? 'line has' : 'lines have'} no close match in your original resume. Check ${state.tailorUnmatched === 1 ? 'it is' : 'they are'} true before you send it. ` + caution;
+        if (t && t.pending) headline = 'Checking the fit score...';
         else if (t) {
             const d = t.after - t.before;
-            if (d > SCORE_NOISE) { lines.push(`Fit score went from ${t.before} to ${t.after}.`); shift = `${t.before} → ${t.after}`; }
-            else if (d < -SCORE_NOISE) lines.push(`Fit score came back lower: ${t.after}, against ${t.before} for your original. Read both before you choose.`);
-            else lines.push(`Fit score is about the same: ${t.after}, against ${t.before} for your original. A point or two either way is normal between runs.`);
+            if (d > SCORE_NOISE) { headline = `Fit score went from ${t.before} to ${t.after}.`; shift = `${t.before} → ${t.after}`; }
+            else if (d < -SCORE_NOISE) headline = `Fit score came back lower: ${t.after}, against ${t.before} for your original. Read both before you choose.`;
+            else headline = `Fit score is about the same: ${t.after}, against ${t.before} for your original.`;
         }
+        if (headline) lines.unshift(headline);
+        const summary = built ? tailorChangesList(state.tailored).slice(0, 2).join(' ') : '';
 
         // The card under the action row: one rewritten line before tailoring, the real before-and-after once it is done.
         const card = $('tailorTeaser');
@@ -1492,26 +1507,15 @@
             $('tailorViewBtn').hidden = !built;
         }
         const line = $('tailorScoreLine');
-        line.hidden = !built || !(lines.length || caution);
-        line.className = 'banner ' + (shift ? 'success' : 'info');
-        line.innerHTML = (lines.length || caution) ? `${shift ? `<span class="score-shift">${escapeHtml(shift)}</span>` : icon('info')}<span class="grow">${lines.map(escapeHtml).join('<br>')}${caution ? `<br><strong>${escapeHtml(caution)}</strong>` : ''}</span>` : '';
-    }
-
-    // On opening the review, briefly mark the first rewritten bullet and the line it came from,
-    // so it is obvious what the "Was:" notes are. A line with no source keeps its own red label.
-    function spotlightFirstChange() {
-        const li = [...document.querySelectorAll('#tailoredPreview li')].find(x => x.querySelector('.src:not(.same)'));
-        if (!li || !$('sourceToggle').checked) return;
-        li.classList.remove('spotlight'); void li.offsetWidth;      // restart if it is already running
-        li.classList.add('spotlight');
-        setTimeout(() => li.classList.remove('spotlight'), 2600);
+        line.hidden = !built || !(lines.length || caution || summary);
+        line.className = 'banner tailor-summary ' + (shift ? 'success' : 'info');
+        line.innerHTML = line.hidden ? '' : `${shift ? `<span class="score-shift">${escapeHtml(shift)}</span>` : icon('info')}<span class="grow">${lines.length ? `<strong>${escapeHtml(lines[0])}</strong>` : ''}${lines.slice(1).map(x => `<span>${escapeHtml(x)}</span>`).join('')}${summary ? `<span>${escapeHtml(summary)}</span>` : ''}${caution ? `<span class="tailor-caution" id="tailorCaution">${escapeHtml(caution)}</span>` : ''}</span>`;
     }
 
     function viewTailored() {
         showPanel('resume');
         $('tailorBlock').scrollIntoView({ behavior: scrollBehavior(), block: 'start' });
         if (!state.tailored) buildTailoredResume($('tailorBtn'));
-        else spotlightFirstChange();
         track('tailored_resume_opened');
     }
 
@@ -1528,12 +1532,11 @@
         const section = (title, html) => html ? `<h4>${title}</h4>${html}` : '';
         const lines = (list) => arr(list).map(x => `<p>${escapeHtml(x)}</p>`).join('');
         const jobs = (Array.isArray(r.experience) ? r.experience : []).map(j => `<div class="job"><b>${escapeHtml(j.title || '')}</b>${j.company ? ', ' + escapeHtml(j.company) : ''}${j.location ? ' &middot; ' + escapeHtml(j.location) : ''}${j.dates ? ' &middot; ' + escapeHtml(j.dates) : ''}<ul>${arr(j.bullets).map(b => {
-            const m = match(b);
-            const src = m.sim >= SAME_LINE ? '<span class="src same">Unchanged from your resume</span>'
-                : m.sim >= SOURCE_FOUND ? `<span class="src">Was: ${escapeHtml(m.before)}</span>`
-                : '<span class="src flag">No close match in your original resume. Check this line is true before you send it.</span>';
-            if (m.sim < SOURCE_FOUND) unmatched++;
-            return `<li>${escapeHtml(b)}${src}</li>`; }).join('')}</ul></div>`).join('');
+            // Nothing but the resume is written into this preview, so selecting and copying it gives a clean resume.
+            // A line with no close match in the original is only highlighted; the reason is in the summary above.
+            const flagged = match(b).sim < SOURCE_FOUND;
+            if (flagged) unmatched++;
+            return `<li${flagged ? ' class="check" aria-describedby="tailorCaution"' : ''}>${escapeHtml(b)}</li>`; }).join('')}</ul></div>`).join('');
         $('tailoredPreview').innerHTML = `<h3>${escapeHtml(r.name || '')}</h3>
             ${r.headline ? `<p><b>${escapeHtml(r.headline)}</b></p>` : ''}${r.contact ? `<p class="muted">${escapeHtml(r.contact)}</p>` : ''}
             ${r.clearance ? `<p><b>Clearance:</b> ${escapeHtml(r.clearance)}</p>` : ''}
@@ -1541,13 +1544,9 @@
             ${section('Core skills', arr(r.skills).length ? `<p>${arr(r.skills).map(escapeHtml).join(' &middot; ')}</p>` : '')}
             ${section('Experience', jobs)}${section('Education', lines(r.education))}${section('Certifications', lines(r.certifications))}${section('Additional', lines(r.additional))}`;
         state.tailorUnmatched = unmatched;
-        $('sourceToggle').checked = true; $('tailoredPreview').classList.add('show-sources');
-        const changes = tailorChangesList(r);
-        $('tailorChanges').hidden = !changes.length;
-        $('tailorChanges').innerHTML = `${icon('info')}<span class="grow"><strong>What changed</strong><br>${changes.map(escapeHtml).join('<br>')}</span>`;
         $('tailoredWrap').hidden = false;
         syncTailorUi();
-        if (!quiet) { $('tailoredWrap').scrollIntoView({ behavior: scrollBehavior(), block: 'nearest' }); spotlightFirstChange(); }
+        if (!quiet) $('tailoredWrap').scrollIntoView({ behavior: scrollBehavior(), block: 'nearest' });
     }
 
     function tailoredToText(r) {
@@ -2519,8 +2518,8 @@ Amazon is an Equal Opportunity Employer.`;
         ],
         clearance: { required: 'Active TS/SCI', candidate: 'Active TS/SCI', status: 'meets', note: 'The posting lists it as a basic qualification.' },
         requirements: [
-            { requirement: 'Active TS/SCI clearance', type: 'required', resume_shows: 'Active TS/SCI', status: 'met' },
-            { requirement: '7+ years selling to the DoD', type: 'required', resume_shows: '15+ years across DoD and the Intelligence Community', status: 'met' },
+            { requirement: 'Active TS/SCI clearance', type: 'required', resume_shows: 'Active TS/SCI', status: 'met', screen_out: true },
+            { requirement: '7+ years selling to the DoD', type: 'required', resume_shows: '15+ years across DoD and the Intelligence Community', status: 'met', screen_out: true },
             { requirement: '$50M+ annual quota', type: 'required', resume_shows: '$180M territory at 145% of quota', status: 'met' },
             { requirement: 'Cloud infrastructure sales', type: 'preferred', resume_shows: 'Cybersecurity and software; moved 8 accounts to cloud', status: 'partial' },
             { requirement: 'MBA', type: 'preferred', resume_shows: 'B.S. Business Administration', status: 'missing' }
@@ -2718,7 +2717,6 @@ Amazon is an Equal Opportunity Employer.`;
         initFileDrop();
         initTrackerEvents();
         initFindJobs();
-        $('sourceToggle').addEventListener('change', (e) => $('tailoredPreview').classList.toggle('show-sources', e.target.checked));
         EXTRA_JOB_IDS.forEach(id => $(id).addEventListener('input', updateBatchUi));
         $('resultCol').addEventListener('click', (e) => { const row = e.target.closest('[data-batch-open]'); if (row) openBatchItem(Number(row.dataset.batchOpen)); });
         updateCounts();

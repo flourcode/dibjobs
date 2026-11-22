@@ -27,6 +27,11 @@
     let isExample = false;
     let stash = null;            // the recruiter's own queue and results while the example is on screen       // the built-in example is on screen (made-up job and candidates)
     let snackTimer = null;
+    // Must-haves the recruiter has confirmed for the job in the box. Every candidate is judged on this same list.
+    let criteria = { key: '', shown: false, drafting: false };
+    const MAX_MUST = 8;
+    const BLIND_KEY = 'dib_jobs_recruiter_blind';
+    let hideNames = false;
 
     const $ = (id) => document.getElementById(id);
     const escapeHtml = (str) => String(str ?? '').replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[m]);
@@ -36,6 +41,26 @@
     const lines = (result, prefix) => (Array.isArray(result.analysis) ? result.analysis : [])
         .filter(a => typeof a === 'string' && a.toLowerCase().startsWith(prefix + ':'))
         .map(a => a.slice(prefix.length + 1).trim());
+
+    // ----- Names. With "Hide names" on, candidates are shown as A, B, C and their name, email and profile
+    // links are left out of the text sent for analysis. The letter follows the order they were added in.
+    const letterFor = (id) => { const i = queue.findIndex(c => c.id === id); let n = i < 0 ? 0 : i, out = ''; do { out = String.fromCharCode(65 + (n % 26)) + out; n = Math.floor(n / 26) - 1; } while (n >= 0); return out; };
+    const isPlaceholderName = (name) => /^Candidate \d+$/.test(name || '');
+    const label = (c) => hideNames ? `Candidate ${letterFor(c.id)}` : (c.name || 'Unknown');
+    const escapeRe = (x) => x.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    function nameParts(name) {
+        if (!name || isPlaceholderName(name)) return [];
+        const parts = name.split(/\s+/).map(p => p.replace(/[^A-Za-z'\-]/g, '')).filter(p => p.length >= 3);
+        return [name.trim(), ...parts].filter(Boolean).sort((a, b) => b.length - a.length);
+    }
+    const swapName = (text, name, to) => nameParts(name).reduce((t, part) => t.replace(new RegExp('\\b' + escapeRe(part) + '\\b(?:\'s)?', 'gi'), to), String(text ?? ''));
+    // What is shown on screen: the candidate's name inside AI-written text becomes their letter while names are hidden.
+    const scrub = (text, c) => hideNames ? swapName(text, c.name, label(c)) : String(text ?? '');
+    // What is sent for analysis while names are hidden.
+    // Emails and profile links go first: they usually contain the name.
+    const redact = (text, name) => swapName(String(text ?? '')
+        .replace(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi, '[email]')
+        .replace(/(?:https?:\/\/)?(?:www\.)?linkedin\.com\/\S+/gi, '[profile link]'), name, '[name]');
 
     function snackbar(message, duration = 4000) {
         $('snackbarText').textContent = message;
@@ -112,9 +137,9 @@
             let status = `${countWords(c.resumeText).toLocaleString()} words, ready`;
             let score = '';
             if (c.status === 'analyzing') status = '<span class="spinner" style="width:14px;height:14px;display:inline-block;vertical-align:-2px"></span> Screening...';
-            else if (c.status === 'complete' && c.result) { status = escapeHtml(c.result.verdict || 'Done'); score = `<span class="score-pill ${band(c.result.score)}">${Math.round(c.result.score) || 0}</span>`; }
+            else if (c.status === 'complete' && c.result) { status = escapeHtml(scrub(c.result.verdict || 'Done', c)); score = `<span class="score-pill ${band(c.result.score)}">${Math.round(c.result.score) || 0}</span>`; }
             else if (c.status === 'error') status = `<span style="color:var(--danger-ink); font-weight:600">${escapeHtml(c.error || 'Could not be screened')}</span>`;
-            return `<div class="row-item queue-row"><span class="grow"><span class="queue-name">${escapeHtml(c.name)}</span><span class="queue-status">${status}</span></span>${score}<button class="icon-btn" data-remove="${c.id}" aria-label="Remove ${escapeHtml(c.name)}"${running ? ' disabled' : ''}>${icon('close')}</button></div>`;
+            return `<div class="row-item queue-row"><span class="grow"><span class="queue-name">${escapeHtml(label(c))}</span><span class="queue-status">${status}</span></span>${score}<button class="icon-btn" data-remove="${c.id}" aria-label="Remove ${escapeHtml(c.name)}"${running ? ' disabled' : ''}>${icon('close')}</button></div>`;
         }).join('') : '<div class="row-item queue-row"><span class="queue-status">No candidates yet. Drop resumes in step 2 and they will line up here.</span></div>';
     }
 
@@ -208,15 +233,11 @@
     // ======================================================================
     // ANALYSIS (one candidate at a time, to stay inside rate limits)
     // ======================================================================
-    async function callScreen(jobDescription, resumeText) {
+    async function callApi(payload) {
         let response;
         try {
             // Sent as text/plain so the browser skips the CORS preflight request (the Lambda parses it as JSON).
-            response = await fetch(API_ENDPOINT, {
-                method: 'POST',
-                headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
-                body: JSON.stringify({ request_type: 'recruiter_screen', job_description: jobDescription, resume_text: resumeText })
-            });
+            response = await fetch(API_ENDPOINT, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=UTF-8' }, body: JSON.stringify(payload) });
         } catch (e) {
             const err = new Error('Could not reach the screening service'); err.transient = true; throw err;
         }
@@ -234,16 +255,59 @@
             err.rateLimited = status === 429;
             throw err;
         }
+        return data;
+    }
+
+    async function callScreen(jobDescription, resumeText, mustHaves) {
+        const data = await callApi({ request_type: 'recruiter_screen', job_description: jobDescription, resume_text: resumeText, must_haves: mustHaves });
         if (typeof data.score !== 'number') throw new Error('The answer came back incomplete');
         data.score = Math.max(0, Math.min(100, Math.round(data.score)));
         return data;
     }
 
+    // ======================================================================
+    // MUST-HAVES: drafted from the posting, edited and confirmed by the recruiter, then used for every candidate
+    // ======================================================================
+    const jobKey = (jd) => jd.replace(/\s+/g, ' ').trim().slice(0, 200) + '|' + jd.length;
+    const readCriteria = () => [...document.querySelectorAll('#criteriaList input')].map(i => i.value.replace(/\s+/g, ' ').trim()).filter(Boolean).slice(0, MAX_MUST);
+    const criterionRow = (value, n) => `<div class="criterion"><input type="text" maxlength="120" value="${escapeHtml(value)}" aria-label="Must-have ${n}" placeholder="e.g. Active Secret clearance" autocomplete="off"><button class="icon-btn" type="button" data-remove-criterion aria-label="Remove must-have ${n}">${icon('close')}</button></div>`;
+    function renderCriteria(list) {
+        if (list) $('criteriaList').innerHTML = list.map((m, i) => criterionRow(m, i + 1)).join('');
+        const rows = document.querySelectorAll('#criteriaList .criterion').length;
+        $('criteriaBox').hidden = !criteria.shown || isExample;
+        $('addCriterionBtn').hidden = rows >= MAX_MUST;
+    }
+    function addCriterion() {
+        const n = document.querySelectorAll('#criteriaList .criterion').length;
+        if (n >= MAX_MUST) return;
+        $('criteriaList').insertAdjacentHTML('beforeend', criterionRow('', n + 1));
+        renderCriteria();
+        $('criteriaList').lastElementChild.querySelector('input').focus();
+    }
+    // Step one of a ranking: draft the must-haves and stop, so the recruiter confirms them before anyone is screened.
+    async function draftCriteria(jd) {
+        if (criteria.drafting) return;
+        criteria.drafting = true;
+        const btn = $('analyzeAllBtn'); btn.disabled = true; $('analyzeText').textContent = 'Reading the must-haves...';
+        let list = [], note = 'Drafted from the posting. Edit them to match what you agreed with the hiring manager. Every candidate is judged on this same list.';
+        try { list = (await callApi({ request_type: 'extract_criteria', job_description: jd })).must_haves || []; }
+        catch (e) { note = 'We could not draft these from the posting. Type the must-haves yourself, or leave them empty to rank on the posting as written.'; }
+        criteria = { key: jobKey(jd), shown: true, drafting: false };
+        if (!Array.isArray(list) || !list.length) list = ['', '', ''];
+        $('criteriaNote').textContent = note;
+        renderCriteria(list.slice(0, MAX_MUST));
+        btn.disabled = false; renderExampleState();
+        $('criteriaBox').scrollIntoView({ behavior: (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) ? 'auto' : 'smooth', block: 'nearest' });
+        const first = $('criteriaList').querySelector('input'); if (first) first.focus({ preventScroll: true });
+        track('recruiter_criteria_drafted', { count: list.filter(Boolean).length });
+    }
+    function resetCriteria() { if (!criteria.shown && !criteria.key) return; criteria = { key: '', shown: false, drafting: false }; renderCriteria([]); renderExampleState(); }
+
     // One retry for a network blip. If the service says "slow down", wait and carry on with the same candidate.
-    async function analyzeCandidate(jobDescription, resumeText, onWait) {
+    async function analyzeCandidate(jobDescription, resumeText, mustHaves, onWait) {
         let waits = 0;
         for (let attempt = 1; ; attempt++) {
-            try { return await callScreen(jobDescription, resumeText); }
+            try { return await callScreen(jobDescription, resumeText, mustHaves); }
             catch (e) {
                 if (e.rateLimited && waits < 3) { waits++; attempt--; if (onWait) onWait(RATE_WAIT_MS / 1000); await sleep(RATE_WAIT_MS); continue; }
                 if (e.transient && attempt < 2) { await sleep(1500); continue; }
@@ -259,7 +323,10 @@
         if (jdIsUrl) { $('jobDescription').focus(); return showInlineError('Paste the job description text in step 1. A link can\'t be read reliably.'); }
         if (jd.length < 50) return showInlineError('Add the job description in step 1 first.');
         if (!queue.length) return showInlineError('Add at least one resume in step 2.');
-        if (running) return;
+        if (running || criteria.drafting) return;
+        // The must-haves are confirmed first. A new or changed job gets a fresh draft.
+        if (!criteria.shown || criteria.key !== jobKey(jd)) return draftCriteria(jd);
+        const mustHaves = readCriteria();
         running = true;
         const btn = $('analyzeAllBtn');
         btn.disabled = true;
@@ -271,9 +338,7 @@
             renderQueue();
             try {
                 const label = `Screening ${done + 1} of ${queue.length}...`;
-                const result = await analyzeCandidate(jd, c.resumeText, (secs) => { $('analyzeText').textContent = `Pausing ${secs} seconds, then continuing...`; setTimeout(() => { if (running) $('analyzeText').textContent = label; }, secs * 1000); });
-                // A link was given: the service returns the posting text it read. Show it and reuse it for the rest.
-                if (result.job_description_text) { jd = result.job_description_text.substring(0, MAX_JD_CHARS); $('jobDescription').value = jd; updateJobCount(); delete result.job_description_text; }
+                const result = await analyzeCandidate(jd, hideNames ? redact(c.resumeText, c.name) : c.resumeText, mustHaves, (secs) => { $('analyzeText').textContent = `Pausing ${secs} seconds, then continuing...`; setTimeout(() => { if (running) $('analyzeText').textContent = label; }, secs * 1000); });
                 c.status = 'complete'; c.result = result;
                 results.push({ id: c.id, name: c.name, resumeText: c.resumeText, ...result });
             } catch (e) {
@@ -284,7 +349,7 @@
         }
         running = false;
         btn.disabled = false;
-        $('analyzeText').textContent = results.length ? 'Run the ranking again' : 'Rank these candidates';
+        renderExampleState();
         renderQueue();
         sort = { column: 'score', direction: 'desc' };
         applySort();
@@ -345,9 +410,9 @@
         $('summaryVerdict').dataset.tone = send ? 'good' : review ? 'caution' : 'bad';
         $('sendCount').textContent = send;
         $('sendUnit').innerHTML = `worth sending<br>of ${total} screened`;
-        $('summaryLabel').textContent = send ? `Send ${best.name} first.` : review ? 'No one clears the bar yet.' : 'This slate is a pass.';
+        $('summaryLabel').textContent = send ? `Send ${label(best)} first.` : review ? 'No one clears the bar yet.' : 'This slate is a pass.';
         $('summaryExplain').textContent = send
-            ? `${best.name} leads at ${best.score}${topStrength(best) ? `: ${topStrength(best).replace(/\.$/, '')}` : ''}. ${review ? `${review} more need${review === 1 ? 's' : ''} a closer look.` : ''}`.trim()
+            ? `${label(best)} leads at ${best.score}${topStrength(best) ? `: ${scrub(topStrength(best), best).replace(/\.$/, '')}` : ''}. ${review ? `${review} more need${review === 1 ? 's' : ''} a closer look.` : ''}`.trim()
             : review ? `${review} candidate${review > 1 ? 's are' : ' is'} worth a closer read. The best score is ${best.score}.`
                 : `The best score is ${best.score}. Widen the search or revisit the must-haves.`;
         const role = best.job_title ? `${best.job_title}${best.company && !/not specified|unknown/i.test(best.company) ? ' at ' + best.company : ''}` : 'Ranking';
@@ -364,15 +429,60 @@
             const call = callFor(r), concern = topConcern(r), strength = topStrength(r);
             return `<tr>
                 <td class="rank">${ranked.indexOf(r.id) + 1}</td>
-                <th scope="row">${escapeHtml(r.name || 'Unknown')}${r.verdict ? `<span class="sub">${escapeHtml(r.verdict)}</span>` : ''}</th>
+                <th scope="row">${escapeHtml(label(r))}${r.verdict ? `<span class="sub">${escapeHtml(scrub(r.verdict, r))}</span>` : ''}</th>
                 <td class="score"><span class="score-pill ${band(r.score)}">${r.score}</span></td>
                 <td class="status-cell"><span class="chip sm ${call.chip}">${call.label}</span></td>
-                <td data-label="Top strength">${strength ? escapeHtml(strength) : '<span class="muted">None identified</span>'}</td>
-                <td data-label="${concern.dealbreaker ? 'Dealbreaker' : 'Key concern'}">${concern.text ? escapeHtml(concern.text) : '<span class="muted">None identified</span>'}</td>
-                <td class="actions"><button class="btn" data-details="${r.id}">View<span class="sr"> ${escapeHtml(r.name || '')}</span></button></td>
+                <td data-label="Top strength">${strength ? escapeHtml(scrub(strength, r)) : '<span class="muted">None identified</span>'}</td>
+                <td data-label="${concern.dealbreaker ? 'Dealbreaker' : 'Key concern'}">${concern.text ? escapeHtml(scrub(concern.text, r)) : '<span class="muted">None identified</span>'}</td>
+                <td class="actions"><button class="btn" data-details="${r.id}">View<span class="sr"> ${escapeHtml(label(r))}</span></button><button class="btn text" data-submittal="${r.id}">${icon('copy')}Submittal<span class="sr"> for ${escapeHtml(label(r))}</span></button></td>
             </tr>`;
         }).join('') : `<tr><td colspan="7" class="muted">No candidates in this group.</td></tr>`;
         document.querySelectorAll('#resultsTable [data-sort]').forEach(b => b.closest('th').setAttribute('aria-sort', b.dataset.sort === sort.column ? (sort.direction === 'asc' ? 'ascending' : 'descending') : 'none'));
+        renderGrid();
+    }
+
+    // ----- Must-haves by candidate: the same checks for everyone, side by side, best score first.
+    const MUST_META = { met: ['status-ok', 'Met'], partial: ['warn', 'Partly'], unclear: ['warn', 'Ask'], missing: ['bad', 'Not shown'] };
+    const mustOf = (r) => (Array.isArray(r.must_haves) ? r.must_haves : []).filter(m => m && m.requirement);
+    function renderGrid() {
+        const ranked = [...results].sort((a, b) => (b.score || 0) - (a.score || 0));
+        const cols = ranked.length ? mustOf(ranked[0]).map(m => m.requirement) : [];
+        $('gridCard').hidden = !cols.length;
+        if (!cols.length) return;
+        $('gridHead').innerHTML = `<tr><th>Candidate</th><th>Call</th>${cols.map(c => `<th>${escapeHtml(c)}</th>`).join('')}</tr>`;
+        $('gridBody').innerHTML = ranked.map(r => {
+            const call = callFor(r), must = mustOf(r);
+            return `<tr><th scope="row">${escapeHtml(label(r))}</th><td class="status-cell"><span class="chip sm ${call.chip}">${call.label}</span></td>${cols.map((c, i) => {
+                const m = must[i] || { status: 'unclear', evidence: 'Not shown' }, meta = MUST_META[m.status] || MUST_META.unclear;
+                return `<td data-label="${escapeHtml(c)}"><span class="chip sm ${meta[0]}">${meta[1]}</span><span class="grid-evidence">${escapeHtml(scrub(m.evidence || 'Not shown', r))}</span></td>`; }).join('')}</tr>`;
+        }).join('');
+    }
+
+    // ----- Submittal: the note a recruiter sends the hiring manager with a candidate. Built from the result, no AI call.
+    function submittalText(r) {
+        const call = callFor(r), concern = topConcern(r), must = mustOf(r);
+        const role = r.job_title ? `${r.job_title}${r.company && !/not specified|unknown/i.test(r.company) ? ' at ' + r.company : ''}` : '';
+        const rec = { send: 'Send to the hiring manager', review: 'Review before sending', pass: 'Pass for this role' }[call.key];
+        const out = [`Candidate: ${label(r)}`];
+        if (role) out.push(`Role: ${role}`);
+        out.push(`Recommendation: ${rec} (fit score ${r.score} of 100)`);
+        if (must.length) { out.push('', 'Must-haves'); must.forEach(m => out.push(`- ${(MUST_META[m.status] || MUST_META.unclear)[1]}: ${m.requirement}. Resume: ${scrub(m.evidence || 'Not shown', r)}`)); }
+        else { const strengths = lines(r, 'match').slice(0, 4); if (strengths.length) { out.push('', 'Strengths'); strengths.forEach(x => out.push('- ' + scrub(x.replace(/\s*(?:\u2192|->)\s*/, ': '), r))); } }
+        if (r.tailored_summary) out.push('', 'Summary', scrub(r.tailored_summary, r));
+        const questions = (Array.isArray(r.interview_questions) ? r.interview_questions : []).map(q => typeof q === 'string' ? q : (q && q.question) || '').filter(q => q.trim()).slice(0, 2);
+        if (concern.text || questions.length) {
+            out.push('', call.key === 'pass' ? 'Reason' : 'To confirm on the phone screen');
+            if (concern.text) out.push('- ' + scrub(concern.text, r));
+            if (call.key !== 'pass') questions.forEach(q => out.push('- ' + scrub(q, r)));
+        }
+        out.push('', 'Screening notes drafted with AI assistance from the resume and the confirmed must-haves. Check them against the resume before relying on them.');
+        return out.join('\n');
+    }
+    function copySubmittal(id) {
+        const r = results.find(x => String(x.id) === String(id));
+        if (!r || !navigator.clipboard) return snackbar('Could not copy.');
+        navigator.clipboard.writeText(submittalText(r)).then(() => snackbar(`Submittal for ${label(r)} copied.`), () => snackbar('Could not copy.'));
+        track('recruiter_submittal_copied');
     }
 
     function showDetails(id) {
@@ -386,17 +496,20 @@
             .filter(q => q.question.trim() && !q.question.includes('[object')).slice(0, 5);
         const keywords = (Array.isArray(r.keywords) ? r.keywords : []).filter(k => k && k.term);
         const listHtml = (items, kind) => items.length
-            ? `<div class="list">${items.map(x => { const [head, ...rest] = x.split(/\s*(?:→|->)\s*/); return `<div class="list-item">${icon(kind === 'ok' ? 'check' : 'minus', 'icon lead ' + kind)}<div><div class="headline-text">${escapeHtml(head)}</div>${rest.length ? `<div class="support-text">${escapeHtml(rest.join(' '))}</div>` : ''}</div></div>`; }).join('')}</div>`
+            ? `<div class="list">${items.map(x => { const [head, ...rest] = x.split(/\s*(?:→|->)\s*/); return `<div class="list-item">${icon(kind === 'ok' ? 'check' : 'minus', 'icon lead ' + kind)}<div><div class="headline-text">${escapeHtml(scrub(head, r))}</div>${rest.length ? `<div class="support-text">${escapeHtml(scrub(rest.join(' '), r))}</div>` : ''}</div></div>`; }).join('')}</div>`
             : '<p class="body-md muted">None identified.</p>';
         $('detailEyebrow').textContent = r.job_title ? `For ${r.job_title}` : 'Candidate';
-        $('detailTitle').textContent = r.name || 'Candidate';
+        $('detailTitle').textContent = label(r);
+        const must = mustOf(r), sc = (x) => escapeHtml(scrub(x, r));
         $('detailBody').innerHTML = `
             <div class="verdict" data-tone="${{ send: 'good', review: 'caution', pass: 'bad' }[call.key]}">
                 <div class="verdict-num" style="margin-top:0"><b>${r.score}</b><span>fit score<br>out of 100</span></div>
-                <p class="verdict-label">${call.label}${r.verdict ? `: ${escapeHtml(r.verdict)}` : ''}</p>
+                <p class="verdict-label">${call.label}${r.verdict ? `: ${sc(r.verdict)}` : ''}</p>
             </div>
+            <div class="row"><button class="btn primary" data-submittal="${r.id}">${icon('copy')}Copy submittal note</button></div>
+            ${must.length ? `<div><p class="eyebrow">Must-haves (${must.filter(m => m.status === 'met').length} of ${must.length} met)</p><div class="rows" style="margin-top:8px">${must.map(m => { const meta = MUST_META[m.status] || MUST_META.unclear; return `<div class="row-item must-row"><span class="grow"><span class="must-name">${escapeHtml(m.requirement)}</span><span class="grid-evidence">${sc(m.evidence || 'Not shown')}</span></span><span class="chip sm ${meta[0]}">${meta[1]}</span></div>`; }).join('')}</div></div>` : ''}
             ${r.clearance && r.clearance.required && !/^none/i.test(r.clearance.required) && r.clearance.status !== 'not_required' ? `<div class="rows"><div class="row-item"><span>Clearance the job asks for</span><b>${escapeHtml(r.clearance.required)}</b></div><div class="row-item"><span>Resume shows</span><b>${escapeHtml(r.clearance.candidate || 'Not stated')}</b></div></div>` : ''}
-            ${r.tailored_summary ? `<div><p class="eyebrow">Summary for the hiring manager</p><div class="paper prose" id="detailSummary" style="margin-top:8px">${escapeHtml(r.tailored_summary)}</div><div class="row" style="margin-top:8px"><button class="btn" data-copy="#detailSummary">${icon('copy')}Copy summary</button></div></div>` : ''}
+            ${r.tailored_summary ? `<div><p class="eyebrow">Summary for the hiring manager</p><div class="paper prose" id="detailSummary" style="margin-top:8px">${sc(r.tailored_summary)}</div><div class="row" style="margin-top:8px"><button class="btn" data-copy="#detailSummary">${icon('copy')}Copy summary</button></div></div>` : ''}
             <div><p class="eyebrow">Strengths (${matches.length})</p><div style="margin-top:8px">${listHtml(matches, 'ok')}</div></div>
             <div><p class="eyebrow">Gaps and concerns (${gaps.length || strategies.length})</p><div style="margin-top:8px">${listHtml(gaps.length ? gaps : strategies.map(s => s.gap), 'gap')}</div></div>
             ${strategies.length ? `<div><p class="eyebrow">What to check</p><div class="stack-sm" style="margin-top:8px">${strategies.map(s => `<div class="rewrite"><div class="before"><span class="tag">Gap</span>${escapeHtml(s.gap)}</div><div class="after"><span class="tag">Check</span>${escapeHtml(s.strategy || '')}${s.talking_points ? `<div class="why">${escapeHtml(s.talking_points)}</div>` : ''}</div></div>`).join('')}</div></div>` : ''}
@@ -430,10 +543,13 @@ What we need
     const EXAMPLE_KEYWORDS = ['DoD', 'quota', 'FedRAMP', 'SEWP', 'Secret clearance', 'Army', 'Air Force', 'resellers'];
     const kw = (...have) => EXAMPLE_KEYWORDS.map(term => ({ term, in_resume: have.includes(term) }));
 
+    const EXAMPLE_MUST = ['7+ years selling to the DoD', 'Quota record with $1M+ deals', 'Active Secret clearance', 'Contract vehicles and resellers'];
+    const must = (...rows) => rows.map(([status, evidence], i) => ({ requirement: EXAMPLE_MUST[i], status, evidence }));
     const EXAMPLE_CANDIDATES = [
         { name: 'Maya Okafor',
           resume: 'MAYA OKAFOR (fictional example)\nSenior Federal Account Executive, cloud software. Nine years selling to Army and Air Force program offices. 118% average quota attainment on a $4.5M number. Closed a $6.2M Army data platform deal through SEWP with a reseller partner. Active TS/SCI clearance.',
           result: { score: 88, verdict: 'Strong fit',
+            must_haves: must(['met', 'Nine years, Army and Air Force accounts'], ['met', '118% of a $4.5M quota; $6.2M Army deal'], ['met', 'Active TS/SCI'], ['met', 'Closed through SEWP with a reseller']),
             recruiter_summary: { risk_level: 'green', top_strength: 'Nine years selling cloud to the Army and Air Force, above quota', concern: 'No OTA deals shown; the role sells through OTAs', dealbreaker: '' },
             analysis: ['Match: 7+ years selling to the DoD → nine years, Army and Air Force accounts', 'Match: Quota record with $1M+ deals → 118% average on $4.5M, including a $6.2M Army deal', 'Match: Active Secret, TS/SCI preferred → holds an active TS/SCI', 'Match: Contract vehicles and resellers → closed through SEWP with a reseller', 'Gap: OTA experience → not mentioned'],
             tailored_summary: 'Maya has sold cloud software to the Army and Air Force for nine years and has averaged 118% of a $4.5M quota. Her largest deal, $6.2M, ran through SEWP with a reseller, which is how this role sells. She holds an active TS/SCI. The one thing to ask about is OTAs, which her resume does not mention.',
@@ -443,6 +559,7 @@ What we need
         { name: 'Daniel Reyes',
           resume: 'DANIEL REYES (fictional example)\nRegional Sales Manager, federal cybersecurity. Eleven years selling to DoD and the intelligence community. Closed $9M in 2025 against a $7M quota. Works through Carahsoft and SEWP. Secret clearance, inactive since 2023 after moving to a role that did not require it.',
           result: { score: 79, verdict: 'Strong seller, clearance to confirm',
+            must_haves: must(['met', 'Eleven years across DoD and the IC'], ['met', '$9M closed against a $7M quota in 2025'], ['partial', 'Secret, inactive since 2023'], ['met', 'Sells through Carahsoft and SEWP']),
             recruiter_summary: { risk_level: 'yellow', top_strength: 'Eleven years of DoD selling, $9M closed last year', concern: 'Secret clearance inactive since 2023; the role needs an active one. Verify it can be reinstated.', dealbreaker: '' },
             analysis: ['Match: 7+ years selling to the DoD → eleven years across DoD and the IC', 'Match: Quota record with $1M+ deals → $9M closed against a $7M quota in 2025', 'Match: Contract vehicles and resellers → sells through Carahsoft and SEWP', 'Gap: Active Secret clearance → Secret has been inactive since 2023', 'Gap: Cloud data platform experience → background is cybersecurity, not data'],
             tailored_summary: 'Daniel has the strongest sales numbers of the four: $9M closed against $7M last year, across eleven years of DoD and IC selling. Two things hold him at review. His Secret clearance has been inactive since 2023, and the role asks for an active one. His products have been cybersecurity, not data platforms. If the clearance can be reinstated quickly, he belongs on the shortlist.',
@@ -452,6 +569,7 @@ What we need
         { name: 'Priya Shah',
           resume: 'PRIYA SHAH (fictional example)\nEnterprise Account Executive, commercial SaaS data analytics. Six years selling to Fortune 500 financial services and healthcare. 135% of a $3M quota in 2025, largest deal $2.4M. Supported one state government pilot. No security clearance.',
           result: { score: 62, verdict: 'Good seller, no federal background',
+            must_haves: must(['missing', 'No federal selling; one state government pilot'], ['met', '135% of a $3M quota; largest deal $2.4M'], ['missing', 'No clearance'], ['missing', 'Not shown']),
             recruiter_summary: { risk_level: 'yellow', top_strength: 'Sells data platforms, 135% of quota last year', concern: 'No federal selling and no clearance; the role needs 7+ years with the DoD', dealbreaker: '' },
             analysis: ['Match: Quota record with $1M+ deals → 135% of $3M, largest deal $2.4M', 'Match: Cloud data platform experience → six years selling data analytics SaaS', 'Gap: 7+ years selling to the DoD → no federal selling; one state government pilot', 'Gap: Active Secret clearance → no clearance', 'Gap: Contract vehicles and acquisition process → not shown'],
             tailored_summary: 'Priya knows the product category better than anyone else in this group and beat a $3M quota by 35% last year. She has not sold to the federal government and holds no clearance, so she would need sponsorship and a long ramp. Worth a conversation only if the hiring manager is open to a commercial seller.',
@@ -461,6 +579,7 @@ What we need
         { name: 'Tom Becker',
           resume: 'TOM BECKER (fictional example)\nProgram Analyst supporting an Air Force program office as a contractor. Four years tracking budgets, schedules and deliverables. Wrote sections of two proposal responses. Active Secret clearance. No sales or quota-carrying experience.',
           result: { score: 41, verdict: 'Not a sales profile',
+            must_haves: must(['missing', 'No sales experience'], ['missing', 'Has never carried a quota'], ['met', 'Active Secret'], ['missing', 'Not shown']),
             recruiter_summary: { risk_level: 'red', top_strength: 'Knows an Air Force program office from the inside', dealbreaker: 'No sales or quota-carrying experience' },
             analysis: ['Match: Active Secret clearance → holds an active Secret', 'Match: Knowledge of the budget cycle → four years tracking program budgets', 'Gap: 7+ years selling to the DoD → no sales experience', 'Gap: Quota record with $1M+ deals → has never carried a quota', 'Gap: Contract vehicles and resellers → not shown'],
             tailored_summary: 'Tom understands how an Air Force program office works and holds an active Secret clearance, but he has never sold or carried a quota. This role needs seven years of DoD selling. He may suit a sales development or solutions role if one opens.',
@@ -481,7 +600,7 @@ What we need
         filter = 'all'; sort = { column: 'score', direction: 'desc' };
         document.querySelectorAll('#filterTabs [role="tab"]').forEach(t => { const on = t.dataset.filter === 'all'; t.setAttribute('aria-selected', String(on)); t.tabIndex = on ? 0 : -1; });
         setFileStatus(); showInlineError(''); updateJobCount();
-        applySort(); renderQueue(); renderResults(); renderExampleState();
+        applySort(); renderQueue(); renderResults(); renderCriteria(); renderExampleState();
         if (auto !== true) { $('resultsCard').scrollIntoView({ behavior: (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) ? 'auto' : 'smooth', block: 'start' }); track('recruiter_example'); }
     }
 
@@ -495,7 +614,7 @@ What we need
         document.querySelectorAll('#filterTabs [role="tab"]').forEach(t => { const on = t.dataset.filter === filter; t.setAttribute('aria-selected', String(on)); t.tabIndex = on ? 0 : -1; });
         if ($('detailDialog').open) $('detailDialog').close();
         showInlineError('');
-        renderQueue(); renderResults(); renderExampleState();
+        renderQueue(); renderResults(); renderCriteria(); renderExampleState();
     }
 
     function renderExampleState() {
@@ -505,7 +624,7 @@ What we need
         $('exampleTag').hidden = !isExample;
         $('exampleBtn').hidden = isExample;
         $('clearQueueBtn').hidden = isExample || queue.length === 0;
-        $('analyzeText').textContent = isExample ? 'Screen your own candidates' : results.length ? 'Run the ranking again' : 'Rank these candidates';
+        if (!running && !criteria.drafting) $('analyzeText').textContent = isExample ? 'Screen your own candidates' : results.length ? 'Run the ranking again' : criteria.shown ? 'Rank on these must-haves' : 'Rank these candidates';
     }
 
     // ======================================================================
@@ -515,12 +634,14 @@ What we need
         if (!results.length) return snackbar('Nothing to export yet.');
         const cell = (v) => { let s = String(v ?? ''); if (/^[=+\-@]/.test(s)) s = "'" + s; return '"' + s.replace(/"/g, '""') + '"'; };
         const ranked = [...results].sort((a, b) => (b.score || 0) - (a.score || 0));
-        const rows = [['Rank', 'Name', 'Score', 'Call', 'Verdict', 'Top strengths', 'Key gaps', 'Decision', 'Notes']];
+        const cols = ranked.length ? mustOf(ranked[0]).map(m => m.requirement) : [];
+        const rows = [['Rank', 'Name', 'Score', 'Call', 'Verdict', ...cols.map(c => 'Must-have: ' + c), 'Top strengths', 'Key gaps', 'Decision', 'Notes']];
         ranked.forEach((r, i) => {
             const strengths = lines(r, 'match').map(keyPart).slice(0, 3).join(' | ');
             let gaps = lines(r, 'gap').map(keyPart);
             if (!gaps.length) gaps = (r.gap_strategies || []).filter(g => g && g.gap).map(g => g.gap);
-            rows.push([i + 1, r.name, r.score, callFor(r).label, r.verdict || '', strengths || 'None identified', gaps.slice(0, 3).join(' | ') || 'None identified', '', '']);
+            const must = mustOf(r);
+            rows.push([i + 1, label(r), r.score, callFor(r).label, scrub(r.verdict || '', r), ...cols.map((c, k) => { const m = must[k]; return m ? `${(MUST_META[m.status] || MUST_META.unclear)[1]}: ${scrub(m.evidence || 'Not shown', r)}` : 'Ask'; }), scrub(strengths, r) || 'None identified', scrub(gaps.slice(0, 3).join(' | '), r) || 'None identified', '', '']);
         });
         const blob = new Blob(['﻿' + rows.map(r => r.map(cell).join(',')).join('\r\n')], { type: 'text/csv;charset=utf-8' });
         const url = URL.createObjectURL(blob);
@@ -536,8 +657,9 @@ What we need
     // ======================================================================
     const ACTIONS = {
         'analyze': () => { if (isExample) { clearExample(); $('jobDescription').focus(); return snackbar(queue.length ? 'Example closed. Your candidates are back.' : 'Example closed. Add your job and resumes.'); } analyzeAll(); },
-        'clear-job': () => { clearExample(); $('jobDescription').value = ''; $('jobFileInfo').textContent = ''; updateJobCount(); $('jobDescription').focus(); },
-        'clear-queue': () => { if (running) return; queue = []; results = []; setFileStatus(); showInlineError(''); $('analyzeText').textContent = 'Rank these candidates'; renderQueue(); renderResults(); },
+        'clear-job': () => { clearExample(); $('jobDescription').value = ''; $('jobFileInfo').textContent = ''; updateJobCount(); resetCriteria(); $('jobDescription').focus(); },
+        'add-criterion': () => addCriterion(),
+        'clear-queue': () => { if (running) return; queue = []; results = []; setFileStatus(); showInlineError(''); renderQueue(); renderResults(); renderExampleState(); },
         'example': () => showExample(false),
         'clear-example': () => { clearExample(); $('jobDescription').focus(); window.scrollTo({ top: 0, behavior: (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) ? 'auto' : 'smooth' }); },
         'add-pasted': () => {
@@ -546,7 +668,7 @@ What we need
             if (!out.ok) return snackbar(out.reason === 'too short to be a resume' ? 'Paste a full resume first (at least 100 characters).' : 'That resume is already in the list.');
             $('candidateResume').value = ''; $('candidateName').value = '';
             showInlineError(''); renderQueue();
-            snackbar(`Added ${queue[queue.length - 1].name}.`);
+            snackbar(`Added ${label(queue[queue.length - 1])}.`);
         },
         'export-csv': () => exportCSV(),
         'close-detail': () => $('detailDialog').close(),
@@ -554,13 +676,22 @@ What we need
     };
 
     function init() {
-        renderQueue(); renderExampleState();
+        try { hideNames = localStorage.getItem(BLIND_KEY) === '1'; } catch (e) { /* storage blocked: names shown */ }
+        $('hideNames').checked = hideNames;
+        $('hideNames').addEventListener('change', (e) => {
+            hideNames = e.target.checked;
+            try { localStorage.setItem(BLIND_KEY, hideNames ? '1' : '0'); } catch (err) { /* not essential */ }
+            if ($('detailDialog').open) $('detailDialog').close();
+            renderQueue(); renderResults();
+            if (results.length && !isExample) snackbar(hideNames ? 'Names hidden on screen. Run the ranking again to leave them out of the analysis too.' : 'Names shown.', 6000);
+        });
+        renderQueue(); renderCriteria(); renderExampleState();
         // First visit: show the ranked example straight away. Skipped once this browser has run a real ranking.
         let used = false; try { used = localStorage.getItem(USED_KEY) === '1'; } catch (e) { /* storage blocked: treat as a first visit */ }
         if (!used) showExample(true);
         initFileDrop();
         updateJobCount();
-        $('jobDescription').addEventListener('input', () => { clearExample(); updateJobCount(); });
+        $('jobDescription').addEventListener('input', () => { clearExample(); updateJobCount(); if (criteria.shown && criteria.key !== jobKey($('jobDescription').value.trim().substring(0, MAX_JD_CHARS))) resetCriteria(); });
 
         // Sortable column headers
         const heads = document.querySelectorAll('#resultsTable thead th');
@@ -571,6 +702,10 @@ What we need
             if (action && ACTIONS[action.dataset.action]) return ACTIONS[action.dataset.action]();
             const remove = e.target.closest('[data-remove]');
             if (remove && !running) { const id = Number(remove.dataset.remove); queue = queue.filter(c => c.id !== id); results = results.filter(r => r.id !== id); if (isExample && !queue.length) clearExample(); renderQueue(); renderResults(); return; }
+            const sub = e.target.closest('[data-submittal]');
+            if (sub) return copySubmittal(sub.dataset.submittal);
+            const dropCriterion = e.target.closest('[data-remove-criterion]');
+            if (dropCriterion) { dropCriterion.closest('.criterion').remove(); renderCriteria(); return; }
             const details = e.target.closest('[data-details]');
             if (details) return showDetails(details.dataset.details);
             const sortBtn = e.target.closest('[data-sort]');

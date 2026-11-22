@@ -32,7 +32,7 @@
     <link rel="apple-touch-icon" href="apple-touch-icon.png">
     <link rel="manifest" href="site.webmanifest">
     <link rel="preload" href="assets/fonts/inter-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="stylesheet" href="assets/app.css?v=30">
+    <link rel="stylesheet" href="assets/app.css?v=32">
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-N10ZLNFZHE"></script>
     <script>
@@ -297,7 +297,7 @@
                     </details>
                 </div>
                 <p class="field-error" id="resumeError" role="alert" hidden></p>
-                <p class="body-sm muted" id="resumePrivacy">We read the file in your browser and send the extracted text for AI analysis when you run a check.</p>
+                <p class="body-sm muted" id="resumePrivacy">We read the file in your browser. When you run a check, its text is sent to Google's Gemini AI for analysis. Nothing is stored on our servers.</p>
                 <button class="btn text" type="button" id="compareVersionsBtn" data-action="compare-versions" hidden><svg class="icon"><use href="#i-compare"/></svg><span id="compareVersionsText">Compare my resume versions for this job</span></button>
                 <details class="disclosure" id="resumeCheck" hidden>
                     <summary><svg class="icon"><use href="#i-check"/></svg><span id="resumeCheckSummary">Resume check</span><svg class="icon chev"><use href="#i-chevron"/></svg></summary>
@@ -425,9 +425,7 @@
                                 <button class="btn text" id="useTailoredBtn" data-action="use-tailored">Use as my resume and re-score</button>
                             </div>
                             <div class="banner info" id="tailorScoreLine" hidden></div>
-                            <div class="banner info" id="tailorChanges"></div>
-                            <label class="switch-row compact"><input type="checkbox" id="sourceToggle" checked><span class="switch" aria-hidden="true"></span><span><span class="label-lg">Show where each line came from</span><span class="body-sm">Under every bullet, the line in your resume it was written from. These notes are not in the download.</span></span></label>
-                            <div class="paper resume-preview show-sources" id="tailoredPreview"></div>
+                            <div class="paper resume-preview" id="tailoredPreview"></div>
                             <p class="body-sm muted">Read every line before you send it. The AI is told not to add anything, but you are the one signing it.</p>
                         </div>
                     </div>
@@ -739,7 +737,7 @@
     <button class="icon-btn" data-action="dismiss-snackbar" aria-label="Dismiss"><svg class="icon"><use href="#i-close"/></svg></button>
 </div>
 
-<script src="assets/files.js?v=30"></script>
-<script src="assets/app.js?v=30"></script>
+<script src="assets/files.js?v=32"></script>
+<script src="assets/app.js?v=32"></script>
 </body>
 </html>

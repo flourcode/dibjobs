@@ -32,7 +32,7 @@
     <link rel="apple-touch-icon" href="../apple-touch-icon.png">
     <link rel="manifest" href="../site.webmanifest">
     <link rel="preload" href="../assets/fonts/inter-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="stylesheet" href="../assets/app.css?v=30">
+    <link rel="stylesheet" href="../assets/app.css?v=32">
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-N10ZLNFZHE"></script>
     <script>
@@ -84,7 +84,7 @@
         <div class="page-intro">
             <p class="eyebrow">Candidate screen &middot; for defense industry recruiters</p>
             <h1 class="h1">Who should you send to the hiring manager?</h1>
-            <p class="lede">Add the job and drop in the resumes. You get a ranked shortlist with a send, review or pass call on each candidate, and the reasons behind it.</p>
+            <p class="lede">Add the job and drop in the resumes. Confirm the must-haves, then get a ranked shortlist with a send, review or pass call on each candidate, the same checks for everyone, and a note you can send the hiring manager.</p>
         </div>
 
         <div class="calc">
@@ -97,6 +97,13 @@
                     </div>
                     <p class="example-note" id="queueExampleNote" hidden><strong>This is an example.</strong> Four made-up candidates, already ranked against a made-up job. The full ranking is below.</p>
                     <div class="rows queue" id="candidateQueue" aria-live="polite"></div>
+                    <label class="switch-row compact"><input type="checkbox" id="hideNames"><span class="switch" aria-hidden="true"></span><span><span class="label-lg">Hide names</span><span class="body-sm">Shows candidates as A, B, C and leaves names, emails and profile links out of the text sent for analysis.</span></span></label>
+                    <div class="criteria" id="criteriaBox" hidden>
+                        <h3 class="title-sm">Confirm the must-haves</h3>
+                        <p class="body-sm muted" id="criteriaNote"></p>
+                        <div id="criteriaList"></div>
+                        <button class="btn text" type="button" data-action="add-criterion" id="addCriterionBtn"><svg class="icon"><use href="#i-add"/></svg>Add a must-have</button>
+                    </div>
                     <p class="field-error" id="inlineError" role="alert" hidden></p>
                     <div class="analyze-bar" id="queueActions">
                         <button class="btn primary lg" id="analyzeAllBtn" data-action="analyze"><span id="analyzeText">Rank these candidates</span><svg class="icon"><use href="#i-next"/></svg></button>
@@ -129,7 +136,7 @@
                         </span>
                     </div>
                     <input type="file" id="resumeFiles" multiple accept=".pdf,.docx,.txt,.md,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain" hidden>
-                    <p class="body-sm muted" id="resumePrivacy">We read the files in your browser and send the extracted text for AI analysis when you rank. Nothing is stored on our servers.</p>
+                    <p class="body-sm muted" id="resumePrivacy">We read the files in your browser. When you rank, their text is sent to Google's Gemini AI for analysis. Nothing is stored on our servers.</p>
                     <div id="fileStatus" role="status" aria-live="polite" hidden></div>
                     <details class="disclosure" id="pasteRow">
                         <summary><svg class="icon"><use href="#i-edit"/></svg><span>Or paste a resume</span><svg class="icon chev"><use href="#i-chevron"/></svg></summary>
@@ -187,13 +194,23 @@
                     <tbody id="resultsBody"></tbody>
                 </table>
             </div>
-            <p class="body-sm muted">Scores and calls are AI estimates to help you prioritize. Read the resume before you decide on anyone.</p>
+            <div id="gridCard" class="stack" hidden>
+                <h2 class="h3">Must-haves by candidate</h2>
+                <div class="table-wrap" role="region" aria-label="Must-haves by candidate" tabindex="0">
+                    <table class="data stackable grid-table" id="gridTable">
+                        <thead id="gridHead"></thead>
+                        <tbody id="gridBody"></tbody>
+                    </table>
+                </div>
+                <p class="body-sm muted">Every candidate was checked against the same must-haves you confirmed. "Ask" means the resume hints at it but does not say so plainly.</p>
+            </div>
+            <p class="body-sm" id="decisionNote"><strong>This supports your decision. It does not make it.</strong> Scores and calls are AI estimates built from the resume text and the must-haves you confirmed. Read each resume and make the call yourself.</p>
         </div>
     </section>
 </main>
 
 <footer class="site-footer">
-    <p style="margin-top:0">Resume files are read in your browser; only their text is sent to the screening service for analysis. Results are AI-generated estimates, not hiring decisions.</p>
+    <p style="margin-top:0">Resume files are read in your browser; only their text is sent, to Google's Gemini AI, for analysis, and nothing is stored on our servers. Results are AI-generated estimates, not hiring decisions.</p>
 </footer>
 </div>
 
@@ -211,7 +228,7 @@
     <button class="icon-btn" data-action="dismiss-snackbar" aria-label="Dismiss"><svg class="icon"><use href="#i-close"/></svg></button>
 </div>
 
-<script src="../assets/files.js?v=30"></script>
-<script src="screen.js?v=30"></script>
+<script src="../assets/files.js?v=32"></script>
+<script src="screen.js?v=32"></script>
 </body>
 </html>
