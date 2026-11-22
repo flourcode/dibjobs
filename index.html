@@ -32,7 +32,7 @@
     <link rel="apple-touch-icon" href="apple-touch-icon.png">
     <link rel="manifest" href="site.webmanifest">
     <link rel="preload" href="assets/fonts/inter-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="stylesheet" href="assets/app.css?v=32">
+    <link rel="stylesheet" href="assets/app.css?v=33">
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-N10ZLNFZHE"></script>
     <script>
@@ -173,7 +173,7 @@
                 </div>
                 <div id="verdictWrap" class="stack" hidden>
                     <button class="btn text back-link" type="button" id="backToBatch" data-action="back-to-batch" hidden><svg class="icon flip"><use href="#i-next"/></svg>Back to the comparison</button>
-                    <div class="example-note" id="exampleNote" hidden><span class="grow"><strong>This is an example</strong> from a made-up resume and posting.</span><button class="btn ink" type="button" data-action="exit-example">Check my own job</button></div>
+                    <div class="example-note" id="exampleNote" hidden><span class="grow"><strong>This is an example</strong> from a made-up resume and posting.</span><button class="btn" type="button" data-action="exit-example">Check my own job</button></div>
                     <div class="verdict" id="verdict" data-tone="neutral">
                         <p class="eyebrow"><span class="example-tag" id="exampleTag" hidden>Example</span><span id="roleLine"></span></p>
                         <div class="verdict-head">
@@ -217,8 +217,6 @@
                     </div>
 
                     <div class="rows" id="breakdown">
-                        <div class="row-item"><span>Strengths</span><b id="strengthsCount">0</b></div>
-                        <div class="row-item"><span>Gaps</span><b id="gapsCount">0</b></div>
                         <div class="row-item"><span>Keywords matched</span><b id="keywordsPercent">0%</b></div>
                         <div class="row-item"><span id="salaryEstimateLabel">Pay</span><b id="salaryEstimate">...</b></div>
                         <div class="row-item" id="baseRow" hidden><span id="baseEstimateLabel">Base</span><b id="baseEstimate"></b></div>
@@ -227,6 +225,7 @@
             </section>
 
             <section class="calc-inputs" id="inputs" aria-label="Your resume and the job">
+            <div class="inputs-fold" id="inputsFold"><span class="grow"><span class="eyebrow">Checked</span><span id="inputsFoldText">Your job and resume</span></span><button class="btn" type="button" data-action="edit-inputs">Change job or resume</button></div>
             <div class="panel stack" id="jobCard">
                 <h2 class="h3">1. The job</h2>
                 <label class="field" id="jobField">
@@ -350,26 +349,14 @@
                 <!-- Overview -->
                 <div class="panel" id="panel-overview" data-title="Overview" role="tabpanel" style="padding-top:24px">
                     
-                    <div class="section" id="fitSignalsBlock" hidden>
-                        <h3 class="section-title">What this hiring manager screens on</h3>
-                        <div class="table-wrap">
-                            <table class="data stackable">
-                                <thead><tr><th>Signal</th><th>Role expects</th><th>Your resume shows</th><th></th></tr></thead>
-                                <tbody id="fitSignalsBody"></tbody>
-                            </table>
-                        </div>
+                    <div class="section">
+                        <h3 class="section-title">Gaps to address <span class="count" id="gapsCount">0</span></h3>
+                        <div class="list" id="gapsList" style="margin-top:12px"></div>
                     </div>
-
-                    <div class="section grid-2">
-                        <div>
-                            <h3 class="section-title">Your strengths</h3>
-                            <div class="list" id="strengthsList" style="margin-top:12px"></div>
-                        </div>
-                        <div>
-                            <h3 class="section-title">Gaps to address</h3>
-                            <div class="list" id="gapsList" style="margin-top:12px"></div>
-                        </div>
-                    </div>
+                    <details class="disclosure section" id="strengthsFold">
+                        <summary><svg class="icon"><use href="#i-check"/></svg><span>Your strengths <span class="count" id="strengthsCount">0</span></span><svg class="icon chev"><use href="#i-chevron"/></svg></summary>
+                        <div class="disclosure-body"><div class="list" id="strengthsList"></div></div>
+                    </details>
 
                     <div class="section">
                         <h3 class="section-title">Market intel</h3>
@@ -685,7 +672,7 @@
                 </div>
                 <p class="body-sm muted">Saved in this browser only, marked "Not checked" until you run a fit check.</p>
                 <div class="row">
-                    <button class="btn ink" type="submit">Save</button>
+                    <button class="btn primary" type="submit">Save</button>
                     <button class="btn text" type="button" data-action="handoff-save-cancel">Cancel</button>
                 </div>
             </form>
@@ -737,7 +724,7 @@
     <button class="icon-btn" data-action="dismiss-snackbar" aria-label="Dismiss"><svg class="icon"><use href="#i-close"/></svg></button>
 </div>
 
-<script src="assets/files.js?v=32"></script>
-<script src="assets/app.js?v=32"></script>
+<script src="assets/files.js?v=33"></script>
+<script src="assets/app.js?v=33"></script>
 </body>
 </html>

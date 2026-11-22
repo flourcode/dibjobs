@@ -619,7 +619,11 @@
         $('batchWrap').hidden = mode !== 'batch';
         $('peekInline').hidden = mode !== 'empty';
         $('results').hidden = mode !== 'ready';
-        document.querySelector('.calc').classList.toggle('has-result', mode !== 'empty');
+        const calc = document.querySelector('.calc');
+        calc.classList.toggle('has-result', mode !== 'empty');
+        calc.classList.remove('editing');      // on phones the form folds to one line under a result until "Change" is pressed
+        const a = state.analysis;
+        $('inputsFoldText').textContent = mode === 'batch' ? 'Your comparison' : state.isExample ? 'The sample job and resume' : (a && a.job_title) ? `${a.job_title}${a.company && !/not specified|unknown/i.test(a.company) ? ' at ' + a.company : ''}` : 'Your job and resume';
         if (mode === 'empty') {
             $('emptyPlain').hidden = false;
             $('examplePreview').hidden = false;
@@ -1187,7 +1191,8 @@
     }
 
     // The comparison at the heart of the result: what the posting asks for, next to what the resume shows.
-    const REQ_STATUS = { met: ['status-ok', 'Met'], partial: ['warn', 'Partly'], missing: ['bad', 'Not shown'], verify: ['warn', 'Verify'] };
+    // One status vocabulary across the site: Met, Partly, Confirm, Not shown (the recruiter page uses the same four).
+    const REQ_STATUS = { met: ['status-ok', 'Met'], partial: ['warn', 'Partly'], missing: ['bad', 'Not shown'], verify: ['warn', 'Confirm'] };
     function keyRequirements(data) {
         const clean = (x) => (typeof x === 'string' ? x.trim() : '');
         let rows = (Array.isArray(data.requirements) ? data.requirements : []).map(r => r && ({
@@ -1268,6 +1273,7 @@
 
     function renderFitSignals(data) {
         const rows = Array.isArray(data.fit_signals) ? data.fit_signals.filter(s => s && s.signal) : [];
+        if (!$('fitSignalsBody')) return;      // the requirement list in the answer now carries this comparison
         $('fitSignalsBlock').hidden = !rows.length;
         const chip = { strong: ['status-ok', 'Strong'], partial: ['warn', 'Partial'], missing: ['bad', 'Missing'] };
         $('fitSignalsBody').innerHTML = rows.map(s => {
@@ -1494,7 +1500,7 @@
         const card = $('tailorTeaser');
         const sample = a && Array.isArray(a.bullet_rewrites) ? a.bullet_rewrites.filter(b => b && b.original && b.improved).map(b => ({ before: b.original, after: b.improved })) : [];
         let pairs = [];
-        if (built) pairs = state.isExample ? sample.slice(0, 2) : (state.tailorPairs || []);
+        if (built) pairs = (state.isExample ? sample : (state.tailorPairs || [])).slice(0, 1);
         else if (a && act !== 'skip') pairs = sample.slice(0, 1);
         card.hidden = !a || (!built && !pairs.length);
         if (!card.hidden) {
@@ -1763,6 +1769,7 @@
         const company = knownCompany(a.company);
         $('printHeader').textContent = `${a.job_title || 'Role'}${company ? ' at ' + company : ''}`;
         $('printMeta').innerHTML = `${escapeHtml(new Date().toLocaleDateString())}<br>dibjobs.com`;
+        $('strengthsFold').open = true;      // the printed report shows every strength
         const prev = document.title;
         document.title = `DIB Jobs report - ${a.job_title || 'Role'}${company ? ' - ' + company : ''}`.replace(/[\\/:*?"<>|]/g, ' ');
         const restore = () => { document.title = prev; window.removeEventListener('afterprint', restore); };
@@ -2675,6 +2682,7 @@ Amazon is an Equal Opportunity Employer.`;
         'clear-resume': () => clearResume(),
         'ocr': () => readResumeWithAI(),
         'new-job': () => newJob(),
+        'edit-inputs': () => { document.querySelector('.calc').classList.add('editing'); $('jobCard').scrollIntoView({ behavior: scrollBehavior(), block: 'start' }); $('jobDescription').focus({ preventScroll: true }); },
         'save-job': () => saveToTracker(),
         'download-report': () => downloadReport(),
         'share': () => shareTool(),

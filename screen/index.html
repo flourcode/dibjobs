@@ -32,7 +32,7 @@
     <link rel="apple-touch-icon" href="../apple-touch-icon.png">
     <link rel="manifest" href="../site.webmanifest">
     <link rel="preload" href="../assets/fonts/inter-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="stylesheet" href="../assets/app.css?v=32">
+    <link rel="stylesheet" href="../assets/app.css?v=33">
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-N10ZLNFZHE"></script>
     <script>
@@ -98,11 +98,13 @@
                     <p class="example-note" id="queueExampleNote" hidden><strong>This is an example.</strong> Four made-up candidates, already ranked against a made-up job. The full ranking is below.</p>
                     <div class="rows queue" id="candidateQueue" aria-live="polite"></div>
                     <label class="switch-row compact"><input type="checkbox" id="hideNames"><span class="switch" aria-hidden="true"></span><span><span class="label-lg">Hide names</span><span class="body-sm">Shows candidates as A, B, C and leaves names, emails and profile links out of the text sent for analysis.</span></span></label>
+                    <p class="body-sm blind-note" id="blindNote" hidden>This ranking was run with names included. Run it again to leave them out of the analysis too.</p>
                     <div class="criteria" id="criteriaBox" hidden>
                         <h3 class="title-sm">Confirm the must-haves</h3>
                         <p class="body-sm muted" id="criteriaNote"></p>
                         <div id="criteriaList"></div>
                         <button class="btn text" type="button" data-action="add-criterion" id="addCriterionBtn"><svg class="icon"><use href="#i-add"/></svg>Add a must-have</button>
+                        <p class="body-sm" id="criteriaStale" hidden>The job description has changed since these were drafted. Your list is kept as it is. <button class="link-btn" type="button" data-action="redraft-criteria">Draft again from the posting</button></p>
                     </div>
                     <p class="field-error" id="inlineError" role="alert" hidden></p>
                     <div class="analyze-bar" id="queueActions">
@@ -120,8 +122,8 @@
                         <button class="btn text" data-action="clear-job">Clear</button>
                     </div>
                     <label class="field">
-                        <span class="field-label">Job description</span>
-                        <textarea id="jobDescription" placeholder="Paste the job description. You can also drop a PDF or Word file here."></textarea>
+                        <span class="field-label">Job description or link</span>
+                        <textarea id="jobDescription" placeholder="Paste the job description, or a link to the posting. You can also drop a PDF or Word file here."></textarea>
                         <span class="supporting"><span id="jobCount"></span><span id="jobFileInfo"></span></span>
                     </label>
                 </div>
@@ -136,7 +138,7 @@
                         </span>
                     </div>
                     <input type="file" id="resumeFiles" multiple accept=".pdf,.docx,.txt,.md,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain" hidden>
-                    <p class="body-sm muted" id="resumePrivacy">We read the files in your browser. When you rank, their text is sent to Google's Gemini AI for analysis. Nothing is stored on our servers.</p>
+                    <p class="body-sm muted" id="resumePrivacy">We read the files in your browser. When you rank, their text is sent to Google's Gemini AI for analysis. Nothing is stored on our servers. Your work stays in this browser tab until you close it.</p>
                     <div id="fileStatus" role="status" aria-live="polite" hidden></div>
                     <details class="disclosure" id="pasteRow">
                         <summary><svg class="icon"><use href="#i-edit"/></svg><span>Or paste a resume</span><svg class="icon chev"><use href="#i-chevron"/></svg></summary>
@@ -162,7 +164,7 @@
         <div id="resultsCard" class="stack" hidden>
             <div class="banner warn" id="exampleBanner" hidden>
                 <span class="grow"><strong>This is an example.</strong> The job and all four candidates are made up, and nothing was sent anywhere. Your own job and candidates are untouched. Open any candidate to see the full write-up.</span>
-                <button class="btn ink" type="button" data-action="clear-example">Screen your own candidates</button>
+                <button class="btn" type="button" data-action="clear-example">Screen your own candidates</button>
             </div>
             <div class="verdict" id="summaryVerdict" data-tone="neutral" aria-live="polite">
                 <p class="eyebrow"><span class="example-tag" id="exampleTag" hidden>Example</span><span id="summaryRole"></span></p>
@@ -196,13 +198,14 @@
             </div>
             <div id="gridCard" class="stack" hidden>
                 <h2 class="h3">Must-haves by candidate</h2>
-                <div class="table-wrap" role="region" aria-label="Must-haves by candidate" tabindex="0">
+                <p class="body-sm grid-hint" id="gridScrollHint" hidden>Scroll sideways to see every must-have.</p>
+                <div class="table-wrap grid-wrap" id="gridWrap" role="region" aria-label="Must-haves by candidate" tabindex="0">
                     <table class="data stackable grid-table" id="gridTable">
                         <thead id="gridHead"></thead>
                         <tbody id="gridBody"></tbody>
                     </table>
                 </div>
-                <p class="body-sm muted">Every candidate was checked against the same must-haves you confirmed. "Ask" means the resume hints at it but does not say so plainly.</p>
+                <p class="body-sm muted">Every candidate was checked against the same must-haves you confirmed. "Confirm" means the resume hints at it but does not say so plainly, so ask.</p>
             </div>
             <p class="body-sm" id="decisionNote"><strong>This supports your decision. It does not make it.</strong> Scores and calls are AI estimates built from the resume text and the must-haves you confirmed. Read each resume and make the call yourself.</p>
         </div>
@@ -225,10 +228,11 @@
 
 <div class="snackbar" id="snackbar" role="status" aria-live="polite">
     <span class="grow" id="snackbarText"></span>
+    <button class="snack-action" type="button" id="snackbarAction" data-action="snackbar-action" hidden>Undo</button>
     <button class="icon-btn" data-action="dismiss-snackbar" aria-label="Dismiss"><svg class="icon"><use href="#i-close"/></svg></button>
 </div>
 
-<script src="../assets/files.js?v=32"></script>
-<script src="screen.js?v=32"></script>
+<script src="../assets/files.js?v=33"></script>
+<script src="screen.js?v=33"></script>
 </body>
 </html>

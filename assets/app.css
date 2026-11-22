@@ -202,7 +202,7 @@ body.file-dragging .dropzone, .dropzone.drop-target { border-color: var(--ink); 
 .banner.warn { background: var(--caution); }
 .banner.error { background: var(--bad); }
 .banner.info { background: var(--control); }
-.banner .btn { margin: -6px -6px -6px 0; background: var(--ink); color: #fff; }
+.banner .btn { margin: -6px -6px -6px 0; background: var(--page); color: var(--ink); }
 
 /* ---------- Disclosure ---------- */
 details.disclosure > summary { display: flex; align-items: center; gap: 10px; min-height: 44px; cursor: pointer; list-style: none; font: 600 15px/20px var(--font); border-radius: var(--r-seg); }
@@ -750,14 +750,53 @@ button.batch-row:focus-visible { outline: 3px solid var(--ink); outline-offset: 
 .criterion input:focus-visible { outline: 3px solid var(--ink); outline-offset: 1px; }
 .grid-evidence { display: block; margin-top: 4px; font: 400 13px/18px var(--font); color: var(--muted); }
 table.grid-table th, table.grid-table td { vertical-align: top; }
-table.grid-table thead th { min-width: 150px; }
+table.grid-table thead th { min-width: 132px; white-space: normal; vertical-align: bottom; }
 table.grid-table thead th:first-child, table.grid-table thead th:nth-child(2) { min-width: 0; }
 .must-row { align-items: flex-start; }
 table.ranking td.actions { white-space: nowrap; }
-table.ranking td.actions .btn.text { margin-left: 4px; }
+table.ranking td.actions .btn { vertical-align: middle; }
+table.ranking td.actions .btn + .btn { margin-left: 4px; }
 @media (max-width: 699px) {
     table.data.stackable.grid-table td[data-label] { color: var(--ink); padding-top: 8px; }
     table.data.stackable.grid-table td[data-label]::before { display: block; content: attr(data-label); margin-bottom: 4px; }
     table.ranking td.actions { white-space: normal; }
 }
 .must-name { font-weight: 700; }
+
+/* v33: one status colour set, three button levels, a shorter result, and a folded form on phones */
+/* Status pills keep their colour inside the answer panel; a hairline keeps them legible on a tinted surface. */
+.verdict .req .chip.sm.status-ok { background: var(--good); }
+.verdict .req .chip.sm.warn { background: var(--caution); }
+.verdict .req .chip.sm.bad { background: var(--bad); }
+.verdict .req .chip.sm { box-shadow: inset 0 0 0 1.5px rgba(11, 18, 21, .16); }
+/* Buttons: primary (blue), secondary (grey on the page, white on a panel or banner), and text links. */
+.btn.ink { background: var(--control); color: var(--ink); }
+.banner .btn:hover { background: var(--panel); }
+.section-title .count, .disclosure summary .count { font-weight: 500; color: var(--muted); margin-left: 4px; }
+#strengthsFold > summary { font: 900 24px/28.8px var(--font); letter-spacing: -0.015em; }
+.inputs-fold { display: none; }
+@media (max-width: 879px) {
+    .calc.has-result:not(.editing) #inputs > :not(.inputs-fold) { display: none; }
+    .calc.has-result:not(.editing) .inputs-fold { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 12px 16px; border-radius: var(--r-md); background: var(--panel); }
+    .inputs-fold .grow { flex: 1 1 160px; min-width: 0; display: flex; flex-direction: column; gap: 2px; font: 600 15px/20px var(--font); }
+    .inputs-fold .btn { background: var(--page); }
+}
+@media print { .inputs-fold { display: none !important; } }
+/* Recruiter: undo in the snackbar, a grid that says when it scrolls, plain link buttons in running text */
+.snack-action { flex: none; min-height: 40px; padding: 8px 12px; border: 0; border-radius: var(--r-seg); background: rgba(255, 255, 255, .16); color: #fff; font: 700 15px/20px var(--font); cursor: pointer; }
+.snack-action:hover { background: rgba(255, 255, 255, .28); }
+.snack-action:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
+.link-btn { padding: 0; border: 0; background: none; color: var(--ink); font: inherit; font-weight: 600; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.blind-note { padding: 8px 12px; border-radius: var(--r-seg); background: var(--caution); }
+.grid-hint { color: var(--muted); margin-bottom: -8px; }
+.grid-wrap { position: relative; background:
+    linear-gradient(to right, var(--panel) 30%, rgba(238, 242, 248, 0)) left center / 28px 100% no-repeat local,
+    linear-gradient(to left, var(--panel) 30%, rgba(238, 242, 248, 0)) right center / 28px 100% no-repeat local,
+    linear-gradient(to right, rgba(11, 18, 21, .16), rgba(11, 18, 21, 0)) left center / 12px 100% no-repeat scroll,
+    linear-gradient(to left, rgba(11, 18, 21, .16), rgba(11, 18, 21, 0)) right center / 12px 100% no-repeat scroll,
+    var(--panel); }
+table.grid-table th[scope="row"] { position: sticky; left: 0; z-index: 1; background: var(--panel); }
+@media (max-width: 699px) { table.grid-table th[scope="row"] { position: static; padding-left: 0; } .grid-hint { display: none; } }
+.calc-inputs > .inputs-fold + * { margin-top: 0; }
+/* The docked button fades the content under it instead of cutting it off. It stays on the first screen by design. */
+.analyze-bar { padding-top: 26px; background: linear-gradient(to bottom, rgba(255,255,255,0), var(--page) 22px); }

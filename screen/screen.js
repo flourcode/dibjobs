@@ -32,6 +32,7 @@
     const MAX_MUST = 8;
     const BLIND_KEY = 'dib_jobs_recruiter_blind';
     let hideNames = false;
+    let rankedBlind = false;     // the ranking on screen was run with names left out of the text sent
 
     const $ = (id) => document.getElementById(id);
     const escapeHtml = (str) => String(str ?? '').replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[m]);
@@ -62,11 +63,50 @@
         .replace(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi, '[email]')
         .replace(/(?:https?:\/\/)?(?:www\.)?linkedin\.com\/\S+/gi, '[profile link]'), name, '[name]');
 
-    function snackbar(message, duration = 4000) {
+    let snackRun = null;
+    function snackbar(message, duration = 4000, action) {
         $('snackbarText').textContent = message;
+        snackRun = action ? action.run : null;
+        $('snackbarAction').hidden = !action;
+        if (action) $('snackbarAction').textContent = action.label;
         $('snackbar').classList.add('show');
         clearTimeout(snackTimer);
         snackTimer = setTimeout(() => $('snackbar').classList.remove('show'), duration);
+    }
+
+    // ----- This tab remembers the recruiter's work, so a reload or a wrong tap does not lose it. It is kept in
+    // the browser's session storage only: it never leaves the device and is gone when the tab is closed.
+    const SESSION_KEY = 'dib_jobs_recruiter_session';
+    let restoring = false;
+    function persist() {
+        if (restoring || isExample || running) return;
+        try {
+            const data = { v: 1, jd: $('jobDescription').value, nextId, rankedBlind,
+                queue: queue.map(c => ({ id: c.id, name: c.name, resumeText: c.resumeText, status: c.status === 'analyzing' ? 'pending' : c.status, result: c.result, error: c.error || '' })),
+                ranked: results.map(r => r.id),
+                criteria: criteria.shown ? { key: criteria.key, list: [...document.querySelectorAll('#criteriaList input')].map(i => i.value), note: $('criteriaNote').textContent } : null };
+            if (!data.jd.trim() && !data.queue.length && !data.criteria) sessionStorage.removeItem(SESSION_KEY);
+            else sessionStorage.setItem(SESSION_KEY, JSON.stringify(data));
+        } catch (e) { /* storage full or blocked: the page still works, it just will not survive a reload */ }
+    }
+    function restore() {
+        let data = null;
+        try { data = JSON.parse(sessionStorage.getItem(SESSION_KEY) || 'null'); } catch (e) { data = null; }
+        if (!data || data.v !== 1 || !Array.isArray(data.queue)) return false;
+        restoring = true;
+        $('jobDescription').value = typeof data.jd === 'string' ? data.jd : '';
+        queue = data.queue.filter(c => c && typeof c.resumeText === 'string' && c.resumeText.length >= 100).map(c => ({ id: Number(c.id), name: String(c.name || ''), resumeText: c.resumeText, status: c.result ? 'complete' : c.status === 'error' ? 'error' : 'pending', result: c.result || null, error: c.error || '' }));
+        nextId = Math.max(Number(data.nextId) || 1, ...queue.map(c => c.id + 1), 1);
+        const ranked = Array.isArray(data.ranked) ? data.ranked : [];
+        results = queue.filter(c => c.result && ranked.includes(c.id)).map(c => ({ id: c.id, name: c.name, resumeText: c.resumeText, ...c.result }));
+        rankedBlind = data.rankedBlind === true;
+        if (data.criteria && Array.isArray(data.criteria.list)) {
+            criteria = { key: String(data.criteria.key || ''), shown: true, drafting: false };
+            $('criteriaNote').textContent = data.criteria.note || '';
+            renderCriteria(data.criteria.list.slice(0, MAX_MUST).map(String));
+        }
+        restoring = false;
+        return !!(queue.length || $('jobDescription').value.trim());
     }
 
     function showInlineError(message) {
@@ -141,6 +181,7 @@
             else if (c.status === 'error') status = `<span style="color:var(--danger-ink); font-weight:600">${escapeHtml(c.error || 'Could not be screened')}</span>`;
             return `<div class="row-item queue-row"><span class="grow"><span class="queue-name">${escapeHtml(label(c))}</span><span class="queue-status">${status}</span></span>${score}<button class="icon-btn" data-remove="${c.id}" aria-label="Remove ${escapeHtml(c.name)}"${running ? ' disabled' : ''}>${icon('close')}</button></div>`;
         }).join('') : '<div class="row-item queue-row"><span class="queue-status">No candidates yet. Drop resumes in step 2 and they will line up here.</span></div>';
+        persist();
     }
 
     // ======================================================================
@@ -189,7 +230,7 @@
             if (res.scanned || !res.text) throw new Error('No readable text was found in that file. Paste the job description instead.');
             box.value = res.text.substring(0, MAX_JD_CHARS);
             $('jobFileInfo').textContent = 'From ' + file.name;
-            updateJobCount();
+            updateJobCount(); renderCriteria(); persist();
         } catch (e) {
             snackbar(e.message || 'That file could not be read.', 7000);
         } finally {
@@ -276,6 +317,8 @@
         const rows = document.querySelectorAll('#criteriaList .criterion').length;
         $('criteriaBox').hidden = !criteria.shown || isExample;
         $('addCriterionBtn').hidden = rows >= MAX_MUST;
+        const jd = $('jobDescription').value.trim().substring(0, MAX_JD_CHARS);
+        $('criteriaStale').hidden = !criteria.shown || !criteria.key || jd.length < 50 || criteria.key === jobKey(jd);
     }
     function addCriterion() {
         const n = document.querySelectorAll('#criteriaList .criterion').length;
@@ -286,7 +329,7 @@
     }
     // Step one of a ranking: draft the must-haves and stop, so the recruiter confirms them before anyone is screened.
     async function draftCriteria(jd) {
-        if (criteria.drafting) return;
+        if (criteria.drafting || running) return;
         criteria.drafting = true;
         const btn = $('analyzeAllBtn'); btn.disabled = true; $('analyzeText').textContent = 'Reading the must-haves...';
         let list = [], note = 'Drafted from the posting. Edit them to match what you agreed with the hiring manager. Every candidate is judged on this same list.';
@@ -299,9 +342,16 @@
         btn.disabled = false; renderExampleState();
         $('criteriaBox').scrollIntoView({ behavior: (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) ? 'auto' : 'smooth', block: 'nearest' });
         const first = $('criteriaList').querySelector('input'); if (first) first.focus({ preventScroll: true });
+        persist();
         track('recruiter_criteria_drafted', { count: list.filter(Boolean).length });
     }
-    function resetCriteria() { if (!criteria.shown && !criteria.key) return; criteria = { key: '', shown: false, drafting: false }; renderCriteria([]); renderExampleState(); }
+    function redraftCriteria() {
+        const jd = $('jobDescription').value.trim().substring(0, MAX_JD_CHARS);
+        if (jd.length < 50) return showInlineError('Add the job description in step 1 first.');
+        const keep = [...document.querySelectorAll('#criteriaList input')].map(i => i.value), note = $('criteriaNote').textContent, was = { ...criteria };
+        draftCriteria(jd).then(() => snackbar('Must-haves drafted again from the posting.', 8000, { label: 'Undo', run: () => { criteria = was; $('criteriaNote').textContent = note; renderCriteria(keep); persist(); } }));
+    }
+    function resetCriteria() { if (!criteria.shown && !criteria.key) return; criteria = { key: '', shown: false, drafting: false }; renderCriteria([]); renderExampleState(); persist(); }
 
     // One retry for a network blip. If the service says "slow down", wait and carry on with the same candidate.
     async function analyzeCandidate(jobDescription, resumeText, mustHaves, onWait) {
@@ -316,17 +366,38 @@
         }
     }
 
+    // A link in the job box is read first and its text shown for checking, the same as on the job seeker page.
+    let readingLink = false;
+    async function readJobLink(url) {
+        if (readingLink || running) return;
+        readingLink = true;
+        const btn = $('analyzeAllBtn'), box = $('jobDescription');
+        btn.disabled = true; box.readOnly = true; $('analyzeText').textContent = 'Reading the posting...';
+        let data = null, why = '';
+        try { data = await callApi({ request_type: 'read_posting', url }); }
+        catch (e) { why = e.transient || /not available yet/i.test(e.message) ? '' : e.message; }
+        readingLink = false; btn.disabled = false; box.readOnly = false; renderExampleState();
+        if (!data || !data.text) { box.value = ''; updateJobCount(); box.focus(); persist(); return showInlineError(why || 'We couldn\'t read that link. Open the posting, copy the whole job description, and paste it in step 1.'); }
+        box.value = data.text.substring(0, MAX_JD_CHARS); box.scrollTop = 0;
+        $('jobFileInfo').textContent = 'Read from the link. Check it is the right posting, then rank.';
+        updateJobCount(); renderCriteria(); persist();
+        box.focus({ preventScroll: true }); box.setSelectionRange(0, 0);
+        box.closest('.panel').scrollIntoView({ behavior: (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) ? 'auto' : 'smooth', block: 'nearest' });
+        snackbar('Posting read from the link. Check it, then rank.', 6000);
+    }
+
     async function analyzeAll() {
         let jd = $('jobDescription').value.trim().substring(0, MAX_JD_CHARS);
         showInlineError('');
-        const jdIsUrl = /^https?:\/\/\S+$/i.test(jd);
-        if (jdIsUrl) { $('jobDescription').focus(); return showInlineError('Paste the job description text in step 1. A link can\'t be read reliably.'); }
+        if (/^https?:\/\/\S+$/i.test(jd)) return readJobLink(jd);
         if (jd.length < 50) return showInlineError('Add the job description in step 1 first.');
         if (!queue.length) return showInlineError('Add at least one resume in step 2.');
-        if (running || criteria.drafting) return;
-        // The must-haves are confirmed first. A new or changed job gets a fresh draft.
-        if (!criteria.shown || criteria.key !== jobKey(jd)) return draftCriteria(jd);
+        if (running || criteria.drafting || readingLink) return;
+        // The must-haves are confirmed first. Once they are on screen they are the recruiter's: editing the job
+        // description never replaces them (a note offers a fresh draft instead).
+        if (!criteria.shown) return draftCriteria(jd);
         const mustHaves = readCriteria();
+        const blind = hideNames;
         running = true;
         const btn = $('analyzeAllBtn');
         btn.disabled = true;
@@ -338,7 +409,7 @@
             renderQueue();
             try {
                 const label = `Screening ${done + 1} of ${queue.length}...`;
-                const result = await analyzeCandidate(jd, hideNames ? redact(c.resumeText, c.name) : c.resumeText, mustHaves, (secs) => { $('analyzeText').textContent = `Pausing ${secs} seconds, then continuing...`; setTimeout(() => { if (running) $('analyzeText').textContent = label; }, secs * 1000); });
+                const result = await analyzeCandidate(jd, blind ? redact(c.resumeText, c.name) : c.resumeText, mustHaves, (secs) => { $('analyzeText').textContent = `Pausing ${secs} seconds, then continuing...`; setTimeout(() => { if (running) $('analyzeText').textContent = label; }, secs * 1000); });
                 c.status = 'complete'; c.result = result;
                 results.push({ id: c.id, name: c.name, resumeText: c.resumeText, ...result });
             } catch (e) {
@@ -348,6 +419,7 @@
             renderQueue();
         }
         running = false;
+        rankedBlind = blind;
         btn.disabled = false;
         renderExampleState();
         renderQueue();
@@ -434,7 +506,7 @@
                 <td class="status-cell"><span class="chip sm ${call.chip}">${call.label}</span></td>
                 <td data-label="Top strength">${strength ? escapeHtml(scrub(strength, r)) : '<span class="muted">None identified</span>'}</td>
                 <td data-label="${concern.dealbreaker ? 'Dealbreaker' : 'Key concern'}">${concern.text ? escapeHtml(scrub(concern.text, r)) : '<span class="muted">None identified</span>'}</td>
-                <td class="actions"><button class="btn" data-details="${r.id}">View<span class="sr"> ${escapeHtml(label(r))}</span></button><button class="btn text" data-submittal="${r.id}">${icon('copy')}Submittal<span class="sr"> for ${escapeHtml(label(r))}</span></button></td>
+                <td class="actions"><button class="btn" data-details="${r.id}">View<span class="sr"> ${escapeHtml(label(r))}</span></button><button class="btn" data-submittal="${r.id}">${icon('copy')}Submittal<span class="sr"> for ${escapeHtml(label(r))}</span></button></td>
             </tr>`;
         }).join('') : `<tr><td colspan="7" class="muted">No candidates in this group.</td></tr>`;
         document.querySelectorAll('#resultsTable [data-sort]').forEach(b => b.closest('th').setAttribute('aria-sort', b.dataset.sort === sort.column ? (sort.direction === 'asc' ? 'ascending' : 'descending') : 'none'));
@@ -442,12 +514,13 @@
     }
 
     // ----- Must-haves by candidate: the same checks for everyone, side by side, best score first.
-    const MUST_META = { met: ['status-ok', 'Met'], partial: ['warn', 'Partly'], unclear: ['warn', 'Ask'], missing: ['bad', 'Not shown'] };
+    const MUST_META = { met: ['status-ok', 'Met'], partial: ['warn', 'Partly'], unclear: ['warn', 'Confirm'], missing: ['bad', 'Not shown'] };
     const mustOf = (r) => (Array.isArray(r.must_haves) ? r.must_haves : []).filter(m => m && m.requirement);
     function renderGrid() {
         const ranked = [...results].sort((a, b) => (b.score || 0) - (a.score || 0));
         const cols = ranked.length ? mustOf(ranked[0]).map(m => m.requirement) : [];
         $('gridCard').hidden = !cols.length;
+        $('blindNote').hidden = !(hideNames && results.length && !rankedBlind && !isExample);
         if (!cols.length) return;
         $('gridHead').innerHTML = `<tr><th>Candidate</th><th>Call</th>${cols.map(c => `<th>${escapeHtml(c)}</th>`).join('')}</tr>`;
         $('gridBody').innerHTML = ranked.map(r => {
@@ -456,6 +529,16 @@
                 const m = must[i] || { status: 'unclear', evidence: 'Not shown' }, meta = MUST_META[m.status] || MUST_META.unclear;
                 return `<td data-label="${escapeHtml(c)}"><span class="chip sm ${meta[0]}">${meta[1]}</span><span class="grid-evidence">${escapeHtml(scrub(m.evidence || 'Not shown', r))}</span></td>`; }).join('')}</tr>`;
         }).join('');
+        updateGridScroll();
+    }
+    // When the grid is wider than the page, say so and fade the edge it continues past.
+    function updateGridScroll() {
+        const wrap = $('gridWrap');
+        if (!wrap || $('gridCard').hidden) return;
+        const more = wrap.scrollWidth > wrap.clientWidth + 2, atEnd = wrap.scrollLeft + wrap.clientWidth >= wrap.scrollWidth - 2;
+        wrap.classList.toggle('more-right', more && !atEnd);
+        wrap.classList.toggle('more-left', more && wrap.scrollLeft > 2);
+        $('gridScrollHint').hidden = !more;
     }
 
     // ----- Submittal: the note a recruiter sends the hiring manager with a candidate. Built from the result, no AI call.
@@ -657,9 +740,16 @@ What we need
     // ======================================================================
     const ACTIONS = {
         'analyze': () => { if (isExample) { clearExample(); $('jobDescription').focus(); return snackbar(queue.length ? 'Example closed. Your candidates are back.' : 'Example closed. Add your job and resumes.'); } analyzeAll(); },
-        'clear-job': () => { clearExample(); $('jobDescription').value = ''; $('jobFileInfo').textContent = ''; updateJobCount(); resetCriteria(); $('jobDescription').focus(); },
+        'clear-job': () => { clearExample(); $('jobDescription').value = ''; $('jobFileInfo').textContent = ''; updateJobCount(); resetCriteria(); persist(); $('jobDescription').focus(); },
         'add-criterion': () => addCriterion(),
-        'clear-queue': () => { if (running) return; queue = []; results = []; setFileStatus(); showInlineError(''); renderQueue(); renderResults(); renderExampleState(); },
+        'clear-queue': () => {
+            if (running || !queue.length) return;
+            const was = { queue, results }, n = queue.length;
+            queue = []; results = []; setFileStatus(); showInlineError(''); renderQueue(); renderResults(); renderExampleState(); persist();
+            snackbar(`Cleared ${n} candidate${n > 1 ? 's' : ''}.`, 10000, { label: 'Undo', run: () => { queue = was.queue; results = was.results; applySort(); renderQueue(); renderResults(); renderExampleState(); persist(); } });
+        },
+        'redraft-criteria': () => redraftCriteria(),
+        'snackbar-action': () => { const run = snackRun; snackRun = null; $('snackbar').classList.remove('show'); if (run) run(); },
         'example': () => showExample(false),
         'clear-example': () => { clearExample(); $('jobDescription').focus(); window.scrollTo({ top: 0, behavior: (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) ? 'auto' : 'smooth' }); },
         'add-pasted': () => {
@@ -683,15 +773,19 @@ What we need
             try { localStorage.setItem(BLIND_KEY, hideNames ? '1' : '0'); } catch (err) { /* not essential */ }
             if ($('detailDialog').open) $('detailDialog').close();
             renderQueue(); renderResults();
-            if (results.length && !isExample) snackbar(hideNames ? 'Names hidden on screen. Run the ranking again to leave them out of the analysis too.' : 'Names shown.', 6000);
         });
+        // Work from earlier in this tab comes back first; the example is only for an empty first visit.
+        const restored = restore();
+        if (restored) { applySort(); renderResults(); }
         renderQueue(); renderCriteria(); renderExampleState();
-        // First visit: show the ranked example straight away. Skipped once this browser has run a real ranking.
         let used = false; try { used = localStorage.getItem(USED_KEY) === '1'; } catch (e) { /* storage blocked: treat as a first visit */ }
-        if (!used) showExample(true);
+        if (!used && !restored) showExample(true);
         initFileDrop();
         updateJobCount();
-        $('jobDescription').addEventListener('input', () => { clearExample(); updateJobCount(); if (criteria.shown && criteria.key !== jobKey($('jobDescription').value.trim().substring(0, MAX_JD_CHARS))) resetCriteria(); });
+        $('jobDescription').addEventListener('input', () => { clearExample(); updateJobCount(); $('jobFileInfo').textContent = ''; renderCriteria(); persist(); });
+        $('criteriaList').addEventListener('input', persist);
+        $('gridWrap').addEventListener('scroll', updateGridScroll, { passive: true });
+        window.addEventListener('resize', updateGridScroll);
 
         // Sortable column headers
         const heads = document.querySelectorAll('#resultsTable thead th');
@@ -701,11 +795,24 @@ What we need
             const action = e.target.closest('[data-action]');
             if (action && ACTIONS[action.dataset.action]) return ACTIONS[action.dataset.action]();
             const remove = e.target.closest('[data-remove]');
-            if (remove && !running) { const id = Number(remove.dataset.remove); queue = queue.filter(c => c.id !== id); results = results.filter(r => r.id !== id); if (isExample && !queue.length) clearExample(); renderQueue(); renderResults(); return; }
+            if (remove && !running) {
+                const id = Number(remove.dataset.remove), was = { queue, results }, gone = queue.find(c => c.id === id);
+                queue = queue.filter(c => c.id !== id); results = results.filter(r => r.id !== id);
+                if (isExample && !queue.length) clearExample();
+                renderQueue(); renderResults(); renderExampleState(); persist();
+                // Undo puts the candidate back where they were, ranking included. (Not offered inside the example.)
+                if (gone && !isExample && !stash) snackbar(`Removed ${hideNames ? 'the candidate' : gone.name}.`, 10000, { label: 'Undo', run: () => { queue = was.queue; results = was.results; applySort(); renderQueue(); renderResults(); renderExampleState(); persist(); } });
+                return;
+            }
             const sub = e.target.closest('[data-submittal]');
             if (sub) return copySubmittal(sub.dataset.submittal);
             const dropCriterion = e.target.closest('[data-remove-criterion]');
-            if (dropCriterion) { dropCriterion.closest('.criterion').remove(); renderCriteria(); return; }
+            if (dropCriterion) {
+                const keep = [...document.querySelectorAll('#criteriaList input')].map(i => i.value);
+                dropCriterion.closest('.criterion').remove(); renderCriteria(); persist();
+                snackbar('Must-have removed.', 8000, { label: 'Undo', run: () => { renderCriteria(keep); persist(); } });
+                return;
+            }
             const details = e.target.closest('[data-details]');
             if (details) return showDetails(details.dataset.details);
             const sortBtn = e.target.closest('[data-sort]');
