@@ -32,7 +32,7 @@
     <link rel="apple-touch-icon" href="apple-touch-icon.png">
     <link rel="manifest" href="site.webmanifest">
     <link rel="preload" href="assets/fonts/inter-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="stylesheet" href="assets/app.css?v=38">
+    <link rel="stylesheet" href="assets/app.css?v=39">
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-N10ZLNFZHE"></script>
     <script>
@@ -148,14 +148,11 @@
                 </div>
 
                 <div id="resultEmpty">
-                    <div class="verdict" data-tone="neutral" id="emptyPlain">
-                        <p class="eyebrow">Your answer shows up here</p>
-                        <p class="verdict-label" style="margin-top:8px">Add the job and your resume, then run the check.</p>
-                    </div>
-                    <div class="sample-peek" id="examplePreview" hidden>
+                    <div class="sample-peek" id="examplePreview">
                         <p class="eyebrow">What you get back &middot; from the sample</p>
+                        <p class="peek-verdict"><span class="peek-score">83</span><span><strong>Apply now.</strong> A straight call, then each requirement in the posting next to what your resume shows:</span></p>
                         <div class="req-list on-panel" id="peekRows"></div>
-                        <p class="body-sm muted">Each requirement in the posting, next to what your resume shows for it. Plus a call on whether to apply, the pay, and a tailored resume.</p>
+                        <p class="body-sm muted">Plus the role at a glance, what it should pay, and your resume rewritten for that job.</p>
                         <button class="btn" type="button" data-action="example">See a sample result</button>
                     </div>
                 </div>
@@ -176,7 +173,7 @@
                 </div>
                 <div id="verdictWrap" class="stack" hidden>
                     <button class="btn text back-link" type="button" id="backToBatch" data-action="back-to-batch" hidden><svg class="icon flip"><use href="#i-next"/></svg>Back to the comparison</button>
-                    <div class="example-note" id="exampleNote" hidden><span class="grow"><strong>This is an example</strong> from a made-up resume and posting.</span><button class="btn" type="button" data-action="exit-example">Check my own job</button></div>
+                    <div class="example-note" id="exampleNote" hidden><span class="grow"><strong>This is an example</strong> from a made-up resume and posting.</span><span class="seg" role="group" aria-label="Which sample"><button class="seg-btn" type="button" data-example="seller" aria-pressed="true">Seller</button><button class="seg-btn" type="button" data-example="leader" aria-pressed="false">Sales leader</button></span><button class="btn" type="button" data-action="exit-example">Check my own job</button></div>
                     <div class="verdict" id="verdict" data-tone="neutral">
                         <p class="eyebrow"><span class="example-tag" id="exampleTag" hidden>Example</span><span id="roleLine"></span></p>
                         <div class="verdict-head">
@@ -212,17 +209,26 @@
                         </div>
                     </div>
 
+                    <div class="snapshot" id="roleSnapshot">
+                    <p class="eyebrow" id="snapshotTitle">The role at a glance</p>
+                    <div class="rows" id="snapshotRows" hidden></div>
+                    <div class="rows" id="breakdown">
+                        <div class="row-item"><span id="salaryEstimateLabel">Pay</span><b id="salaryEstimate">...</b></div>
+                        <div class="row-item" id="baseRow" hidden><span id="baseEstimateLabel">Base</span><b id="baseEstimate"></b></div>
+                        <div class="row-item"><span>Keywords matched</span><b id="keywordsPercent">0%</b></div>
+                    </div>
+                    <div class="snapshot-ask" id="snapshotAsk" hidden>
+                        <p class="label-lg">The posting does not say. Ask the recruiter:</p>
+                        <ul id="snapshotQuestions"></ul>
+                        <button class="btn" type="button" data-action="copy-snapshot-questions"><svg class="icon"><use href="#i-copy"/></svg>Copy these questions</button>
+                    </div>
+                    </div>
+
                     <div class="tailor-card" id="tailorTeaser" hidden>
                         <div class="tailor-card-head"><h3 class="title-md" id="tailorTeaserTitle"></h3><span class="score-shift" id="tailorTeaserScore" hidden></span></div>
                         <div class="stack-sm" id="tailorPairs"></div>
                         <p class="body-sm" id="tailorTeaserText"></p>
                         <button class="btn" type="button" id="tailorViewBtn" data-action="view-tailored" hidden>See the full tailored resume</button>
-                    </div>
-
-                    <div class="rows" id="breakdown">
-                        <div class="row-item"><span>Keywords matched</span><b id="keywordsPercent">0%</b></div>
-                        <div class="row-item"><span id="salaryEstimateLabel">Pay</span><b id="salaryEstimate">...</b></div>
-                        <div class="row-item" id="baseRow" hidden><span id="baseEstimateLabel">Base</span><b id="baseEstimate"></b></div>
                     </div>
 
                     <div class="feedback" id="feedback" hidden>
@@ -344,7 +350,6 @@
                 <p class="field-error" id="inlineError" role="alert" hidden></p>
                 <div class="analyze-row">
                     <button id="analyzeBtn" class="btn primary lg" data-action="analyze"><span id="btnText">Check this job</span><svg class="icon"><use href="#i-next"/></svg></button>
-                    <button class="btn lg" type="button" data-action="example" id="exampleLink">See a sample result</button>
                 </div>
             </div>
             </section>
@@ -628,7 +633,18 @@
 
         <div class="plain">
             <h2 class="h3" id="employers">Go straight to an employer</h2>
-            <p class="body-md muted" style="margin-top:4px">Each name opens that company's open jobs on LinkedIn, in a new tab.</p>
+            <p class="body-md muted" style="margin-top:4px" id="employerHelp">Each name opens that company's open jobs on LinkedIn, in a new tab.</p>
+            <div class="role-pick" style="margin-top:12px">
+                <span class="label-lg" id="employerRoleLabel">Looking for</span>
+                <div class="chips" id="employerRoles" role="group" aria-labelledby="employerRoleLabel">
+                    <button type="button" class="chip sm" data-role="" aria-pressed="true">Any role</button>
+                    <button type="button" class="chip sm" data-role="federal sales" aria-pressed="false">Federal sales</button>
+                    <button type="button" class="chip sm" data-role="federal sales director" aria-pressed="false">Sales director</button>
+                    <button type="button" class="chip sm" data-role="partner sales" aria-pressed="false">Partner sales</button>
+                    <button type="button" class="chip sm" data-role="capture manager" aria-pressed="false">Capture</button>
+                    <button type="button" class="chip sm" data-role="business development" aria-pressed="false">Business development</button>
+                </div>
+            </div>
             <div class="chips" id="employerTop" style="margin-top:12px"></div>
             <div class="row" style="margin-top:12px; align-items:flex-end">
                 <button class="btn" type="button" id="employerAllBtn" data-action="toggle-employers" aria-expanded="false" aria-controls="companyBoards">Show all employers</button>
@@ -749,7 +765,7 @@
     <button class="icon-btn" data-action="dismiss-snackbar" aria-label="Dismiss"><svg class="icon"><use href="#i-close"/></svg></button>
 </div>
 
-<script src="assets/files.js?v=38"></script>
-<script src="assets/app.js?v=38"></script>
+<script src="assets/files.js?v=39"></script>
+<script src="assets/app.js?v=39"></script>
 </body>
 </html>

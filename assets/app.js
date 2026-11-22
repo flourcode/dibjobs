@@ -247,6 +247,8 @@
 
     function initMenus() {
         document.addEventListener('click', (e) => {
+            const roleBtn = e.target.closest('#employerRoles [data-role]'); if (roleBtn) return pickEmployerRole(roleBtn);
+            const exBtn = e.target.closest('#exampleNote [data-example]'); if (exBtn) { if (exBtn.dataset.example !== (state.exampleKey || 'seller')) showExample(exBtn.dataset.example); return; }
             const fb = e.target.closest('#feedback [data-feedback]'); if (fb) return giveFeedback(fb.dataset.feedback);
             const why = e.target.closest('#feedback [data-why]'); if (why) return giveFeedbackReason(why.dataset.why, why.textContent.trim());
             const toggle = e.target.closest('[data-menu]');
@@ -627,13 +629,10 @@
         const a = state.analysis;
         $('inputsFoldText').textContent = mode === 'batch' ? 'Your comparison' : state.isExample ? 'The sample job and resume' : (a && a.job_title) ? `${a.job_title}${a.company && !/not specified|unknown/i.test(a.company) ? ' at ' + a.company : ''}` : 'Your job and resume';
         if (mode === 'empty') {
-            $('emptyPlain').hidden = false;
-            $('examplePreview').hidden = false;
-            $('exampleLink').hidden = false;
+            // One short preview of the sample (the comparison is the pitch) and one button to open it.
             $('peekRows').innerHTML = requirementRows(keyRequirements(EXAMPLE_ANALYSIS).filter((r, i) => i === 0 || i === 3));
             $('peekInlineRow').innerHTML = requirementRows(keyRequirements(EXAMPLE_ANALYSIS).slice(0, 1));
             document.body.classList.remove('example-compact');
-            if (isFirstVisit()) showExamplePreview();
         }
     }
     function showInputs() { /* inputs are always visible in this layout */ }
@@ -1096,11 +1095,11 @@
         $('scoreNum').textContent = score;       // shown at once, with the call and the evidence beside it
         $('exampleTag').hidden = !state.isExample;
         $('exampleNote').hidden = !state.isExample;
-        $('exampleLink').hidden = state.isExample;
         document.body.classList.toggle('example-compact', !!(state.isExample && state.previewOnly));
         const company = knownCompany(data.company);
         $('roleLine').textContent = (data.job_title || 'Role') + (company ? ' at ' + company : '');
         renderRecommendation(data, score);
+        renderSnapshot(data);
         syncTailorUi();
         const delta = $('scoreDelta');
         if (typeof previousScore === 'number') {
@@ -1228,6 +1227,32 @@
             + (rest.length ? `<p class="req-head rest">Other requirements</p>${requirementRows(rest)}` : '');
     }
     const requirementRows = (rows) => rows.map(r => `<div class="req"><div class="req-main"><span class="req-what">${r.type ? `<span class="req-tag">${r.type === 'required' ? 'Required' : 'Preferred'}</span>` : ''}<b>${escapeHtml(r.requirement)}</b></span><span class="req-shows">Your resume: ${escapeHtml(r.shows || 'Not shown')}</span></div><span class="chip sm ${REQ_STATUS[r.status][0]}">${REQ_STATUS[r.status][1]}</span></div>`).join('');
+
+    // The role at a glance: what kind of seat it is, who it sells to, whose number it is, where, and how much travel.
+    // Everything comes from the posting. What the posting leaves out becomes a question for the recruiter.
+    const SNAPSHOT_ROWS = [
+        ['summary', 'The role', ''],
+        ['customers', 'Sells to', 'Which agencies or accounts would I cover?'],
+        ['quota', 'The number', 'What is the quota for this seat, and is it an individual or a team number?'],
+        ['location', 'Location', 'Is the role remote, hybrid or on-site, and where is it based?'],
+        ['travel', 'Travel', 'How much travel does the role involve?']
+    ];
+    const notStated = (v) => !v || /^(not stated|not specified|unknown|n\/a|none stated)\.?$/i.test(v);
+    function renderSnapshot(data) {
+        const snap = data && data.role_snapshot && typeof data.role_snapshot === 'object' ? data.role_snapshot : null;
+        const rows = [], ask = [];
+        if (snap) SNAPSHOT_ROWS.forEach(([key, label, question]) => {
+            const value = typeof snap[key] === 'string' ? tidy(snap[key], 110) : '';
+            if (notStated(value)) { if (question) { rows.push([label, 'Not stated', true]); ask.push(question); } }
+            else rows.push([label, value, false]);
+        });
+        $('snapshotRows').hidden = !rows.length;
+        $('snapshotRows').innerHTML = rows.map(([label, value, open]) => `<div class="row-item fact"><span>${label}</span><span class="fact-value${open ? ' open' : ''}">${escapeHtml(value)}</span></div>`).join('');
+        $('snapshotTitle').textContent = rows.length ? 'The role at a glance' : 'Pay and keywords';
+        $('snapshotAsk').hidden = !ask.length;
+        $('snapshotQuestions').innerHTML = ask.map(q => `<li>${escapeHtml(q)}</li>`).join('');
+        state.snapshotQuestions = ask;
+    }
 
     // "Was this verdict right?": one tap, recorded as a count only (the vote, the score and the chosen reason).
     function resetFeedback() {
@@ -2213,11 +2238,28 @@
         $('readySearches').innerHTML = READY_SEARCHES.map(([title, blurb, query]) => { const c = { title: query, location: '', clearance: '' };
             return `<div class="tool-card"><span class="title-md">${title}</span><span class="body-sm">${blurb}</span><div class="chips">${outLink(linkedInUrl(c), 'LinkedIn, past week', 'chip sm')}${boardLinks(c, 'chip sm')}</div></div>`; }).join('');
         $('companyBoards').innerHTML = COMPANY_BOARDS.map(([group, companies]) => `<div class="board-group"><p class="label-lg muted" style="margin:20px 0 8px">${group}</p><div class="chips">${
-            companies.map(([name, slug]) => outLink(`https://www.linkedin.com/company/${slug}/jobs/`, name)).join('')}</div></div>`).join('');
+            companies.map(([name, slug]) => outLink(employerUrl(name, slug), name)).join('')}</div></div>`).join('');
         // A dozen well-known names lead; the full list opens on request or as soon as someone types a name.
         const all = COMPANY_BOARDS.flatMap(g => g[1]);
-        $('employerTop').innerHTML = TOP_EMPLOYERS.map(n => all.find(c => c[0] === n)).filter(Boolean).map(([name, slug]) => outLink(`https://www.linkedin.com/company/${slug}/jobs/`, name)).join('');
-        showAllEmployers(false);
+        $('employerTop').innerHTML = TOP_EMPLOYERS.map(n => all.find(c => c[0] === n)).filter(Boolean).map(([name, slug]) => outLink(employerUrl(name, slug), name)).join('');
+        if (!renderStaticSearches.done) { renderStaticSearches.done = true; showAllEmployers(false); }
+    }
+    // With a role picked, an employer link opens a LinkedIn search for that role at that company (a keyword search, so it
+    // is close rather than exact). With "Any role" it opens the company's own jobs page.
+    const SEARCH_NAME = { 'RTX (Raytheon)': 'RTX', 'Amazon / AWS': 'Amazon Web Services', 'Microsoft / Azure': 'Microsoft', 'Booz Allen': 'Booz Allen Hamilton', 'WWT': 'World Wide Technology', 'HPE': 'Hewlett Packard Enterprise' };
+    function employerUrl(name, slug) {
+        const role = state.employerRole || '';
+        if (!role) return `https://www.linkedin.com/company/${slug}/jobs/`;
+        return withParams('https://www.linkedin.com/jobs/search/', { keywords: `${role} "${SEARCH_NAME[name] || name}"`, f_TPR: 'r2592000' });
+    }
+    function pickEmployerRole(btn) {
+        state.employerRole = btn.dataset.role || '';
+        document.querySelectorAll('#employerRoles [data-role]').forEach(b => b.setAttribute('aria-pressed', String(b === btn)));
+        const label = btn.textContent.trim().toLowerCase();
+        $('employerHelp').textContent = state.employerRole ? `Each name opens a LinkedIn search for ${label} roles at that company from the past month, in a new tab.` : "Each name opens that company's open jobs on LinkedIn, in a new tab.";
+        renderStaticSearches();
+        filterEmployers();
+        track('employer_role_picked', { role: state.employerRole || 'any' });
     }
     const TOP_EMPLOYERS = ['Lockheed Martin', 'RTX (Raytheon)', 'Northrop Grumman', 'Leidos', 'Booz Allen', 'GDIT', 'Anduril', 'Palantir', 'Amazon / AWS', 'Microsoft / Azure', 'SpaceX', 'Anthropic'];
     function showAllEmployers(open) {
@@ -2439,7 +2481,7 @@ Senior Federal Sales Executive with 15+ years driving revenue growth across Depa
 EXPERIENCE
 
 Account Manager | Major Cybersecurity Provider | 2019-Present
-- Lead DoD sales territory generating $180M+ annual revenue
+- Carry a $124M annual quota across a DoD territory; closed $180M in FY23
 - Closed $95M multi-year enterprise license agreement with Army customer
 - Built partner ecosystem of 25+ defense contractors driving 40% of pipeline
 - Achieved 145% of quota in FY23, 138% in FY22, President's Club both years
@@ -2532,7 +2574,7 @@ Amazon is an Equal Opportunity Employer.`;
         job_summary: 'Own the full sales cycle for a portfolio of DoD cloud accounts.',
         score: 83, verdict: 'Strong match',
         analysis: [
-            'Match: DoD quota attainment → 145% of quota in FY23 and 138% in FY22 on a $180M territory',
+            'Match: DoD quota attainment → Carried a $124M quota and closed $180M in FY23 (145%); 138% in FY22',
             'Match: Clearance → The role requires an active TS/SCI; the resume shows an active TS/SCI',
             'Match: Large federal deals → Closed a $95M multi-year Army agreement and led a $45M Navy IDIQ capture',
             'Match: Partner selling → Built a 25-partner ecosystem driving 40% of pipeline',
@@ -2541,7 +2583,7 @@ Amazon is an Equal Opportunity Employer.`;
             'Gap: Cloud infrastructure → Experience is cybersecurity and enterprise software, not AWS, Azure or GCP',
             'Gap: Advanced degree → MBA preferred; the resume shows a B.S.'
         ],
-        tailored_summary: 'Senior federal sales executive with 15+ years selling enterprise software and cybersecurity to the Department of Defense and Intelligence Community. Carries a $180M DoD territory at 145% of quota, with a $95M Army enterprise agreement and a $45M Navy IDIQ among recent wins. Active TS/SCI. Builds partner ecosystems with defense primes and systems integrators and works alongside solutions architects through ATO.',
+        tailored_summary: 'Senior federal sales executive with 15+ years selling enterprise software and cybersecurity to the Department of Defense and Intelligence Community. Carries a $124M annual DoD quota and closed $180M in FY23 (145%), with a $95M Army enterprise agreement and a $45M Navy IDIQ among recent wins. Active TS/SCI. Builds partner ecosystems with defense primes and systems integrators and works alongside solutions architects through ATO.',
         interview_questions: [
             { question: 'Walk me through the largest DoD deal you have closed.', suggested_answer: 'Use the $95M multi-year Army enterprise license agreement: how you found the requirement, who you sold to, how partners were involved, and how long it took.' },
             { question: 'You have sold security and software. How will you sell cloud infrastructure?', suggested_answer: 'Point to the 8 accounts you moved from on-premise to cloud and the ATO work with solutions architects, then be direct that consumption selling is new and say how you will ramp.' },
@@ -2563,16 +2605,16 @@ Amazon is an Equal Opportunity Employer.`;
         requirements: [
             { requirement: 'Active TS/SCI clearance', type: 'required', resume_shows: 'Active TS/SCI', status: 'met', screen_out: true },
             { requirement: '7+ years selling to the DoD', type: 'required', resume_shows: '15+ years across DoD and the Intelligence Community', status: 'met', screen_out: true },
-            { requirement: '$50M+ annual quota', type: 'required', resume_shows: '$180M territory at 145% of quota', status: 'met' },
+            { requirement: '$50M+ annual quota', type: 'required', resume_shows: '$124M assigned quota; closed $180M in FY23 (145%)', status: 'met' },
             { requirement: 'Cloud infrastructure sales', type: 'preferred', resume_shows: 'Cybersecurity and software; moved 8 accounts to cloud', status: 'partial' },
             { requirement: 'MBA', type: 'preferred', resume_shows: 'B.S. Business Administration', status: 'missing' }
         ],
         bullet_rewrites: [
-            { original: 'Lead DoD sales territory generating $180M+ annual revenue', improved: 'Own a $180M+ DoD territory across DISA, Army, Navy and Air Force, finishing FY23 at 145% of quota', why: 'Puts quota attainment, the first thing this role screens on, in the opening bullet.' },
+            { original: 'Carry a $124M annual quota across a DoD territory; closed $180M in FY23', improved: 'Carry a $124M annual quota across DISA, Army, Navy and Air Force; closed $180M in FY23, 145% of quota', why: 'Puts quota attainment, the first thing this role screens on, in the opening bullet.' },
             { original: 'Transitioned 8 accounts from on-premise to cloud solutions', improved: 'Led cloud migration for 8 Army and Intelligence Community accounts, moving them from on-premise to cloud solutions', why: 'Uses the posting\'s own term for work you already did, and names the customers.' }
         ],
         fit_signals: [
-            { signal: 'Annual quota', role_expects: '$50M+', resume_shows: '$180M territory at 145%', status: 'strong' },
+            { signal: 'Annual quota', role_expects: '$50M+', resume_shows: '$124M quota, closed at 145%', status: 'strong' },
             { signal: 'Years selling to DoD', role_expects: '7+', resume_shows: '15+', status: 'strong' },
             { signal: 'Clearance', role_expects: 'Active TS/SCI', resume_shows: 'Active TS/SCI', status: 'strong' },
             { signal: 'Product sold', role_expects: 'Cloud infrastructure', resume_shows: 'Cybersecurity and enterprise software', status: 'partial' }
@@ -2584,12 +2626,13 @@ Amazon is an Equal Opportunity Employer.`;
         ],
         recommendation: { action: 'apply', label: 'Apply now.', decisive_requirement: 'Active TS/SCI',
             headline: 'Your DoD sales record and your clearance both clear the bar. Move your cloud work to the top of your resume, then send it.',
-            reasons: ['Your $180M territory at 145% is well past the $50M quota they ask for.', 'Your cloud experience is real but buried in an older role. Ten minutes of tailoring fixes that.'],
+            reasons: ['You carried a $124M quota and closed it at 145%. They ask for $50M.', 'Your cloud experience is real but buried in an older role. Ten minutes of tailoring fixes that.'],
             next_step: 'Tailor the two bullets under Your resume, then write to the hiring team.',
-            recruiter_question: "Hi [Name], I'm interested in the Principal DoD Sales Representative role. I hold an active TS/SCI and carry a $180M DoD territory at 145% of quota. Is the team still interviewing, and who is the hiring manager? Thank you." },
+            recruiter_question: "Hi [Name], I'm interested in the Principal DoD Sales Representative role. I hold an active TS/SCI and carry a $124M DoD quota, closed at 145% in FY23. Is the team still interviewing, and who is the hiring manager? Thank you." },
         salary_intel: { low: 200, mid: 240, high: 280, pay_source: 'posting', base_source: 'estimate', is_variable_comp: true, base_low: 130, base_high: 160, pay_mix: '55/45', comp_questions: ['What is the quota, and how was it set?', 'How long is the ramp, and is it guaranteed?', 'Are there accelerators past 100%, and is there a cap?', 'Which accounts are in the territory today?'], notes: 'The on-target range is from the posting. The base range is an estimate.' },
         competition: { level: 'Moderate', reasoning: 'The TS/SCI requirement narrows the pool, but strong DoD sellers will apply.' },
         company_intel: { known: true, type: 'Cloud service provider', size: 'Large', reputation: 'Strong in federal' },
+        role_snapshot: { role_type: 'individual', summary: 'Individual quota carrier for a portfolio of DoD accounts; no direct reports', customers: 'Department of Defense accounts', quota: 'Not stated', location: 'Arlington, VA, with customer site visits', travel: 'Not stated' },
         timeline: { screen_weeks: '1-2', interview_weeks: '3-5', offer_weeks: '6-8', notes: 'Expect a multi-interview loop.' }
     };
 
@@ -2599,11 +2642,11 @@ Amazon is an Equal Opportunity Employer.`;
         headline: 'Principal DoD Sales Executive | Enterprise Software, Cybersecurity and Cloud Adoption',
         contact: 'Arlington, VA | johndoe@email.com | (703) 555-1234',
         clearance: 'Active TS/SCI',
-        summary: 'Senior federal sales executive with 15+ years selling to the Department of Defense and Intelligence Community. Carries a $180M+ DoD territory at 145% of quota across DISA, Army, Navy and Air Force. Led cloud migration for 8 Army and Intelligence Community accounts and works with solutions architects through ATO. Builds partner ecosystems with defense primes and systems integrators.',
+        summary: 'Senior federal sales executive with 15+ years selling to the Department of Defense and Intelligence Community. Carries a $124M annual DoD quota across DISA, Army, Navy and Air Force and closed $180M in FY23 (145%). Led cloud migration for 8 Army and Intelligence Community accounts and works with solutions architects through ATO. Builds partner ecosystems with defense primes and systems integrators.',
         skills: ['DoD and Intelligence Community sales', 'Quota attainment', 'Cloud adoption and ATO support', 'IDIQ/GWAC', 'FAR/DFARS', 'Partner ecosystems', 'Strategic account planning', 'MEDDIC', 'Contract negotiations', 'Salesforce'],
         experience: [
             { title: 'Account Manager', company: 'Major Cybersecurity Provider', location: '', dates: '2019-Present', bullets: [
-                'Own a $180M+ DoD territory across DISA, Army, Navy and Air Force, finishing FY23 at 145% of quota and FY22 at 138% (President\'s Club both years)',
+                'Carry a $124M annual quota across DISA, Army, Navy and Air Force; closed $180M in FY23, 145% of quota, and finished FY22 at 138% (President\'s Club both years)',
                 'Closed a $95M multi-year enterprise license agreement with an Army customer',
                 'Built a partner ecosystem of 25+ defense contractors that drives 40% of pipeline',
                 'Work with solutions architects on technical requirements and ATO support' ] },
@@ -2629,24 +2672,193 @@ Amazon is an Equal Opportunity Employer.`;
         ]
     };
 
-    // First visit: show the example answer straight away, with the job and resume boxes left empty and ready.
+
+    // A second worked example: a sales leader role, where the team's number, direct reports and partner revenue are what count.
+    const SAMPLE_RESUME_2 = `JANE ROE
+Ashburn, VA | janeroe@email.com | (571) 555-0142
+
+CLEARANCE: Secret
+
+SUMMARY
+Federal sales leader with 13 years selling data and analytics software to the Department of Defense, the last seven leading teams. Builds teams that forecast accurately and sell with resellers and systems integrators.
+
+EXPERIENCE
+
+Director, DoD Sales | Enterprise Data Platform Company | 2021-Present
+- Lead a team of 8 account executives covering Army, Air Force and DISA
+- Team quota of $52M in FY25; the team closed $57M (110%). FY24: $44M team quota, $47M closed (107%)
+- Hired 5 of the 8 account executives; 3 have been promoted to senior roles
+- 35% of FY25 bookings came through resellers and systems integrators, mainly Carahsoft and GDIT
+- Forecast weekly to the VP of Public Sector; forecast within 8% of actuals for six straight quarters
+
+Federal Sales Manager | Analytics Software Company | 2018-2021
+- Managed 5 account executives selling to Army and Navy accounts
+- Team quota of $18M; the team finished at 104%, 117% and 121% over three years
+- Started the team's first reseller program with two value-added resellers
+
+Senior Account Executive, DoD | Analytics Software Company | 2012-2018
+- Individual quota of $4M to $6M; over quota five of six years
+- Closed a $9M Air Force enterprise agreement
+
+EDUCATION
+B.A. Economics, James Madison University
+
+SKILLS
+Federal Sales Leadership, Team Quota, Forecasting, Hiring, Reseller and Integrator Programs, DoD Accounts, Salesforce`;
+    const SAMPLE_JD_2 = `Federal Sales Director, DoD
+Harborlight Software - Reston, VA (hybrid, three days a week in the office)
+
+About the Role:
+Harborlight Software is hiring a Federal Sales Director to lead our DoD sales team of 10 account executives. You own the team's number, a $60M team quota in FY26, and you report to the VP of Public Sector.
+
+Basic Qualifications:
+- 5+ years leading federal sales teams, with direct reports
+- Experience owning a team quota of $40M or more
+- Active Secret clearance
+- At least 40% of revenue delivered through partners (resellers and systems integrators)
+- Experience hiring and ramping account executives
+- Bachelor's degree
+
+Preferred Qualifications:
+- Experience selling data, analytics or AI software
+- Relationships across Army and Air Force
+- Experience with OTAs and CSOs
+- MBA
+
+Responsibilities:
+- Lead, coach and hire a team of 10 account executives
+- Own the team forecast and the team quota
+- Build the partner plan with resellers and systems integrators
+- Work with the VP of Public Sector on territory and compensation design
+
+Travel: up to 30%
+Compensation: $360,000 - $420,000 OTE (50/50 base and variable)
+
+Harborlight Software is a fictional company used for this example.`;
+    const EXAMPLE_ANALYSIS_2 = {
+        job_title: 'Federal Sales Director, DoD', company: 'Harborlight Software',
+        job_summary: 'Lead a team of 10 account executives and own a $60M team quota.',
+        score: 78, verdict: 'Good match',
+        analysis: [
+            'Match: Leading federal sales teams → Seven years with direct reports: 5 account executives, then 8',
+            'Match: Team quota → Team quota of $52M in FY25, with $57M closed (110%)',
+            'Match: Hiring → Hired 5 of the 8 account executives; 3 promoted',
+            'Match: Forecasting → Forecast within 8% of actuals for six straight quarters',
+            'Match: Location → Ashburn, VA is a short drive from the Reston office',
+            'Gap: Clearance status → The posting asks for an active Secret; the resume says Secret with no status or date',
+            'Gap: Partner revenue → 35% of FY25 bookings came through partners; the posting asks for at least 40%',
+            'Gap: OTAs and CSOs → Not shown on the resume'
+        ],
+        tailored_summary: 'Federal sales leader with 13 years selling data and analytics software to the Department of Defense, the last seven with direct reports. Leads 8 account executives on a $52M team quota and closed $57M in FY25 (110%). Hired 5 of the 8 and has forecast within 8% of actuals for six straight quarters. Sells with resellers and systems integrators, including Carahsoft and GDIT.',
+        interview_questions: [
+            { question: 'Tell me about a rep you hired who did not work out.', suggested_answer: 'Pick one of the three you did not hire into the current team of eight, say what you missed in the interview, and what you changed in how you hire.' },
+            { question: 'How much of your number comes through partners, and how would you grow it?', suggested_answer: 'Say 35% plainly, name Carahsoft and GDIT, and describe what you would do in the first two quarters to reach 40%.' },
+            { question: 'How do you build a forecast you trust?', suggested_answer: 'Use the six quarters within 8% of actuals and describe the weekly review you run before it goes to the VP of Public Sector.' }
+        ],
+        gap_strategies: [
+            { gap: 'Clearance status is not stated', strategy: 'If your Secret is active, say so on the first line of the resume with the investigation date. If it has lapsed, tell the recruiter before the screen.', talking_points: 'My Secret is active as of [date]. (Only if that is true.)' },
+            { gap: 'Partner revenue is 35%, not 40%', strategy: 'Do not round up. Show the trend and the programs you started, and say how you would close the gap.', talking_points: 'I started the reseller program at my last company from nothing, and partners are 35% of bookings on my current team.' }
+        ],
+        keywords: [
+            { term: 'DoD', in_resume: true, importance: 'critical' }, { term: 'Team quota', in_resume: true, importance: 'critical' },
+            { term: 'Direct reports', in_resume: false, importance: 'critical' }, { term: 'Secret', in_resume: true, importance: 'critical' },
+            { term: 'Resellers', in_resume: true, importance: 'important' }, { term: 'Systems integrators', in_resume: true, importance: 'important' },
+            { term: 'Forecast', in_resume: true, importance: 'important' }, { term: 'Hiring', in_resume: true, importance: 'important' },
+            { term: 'Analytics', in_resume: true, importance: 'important' }, { term: 'OTAs', in_resume: false, importance: 'nice' },
+            { term: 'CSOs', in_resume: false, importance: 'nice' }
+        ],
+        clearance: { required: 'Active Secret', candidate: 'Secret (status not stated)', status: 'unclear', note: 'The posting lists an active Secret as a basic qualification.' },
+        requirements: [
+            { requirement: 'Active Secret clearance', type: 'required', resume_shows: 'Secret, with no status or date', status: 'verify', screen_out: true },
+            { requirement: '5+ years leading federal sales teams', type: 'required', resume_shows: 'Seven years with direct reports: 5 reps, then 8', status: 'met', screen_out: true },
+            { requirement: 'Reston, VA, three days a week in the office', type: 'required', resume_shows: 'Ashburn, VA', status: 'met', screen_out: true },
+            { requirement: 'Team quota of $40M or more', type: 'required', resume_shows: 'Team quota of $52M in FY25; team closed $57M (110%)', status: 'met' },
+            { requirement: '40% of revenue through partners', type: 'required', resume_shows: '35% of FY25 bookings through resellers and integrators', status: 'partial' }
+        ],
+        bullet_rewrites: [
+            { original: 'Lead a team of 8 account executives covering Army, Air Force and DISA', improved: 'Lead 8 direct reports, all account executives, covering Army, Air Force and DISA', why: 'The posting asks for direct reports in those words. These are the same eight people.' },
+            { original: '35% of FY25 bookings came through resellers and systems integrators, mainly Carahsoft and GDIT', improved: 'Delivered 35% of FY25 bookings through partners (resellers and systems integrators), mainly Carahsoft and GDIT', why: 'Uses the posting\'s word, partners, and keeps your real number. It does not round 35% up to 40%.' }
+        ],
+        fit_signals: [
+            { signal: 'Team quota', role_expects: '$40M or more', resume_shows: '$52M team quota, closed at 110%', status: 'strong' },
+            { signal: 'Direct reports', role_expects: 'Leads 10', resume_shows: 'Leads 8 now; led 5 before', status: 'strong' },
+            { signal: 'Partner revenue', role_expects: '40% or more', resume_shows: '35% of bookings', status: 'partial' },
+            { signal: 'Clearance', role_expects: 'Active Secret', resume_shows: 'Secret, status not stated', status: 'partial' }
+        ],
+        questions_to_ask: [
+            { question: 'How many of the 10 account executives hit quota last year?', why: 'It tells you whether you are inheriting a team or a rebuild.' },
+            { question: 'How was the $60M team quota set?', why: 'A number built from the accounts is a plan. A number handed down is a wish.' },
+            { question: 'How many of the 10 seats are filled today?', why: 'Open seats still count against the team number.' }
+        ],
+        recommendation: { action: 'fix_first', label: 'Tailor your resume first.', decisive_requirement: 'Active Secret clearance',
+            headline: 'You already lead a team this size and own a bigger number than they ask for. Two lines on your resume will hold you up as written: fix them, then apply.',
+            reasons: ['Your clearance line says only "Secret". The posting asks for an active one, so a recruiter cannot tell.', 'Partner revenue reads as 35% against a 40% ask. Say it plainly and show how you would close the gap.'],
+            next_step: 'Add the status and date to your clearance line if it is active, then tailor the resume.',
+            recruiter_question: "Hi [Name], I'm interested in the Federal Sales Director, DoD role. I lead 8 account executives on a $52M team quota and closed FY25 at 110%. About 35% of my team's bookings come through partners. Is the 40% partner figure a firm requirement? Thank you." },
+        salary_intel: { low: 360, mid: 390, high: 420, pay_source: 'posting', base_source: 'posting', is_variable_comp: true, base_low: 180, base_high: 210, pay_mix: '50/50', comp_questions: ['Is the variable half paid on the team number alone, or are there other measures?', 'What happens to my plan while open seats are unfilled?', 'Are there accelerators past 100%, and is there a cap?', 'How often has the comp plan changed in the last two years?'], notes: 'The on-target range and the 50/50 split are from the posting.' },
+        competition: { level: 'Moderate', reasoning: 'Fewer people have led a team this size, but the pay will draw experienced directors.' },
+        company_intel: { known: false, type: 'Software company', size: 'Not known', reputation: 'A fictional company used for this example' },
+        role_snapshot: { role_type: 'leader', summary: 'Leads 10 account executives and owns the team number', customers: 'Department of Defense; Army and Air Force relationships preferred', quota: '$60M team quota in FY26', location: 'Reston, VA, hybrid, three days a week in the office', travel: 'Up to 30%' },
+        timeline: { screen_weeks: '1-2', interview_weeks: '3-6', offer_weeks: '7-10', notes: 'Leadership hires usually add a panel and a meeting with the VP.' }
+    };
+    // Every fact below is in SAMPLE_RESUME_2. Note what it does not do: it does not add "Active" to the clearance.
+    const EXAMPLE_TAILORED_2 = {
+        name: 'JANE ROE',
+        headline: 'Federal Sales Director | DoD Team Leadership, Team Quota and Partner Sales',
+        contact: 'Ashburn, VA | janeroe@email.com | (571) 555-0142',
+        clearance: 'Secret',
+        summary: 'Federal sales leader with 13 years selling data and analytics software to the Department of Defense, the last seven leading teams. Leads 8 direct reports on a $52M team quota and closed $57M in FY25 (110%). Hired 5 of the 8 account executives. Sells with resellers and systems integrators, including Carahsoft and GDIT.',
+        skills: ['Federal sales leadership', 'Team quota', 'Hiring', 'Forecasting', 'Reseller and integrator programs', 'DoD accounts', 'Salesforce'],
+        experience: [
+            { title: 'Director, DoD Sales', company: 'Enterprise Data Platform Company', location: '', dates: '2021-Present', bullets: [
+                'Lead 8 direct reports, all account executives, covering Army, Air Force and DISA',
+                'Own a team quota of $52M in FY25; the team closed $57M (110%). FY24: $44M team quota, $47M closed (107%)',
+                'Hired 5 of the 8 account executives; 3 have been promoted to senior roles',
+                'Delivered 35% of FY25 bookings through partners (resellers and systems integrators), mainly Carahsoft and GDIT',
+                'Forecast weekly to the VP of Public Sector; forecast within 8% of actuals for six straight quarters' ] },
+            { title: 'Federal Sales Manager', company: 'Analytics Software Company', location: '', dates: '2018-2021', bullets: [
+                'Managed 5 account executives selling to Army and Navy accounts',
+                'Team quota of $18M; the team finished at 104%, 117% and 121% over three years',
+                'Started the team\'s first reseller program with two value-added resellers' ] },
+            { title: 'Senior Account Executive, DoD', company: 'Analytics Software Company', location: '', dates: '2012-2018', bullets: [
+                'Individual quota of $4M to $6M; over quota five of six years',
+                'Closed a $9M Air Force enterprise agreement' ] }
+        ],
+        education: ['B.A. Economics, James Madison University'],
+        certifications: [],
+        additional: [],
+        changes: [
+            'Called your eight account executives direct reports, the posting\'s words, and opened with the team number it screens on.',
+            'Left your clearance as "Secret" and partner revenue at 35%. Your resume does not say more, so neither does this one.'
+        ]
+    };
+    const EXAMPLES = {
+        seller: { label: 'Seller', analysis: EXAMPLE_ANALYSIS, tailored: EXAMPLE_TAILORED, resume: SAMPLE_RESUME, jd: SAMPLE_JD },
+        leader: { label: 'Sales leader', analysis: EXAMPLE_ANALYSIS_2, tailored: EXAMPLE_TAILORED_2, resume: SAMPLE_RESUME_2, jd: SAMPLE_JD_2 }
+    };
+    const currentExample = () => EXAMPLES[state.exampleKey] || EXAMPLES.seller;
+
+    // The sample is opened on request. A first visit shows a short preview of it beside the form.
     const NARROW = window.matchMedia('(max-width: 879px)');
     const isFirstVisit = () => !NARROW.matches && !state.exampleDismissed && !$('resumeText').value.trim() && !$('jobDescription').value.trim() && !state.tracked.length && !Object.keys(getSavedResumes()).length;
     function showExamplePreview() {
-        state.analysis = EXAMPLE_ANALYSIS;
+        const ex = currentExample();
+        state.analysis = ex.analysis;
         state.isExample = true; state.previewOnly = true;
-        state.resumeText = SAMPLE_RESUME; state.jd = SAMPLE_JD;      // so the example's own tools (Ask AI, tailoring) have something to work on
+        state.resumeText = ex.resume; state.jd = ex.jd;      // so the example's own tools (Ask AI, tailoring) have something to work on
         resetGenerated();
-        renderResults(EXAMPLE_ANALYSIS);
+        renderResults(ex.analysis);
         showExampleTailored();
+        document.querySelectorAll('#exampleNote [data-example]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.example === (state.exampleKey || 'seller'))));
     }
     // The example arrives with its tailored resume already written, so the before and after are visible at once.
     function showExampleTailored() {
-        state.tailored = EXAMPLE_TAILORED;
+        const ex = currentExample();
+        state.tailored = ex.tailored;
         state.tailorScore = null;               // the example makes no fit-score claim: only what can be counted
         state.tailorPairs = null;
-        state.tailorKeywords = keywordShift(EXAMPLE_ANALYSIS, SAMPLE_RESUME, tailoredToText(EXAMPLE_TAILORED));
-        renderTailored(EXAMPLE_TAILORED, true);
+        state.tailorKeywords = keywordShift(ex.analysis, ex.resume, tailoredToText(ex.tailored));
+        renderTailored(ex.tailored, true);
     }
     function expandExample() {
         state.previewOnly = false;
@@ -2656,7 +2868,8 @@ Amazon is an Equal Opportunity Employer.`;
     }
 
     // "See a sample result": shows the example answer only. The job and resume boxes are never touched.
-    function showExample() {
+    function showExample(key) {
+        if (EXAMPLES[key]) state.exampleKey = key;
         resetAnalyzeUi();
         state.trackedId = null; state.postingUrl = ''; state.linkHelp = null; state.linkedText = ''; renderLinkHelp();
         showInlineError('');
@@ -2719,6 +2932,7 @@ Amazon is an Equal Opportunity Employer.`;
         'ocr': () => readResumeWithAI(),
         'new-job': () => newJob(),
         'go-find': () => showView('explore'),
+        'copy-snapshot-questions': () => copyText((state.snapshotQuestions || []).map(q => '- ' + q).join('\n'), 'Questions copied.'),
         'toggle-employers': () => { const open = $('companyBoards').hidden; if (!open) { $('employerFilter').value = ''; filterEmployers(); } showAllEmployers(open); },
         'edit-inputs': () => { document.querySelector('.calc').classList.add('editing'); $('jobCard').scrollIntoView({ behavior: scrollBehavior(), block: 'start' }); $('jobDescription').focus({ preventScroll: true }); },
         'save-job': () => saveToTracker(),

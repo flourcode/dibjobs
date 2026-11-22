@@ -839,3 +839,29 @@ table.grid-table th[scope="row"] { position: sticky; left: 0; z-index: 1; backgr
 .find-hint { white-space: nowrap; }
 .find-hint .link-btn { display: inline; min-height: 0; width: auto; padding: 0; font: inherit; font-weight: 600; color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
 #buildSearch { scroll-margin-top: 16px; }
+
+/* v39: one sample preview, the role at a glance, a sample switch, and a role picker on employers */
+.peek-verdict { display: flex; align-items: center; gap: 14px; font: 400 16px/23px var(--font); }
+.peek-score { flex: none; font: 900 44px/44px var(--font); letter-spacing: -0.045em; }
+.sample-peek { margin-top: 0; }
+.snapshot { border-radius: var(--r-md); background: var(--panel); padding: 16px 16px 4px; }
+.snapshot > .eyebrow { margin-bottom: 4px; }
+.snapshot .rows { padding: 0; background: none; border-radius: 0; }
+.snapshot .rows + .rows { border-top: 1px solid var(--hairline); }
+.row-item.fact { align-items: flex-start; padding: 12px 0; min-height: 0; }
+.row-item.fact > span:first-child { flex: 0 0 96px; color: var(--muted); font: 500 15px/22px var(--font); }
+.fact-value { flex: 1; text-align: right; font: 500 16px/22px var(--font); overflow-wrap: anywhere; }
+.fact-value.open { font-weight: 700; }
+.fact-value.open::after { content: ''; display: inline-block; width: 8px; height: 8px; margin-left: 8px; border-radius: 50%; background: #c98a00; }
+.snapshot-ask { margin: 4px 0 12px; padding: 14px 16px; border-radius: var(--r-sm); background: var(--caution); }
+.snapshot-ask ul { margin: 8px 0 12px; padding-left: 20px; list-style: disc; font: 400 15px/22px var(--font); }
+.snapshot-ask li + li { margin-top: 4px; }
+.snapshot-ask .btn { background: var(--page); }
+.seg { display: inline-flex; padding: 3px; border-radius: var(--r-sm); background: var(--control); }
+.seg-btn { min-height: 38px; padding: 6px 12px; border: 0; border-radius: var(--r-seg); background: none; color: var(--ink); font: 600 14px/20px var(--font); cursor: pointer; }
+.seg-btn[aria-pressed="true"] { background: var(--ink); color: #fff; }
+.seg-btn:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
+.role-pick { display: flex; align-items: center; gap: 8px 12px; flex-wrap: wrap; }
+#employerRoles .chip { cursor: pointer; min-height: 36px; }
+#employerRoles .chip[aria-pressed="true"] { background: var(--ink); color: #fff; }
+@media print { .snapshot-ask .btn, .seg { display: none !important; } }
