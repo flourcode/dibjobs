@@ -24,7 +24,8 @@
     let nextId = 1;
     let running = false;
     const USED_KEY = 'dib_jobs_recruiter_used';
-    let isExample = false;       // the built-in example is on screen (made-up job and candidates)
+    let isExample = false;
+    let stash = null;            // the recruiter's own queue and results while the example is on screen       // the built-in example is on screen (made-up job and candidates)
     let snackTimer = null;
 
     const $ = (id) => document.getElementById(id);
@@ -106,7 +107,7 @@
         const n = queue.length;
         $('queueCount').textContent = `${n} candidate${n !== 1 ? 's' : ''}`;
         $('clearQueueBtn').hidden = n === 0 || isExample;
-        $('exampleBtn').hidden = n > 0;
+        $('exampleBtn').hidden = isExample;
         $('candidateQueue').innerHTML = n ? queue.map(c => {
             let status = `${countWords(c.resumeText).toLocaleString()} words, ready`;
             let score = '';
@@ -469,11 +470,11 @@ What we need
 
     // auto: shown on arrival for a first-time visitor. The job box stays empty and the page does not scroll.
     function showExample(auto) {
-        if (running) return;
-        if (queue.length && !isExample) return snackbar('Clear your candidates first, then open the example.', 6000);
+        if (running || isExample) return;
+        // The example is shown on its own. The recruiter's job description is never touched, and their
+        // candidates and ranking are set aside and put back when the example is closed.
+        stash = { queue, results, filter, sort };
         isExample = true;
-        $('jobDescription').value = auto === true ? '' : EXAMPLE_JD;
-        $('jobFileInfo').textContent = '';
         queue = EXAMPLE_CANDIDATES.map(c => ({ id: nextId++, name: c.name, resumeText: c.resume, status: 'complete', result: { ...EXAMPLE_JOB, ...c.result } }));
         results = queue.map(c => ({ id: c.id, name: c.name, resumeText: c.resumeText, ...c.result }));
         filter = 'all'; sort = { column: 'score', direction: 'desc' };
@@ -483,12 +484,14 @@ What we need
         if (auto !== true) { $('resultsCard').scrollIntoView({ behavior: (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) ? 'auto' : 'smooth', block: 'start' }); track('recruiter_example'); }
     }
 
-    // Leave the example. keepJob: the recruiter has started typing their own job over the sample.
-    function clearExample(keepJob) {
+    // Leave the example and put the recruiter's own candidates and ranking back as they were.
+    function clearExample() {
         if (!isExample) return;
         isExample = false;
-        queue = []; results = [];
-        if (!keepJob) { $('jobDescription').value = ''; updateJobCount(); }
+        queue = stash ? stash.queue : []; results = stash ? stash.results : [];
+        if (stash) { filter = stash.filter; sort = stash.sort; }
+        stash = null;
+        document.querySelectorAll('#filterTabs [role="tab"]').forEach(t => { const on = t.dataset.filter === filter; t.setAttribute('aria-selected', String(on)); t.tabIndex = on ? 0 : -1; });
         if ($('detailDialog').open) $('detailDialog').close();
         showInlineError('');
         renderQueue(); renderResults(); renderExampleState();
@@ -499,7 +502,7 @@ What we need
         $('queueExampleNote').hidden = !isExample;
         document.querySelector('.calc').classList.toggle('has-result', isExample);   // on phones, the ranked example leads
         $('exampleTag').hidden = !isExample;
-        $('exampleBtn').hidden = isExample || queue.length > 0;
+        $('exampleBtn').hidden = isExample;
         $('clearQueueBtn').hidden = isExample || queue.length === 0;
         $('analyzeText').textContent = isExample ? 'Screen your own candidates' : results.length ? 'Run the ranking again' : 'Rank these candidates';
     }
@@ -531,7 +534,7 @@ What we need
     // INIT + EVENTS
     // ======================================================================
     const ACTIONS = {
-        'analyze': () => { if (isExample) { clearExample(); $('jobDescription').focus(); return snackbar('Example cleared. Add your job and resumes.'); } analyzeAll(); },
+        'analyze': () => { if (isExample) { clearExample(); $('jobDescription').focus(); return snackbar(queue.length ? 'Example closed. Your candidates are back.' : 'Example closed. Add your job and resumes.'); } analyzeAll(); },
         'clear-job': () => { clearExample(); $('jobDescription').value = ''; $('jobFileInfo').textContent = ''; updateJobCount(); $('jobDescription').focus(); },
         'clear-queue': () => { if (running) return; queue = []; results = []; setFileStatus(); showInlineError(''); $('analyzeText').textContent = 'Rank these candidates'; renderQueue(); renderResults(); },
         'example': () => showExample(false),
@@ -556,7 +559,7 @@ What we need
         if (!used) showExample(true);
         initFileDrop();
         updateJobCount();
-        $('jobDescription').addEventListener('input', () => { clearExample(true); updateJobCount(); });
+        $('jobDescription').addEventListener('input', () => { clearExample(); updateJobCount(); });
 
         // Sortable column headers
         const heads = document.querySelectorAll('#resultsTable thead th');

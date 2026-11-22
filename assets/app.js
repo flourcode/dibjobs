@@ -149,7 +149,7 @@
 
     // Material dialog. With `label` it asks for text and resolves to the string;
     // without it, it is a confirmation and resolves to true. Cancel = null.
-    function askDialog({ title, body = '', label = '', value = '', okText = 'OK', danger = false }) {
+    function askDialog({ title, body = '', label = '', value = '', okText = 'OK', danger = false, altText = '' }) {
         return new Promise((resolve) => {
             const dlg = $('promptDialog');
             $('promptTitle').textContent = title;
@@ -162,9 +162,11 @@
             const ok = $('promptOk');
             ok.textContent = okText;
             ok.classList.toggle('danger', danger);
+            $('promptAlt').hidden = !altText; $('promptAlt').textContent = altText;
             dlg.returnValue = 'cancel';
             const onClose = () => {
                 dlg.removeEventListener('close', onClose);
+                if (dlg.returnValue === 'alt') return resolve('alt');
                 if (dlg.returnValue !== 'ok') return resolve(null);
                 resolve(label ? $('promptInput').value.trim() : true);
             };
@@ -510,6 +512,8 @@
         $('resumeCount').textContent = fmt(resume) + (resume.length > MAX_RESUME_CHARS ? ` (only the first ${MAX_RESUME_CHARS.toLocaleString()} characters are analyzed)` : '');
         $('jobCount').textContent = /^https?:\/\/\S+$/i.test(job.trim()) ? 'Link detected: we will fetch the posting' : fmt(job);
         updateBatchUi();
+        if ($('resumeText').value.trim().length >= 100) clearFieldError('resume');
+        updateHandoffLabel();
     }
 
     function onResumeChanged() {
@@ -588,6 +592,18 @@
     // ======================================================================
     // ANALYSIS (two calls: fit analysis, then market intel in the background)
     // ======================================================================
+    // A missing or unusable input is reported at that input, and focus goes there. Clears when the field changes.
+    function fieldError(which, message) {
+        showInlineError('');
+        $('jobError').textContent = which === 'job' ? message : ''; $('jobError').hidden = which !== 'job';
+        $('resumeError').textContent = which === 'resume' ? message : ''; $('resumeError').hidden = which !== 'resume';
+        $('jobDescription').setAttribute('aria-invalid', String(which === 'job'));
+        if (which === 'job') $('jobDescription').focus();
+        if (which === 'resume') { setResumeMode(true); $('resumeDrop').focus(); }
+        if (which) $(which === 'job' ? 'jobCard' : 'resumeCard').scrollIntoView({ behavior: scrollBehavior(), block: 'nearest' });
+    }
+    const clearFieldError = (which) => { const el = $(which + 'Error'); if (!el.hidden) { el.hidden = true; el.textContent = ''; if (which === 'job') $('jobDescription').setAttribute('aria-invalid', 'false'); } };
+
     function showInlineError(message) {
         const el = $('inlineError');
         el.textContent = message || '';
@@ -600,6 +616,7 @@
         $('loading').hidden = mode !== 'loading';
         $('verdictWrap').hidden = mode !== 'ready';
         $('batchWrap').hidden = mode !== 'batch';
+        $('peekInline').hidden = mode !== 'empty';
         $('results').hidden = mode !== 'ready';
         document.querySelector('.calc').classList.toggle('has-result', mode !== 'empty');
         if (mode === 'empty') {
@@ -607,6 +624,7 @@
             $('examplePreview').hidden = false;
             $('exampleLink').hidden = false;
             $('peekRows').innerHTML = requirementRows(keyRequirements(EXAMPLE_ANALYSIS).filter((r, i) => i === 0 || i === 3));
+            $('peekInlineRow').innerHTML = requirementRows(keyRequirements(EXAMPLE_ANALYSIS).slice(0, 1));
             document.body.classList.remove('example-compact');
             if (isFirstVisit()) showExamplePreview();
         }
@@ -682,11 +700,12 @@
     async function analyzeJob() {
         const jd = $('jobDescription').value.trim();
         const resume = $('resumeText').value.trim().substring(0, MAX_RESUME_CHARS);
-        showInlineError('');
-        if (!resume) return showInlineError(state.pendingOcrFile ? 'Your PDF had no readable text. Use "Read with AI" in the resume section, or paste your resume text.' : 'Add your resume first: drop in a PDF or Word file, or paste the text.');
-        if (resume.length < 100) return showInlineError('That resume is too short to analyze. Add more detail.');
-        if (!jd) return showInlineError('Add a job description: paste the text or a link to the posting.');
-        if (state.resumeSource === 'example' && resume === state.exampleResume && jd !== state.exampleJd) return showInlineError('That is the example resume, not yours. Choose Change and add your own resume to check a real job.');
+        fieldError(null);
+        // Step 1 is the job, so that is asked for first.
+        if (!jd) return fieldError('job', 'Paste the job description, or a link to the posting.');
+        if (!resume) return fieldError('resume', state.pendingOcrFile ? 'Your PDF had no readable text. Use "Read with AI" above, or paste your resume text.' : 'Add your resume: drop in a PDF or Word file, or paste the text.');
+        if (resume.length < 100) return fieldError('resume', 'That resume is too short to check. Add more detail.');
+        if (state.resumeSource === 'example' && resume === state.exampleResume && jd !== state.exampleJd) return fieldError('resume', 'That is the example resume, not yours. Add your own resume to check a real job.');
 
         resetAnalyzeUi();
         const run = state.runId, stale = () => run !== state.runId;
@@ -785,23 +804,24 @@
 
     function compareJobs() {
         const resume = $('resumeText').value.trim().substring(0, MAX_RESUME_CHARS);
-        showInlineError('');
-        if (resume.length < 100) return showInlineError('Add your resume first: drop in a PDF or Word file, or paste the text.');
-        if (state.resumeSource === 'example') return showInlineError('That is the example resume, not yours. Choose Change and add your own resume first.');
+        fieldError(null);
+        if (!$('jobDescription').value.trim()) return fieldError('job', 'Add the first job here, then the others below it.');
+        if (resume.length < 100) return fieldError('resume', 'Add your resume: drop in a PDF or Word file, or paste the text.');
+        if (state.resumeSource === 'example') return fieldError('resume', 'That is the example resume, not yours. Add your own resume first.');
         const first = $('jobDescription').value.trim();
-        if (!first) return showInlineError('Add the first job in "1. The job", then the others below it.');
+        if (!first) return fieldError('job', 'Add the first job here, then the others below it.');
         const seen = new Set(), jobs = [];
         [first, ...extraJobs()].forEach(jd => { const key = isUrl(jd) ? normalizeUrl(jd) : jobKey(jd); if (!seen.has(key)) { seen.add(key); jobs.push(jd); } });
-        if (jobs.length < 2) return showInlineError('Those are the same job. Add a different posting to compare.');
+        if (jobs.length < 2) return fieldError('job', 'Those are the same job. Add a different posting to compare.');
         return runBatch('jobs', jobs.map((jd, i) => ({ jd, resumeText: resume, slot: i })));
     }
 
     function compareVersions() {
-        showInlineError('');
+        fieldError(null);
         const jd = $('jobDescription').value.trim();
-        if (!jd) return showInlineError('Add the job in "1. The job" first, then compare your resume versions against it.');
+        if (!jd) return fieldError('job', 'Add the job here first, then compare your resume versions against it.');
         const versions = resumeVersions();
-        if (versions.length < 2) return showInlineError('Save at least two versions of your resume to compare them.');
+        if (versions.length < 2) return fieldError('resume', 'Save at least two versions of your resume to compare them.');
         return runBatch('versions', versions.map(v => ({ jd, resumeText: v.text, resumeName: v.name })));
     }
 
@@ -1118,7 +1138,14 @@
         if (r.recruiter_question && r.recruiter_question.trim()) return r.recruiter_question.trim();
         const role = data.job_title || 'this';
         const c = data.clearance || {};
-        if (c.status === 'gap') return `Hi [Name], I'm interested in the ${role} role. The posting lists ${c.required}, and I currently hold ${c.candidate && !/not stated/i.test(c.candidate) ? c.candidate : 'no active clearance'}. Would you consider a candidate at my level and sponsor the upgrade, or is it required on day one? Thank you.`;
+        if (c.status === 'gap') {
+            // Say what the candidate holds only when the resume states it. A resume that is silent on
+            // clearance is not a statement that they have none, so the question is asked without it.
+            const stated = c.candidate && !/not (stated|shown|listed|specified|mentioned)|^none|unknown|unclear|^n\/?a$/i.test(c.candidate.trim());
+            return stated
+                ? `Hi [Name], I'm interested in the ${role} role. The posting lists ${c.required}, and my resume shows ${c.candidate}. Is ${c.required} required on day one, or would you consider a candidate at my level? Thank you.`
+                : `Hi [Name], I'm interested in the ${role} role. The posting lists ${c.required}. Is that required on day one, or is there flexibility for the right candidate? Thank you.`;
+        }
         return `Hi [Name], I'm interested in the ${role} role. Before I apply, could you tell me which of the listed requirements are firm and which are flexible? Thank you.`;
     }
 
@@ -1744,7 +1771,22 @@
         let existing = state.trackedId != null ? findJob(state.trackedId) : null;
         if (!existing && link) existing = state.tracked.find(j => sameUrl(j.url, link));
         if (!existing) existing = state.tracked.find(j => isUnchecked(j) && j.jd && jobKey(j.jd) === jobKey(jd));
-        if (!existing) existing = state.tracked.find(j => j.company === company && j.role === role && !(link && isUrl(j.url) && !sameUrl(j.url, link)));
+        if (!existing) {
+            // Same company and title, and no link to tell them apart. If the posting text is clearly
+            // different it may be a second requisition, so the user decides rather than the tracker guessing.
+            const twin = state.tracked.find(j => j.company === company && j.role === role && !(link && isUrl(j.url) && !sameUrl(j.url, link)));
+            const differs = twin && twin.jd && jd && textHead(twin.jd) !== textHead(jd);
+            if (twin && differs && !opts.dup) {
+                if (opts.silent || opts.quiet) opts = Object.assign({}, opts, { dup: 'separate' });
+                else {
+                    askDialog({ title: 'You already saved a job with this title', okText: 'Update existing job', altText: 'Save as a separate job',
+                        body: `<p>Your tracker has <strong>${escapeHtml(role)}</strong> at <strong>${escapeHtml(company)}</strong>, saved ${escapeHtml(twin.date || 'earlier')}, and the posting text is different. Is this the same job, or a second opening with the same title?</p>` })
+                        .then(choice => { if (choice) saveToTracker(Object.assign({}, opts, { dup: choice === 'alt' ? 'separate' : 'update' })); });
+                    return;
+                }
+            }
+            if (twin && !(differs && opts.dup === 'separate')) existing = twin;
+        }
         const index = existing ? state.tracked.indexOf(existing) : -1;
         const before = existing ? Object.assign({}, existing) : null;
         let entry = existing;
@@ -1834,7 +1876,7 @@
                     <div class="row end">
                         ${isUrl(j.url) ? `<a class="btn text" href="${escapeHtml(j.url)}" target="_blank" rel="noopener noreferrer">${icon('open')}Open posting</a>` : ''}
                         <button class="btn text danger" data-remove>Remove</button>
-                        ${j.analysis ? '<button class="btn" data-open>Open analysis</button>' : canCheck ? '<button class="btn" data-open>Check my fit</button>' : ''}
+                        ${j.analysis ? '<button class="btn" data-open>Open analysis</button>' : canCheck ? '<button class="btn" data-open>Continue to fit check</button>' : ''}
                     </div>
                 </div>
             </div>`;
@@ -2210,6 +2252,14 @@
         return { kind: 'text', value: raw.substring(0, MAX_JD_CHARS), truncated: raw.length > MAX_JD_CHARS };
     }
 
+    // The hand-off button opens the form; the check itself still needs one more press, because that is
+    // the moment resume text is sent for analysis. The label says which of the two situations applies.
+    const hasRealResume = () => $('resumeText').value.trim().length >= 100 && state.resumeSource !== 'example';
+    function updateHandoffLabel() {
+        const el = $('handoffCheckText');
+        if (el) el.textContent = hasRealResume() ? 'Continue to fit check' : 'Add a resume to check fit';
+    }
+
     // Put a real posting on Check a job. Nothing is analyzed until the user chooses "Check this job".
     function prepareJob(text, opts = {}) {
         resetAnalyzeUi();
@@ -2498,7 +2548,8 @@ Amazon is an Equal Opportunity Employer.`;
     };
 
     // First visit: show the example answer straight away, with the job and resume boxes left empty and ready.
-    const isFirstVisit = () => !state.exampleDismissed && !$('resumeText').value.trim() && !$('jobDescription').value.trim() && !state.tracked.length && !Object.keys(getSavedResumes()).length;
+    const NARROW = window.matchMedia('(max-width: 879px)');
+    const isFirstVisit = () => !NARROW.matches && !state.exampleDismissed && !$('resumeText').value.trim() && !$('jobDescription').value.trim() && !state.tracked.length && !Object.keys(getSavedResumes()).length;
     function showExamplePreview() {
         state.analysis = EXAMPLE_ANALYSIS;
         state.isExample = true; state.previewOnly = true;
@@ -2654,7 +2705,7 @@ Amazon is an Equal Opportunity Employer.`;
             if (delEl) return deleteSavedResume(delEl.dataset.deleteResume);
         });
         $('resumeText').addEventListener('input', onResumeChanged);
-        $('jobDescription').addEventListener('input', (e) => { if (!e.target.value.trim()) jobReplaced(); updateCounts(); });
+        $('jobDescription').addEventListener('input', (e) => { if (!e.target.value.trim()) jobReplaced(); if (e.target.value.trim()) clearFieldError('job'); updateCounts(); });
         $('jobDescription').addEventListener('paste', (e) => { const t = e.target; if (t.selectionStart === 0 && t.selectionEnd === t.value.length) jobReplaced(); });
         $('militaryToggle').addEventListener('change', (e) => { store.set(KEYS.military, e.target.checked ? '1' : '0'); $('militaryChip').hidden = !e.target.checked; });
         $('restoreFile').addEventListener('change', (e) => restoreData(e.target.files[0]));

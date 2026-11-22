@@ -32,7 +32,7 @@
     <link rel="apple-touch-icon" href="apple-touch-icon.png">
     <link rel="manifest" href="site.webmanifest">
     <link rel="preload" href="assets/fonts/inter-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="stylesheet" href="assets/app.css?v=26">
+    <link rel="stylesheet" href="assets/app.css?v=28">
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-N10ZLNFZHE"></script>
     <script>
@@ -122,13 +122,25 @@
             <!-- The answer comes first in reading order; on wide screens it sits to the right of the inputs. -->
             <section class="calc-result" id="resultCol" aria-label="Your result">
                 <div id="loading" hidden aria-busy="true">
-                    <div class="verdict" data-tone="neutral">
-                        <p class="eyebrow" id="loadingStep" aria-live="polite">Reading job description...</p>
-                        <div class="skeleton" style="width:140px; height:84px; margin-top:12px"></div>
-                        <div class="skeleton sk-line" style="width:70%; height:28px"></div>
-                        <div class="skeleton sk-line" style="width:95%"></div>
-                        <div class="skeleton sk-line" style="width:60%"></div>
-                        <div class="linear-progress" role="progressbar" aria-label="Analysis progress" style="margin-top:20px"><div id="loadingProgress"></div></div>
+                    <div class="verdict loading-panel" data-tone="neutral">
+                        <p class="eyebrow">Job fit check</p>
+                        <p class="verdict-label" id="loadingStep" aria-live="polite">Checking your fit...</p>
+                        <div class="linear-progress" role="progressbar" aria-label="Analysis progress"><div id="loadingProgress"></div></div>
+                        <p class="body-sm muted loading-note">Comparing each requirement in the posting with what your resume shows.</p>
+                        <div class="req-list on-panel" aria-hidden="true">
+                            <div class="req">
+                                <div class="req-main"><span class="skeleton" style="width:62%; height:16px"></span><span class="skeleton" style="width:44%; height:14px; margin-top:6px"></span></div>
+                                <span class="skeleton sk-chip"></span>
+                            </div>
+                            <div class="req">
+                                <div class="req-main"><span class="skeleton" style="width:74%; height:16px"></span><span class="skeleton" style="width:38%; height:14px; margin-top:6px"></span></div>
+                                <span class="skeleton sk-chip"></span>
+                            </div>
+                            <div class="req">
+                                <div class="req-main"><span class="skeleton" style="width:54%; height:16px"></span><span class="skeleton" style="width:48%; height:14px; margin-top:6px"></span></div>
+                                <span class="skeleton sk-chip"></span>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -219,9 +231,10 @@
                 <h2 class="h3">1. The job</h2>
                 <label class="field" id="jobField">
                     <span class="field-label">Job link or description</span>
-                    <textarea id="jobDescription" rows="3" placeholder="Paste a link to the posting or the job description. You can also drop a PDF or Word file here."></textarea>
+                    <textarea id="jobDescription" rows="3" aria-describedby="jobError" placeholder="Paste a link to the posting or the job description. You can also drop a PDF or Word file here."></textarea>
                     <span class="supporting"><span id="jobCount"></span><span>Ctrl / &#8984; + Enter to run</span></span>
                 </label>
+                <p class="field-error" id="jobError" role="alert" hidden></p>
                 <div class="banner info" id="jobLinkHelp" hidden>
                     <span class="grow"><span id="jobLinkMsg"></span> <a id="jobLinkAnchor" href="#" target="_blank" rel="noopener noreferrer"></a></span>
                     <button class="btn" type="button" id="pasteInsteadBtn" data-action="paste-instead">Paste the job description instead</button>
@@ -235,6 +248,12 @@
                         <label class="field sm"><span class="field-label">Job 4</span><textarea id="extraJob3" class="extra-job" rows="2" placeholder="Paste a link or the job description"></textarea></label>
                     </div>
                 </details>
+            </div>
+
+            <div class="peek-inline" id="peekInline" hidden>
+                <p class="eyebrow">What you get back &middot; from the sample</p>
+                <div class="req-list on-panel" id="peekInlineRow"></div>
+                <button class="btn" type="button" data-action="example">See a sample result</button>
             </div>
 
             <div class="panel stack" id="resumeCard">
@@ -277,6 +296,7 @@
                         </div>
                     </details>
                 </div>
+                <p class="field-error" id="resumeError" role="alert" hidden></p>
                 <p class="body-sm muted" id="resumePrivacy">We read the file in your browser and send the extracted text for AI analysis when you run a check.</p>
                 <button class="btn text" type="button" id="compareVersionsBtn" data-action="compare-versions" hidden><svg class="icon"><use href="#i-compare"/></svg><span id="compareVersionsText">Compare my resume versions for this job</span></button>
                 <details class="disclosure" id="resumeCheck" hidden>
@@ -656,7 +676,7 @@
                 <textarea id="handoffInput" rows="3" placeholder="Paste the link to the posting (https://...) or the full job description"></textarea></label>
             <p class="field-error" id="handoffError" role="alert" hidden></p>
             <div class="row" id="handoffActions">
-                <button class="btn primary" type="button" data-action="handoff-check">Check my fit<svg class="icon"><use href="#i-next"/></svg></button>
+                <button class="btn primary" type="button" data-action="handoff-check"><span id="handoffCheckText">Continue to fit check</span><svg class="icon"><use href="#i-next"/></svg></button>
                 <button class="btn" type="button" data-action="handoff-save"><svg class="icon"><use href="#i-bookmark"/></svg><span>Save for later</span></button>
             </div>
             <form class="save-form stack" id="saveForm" hidden novalidate>
@@ -707,6 +727,7 @@
         <label class="field" id="promptField" style="margin-top:16px"><span class="field-label" id="promptLabel"></span><input type="text" id="promptInput" maxlength="50" autocomplete="off"></label>
         <div class="dialog-actions">
             <button class="btn text" value="cancel" formnovalidate>Cancel</button>
+            <button class="btn text" value="alt" id="promptAlt" formnovalidate hidden></button>
             <button class="btn text" value="ok" id="promptOk">OK</button>
         </div>
     </form>
@@ -718,7 +739,7 @@
     <button class="icon-btn" data-action="dismiss-snackbar" aria-label="Dismiss"><svg class="icon"><use href="#i-close"/></svg></button>
 </div>
 
-<script src="assets/files.js?v=26"></script>
-<script src="assets/app.js?v=26"></script>
+<script src="assets/files.js?v=28"></script>
+<script src="assets/app.js?v=28"></script>
 </body>
 </html>

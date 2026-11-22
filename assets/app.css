@@ -218,8 +218,16 @@ details.disclosure > .disclosure-body { padding: 4px 0 8px; }
 .bullets li::before { content: ''; position: absolute; left: 4px; top: 12px; width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
 
 /* ---------- Loading ---------- */
-.linear-progress { height: 6px; border-radius: 3px; background: var(--control); overflow: hidden; }
-.linear-progress > div { height: 100%; width: 5%; border-radius: 3px; background: var(--ink); transition: width .6s var(--ease); }
+.linear-progress { height: 10px; border-radius: var(--r-pill); background: var(--control); overflow: hidden; }
+.linear-progress > div { height: 100%; width: 5%; border-radius: var(--r-pill); background: var(--ink); transition: width .6s var(--ease); }
+/* The waiting state is the answer panel with its contents still to come: same heading, same requirement rows. */
+.loading-panel .verdict-label { margin-top: 8px; }
+.loading-panel .linear-progress { margin-top: 18px; background: var(--page); }
+.loading-note { margin-top: 12px; }
+.loading-panel .req-list.on-panel { margin-top: 16px; }
+.loading-panel .req-main { flex: 1; }
+.loading-panel .skeleton { display: block; border-radius: 6px; }
+.loading-panel .sk-chip { flex: none; width: 64px; height: 26px; border-radius: var(--r-pill); }
 .skeleton { position: relative; overflow: hidden; border-radius: var(--r-seg); background: var(--control); }
 .skeleton::after { content: ''; position: absolute; inset: 0; transform: translateX(-100%); background: linear-gradient(90deg, transparent, rgba(255,255,255,.7), transparent); animation: shimmer 1.4s infinite; }
 @keyframes shimmer { to { transform: translateX(100%); } }
@@ -703,3 +711,14 @@ button.batch-row:focus-visible { outline: 3px solid var(--ink); outline-offset: 
     .linear-progress.indeterminate > div { animation: none; width: 100%; opacity: .45; }
     .resume-preview li.spotlight { animation: none; background: var(--caution); box-shadow: 0 0 0 6px var(--caution); }
 }
+
+/* v27: phones start with the form and a one-line sample; errors sit at their field */
+.peek-inline { display: none; flex-direction: column; gap: 10px; padding: 16px 18px; border-radius: var(--r-md); background: var(--panel); }
+.peek-inline .btn { align-self: flex-start; background: var(--page); }
+@media (max-width: 879px) {
+    .peek-inline:not([hidden]) { display: flex; }
+    #examplePreview { display: none !important; }       /* the same sample is shown above, beside the job field */
+    #exampleLink { display: none; }
+}
+.panel > .field-error { margin-top: 8px; }
+#jobDescription[aria-invalid="true"] { border-color: var(--danger-ink); }

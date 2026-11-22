@@ -29,7 +29,7 @@
 // site's copy ("Your resume is not stored on our servers").
 
 const env = process.env;
-const VERSION = '3.5.0';
+const VERSION = '3.5.1';
 
 function clampInt(v, def, min, max) {
     const n = Number.parseInt(v, 10);
@@ -384,6 +384,7 @@ FINAL TASK - **Recommendation:**
    - "reasons": 2-3 short reasons, each tied to specific evidence from the resume or the posting
    - "next_step": the single most useful thing to do next, one sentence
    - "recruiter_question": when action is "confirm_requirement", a short, polite message the candidate can send a recruiter as-is to resolve it (2-3 sentences, first person, no placeholders except "[Name]", mentions the role, states what they hold, asks the specific question). Otherwise an empty string.
+     Never state or imply that the candidate lacks a clearance, or holds "no clearance", unless the resume says so in those terms. When the resume is silent on clearance, ask whether the requirement is firm on day one and say nothing about what the candidate holds. Only mention what the candidate holds when the resume states it.
 
 REQUIREMENTS (the "requirements" field): the 4 or 5 requirements from the posting that most decide whether this candidate should apply, most decisive first. Always include the security clearance when the posting states one. For each:
    - "requirement": the requirement in the posting's own terms, short (max 60 characters), e.g. "Active TS/SCI clearance", "7+ years selling to the DoD"
