@@ -32,7 +32,7 @@
     <link rel="apple-touch-icon" href="apple-touch-icon.png">
     <link rel="manifest" href="site.webmanifest">
     <link rel="preload" href="assets/fonts/inter-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="stylesheet" href="assets/app.css?v=41">
+    <link rel="stylesheet" href="assets/app.css?v=42">
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-N10ZLNFZHE"></script>
     <script>
@@ -120,9 +120,16 @@
             <h1 class="h1">Is this job a good fit?</h1>
             <p class="lede"><span class="wide-only">Add your resume and the job posting. You get a straight answer, what the posting asks for next to what your resume shows, what it should pay, and your resume rewritten for that job.</span><span class="narrow-only">A straight answer on whether to apply, and your resume rewritten for the job.</span></p>
             <div class="doors" id="doors" role="group" aria-label="Where to start">
-                <button class="btn door" type="button" data-action="door-posting"><svg class="icon"><use href="#i-doc"/></svg><span>I have a posting</span></button>
-                <button class="btn door" type="button" data-action="go-find"><svg class="icon"><use href="#i-search"/></svg><span>I'm looking for one</span></button>
+                <div class="door-col">
+                    <button class="btn primary door" type="button" data-action="door-posting"><svg class="icon"><use href="#i-doc"/></svg><span>Check a job</span></button>
+                    <span class="door-note"><span class="wide-only">Have a posting someone sent you? Paste the link or description.</span><span class="narrow-only">Have a posting? Paste it.</span></span>
+                </div>
+                <div class="door-col">
+                    <button class="btn door" type="button" data-action="go-find"><svg class="icon"><use href="#i-search"/></svg><span>Find defense jobs</span></button>
+                    <span class="door-note"><span class="wide-only">Have a role or employer in mind? Go straight to searches for federal sales, BD, capture and partner roles.</span><span class="narrow-only">Have a role in mind? Search.</span></span>
+                </div>
             </div>
+        
         </div>
 
         <div class="calc">
@@ -767,7 +774,7 @@
     <button class="icon-btn" data-action="dismiss-snackbar" aria-label="Dismiss"><svg class="icon"><use href="#i-close"/></svg></button>
 </div>
 
-<script src="assets/files.js?v=41"></script>
-<script src="assets/app.js?v=41"></script>
+<script src="assets/files.js?v=42"></script>
+<script src="assets/app.js?v=42"></script>
 </body>
 </html>
