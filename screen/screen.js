@@ -176,7 +176,7 @@
         $('candidateQueue').innerHTML = n ? queue.map(c => {
             let status = `${countWords(c.resumeText).toLocaleString()} words, ready`;
             let score = '';
-            if (c.status === 'analyzing') status = '<span class="spinner" style="width:14px;height:14px;display:inline-block;vertical-align:-2px"></span> Screening...';
+            if (c.status === 'analyzing') status = '<span class="spinner" style="width:14px;height:14px;display:inline-block;vertical-align:-2px"></span> Screening…';
             else if (c.status === 'complete' && c.result) { status = escapeHtml(scrub(c.result.verdict || 'Done', c)); score = `<span class="score-pill ${band(c.result.score)}">${Math.round(c.result.score) || 0}</span>`; }
             else if (c.status === 'error') status = `<span style="color:var(--danger-ink); font-weight:600">${escapeHtml(c.error || 'Could not be screened')}</span>`;
             return `<div class="row-item queue-row"><span class="grow"><span class="queue-name">${escapeHtml(label(c))}</span><span class="queue-status">${status}</span></span>${score}<button class="icon-btn" data-remove="${c.id}" aria-label="Remove ${escapeHtml(c.name)}"${running ? ' disabled' : ''}>${icon('close')}</button></div>`;
@@ -331,7 +331,7 @@
     async function draftCriteria(jd) {
         if (criteria.drafting || running) return;
         criteria.drafting = true;
-        const btn = $('analyzeAllBtn'); btn.disabled = true; $('analyzeText').textContent = 'Reading the must-haves...';
+        const btn = $('analyzeAllBtn'); btn.disabled = true; $('analyzeText').textContent = 'Reading the must-haves…';
         let list = [], note = 'Drafted from the posting. Edit them to match what you agreed with the hiring manager. Every candidate is judged on this same list.';
         try { list = (await callApi({ request_type: 'extract_criteria', job_description: jd })).must_haves || []; }
         catch (e) { note = 'We could not draft these from the posting. Type the must-haves yourself, or leave them empty to rank on the posting as written.'; }
@@ -372,7 +372,7 @@
         if (readingLink || running) return;
         readingLink = true;
         const btn = $('analyzeAllBtn'), box = $('jobDescription');
-        btn.disabled = true; box.readOnly = true; $('analyzeText').textContent = 'Reading the posting...';
+        btn.disabled = true; box.readOnly = true; $('analyzeText').textContent = 'Reading the posting…';
         let data = null, why = '';
         try { data = await callApi({ request_type: 'read_posting', url }); }
         catch (e) { why = e.transient || /not available yet/i.test(e.message) ? '' : e.message; }
@@ -409,7 +409,7 @@
             renderQueue();
             try {
                 const label = `Screening ${done + 1} of ${queue.length}...`;
-                const result = await analyzeCandidate(jd, blind ? redact(c.resumeText, c.name) : c.resumeText, mustHaves, (secs) => { $('analyzeText').textContent = `Pausing ${secs} seconds, then continuing...`; setTimeout(() => { if (running) $('analyzeText').textContent = label; }, secs * 1000); });
+                const result = await analyzeCandidate(jd, blind ? redact(c.resumeText, c.name) : c.resumeText, mustHaves, (secs) => { $('analyzeText').textContent = `Pausing ${secs} seconds, then continuing…`; setTimeout(() => { if (running) $('analyzeText').textContent = label; }, secs * 1000); });
                 c.status = 'complete'; c.result = result;
                 results.push({ id: c.id, name: c.name, resumeText: c.resumeText, ...result });
             } catch (e) {

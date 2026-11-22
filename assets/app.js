@@ -379,7 +379,7 @@
 
     function setDropBusy(busy, label) {
         $('resumeDrop').classList.toggle('busy', busy);
-        $('resumeDropMain').innerHTML = busy ? escapeHtml(label || 'Reading your resume...') : 'Drop your resume here or <u>choose a file</u>';
+        $('resumeDropMain').innerHTML = busy ? escapeHtml(label || 'Reading your resume…') : 'Drop your resume here or <u>choose a file</u>';
     }
 
     async function handleResumeFile(file) {
@@ -434,8 +434,8 @@
     async function readResumeWithAI() {
         const file = state.pendingOcrFile;
         if (!file) return;
-        setDropBusy(true, 'AI is reading your resume...');
-        setFileStatus('warn', `<span class="grow"><strong>${escapeHtml(file.name)}</strong><br>Reading with AI. This can take up to a minute...</span>`);
+        setDropBusy(true, 'AI is reading your resume…');
+        setFileStatus('warn', `<span class="grow"><strong>${escapeHtml(file.name)}</strong><br>Reading with AI. This can take up to a minute…</span>`);
         try {
             const dataUrl = await new Promise((resolve, reject) => {
                 const reader = new FileReader();
@@ -641,7 +641,7 @@
     function startLoading() {
         setResultState('loading');
         setLoadingProgress(null);
-        $('loadingStep').textContent = 'Checking your fit...';
+        $('loadingStep').textContent = 'Checking your fit…';
         revealResult();
         clearInterval(state.loadingTimer);
     }
@@ -693,7 +693,7 @@
         if (box.hidden) return;
         box.className = 'banner ' + (mode === 'read' ? 'warn' : 'info');
         const title = mode === 'read' && state.linkTitle ? `<strong>${escapeHtml(state.linkTitle)}</strong>. ` : '';
-        $('jobLinkMsg').innerHTML = mode === 'reading' ? 'Reading the posting from this link...'
+        $('jobLinkMsg').innerHTML = mode === 'reading' ? 'Reading the posting from this link…'
             : mode === 'read' ? `Read from the link: ${title}Check that this is the right posting, then run the check.`
             : 'Link kept for your tracker:';
         $('jobLinkAnchor').textContent = state.postingUrl;
@@ -721,7 +721,7 @@
         state.exampleDismissed = true;
         box.value = url; box.readOnly = true;
         fieldError(null); showInlineError(''); updateCounts(); renderLinkHelp();
-        btn.disabled = true; $('btnText').textContent = 'Reading the posting...';
+        btn.disabled = true; $('btnText').textContent = 'Reading the posting…';
         let result = null, failure = '';
         try { result = await api({ request_type: 'read_posting', url }); }
         catch (e) { failure = e.transient || /not available yet/i.test(e.message) ? LINK_MSG : e.message; }
@@ -759,7 +759,7 @@
         renderLinkHelp();
         const btn = $('analyzeBtn');
         btn.disabled = true;
-        $('btnText').textContent = 'Checking...';
+        $('btnText').textContent = 'Checking…';
         startLoading();
         let lastError = null;
         for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
@@ -895,7 +895,7 @@
         for (let i = 0; i < items.length; i++) {
             const item = items[i];
             $('btnText').textContent = `Checking ${i + 1} of ${items.length}...`;
-            $('loadingStep').textContent = kind === 'jobs' ? `Checking job ${i + 1} of ${items.length} against your resume...` : `Checking "${item.resumeName}" (${i + 1} of ${items.length})...`;
+            $('loadingStep').textContent = kind === 'jobs' ? `Checking job ${i + 1} of ${items.length} against your resume…` : `Checking "${item.resumeName}" (${i + 1} of ${items.length})...`;
             setLoadingProgress(Math.round(8 + (i / items.length) * 88));
             try {
                 const data = await batchCall(item);
@@ -1387,7 +1387,7 @@
             $('compQuestionsList').innerHTML = cq.map(q => `<li>${escapeHtml(q)}</li>`).join('');
         } else {
             $('compLabel').textContent = 'PAY';
-            $('salaryRange').textContent = 'Loading...';
+            $('salaryRange').textContent = 'Loading…';
             $('salaryEstimateLabel').textContent = 'Pay';
             $('salaryEstimate').textContent = '...';
             $('baseRow').hidden = true;
@@ -1428,7 +1428,7 @@
         if (!state.analysis || state.tailoring) return;
         state.tailoring = true; syncTailorUi();
         try {
-            await withBusy(button, 'Writing your resume...', async () => {
+            await withBusy(button, 'Writing your resume…', async () => {
                 const forJob = state.analysis;
                 const data = await api({ request_type: 'tailor_resume', job_description: state.jd, resume_text: state.resumeText, analysis_data: slimAnalysis(), military_transition: isMilitary() });
                 if (state.analysis !== forJob) return;
@@ -1516,7 +1516,7 @@
         const a = state.analysis, built = !!state.tailored, t = state.tailorScore, k = state.tailorKeywords;
         const act = state.primaryAction, tailorLeads = act === 'apply' || act === 'fix_first';
         const meta = ACTIONS_META[act] || ACTIONS_META.fix_first;
-        const cta = !tailorLeads ? meta.cta : state.tailoring ? ['spark', 'Writing your resume...'] : built ? ['doc', 'Review tailored resume'] : ['spark', 'Tailor my resume to this job'];
+        const cta = !tailorLeads ? meta.cta : state.tailoring ? ['spark', 'Writing your resume…'] : built ? ['doc', 'Review tailored resume'] : ['spark', 'Tailor my resume to this job'];
         $('primaryActionText').textContent = cta[1];
         $('primaryActionBtn').querySelector('use').setAttribute('href', '#i-' + cta[0]);
         $('primaryActionBtn').disabled = tailorLeads && !!state.tailoring;
@@ -1535,7 +1535,7 @@
             if (k.added.length) caution = `New in this version: ${k.added.join(', ')}. Make sure each is true for you before you send it.`;
         }
         if (built && state.tailorUnmatched) caution = `${state.tailorUnmatched} highlighted ${state.tailorUnmatched === 1 ? 'line has' : 'lines have'} no close match in your original resume. Check ${state.tailorUnmatched === 1 ? 'it is' : 'they are'} true before you send it. ` + caution;
-        if (t && t.pending) headline = 'Checking the fit score...';
+        if (t && t.pending) headline = 'Checking the fit score…';
         else if (t) {
             const d = t.after - t.before;
             if (d > SCORE_NOISE) { headline = `Fit score went from ${t.before} to ${t.after}.`; shift = `${t.before} → ${t.after}`; }
@@ -1709,7 +1709,7 @@
     // ======================================================================
     async function writeLinkedInNotes(button) {
         if (!state.analysis) return;
-        await withBusy(button, 'Writing...', async () => {
+        await withBusy(button, 'Writing…', async () => {
             const forJob = state.analysis;
             const data = await api({ request_type: 'generate_linkedin_messages', job_description: state.jd, resume_text: state.resumeText, analysis_data: slimAnalysis() });
             if (state.analysis !== forJob) return;
@@ -1725,7 +1725,7 @@
 
     async function writeIntroEmail(button) {
         if (!state.analysis) return;
-        await withBusy(button, 'Writing...', async () => {
+        await withBusy(button, 'Writing…', async () => {
             const forJob = state.analysis;
             const data = await api({ request_type: 'generate_intro_email', job_description: state.jd, resume_text: state.resumeText, analysis_data: slimAnalysis() });
             if (state.analysis !== forJob) return;
@@ -1783,7 +1783,7 @@
         addMessage('user', question);
         state.chat.push({ role: 'user', content: question });
         input.value = '';
-        const thinking = addMessage('thinking assistant', 'Thinking...');
+        const thinking = addMessage('thinking assistant', 'Thinking…');
         const btn = $('askBtn');
         btn.disabled = true;
         const forJob = state.analysis;
