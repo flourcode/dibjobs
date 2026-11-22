@@ -830,3 +830,6 @@ table.grid-table th[scope="row"] { position: sticky; left: 0; z-index: 1; backgr
 .feedback-why .body-sm { flex: 1 1 100%; }
 @media print { .feedback, .foot-links { display: none !important; } }
 .doc ul { list-style: disc; }
+/* v36: About, Privacy and Terms join the phone menu; on wide screens they stay in the footer only */
+.nav-more .menu-only { display: none; }
+@media (max-width: 699px) { .nav-more .menu-only { display: flex; } .nav-more .nav-item[aria-current="page"] { background: var(--panel); font-weight: 700; } }
