@@ -833,3 +833,9 @@ table.grid-table th[scope="row"] { position: sticky; left: 0; z-index: 1; backgr
 /* v36: About, Privacy and Terms join the phone menu; on wide screens they stay in the footer only */
 .nav-more .menu-only { display: none; }
 @media (max-width: 699px) { .nav-more .menu-only { display: flex; } .nav-more .nav-item[aria-current="page"] { background: var(--panel); font-weight: 700; } }
+/* v37: a way to Find Jobs from the first screen; employers lead the Find Jobs view */
+.card-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px 16px; flex-wrap: wrap; }
+.find-hint { font: 400 14px/20px var(--font); color: var(--muted); }
+.find-hint { white-space: nowrap; }
+.find-hint .link-btn { display: inline; min-height: 0; width: auto; padding: 0; font: inherit; font-weight: 600; color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+#buildSearch { scroll-margin-top: 16px; }

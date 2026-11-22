@@ -32,7 +32,7 @@
     <link rel="apple-touch-icon" href="apple-touch-icon.png">
     <link rel="manifest" href="site.webmanifest">
     <link rel="preload" href="assets/fonts/inter-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="stylesheet" href="assets/app.css?v=36">
+    <link rel="stylesheet" href="assets/app.css?v=38">
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-N10ZLNFZHE"></script>
     <script>
@@ -243,7 +243,7 @@
             <section class="calc-inputs" id="inputs" aria-label="Your resume and the job">
             <div class="inputs-fold" id="inputsFold"><span class="grow"><span class="eyebrow">Checked</span><span id="inputsFoldText">Your job and resume</span></span><button class="btn" type="button" data-action="edit-inputs">Change job or resume</button></div>
             <div class="panel stack" id="jobCard">
-                <h2 class="h3">1. The job</h2>
+                <div class="card-head"><h2 class="h3">1. The job</h2><span class="find-hint">No posting yet? <button class="link-btn" type="button" data-action="go-find">Find one</button></span></div>
                 <label class="field" id="jobField">
                     <span class="field-label">Job description or link</span>
                     <textarea id="jobDescription" rows="3" aria-describedby="jobError" placeholder="Paste the job description, or a link to the posting. You can also drop a PDF or Word file here."></textarea>
@@ -622,12 +622,57 @@
         <div class="page-intro">
             <p class="eyebrow">Job search &middot; for defense industry sales, BD and capture</p>
             <h1 class="h1">Find defense and federal jobs</h1>
-            <p class="lede">Search LinkedIn, the clearance boards or Google for openings, then bring a posting back to check your fit.</p>
-            <p class="body-md" style="margin-top:8px"><a href="#employers" id="browseEmployersLink" class="jump-link">Browse defense employers</a></p>
+            <p class="lede">Go straight to an employer's open jobs or open a ready-made search, then bring a posting back to check your fit.</p>
+            <p class="body-md" style="margin-top:8px"><a href="#buildSearch" id="browseEmployersLink" class="jump-link">Build your own search</a></p>
+        </div>
+
+        <div class="plain">
+            <h2 class="h3" id="employers">Go straight to an employer</h2>
+            <p class="body-md muted" style="margin-top:4px">Each name opens that company's open jobs on LinkedIn, in a new tab.</p>
+            <div class="chips" id="employerTop" style="margin-top:12px"></div>
+            <div class="row" style="margin-top:12px; align-items:flex-end">
+                <button class="btn" type="button" id="employerAllBtn" data-action="toggle-employers" aria-expanded="false" aria-controls="companyBoards">Show all employers</button>
+                <label class="field sm" style="flex:1 1 220px; max-width:360px"><span class="field-label">Or find a company</span>
+                    <input type="search" id="employerFilter" autocomplete="off" placeholder="e.g. Leidos, cloud, reseller"><span class="supporting"><span id="employerCount" aria-live="polite"></span></span></label>
+            </div>
+            <p class="body-md muted" id="employerNone" hidden>No employer matches that. Try a shorter name, or build your own search below.</p>
+            <div id="companyBoards" hidden></div>
+        </div>
+
+        <div class="plain" id="boardsRow">
+            <h2 class="h3">Start with a ready search</h2>
+            <p class="body-md muted" style="margin-top:4px">One tap opens the search on that site, in a new tab.</p>
+            <div class="grid-2" id="readySearches" style="margin-top:12px"></div>
+        </div>
+
+        <div class="panel accent stack" id="handoffCard">
+            <div>
+                <h2 class="h3">Found a posting?</h2>
+                <p class="body-md muted" style="margin-top:4px">Bring it back here. Check it against your resume now, or save it and decide later.</p>
+            </div>
+            <label class="field"><span class="field-label">Posting link or job description</span>
+                <textarea id="handoffInput" rows="3" placeholder="Paste the link to the posting (https://...) or the full job description"></textarea></label>
+            <p class="field-error" id="handoffError" role="alert" hidden></p>
+            <div class="row" id="handoffActions">
+                <button class="btn primary" type="button" data-action="handoff-check"><span id="handoffCheckText">Continue to fit check</span><svg class="icon"><use href="#i-next"/></svg></button>
+                <button class="btn" type="button" data-action="handoff-save"><svg class="icon"><use href="#i-bookmark"/></svg><span>Save for later</span></button>
+            </div>
+            <form class="save-form stack" id="saveForm" hidden novalidate>
+                <p class="title-md">Save to your tracker</p>
+                <div class="search-fields">
+                    <label class="field sm"><span class="field-label">Job title <span class="optional">optional</span></span><input type="text" id="saveTitle" maxlength="120" autocomplete="off" placeholder="e.g. Capture manager"></label>
+                    <label class="field sm"><span class="field-label">Company <span class="optional">optional</span></span><input type="text" id="saveCompany" maxlength="80" autocomplete="off"></label>
+                </div>
+                <p class="body-sm muted">Saved in this browser only, marked "Not checked" until you run a fit check.</p>
+                <div class="row">
+                    <button class="btn primary" type="submit">Save</button>
+                    <button class="btn text" type="button" data-action="handoff-save-cancel">Cancel</button>
+                </div>
+            </form>
         </div>
 
         <form class="panel stack" id="searchForm" novalidate>
-            <h2 class="h3">1. Search for openings</h2>
+            <h2 class="h3" id="buildSearch">Build your own search</h2>
             <div class="search-fields three">
                 <label class="field"><span class="field-label">Job title or keywords</span>
                     <input type="text" id="searchTitle" maxlength="80" autocomplete="off" enterkeyhint="search" placeholder="federal sales"></label>
@@ -668,45 +713,6 @@
             <p class="body-sm muted">Every button opens the search on that site in a new tab. Only the title, location and clearance keyword above are sent. Your resume and tracker never are. The clearance keyword only asks for postings that mention the phrase; it can't confirm eligibility or that a posting is still open.</p>
         </form>
 
-        <div class="panel accent stack" id="handoffCard">
-            <div>
-                <h2 class="h3">2. Found a posting?</h2>
-                <p class="body-md muted" style="margin-top:4px">Bring it back here. Check it against your resume now, or save it and decide later.</p>
-            </div>
-            <label class="field"><span class="field-label">Posting link or job description</span>
-                <textarea id="handoffInput" rows="3" placeholder="Paste the link to the posting (https://...) or the full job description"></textarea></label>
-            <p class="field-error" id="handoffError" role="alert" hidden></p>
-            <div class="row" id="handoffActions">
-                <button class="btn primary" type="button" data-action="handoff-check"><span id="handoffCheckText">Continue to fit check</span><svg class="icon"><use href="#i-next"/></svg></button>
-                <button class="btn" type="button" data-action="handoff-save"><svg class="icon"><use href="#i-bookmark"/></svg><span>Save for later</span></button>
-            </div>
-            <form class="save-form stack" id="saveForm" hidden novalidate>
-                <p class="title-md">Save to your tracker</p>
-                <div class="search-fields">
-                    <label class="field sm"><span class="field-label">Job title <span class="optional">optional</span></span><input type="text" id="saveTitle" maxlength="120" autocomplete="off" placeholder="e.g. Capture manager"></label>
-                    <label class="field sm"><span class="field-label">Company <span class="optional">optional</span></span><input type="text" id="saveCompany" maxlength="80" autocomplete="off"></label>
-                </div>
-                <p class="body-sm muted">Saved in this browser only, marked "Not checked" until you run a fit check.</p>
-                <div class="row">
-                    <button class="btn primary" type="submit">Save</button>
-                    <button class="btn text" type="button" data-action="handoff-save-cancel">Cancel</button>
-                </div>
-            </form>
-        </div>
-
-        <div class="plain" id="boardsRow">
-            <h2 class="h3">Ready-to-use searches</h2>
-            <div class="grid-2" id="readySearches" style="margin-top:12px"></div>
-        </div>
-
-        <div class="plain">
-            <h2 class="h3" id="employers">Browse defense employers</h2>
-            <p class="body-md muted" style="margin-top:4px">Each name opens that company's open jobs on LinkedIn, in a new tab.</p>
-            <label class="field sm" style="margin-top:12px; max-width:360px"><span class="field-label">Filter by company or type</span>
-                <input type="search" id="employerFilter" autocomplete="off" placeholder="e.g. Leidos, cloud, reseller"><span class="supporting"><span id="employerCount" aria-live="polite"></span></span></label>
-            <p class="body-md muted" id="employerNone" hidden>No employer matches that. Try a shorter name, or use the search above.</p>
-            <div id="companyBoards"></div>
-        </div>
     </section>
 </main>
 
@@ -743,7 +749,7 @@
     <button class="icon-btn" data-action="dismiss-snackbar" aria-label="Dismiss"><svg class="icon"><use href="#i-close"/></svg></button>
 </div>
 
-<script src="assets/files.js?v=36"></script>
-<script src="assets/app.js?v=36"></script>
+<script src="assets/files.js?v=38"></script>
+<script src="assets/app.js?v=38"></script>
 </body>
 </html>

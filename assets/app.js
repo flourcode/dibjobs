@@ -2214,13 +2214,24 @@
             return `<div class="tool-card"><span class="title-md">${title}</span><span class="body-sm">${blurb}</span><div class="chips">${outLink(linkedInUrl(c), 'LinkedIn, past week', 'chip sm')}${boardLinks(c, 'chip sm')}</div></div>`; }).join('');
         $('companyBoards').innerHTML = COMPANY_BOARDS.map(([group, companies]) => `<div class="board-group"><p class="label-lg muted" style="margin:20px 0 8px">${group}</p><div class="chips">${
             companies.map(([name, slug]) => outLink(`https://www.linkedin.com/company/${slug}/jobs/`, name)).join('')}</div></div>`).join('');
-        const total = COMPANY_BOARDS.reduce((n, g) => n + g[1].length, 0);
-        $('browseEmployersLink').textContent = `Browse ${total} defense employers`;
+        // A dozen well-known names lead; the full list opens on request or as soon as someone types a name.
+        const all = COMPANY_BOARDS.flatMap(g => g[1]);
+        $('employerTop').innerHTML = TOP_EMPLOYERS.map(n => all.find(c => c[0] === n)).filter(Boolean).map(([name, slug]) => outLink(`https://www.linkedin.com/company/${slug}/jobs/`, name)).join('');
+        showAllEmployers(false);
+    }
+    const TOP_EMPLOYERS = ['Lockheed Martin', 'RTX (Raytheon)', 'Northrop Grumman', 'Leidos', 'Booz Allen', 'GDIT', 'Anduril', 'Palantir', 'Amazon / AWS', 'Microsoft / Azure', 'SpaceX', 'Anthropic'];
+    function showAllEmployers(open) {
+        const total = COMPANY_BOARDS.reduce((n, g) => n + g[1].length, 0), btn = $('employerAllBtn');
+        $('companyBoards').hidden = !open;
+        btn.setAttribute('aria-expanded', String(open));
+        btn.textContent = open ? 'Show fewer employers' : `Show all ${total} employers`;
     }
 
     // Typing a name narrows the employer list; groups with no match drop out.
     function filterEmployers() {
         const q = $('employerFilter').value.trim().toLowerCase();
+        if (q) showAllEmployers(true);
+        $('employerTop').hidden = !!q;
         let shown = 0;
         document.querySelectorAll('#companyBoards .board-group').forEach(group => {
             let any = false;
@@ -2707,6 +2718,8 @@ Amazon is an Equal Opportunity Employer.`;
         'clear-resume': () => clearResume(),
         'ocr': () => readResumeWithAI(),
         'new-job': () => newJob(),
+        'go-find': () => showView('explore'),
+        'toggle-employers': () => { const open = $('companyBoards').hidden; if (!open) { $('employerFilter').value = ''; filterEmployers(); } showAllEmployers(open); },
         'edit-inputs': () => { document.querySelector('.calc').classList.add('editing'); $('jobCard').scrollIntoView({ behavior: scrollBehavior(), block: 'start' }); $('jobDescription').focus({ preventScroll: true }); },
         'save-job': () => saveToTracker(),
         'download-report': () => downloadReport(),
