@@ -32,7 +32,7 @@
     <link rel="apple-touch-icon" href="apple-touch-icon.png">
     <link rel="manifest" href="site.webmanifest">
     <link rel="preload" href="assets/fonts/inter-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="stylesheet" href="assets/app.css?v=39">
+    <link rel="stylesheet" href="assets/app.css?v=40">
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-N10ZLNFZHE"></script>
     <script>
@@ -627,38 +627,36 @@
         <div class="page-intro">
             <p class="eyebrow">Job search &middot; for defense industry sales, BD and capture</p>
             <h1 class="h1">Find defense and federal jobs</h1>
-            <p class="lede">Go straight to an employer's open jobs or open a ready-made search, then bring a posting back to check your fit.</p>
-            <p class="body-md" style="margin-top:8px"><a href="#buildSearch" id="browseEmployersLink" class="jump-link">Build your own search</a></p>
-        </div>
-
-        <div class="plain">
-            <h2 class="h3" id="employers">Go straight to an employer</h2>
-            <p class="body-md muted" style="margin-top:4px" id="employerHelp">Each name opens that company's open jobs on LinkedIn, in a new tab.</p>
-            <div class="role-pick" style="margin-top:12px">
-                <span class="label-lg" id="employerRoleLabel">Looking for</span>
-                <div class="chips" id="employerRoles" role="group" aria-labelledby="employerRoleLabel">
-                    <button type="button" class="chip sm" data-role="" aria-pressed="true">Any role</button>
-                    <button type="button" class="chip sm" data-role="federal sales" aria-pressed="false">Federal sales</button>
-                    <button type="button" class="chip sm" data-role="federal sales director" aria-pressed="false">Sales director</button>
-                    <button type="button" class="chip sm" data-role="partner sales" aria-pressed="false">Partner sales</button>
-                    <button type="button" class="chip sm" data-role="capture manager" aria-pressed="false">Capture</button>
-                    <button type="button" class="chip sm" data-role="business development" aria-pressed="false">Business development</button>
-                </div>
-            </div>
-            <div class="chips" id="employerTop" style="margin-top:12px"></div>
-            <div class="row" style="margin-top:12px; align-items:flex-end">
-                <button class="btn" type="button" id="employerAllBtn" data-action="toggle-employers" aria-expanded="false" aria-controls="companyBoards">Show all employers</button>
-                <label class="field sm" style="flex:1 1 220px; max-width:360px"><span class="field-label">Or find a company</span>
-                    <input type="search" id="employerFilter" autocomplete="off" placeholder="e.g. Leidos, cloud, reseller"><span class="supporting"><span id="employerCount" aria-live="polite"></span></span></label>
-            </div>
-            <p class="body-md muted" id="employerNone" hidden>No employer matches that. Try a shorter name, or build your own search below.</p>
-            <div id="companyBoards" hidden></div>
+            <p class="lede">Open a ready-made search or go straight to an employer's open jobs, then bring a posting back to check your fit.</p>
+            <p class="body-md jump-row" style="margin-top:8px"><a href="#employers" class="jump-link">Go straight to an employer</a><a href="#buildSearch" id="browseEmployersLink" class="jump-link">Build your own search</a></p>
         </div>
 
         <div class="plain" id="boardsRow">
             <h2 class="h3">Start with a ready search</h2>
             <p class="body-md muted" style="margin-top:4px">One tap opens the search on that site, in a new tab.</p>
             <div class="grid-2" id="readySearches" style="margin-top:12px"></div>
+        </div>
+
+        <div class="plain">
+            <h2 class="h3" id="employers">Go straight to an employer</h2>
+            <p class="body-md muted" style="margin-top:4px" id="employerHelp">Each name opens that company's open jobs on LinkedIn, in a new tab.</p>
+            <div class="chips" id="employerTop" style="margin-top:12px"></div>
+            <div class="row" style="margin-top:12px; align-items:flex-end">
+                <button class="btn" type="button" id="employerAllBtn" data-action="toggle-employers" aria-expanded="false" aria-controls="companyBoards">Show all employers</button>
+                <label class="field sm" style="flex:0 1 240px"><span class="field-label">Narrow to a role <span class="optional">optional</span></span>
+                    <select id="employerRole">
+                        <option value="">Any role</option>
+                        <option value="federal sales">Federal sales</option>
+                        <option value="federal sales director">Sales director</option>
+                        <option value="partner sales">Partner sales</option>
+                        <option value="capture manager">Capture</option>
+                        <option value="business development">Business development</option>
+                    </select></label>
+                <label class="field sm" style="flex:1 1 220px; max-width:360px"><span class="field-label">Find a company</span>
+                    <input type="search" id="employerFilter" autocomplete="off" placeholder="e.g. Leidos, cloud, reseller"><span class="supporting"><span id="employerCount" aria-live="polite"></span></span></label>
+            </div>
+            <p class="body-md muted" id="employerNone" hidden>No employer matches that. Try a shorter name, or build your own search below.</p>
+            <div id="companyBoards" hidden></div>
         </div>
 
         <div class="panel accent stack" id="handoffCard">
@@ -765,7 +763,7 @@
     <button class="icon-btn" data-action="dismiss-snackbar" aria-label="Dismiss"><svg class="icon"><use href="#i-close"/></svg></button>
 </div>
 
-<script src="assets/files.js?v=39"></script>
-<script src="assets/app.js?v=39"></script>
+<script src="assets/files.js?v=40"></script>
+<script src="assets/app.js?v=40"></script>
 </body>
 </html>

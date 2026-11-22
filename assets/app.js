@@ -247,7 +247,6 @@
 
     function initMenus() {
         document.addEventListener('click', (e) => {
-            const roleBtn = e.target.closest('#employerRoles [data-role]'); if (roleBtn) return pickEmployerRole(roleBtn);
             const exBtn = e.target.closest('#exampleNote [data-example]'); if (exBtn) { if (exBtn.dataset.example !== (state.exampleKey || 'seller')) showExample(exBtn.dataset.example); return; }
             const fb = e.target.closest('#feedback [data-feedback]'); if (fb) return giveFeedback(fb.dataset.feedback);
             const why = e.target.closest('#feedback [data-why]'); if (why) return giveFeedbackReason(why.dataset.why, why.textContent.trim());
@@ -2252,10 +2251,11 @@
         if (!role) return `https://www.linkedin.com/company/${slug}/jobs/`;
         return withParams('https://www.linkedin.com/jobs/search/', { keywords: `${role} "${SEARCH_NAME[name] || name}"`, f_TPR: 'r2592000' });
     }
-    function pickEmployerRole(btn) {
-        state.employerRole = btn.dataset.role || '';
-        document.querySelectorAll('#employerRoles [data-role]').forEach(b => b.setAttribute('aria-pressed', String(b === btn)));
-        const label = btn.textContent.trim().toLowerCase();
+    // The role is a filter on the employer links, shown as a menu so it does not read as a search button.
+    function pickEmployerRole() {
+        const sel = $('employerRole');
+        state.employerRole = sel.value || '';
+        const label = sel.options[sel.selectedIndex].textContent.trim().toLowerCase();
         $('employerHelp').textContent = state.employerRole ? `Each name opens a LinkedIn search for ${label} roles at that company from the past month, in a new tab.` : "Each name opens that company's open jobs on LinkedIn, in a new tab.";
         renderStaticSearches();
         filterEmployers();
@@ -2463,6 +2463,7 @@
         $('view-explore').addEventListener('click', (e) => { const chip = e.target.closest('[data-fill-title]'); if (chip) fillTitle(chip.dataset.fillTitle); });
         $('saveForm').addEventListener('submit', savePostingForLater);
         $('employerFilter').addEventListener('input', filterEmployers);
+        $('employerRole').addEventListener('change', pickEmployerRole);
         $('handoffInput').addEventListener('input', () => handoffError(''));
     }
 

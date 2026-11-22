@@ -865,3 +865,10 @@ table.grid-table th[scope="row"] { position: sticky; left: 0; z-index: 1; backgr
 #employerRoles .chip { cursor: pointer; min-height: 36px; }
 #employerRoles .chip[aria-pressed="true"] { background: var(--ink); color: #fff; }
 @media print { .snapshot-ask .btn, .seg { display: none !important; } }
+/* v40: ready searches lead Find Jobs; the employer role is a menu, not a row of buttons */
+.jump-row { display: flex; flex-wrap: wrap; gap: 4px 20px; }
+#employers { scroll-margin-top: 16px; }
+@media (max-width: 699px) {
+    #readySearches .tool-card { padding: 12px 14px; gap: 8px; }
+    #readySearches .tool-card .body-sm { display: none; }
+}
