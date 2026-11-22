@@ -603,25 +603,37 @@
         $('results').hidden = mode !== 'ready';
         document.querySelector('.calc').classList.toggle('has-result', mode !== 'empty');
         if (mode === 'empty') {
-            $('examplePreview').hidden = true;
             $('emptyPlain').hidden = false;
+            $('examplePreview').hidden = false;
+            $('exampleLink').hidden = false;
+            $('peekRows').innerHTML = requirementRows(keyRequirements(EXAMPLE_ANALYSIS).filter((r, i) => i === 0 || i === 3));
             document.body.classList.remove('example-compact');
             if (isFirstVisit()) showExamplePreview();
         }
     }
     function showInputs() { /* inputs are always visible in this layout */ }
 
+    // One check is one request with no progress to report, so the bar only shows that work is under way.
+    // Comparisons set a real "2 of 4" count and width themselves (see runBatch).
     function startLoading() {
-        const steps = [[15, 'Reading job description...'], [35, 'Extracting key requirements...'], [55, 'Comparing against your resume...'], [72, 'Checking clearance and fit signals...'], [86, 'Drafting interview prep...'], [94, 'Finishing up...']];
-        let i = 0;
         setResultState('loading');
-        $('loadingProgress').style.width = '5%';
-        $('loadingStep').textContent = steps[0][1];
-        $('resultCol').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        setLoadingProgress(null);
+        $('loadingStep').textContent = 'Checking your fit...';
+        revealResult();
         clearInterval(state.loadingTimer);
-        state.loadingTimer = setInterval(() => {
-            if (i < steps.length) { $('loadingProgress').style.width = steps[i][0] + '%'; $('loadingStep').textContent = steps[i][1]; i++; }
-        }, 1500);
+    }
+    function setLoadingProgress(percent) {
+        const bar = $('loadingProgress');
+        bar.parentElement.classList.toggle('indeterminate', percent === null);
+        bar.style.width = percent === null ? '' : percent + '%';
+        if (percent === null) bar.parentElement.removeAttribute('aria-valuenow'); else bar.parentElement.setAttribute('aria-valuenow', String(percent));
+    }
+
+    // Scrolling follows the visitor's motion setting, and only happens when the target is not already in view.
+    const scrollBehavior = () => (reducedMotion() ? 'auto' : 'smooth');
+    function revealResult() {
+        const r = $('resultCol').getBoundingClientRect();
+        if (r.top < 0 || r.top > window.innerHeight * 0.5) $('resultCol').scrollIntoView({ behavior: scrollBehavior(), block: 'start' });
     }
 
     function stopLoading() {
@@ -736,7 +748,7 @@
             setResultState(state.analysis ? 'ready' : 'empty');
             showInlineError(lastError.message);
             if (jdIsUrl) { state.linkHelp = 'failed'; renderLinkHelp(); }
-            $('analyzeBar').scrollIntoView({ behavior: 'smooth', block: 'center' });
+            $('analyzeBar').scrollIntoView({ behavior: scrollBehavior(), block: 'center' });
         }
     }
 
@@ -811,12 +823,12 @@
         $('analyzeBtn').disabled = true; $('compareVersionsBtn').disabled = true;
         setResultState('loading');
         clearInterval(state.loadingTimer);
-        $('resultCol').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        $('resultCol').scrollIntoView({ behavior: scrollBehavior(), block: 'start' });
         for (let i = 0; i < items.length; i++) {
             const item = items[i];
             $('btnText').textContent = `Checking ${i + 1} of ${items.length}...`;
             $('loadingStep').textContent = kind === 'jobs' ? `Checking job ${i + 1} of ${items.length} against your resume...` : `Checking "${item.resumeName}" (${i + 1} of ${items.length})...`;
-            $('loadingProgress').style.width = Math.round(8 + (i / items.length) * 88) + '%';
+            setLoadingProgress(Math.round(8 + (i / items.length) * 88));
             try {
                 const data = await batchCall(item);
                 if (stale()) return;
@@ -841,7 +853,7 @@
             state.batch = null;
             setResultState('empty');
             showInlineError(items[0].error || 'The comparison could not be run. Try again.');
-            return $('analyzeBar').scrollIntoView({ behavior: 'smooth', block: 'center' });
+            return $('analyzeBar').scrollIntoView({ behavior: scrollBehavior(), block: 'center' });
         }
         // Rank by fit; anything that failed goes last.
         state.batch.ranked = items.filter(it => it.analysis).sort((a, b) => (b.analysis.score || 0) - (a.analysis.score || 0)).concat(items.filter(it => !it.analysis));
@@ -914,7 +926,7 @@
         renderResults(it.analysis);
         if (state.trackedId != null) setSaveButton(true, 'In your tracker');
         if (!it.analysis.salary_intel && !it.intelAsked) { it.intelAsked = true; fetchMarketIntel(); }
-        $('resultCol').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        $('resultCol').scrollIntoView({ behavior: scrollBehavior(), block: 'start' });
     }
 
     function backToBatch() {
@@ -923,7 +935,7 @@
         resetGenerated();
         restoreBatchInputs();
         renderBatch();
-        $('resultCol').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        $('resultCol').scrollIntoView({ behavior: scrollBehavior(), block: 'start' });
     }
 
     // Saves every checked job with its analysis, through the same path as the Save button.
@@ -987,19 +999,6 @@
     // ======================================================================
     const scoreBand = (score) => score >= 75 ? 'high' : score >= 55 ? 'mid' : 'low';
 
-    function countUp(el, target) {
-        if (reducedMotion() || window.matchMedia('print').matches) { el.textContent = target; return; }
-        const start = performance.now(), dur = 900;
-        el.dataset.target = target;
-        const tick = (now) => {
-            if (el.dataset.target !== String(target)) return;      // a newer score took over
-            const t = Math.min(1, (now - start) / dur);
-            el.textContent = Math.round(target * (1 - Math.pow(1 - t, 3)));
-            if (t < 1) requestAnimationFrame(tick);
-        };
-        requestAnimationFrame(tick);
-    }
-
     function setSaveButton(saved, label) {
         const btn = $('saveToTrackerBtn');
         btn.disabled = saved;
@@ -1008,7 +1007,7 @@
     }
 
     function resetGenerated() {
-        state.tailored = null; state.tailorScore = null; state.tailorKeywords = null; state.tailorPairs = null; state.chat = [];
+        state.tailored = null; state.tailorScore = null; state.tailorKeywords = null; state.tailorPairs = null; state.tailorUnmatched = 0; state.chat = [];
         $('tailoredWrap').hidden = true;
         syncTailorUi();
         $('linkedinList').innerHTML = '';
@@ -1031,7 +1030,7 @@
 
         // Verdict: the number first, then the call, then why
         const score = Math.max(0, Math.min(100, Math.round(Number(data.score) || 0)));
-        countUp($('scoreNum'), score);
+        $('scoreNum').textContent = score;       // shown at once, with the call and the evidence beside it
         $('exampleTag').hidden = !state.isExample;
         $('exampleNote').hidden = !state.isExample;
         $('exampleLink').hidden = state.isExample;
@@ -1084,7 +1083,7 @@
         buildTemplates(data);
 
         ['strengthsList', 'gapsList', 'interviewQuestionsList', 'questionsToAskList'].forEach(id => $(id).classList.add('stagger'));
-        if (!state.isExample) $('resultCol').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        if (!state.isExample) revealResult();
     }
 
     // The decision the job seeker came for: is this role worth my time, and what do I do next?
@@ -1123,6 +1122,28 @@
         return `Hi [Name], I'm interested in the ${role} role. Before I apply, could you tell me which of the listed requirements are firm and which are flexible? Thank you.`;
     }
 
+    // The comparison at the heart of the result: what the posting asks for, next to what the resume shows.
+    const REQ_STATUS = { met: ['status-ok', 'Met'], partial: ['warn', 'Partly'], missing: ['bad', 'Not shown'], verify: ['warn', 'Verify'] };
+    function keyRequirements(data) {
+        const clean = (x) => (typeof x === 'string' ? x.trim() : '');
+        let rows = (Array.isArray(data.requirements) ? data.requirements : []).map(r => r && ({
+            requirement: clean(r.requirement), shows: clean(r.resume_shows),
+            type: /^pref/i.test(r.type) ? 'preferred' : /^req/i.test(r.type) ? 'required' : '',
+            status: REQ_STATUS[r.status] ? r.status : 'verify'
+        })).filter(r => r && r.requirement);
+        if (!rows.length) {
+            // Older answers have no requirement list: build one from the clearance check and the fit signals.
+            const c = data.clearance || {};
+            if (c.required && !/^none/i.test(c.required) && c.status !== 'not_required') rows.push({ requirement: c.required, shows: c.candidate || 'Not stated', type: 'required', status: { meets: 'met', gap: 'missing' }[c.status] || 'verify' });
+            (Array.isArray(data.fit_signals) ? data.fit_signals : []).forEach(f => {
+                if (!f || !f.signal || /clearance/i.test(f.signal)) return;
+                rows.push({ requirement: [f.signal, f.role_expects].filter(Boolean).join(': '), shows: clean(f.resume_shows) || 'Not shown', type: '', status: { strong: 'met', partial: 'partial', missing: 'missing' }[f.status] || 'verify' });
+            });
+        }
+        return rows.slice(0, 4);
+    }
+    const requirementRows = (rows) => rows.map(r => `<div class="req"><div class="req-main"><span class="req-what">${r.type ? `<span class="req-tag">${r.type === 'required' ? 'Required' : 'Preferred'}</span>` : ''}<b>${escapeHtml(r.requirement)}</b></span><span class="req-shows">Your resume: ${escapeHtml(r.shows || 'Not shown')}</span></div><span class="chip sm ${REQ_STATUS[r.status][0]}">${REQ_STATUS[r.status][1]}</span></div>`).join('');
+
     function renderRecommendation(data, score) {
         const r = deriveRecommendation(data, score);
         const meta = ACTIONS_META[r.action];
@@ -1135,8 +1156,9 @@
         // Evidence for the deciding requirement: clearance, when it is what stands in the way
         const c = data.clearance || {};
         const showEvidence = (c.status === 'gap' || c.status === 'meets') && !!c.required;
-        $('recEvidence').hidden = !showEvidence;
-        if (showEvidence) { $('evidenceRequired').textContent = c.required; $('evidenceCandidate').textContent = c.candidate || 'Not stated'; }
+        const reqs = keyRequirements(data);
+        $('recEvidence').hidden = !reqs.length;
+        $('recEvidence').innerHTML = reqs.length ? `<p class="req-head">The posting asks for</p>${requirementRows(reqs)}` : '';
 
         const reasons = (Array.isArray(r.reasons) ? r.reasons : []).filter(x => typeof x === 'string' && x.trim()).slice(0, 3);
         $('recReasons').innerHTML = reasons.map(x => `<li>${escapeHtml(x)}</li>`).join('');
@@ -1154,7 +1176,7 @@
         if (!state.analysis) return;
         switch (state.primaryAction) {
             case 'confirm_requirement': copyText(state.recruiterQuestion, 'Question copied. Paste it into a message to the recruiter.'); break;
-            case 'fix_first': case 'apply': if (state.tailored) downloadTailoredDocx(); else viewTailored(); break;
+            case 'fix_first': case 'apply': viewTailored(); break;
             default: showView('explore');
         }
         track('primary_action', { action: state.primaryAction });
@@ -1162,7 +1184,7 @@
 
     function goToEmail() {
         showPanel('outreach');
-        $('emailBtn').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        $('emailBtn').scrollIntoView({ behavior: scrollBehavior(), block: 'center' });
         if ($('emailWrap').hidden) writeIntroEmail($('emailBtn'));
     }
 
@@ -1331,17 +1353,26 @@
     const tailorChangesList = (r) => arr(r && r.changes).filter(x => !META_NOTE.test(x));
 
     // Pairs each rewritten bullet with the original line it came from, so the change can be shown side by side.
-    function tailoredPairs(originalText, tailored) {
+    // Finds, for each rewritten bullet, the original line it shares the most words with.
+    function sourceMatcher(originalText) {
         const words = (x) => new Set((String(x).toLowerCase().match(/[a-z0-9$%+.]+/g) || []).filter(w => w.length > 2));
-        const lines = String(originalText).split('\n').map(l => l.replace(/^[\s•\-*–·]+/, '').trim()).filter(l => l.length >= 25).map(l => ({ text: l, set: words(l) }));
-        const out = [];
+        const lines = String(originalText).split('\n').map(l => l.replace(/^[\s\u2022\-*\u2013\u00b7]+/, '').trim()).filter(l => l.length >= 20).map(l => ({ text: l, set: words(l) }));
+        return (bullet) => {
+            const set = words(bullet); let best = { sim: 0, before: '' };
+            lines.forEach(o => { let shared = 0; set.forEach(w => { if (o.set.has(w)) shared++; }); const sim = shared / ((set.size + o.set.size - shared) || 1); if (sim > best.sim) best = { sim, before: o.text }; });
+            return best;
+        };
+    }
+    const SAME_LINE = 0.9, SOURCE_FOUND = 0.3;
+
+    // The two most reworded bullets that clearly come from a line in the original, for the before-and-after card.
+    function tailoredPairs(originalText, tailored) {
+        const match = sourceMatcher(originalText), out = [];
         (Array.isArray(tailored.experience) ? tailored.experience : []).forEach(job => arr(job.bullets).forEach(bullet => {
-            const set = words(bullet); let best = null;
-            lines.forEach(o => { let shared = 0; set.forEach(w => { if (o.set.has(w)) shared++; }); const sim = shared / ((set.size + o.set.size - shared) || 1); if (!best || sim > best.sim) best = { sim, before: o.text }; });
-            // Clearly the same line (enough shared words), and clearly reworded (not a copy).
-            if (best && best.sim >= 0.4 && best.sim < 0.9) out.push({ before: best.before, after: bullet, sim: best.sim });
+            const m = match(bullet);
+            if (m.sim >= 0.4 && m.sim < SAME_LINE) out.push({ before: m.before, after: bullet, sim: m.sim });
         }));
-        return out.sort((a, b) => a.sim - b.sim).slice(0, 2);
+        return out.sort((x, y) => x.sim - y.sim).slice(0, 2);
     }
 
     const pairHtml = (p) => `<div class="rewrite"><div class="before"><span class="tag">Before</span>${escapeHtml(p.before)}</div><div class="after"><span class="tag">After</span><span>${escapeHtml(p.after)}</span></div></div>`;
@@ -1352,7 +1383,7 @@
         const a = state.analysis, built = !!state.tailored, t = state.tailorScore, k = state.tailorKeywords;
         const act = state.primaryAction, tailorLeads = act === 'apply' || act === 'fix_first';
         const meta = ACTIONS_META[act] || ACTIONS_META.fix_first;
-        const cta = !tailorLeads ? meta.cta : state.tailoring ? ['spark', 'Writing your resume...'] : built ? ['download', 'Download tailored resume'] : ['spark', 'Tailor my resume to this job'];
+        const cta = !tailorLeads ? meta.cta : state.tailoring ? ['spark', 'Writing your resume...'] : built ? ['doc', 'Review tailored resume'] : ['spark', 'Tailor my resume to this job'];
         $('primaryActionText').textContent = cta[1];
         $('primaryActionBtn').querySelector('use').setAttribute('href', '#i-' + cta[0]);
         $('primaryActionBtn').disabled = tailorLeads && !!state.tailoring;
@@ -1371,6 +1402,7 @@
             if (k.now > k.was) shift = `${k.was} → ${k.now} keywords`;
             if (k.added.length) caution = `New in this version: ${k.added.join(', ')}. Make sure each is true for you before you send it.`;
         }
+        if (built && state.tailorUnmatched) caution = `${state.tailorUnmatched} ${state.tailorUnmatched === 1 ? 'line has' : 'lines have'} no close match in your original resume and ${state.tailorUnmatched === 1 ? 'is' : 'are'} marked below. ` + caution;
         if (t && t.pending) lines.push('Checking the fit score...');
         else if (t) {
             const d = t.after - t.before;
@@ -1396,15 +1428,26 @@
             $('tailorViewBtn').hidden = !built;
         }
         const line = $('tailorScoreLine');
-        line.hidden = !built || !lines.length;
+        line.hidden = !built || !(lines.length || caution);
         line.className = 'banner ' + (shift ? 'success' : 'info');
-        line.innerHTML = lines.length ? `${shift ? `<span class="score-shift">${escapeHtml(shift)}</span>` : icon('info')}<span class="grow">${lines.map(escapeHtml).join('<br>')}${caution ? `<br><strong>${escapeHtml(caution)}</strong>` : ''}</span>` : '';
+        line.innerHTML = (lines.length || caution) ? `${shift ? `<span class="score-shift">${escapeHtml(shift)}</span>` : icon('info')}<span class="grow">${lines.map(escapeHtml).join('<br>')}${caution ? `<br><strong>${escapeHtml(caution)}</strong>` : ''}</span>` : '';
+    }
+
+    // On opening the review, briefly mark the first rewritten bullet and the line it came from,
+    // so it is obvious what the "Was:" notes are. A line with no source keeps its own red label.
+    function spotlightFirstChange() {
+        const li = [...document.querySelectorAll('#tailoredPreview li')].find(x => x.querySelector('.src:not(.same)'));
+        if (!li || !$('sourceToggle').checked) return;
+        li.classList.remove('spotlight'); void li.offsetWidth;      // restart if it is already running
+        li.classList.add('spotlight');
+        setTimeout(() => li.classList.remove('spotlight'), 2600);
     }
 
     function viewTailored() {
         showPanel('resume');
-        $('tailorBlock').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        $('tailorBlock').scrollIntoView({ behavior: scrollBehavior(), block: 'start' });
         if (!state.tailored) buildTailoredResume($('tailorBtn'));
+        else spotlightFirstChange();
         track('tailored_resume_opened');
     }
 
@@ -1417,21 +1460,30 @@
     const arr = (v) => Array.isArray(v) ? v.filter(x => typeof x === 'string' && x.trim()) : [];
 
     function renderTailored(r, quiet) {
+        const match = sourceMatcher(state.resumeText || ''); let unmatched = 0;
         const section = (title, html) => html ? `<h4>${title}</h4>${html}` : '';
         const lines = (list) => arr(list).map(x => `<p>${escapeHtml(x)}</p>`).join('');
-        const jobs = (Array.isArray(r.experience) ? r.experience : []).map(j => `<div class="job"><b>${escapeHtml(j.title || '')}</b>${j.company ? ', ' + escapeHtml(j.company) : ''}${j.location ? ' &middot; ' + escapeHtml(j.location) : ''}${j.dates ? ' &middot; ' + escapeHtml(j.dates) : ''}<ul>${arr(j.bullets).map(b => `<li>${escapeHtml(b)}</li>`).join('')}</ul></div>`).join('');
+        const jobs = (Array.isArray(r.experience) ? r.experience : []).map(j => `<div class="job"><b>${escapeHtml(j.title || '')}</b>${j.company ? ', ' + escapeHtml(j.company) : ''}${j.location ? ' &middot; ' + escapeHtml(j.location) : ''}${j.dates ? ' &middot; ' + escapeHtml(j.dates) : ''}<ul>${arr(j.bullets).map(b => {
+            const m = match(b);
+            const src = m.sim >= SAME_LINE ? '<span class="src same">Unchanged from your resume</span>'
+                : m.sim >= SOURCE_FOUND ? `<span class="src">Was: ${escapeHtml(m.before)}</span>`
+                : '<span class="src flag">No close match in your original resume. Check this line is true before you send it.</span>';
+            if (m.sim < SOURCE_FOUND) unmatched++;
+            return `<li>${escapeHtml(b)}${src}</li>`; }).join('')}</ul></div>`).join('');
         $('tailoredPreview').innerHTML = `<h3>${escapeHtml(r.name || '')}</h3>
             ${r.headline ? `<p><b>${escapeHtml(r.headline)}</b></p>` : ''}${r.contact ? `<p class="muted">${escapeHtml(r.contact)}</p>` : ''}
             ${r.clearance ? `<p><b>Clearance:</b> ${escapeHtml(r.clearance)}</p>` : ''}
             ${section('Summary', r.summary ? `<p>${escapeHtml(r.summary)}</p>` : '')}
             ${section('Core skills', arr(r.skills).length ? `<p>${arr(r.skills).map(escapeHtml).join(' &middot; ')}</p>` : '')}
             ${section('Experience', jobs)}${section('Education', lines(r.education))}${section('Certifications', lines(r.certifications))}${section('Additional', lines(r.additional))}`;
+        state.tailorUnmatched = unmatched;
+        $('sourceToggle').checked = true; $('tailoredPreview').classList.add('show-sources');
         const changes = tailorChangesList(r);
         $('tailorChanges').hidden = !changes.length;
         $('tailorChanges').innerHTML = `${icon('info')}<span class="grow"><strong>What changed</strong><br>${changes.map(escapeHtml).join('<br>')}</span>`;
         $('tailoredWrap').hidden = false;
         syncTailorUi();
-        if (!quiet) $('tailoredWrap').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        if (!quiet) { $('tailoredWrap').scrollIntoView({ behavior: scrollBehavior(), block: 'nearest' }); spotlightFirstChange(); }
     }
 
     function tailoredToText(r) {
@@ -1599,7 +1651,7 @@
                 .split(/\n\n+/).filter(p => p.trim()).map(p => `<p>${p.replace(/\n/g, '<br>')}</p>`).join('');
         } else el.textContent = text;
         $('chat').appendChild(el);
-        el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        el.scrollIntoView({ behavior: scrollBehavior(), block: 'nearest' });
         return el;
     }
 
@@ -1804,9 +1856,9 @@
     }
 
     function onCompareClick() {
-        if (!state.compareMode) { state.compareMode = true; renderTracker(); $('savedBlock').scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
+        if (!state.compareMode) { state.compareMode = true; renderTracker(); $('savedBlock').scrollIntoView({ behavior: scrollBehavior(), block: 'start' }); return; }
         renderCompare();
-        $('compareSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        $('compareSection').scrollIntoView({ behavior: scrollBehavior(), block: 'start' });
     }
 
     function cancelCompare() {
@@ -2050,8 +2102,23 @@
     function renderStaticSearches() {
         $('readySearches').innerHTML = READY_SEARCHES.map(([title, blurb, query]) => { const c = { title: query, location: '', clearance: '' };
             return `<div class="tool-card"><span class="title-md">${title}</span><span class="body-sm">${blurb}</span><div class="chips">${outLink(linkedInUrl(c), 'LinkedIn, past week', 'chip sm')}${boardLinks(c, 'chip sm')}</div></div>`; }).join('');
-        $('companyBoards').innerHTML = COMPANY_BOARDS.map(([group, companies]) => `<p class="label-lg muted" style="margin:20px 0 8px">${group}</p><div class="chips">${
-            companies.map(([name, slug]) => outLink(`https://www.linkedin.com/company/${slug}/jobs/`, name)).join('')}</div>`).join('');
+        $('companyBoards').innerHTML = COMPANY_BOARDS.map(([group, companies]) => `<div class="board-group"><p class="label-lg muted" style="margin:20px 0 8px">${group}</p><div class="chips">${
+            companies.map(([name, slug]) => outLink(`https://www.linkedin.com/company/${slug}/jobs/`, name)).join('')}</div></div>`).join('');
+        const total = COMPANY_BOARDS.reduce((n, g) => n + g[1].length, 0);
+        $('browseEmployersLink').textContent = `Browse ${total} defense employers`;
+    }
+
+    // Typing a name narrows the employer list; groups with no match drop out.
+    function filterEmployers() {
+        const q = $('employerFilter').value.trim().toLowerCase();
+        let shown = 0;
+        document.querySelectorAll('#companyBoards .board-group').forEach(group => {
+            let any = false;
+            group.querySelectorAll('a').forEach(a => { const hit = !q || a.textContent.toLowerCase().includes(q) || group.querySelector('p').textContent.toLowerCase().includes(q); a.hidden = !hit; if (hit) { any = true; shown++; } });
+            group.hidden = !any;
+        });
+        $('employerNone').hidden = shown > 0;
+        $('employerCount').textContent = q ? `${shown} ${shown === 1 ? 'employer' : 'employers'}` : '';
     }
 
     // Enter or the blue button: LinkedIn, straight from the user's action so it opens as a normal new tab.
@@ -2221,6 +2288,7 @@
         $('searchClearance').addEventListener('change', updateSearchUi);
         $('view-explore').addEventListener('click', (e) => { const chip = e.target.closest('[data-fill-title]'); if (chip) fillTitle(chip.dataset.fillTitle); });
         $('saveForm').addEventListener('submit', savePostingForLater);
+        $('employerFilter').addEventListener('input', filterEmployers);
         $('handoffInput').addEventListener('input', () => handoffError(''));
     }
 
@@ -2316,7 +2384,7 @@ Amazon is an Equal Opportunity Employer.`;
         $('jobDescription').value = SAMPLE_JD;
         state.fileFlags = null; state.fileName = ''; state.resumeSource = 'example'; state.exampleResume = $('resumeText').value.trim(); state.exampleJd = $('jobDescription').value.trim();
         setFileStatus('info', silent
-            ? '<span class="grow"><strong>This is the example.</strong> Choose New job, then add your own posting and resume to run a real check.</span>'
+            ? '<span class="grow"><strong>This is the example.</strong> Choose More, then Start a new job, and add your own posting and resume.</span>'
             : '<span class="grow">Sample resume and job loaded. Your own saved resume is untouched and comes back when you reload.</span>');
         updateCounts();          // the sample is intentionally not remembered
         $('resumeSavedNote').textContent = '';
@@ -2357,12 +2425,19 @@ Amazon is an Equal Opportunity Employer.`;
             { term: 'IDIQ', in_resume: true, importance: 'important' }, { term: 'GWAC', in_resume: true, importance: 'important' },
             { term: 'ATO', in_resume: true, importance: 'important' }, { term: 'MEDDIC', in_resume: true, importance: 'important' },
             { term: 'FedRAMP', in_resume: false, importance: 'important' }, { term: 'IL5', in_resume: false, importance: 'important' },
-            { term: 'Cloud infrastructure', in_resume: false, importance: 'important' }, { term: 'Territory plan', in_resume: false, importance: 'nice-to-have' }
+            { term: 'Cloud infrastructure', in_resume: false, importance: 'important' }, { term: 'Cloud migration', in_resume: false, importance: 'important' }
         ],
         clearance: { required: 'Active TS/SCI', candidate: 'Active TS/SCI', status: 'meets', note: 'The posting lists it as a basic qualification.' },
+        requirements: [
+            { requirement: 'Active TS/SCI clearance', type: 'required', resume_shows: 'Active TS/SCI', status: 'met' },
+            { requirement: '7+ years selling to the DoD', type: 'required', resume_shows: '15+ years across DoD and the Intelligence Community', status: 'met' },
+            { requirement: '$50M+ annual quota', type: 'required', resume_shows: '$180M territory at 145% of quota', status: 'met' },
+            { requirement: 'Cloud infrastructure sales', type: 'preferred', resume_shows: 'Cybersecurity and software; moved 8 accounts to cloud', status: 'partial' },
+            { requirement: 'MBA', type: 'preferred', resume_shows: 'B.S. Business Administration', status: 'missing' }
+        ],
         bullet_rewrites: [
             { original: 'Lead DoD sales territory generating $180M+ annual revenue', improved: 'Own a $180M+ DoD territory across DISA, Army, Navy and Air Force, finishing FY23 at 145% of quota', why: 'Puts quota attainment, the first thing this role screens on, in the opening bullet.' },
-            { original: 'Transitioned 8 accounts from on-premise to cloud solutions', improved: 'Moved 8 Army and Intelligence Community accounts from on-premise to cloud solutions', why: 'Names the customers and brings your cloud experience forward.' }
+            { original: 'Transitioned 8 accounts from on-premise to cloud solutions', improved: 'Led cloud migration for 8 Army and Intelligence Community accounts, moving them from on-premise to cloud solutions', why: 'Uses the posting\'s own term for work you already did, and names the customers.' }
         ],
         fit_signals: [
             { signal: 'Annual quota', role_expects: '$50M+', resume_shows: '$180M territory at 145%', status: 'strong' },
@@ -2392,7 +2467,7 @@ Amazon is an Equal Opportunity Employer.`;
         headline: 'Principal DoD Sales Executive | Enterprise Software, Cybersecurity and Cloud Adoption',
         contact: 'Arlington, VA | johndoe@email.com | (703) 555-1234',
         clearance: 'Active TS/SCI',
-        summary: 'Senior federal sales executive with 15+ years selling to the Department of Defense and Intelligence Community. Carries a $180M+ DoD territory at 145% of quota across DISA, Army, Navy and Air Force. Moved 8 Army and Intelligence Community accounts from on-premise to cloud solutions and works with solutions architects through ATO. Builds partner ecosystems with defense primes and systems integrators.',
+        summary: 'Senior federal sales executive with 15+ years selling to the Department of Defense and Intelligence Community. Carries a $180M+ DoD territory at 145% of quota across DISA, Army, Navy and Air Force. Led cloud migration for 8 Army and Intelligence Community accounts and works with solutions architects through ATO. Builds partner ecosystems with defense primes and systems integrators.',
         skills: ['DoD and Intelligence Community sales', 'Quota attainment', 'Cloud adoption and ATO support', 'IDIQ/GWAC', 'FAR/DFARS', 'Partner ecosystems', 'Strategic account planning', 'MEDDIC', 'Contract negotiations', 'Salesforce'],
         experience: [
             { title: 'Account Manager', company: 'Major Cybersecurity Provider', location: '', dates: '2019-Present', bullets: [
@@ -2406,7 +2481,7 @@ Amazon is an Equal Opportunity Employer.`;
                 'Exceeded quota four years running: 112%, 128%, 135%, 141%',
                 'Built strategic account plans for the top 15 DoD accounts and ran joint pursuits with Lockheed Martin, Northrop Grumman and GDIT' ] },
             { title: 'Federal Account Manager', company: 'Defense Contractor', location: '', dates: '2010-2015', bullets: [
-                'Moved 8 Army and Intelligence Community accounts from on-premise to cloud solutions',
+                'Led cloud migration for 8 Army and Intelligence Community accounts, moving them from on-premise to cloud solutions',
                 'Managed a $35M book of business across Army and Intelligence Community accounts',
                 'Sales lead on a $200M program capture, working with contracting officers and program managers' ] },
             { title: 'Sales Representative', company: 'Technology Reseller', location: '', dates: '2007-2010', bullets: [
@@ -2416,14 +2491,14 @@ Amazon is an Equal Opportunity Employer.`;
         certifications: ['AWS AI Practitioner', 'MEDDIC Sales Methodology Certified', 'Salesforce Certified Administrator'],
         additional: [],
         changes: [
-            'Brought the cloud work forward: the 8 accounts moved to cloud and the ATO support now appear in the summary, and the AWS certification is listed first.',
+            'Brought the cloud work forward and called it what the posting calls it, cloud migration. It is the same 8 accounts from your 2010-2015 role.',
             'Opened the current role with the quota numbers this posting screens on.',
             'Reworded skills to match the posting\'s terms. Nothing was added that is not in the original.'
         ]
     };
 
     // First visit: show the example answer straight away, with the job and resume boxes left empty and ready.
-    const isFirstVisit = () => !$('resumeText').value.trim() && !$('jobDescription').value.trim() && !state.tracked.length && !Object.keys(getSavedResumes()).length;
+    const isFirstVisit = () => !state.exampleDismissed && !$('resumeText').value.trim() && !$('jobDescription').value.trim() && !state.tracked.length && !Object.keys(getSavedResumes()).length;
     function showExamplePreview() {
         state.analysis = EXAMPLE_ANALYSIS;
         state.isExample = true; state.previewOnly = true;
@@ -2435,31 +2510,40 @@ Amazon is an Equal Opportunity Employer.`;
     // The example arrives with its tailored resume already written, so the before and after are visible at once.
     function showExampleTailored() {
         state.tailored = EXAMPLE_TAILORED;
-        state.tailorScore = { before: EXAMPLE_ANALYSIS.score, after: 89 };
+        state.tailorScore = null;               // the example makes no fit-score claim: only what can be counted
+        state.tailorPairs = null;
         state.tailorKeywords = keywordShift(EXAMPLE_ANALYSIS, SAMPLE_RESUME, tailoredToText(EXAMPLE_TAILORED));
         renderTailored(EXAMPLE_TAILORED, true);
     }
     function expandExample() {
         state.previewOnly = false;
         document.body.classList.remove('example-compact');
-        $('verdict').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        $('verdict').scrollIntoView({ behavior: scrollBehavior(), block: 'start' });
         track('example_viewed');
     }
 
+    // "See a sample result": shows the example answer only. The job and resume boxes are never touched.
     function showExample() {
         resetAnalyzeUi();
         state.trackedId = null; state.postingUrl = ''; state.linkHelp = null; state.linkedText = ''; renderLinkHelp();
-        loadSampleData(true);
-        state.analysis = EXAMPLE_ANALYSIS;
-        state.isExample = true; state.previewOnly = false;
-        state.resumeText = $('resumeText').value.trim();
-        state.jd = $('jobDescription').value.trim();
-        setResumeMode(false);
-        resetGenerated();
-        renderResults(EXAMPLE_ANALYSIS);
-        showExampleTailored();
-        $('resultCol').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        showInlineError('');
+        showExamplePreview();
+        state.previewOnly = false;
+        document.body.classList.remove('example-compact');
+        $('resultCol').scrollIntoView({ behavior: scrollBehavior(), block: 'start' });
         track('example_viewed');
+    }
+
+    // "Check my own job": put the example away and hand the form back.
+    function exitExample() {
+        resetAnalyzeUi();
+        state.exampleDismissed = true;           // do not bring it back on its own during this visit
+        state.analysis = null; state.isExample = false; state.previewOnly = false; state.jd = '';
+        state.resumeText = $('resumeText').value.trim().substring(0, MAX_RESUME_CHARS);
+        resetGenerated();
+        setResultState('empty');
+        $('inputs').scrollIntoView({ behavior: scrollBehavior(), block: 'start' });
+        $('jobDescription').focus({ preventScroll: true });
     }
 
     // The example resume is never carried into a real job.
@@ -2523,6 +2607,7 @@ Amazon is an Equal Opportunity Employer.`;
         'backup': () => backupData(),
         'restore': () => $('restoreFile').click(),
         'example-expand': () => expandExample(),
+        'exit-example': () => exitExample(),
         'suggest-terms': () => suggestSearchTerms(),
         'add-resume': () => { showView('analyze'); setResumeMode(true); $('resumeDrop').focus(); },
         'handoff-check': () => handoffCheck(),
@@ -2542,6 +2627,7 @@ Amazon is an Equal Opportunity Employer.`;
         initFileDrop();
         initTrackerEvents();
         initFindJobs();
+        $('sourceToggle').addEventListener('change', (e) => $('tailoredPreview').classList.toggle('show-sources', e.target.checked));
         EXTRA_JOB_IDS.forEach(id => $(id).addEventListener('input', updateBatchUi));
         $('resultCol').addEventListener('click', (e) => { const row = e.target.closest('[data-batch-open]'); if (row) openBatchItem(Number(row.dataset.batchOpen)); });
         updateCounts();

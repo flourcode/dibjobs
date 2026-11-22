@@ -32,7 +32,7 @@
     <link rel="apple-touch-icon" href="apple-touch-icon.png">
     <link rel="manifest" href="site.webmanifest">
     <link rel="preload" href="assets/fonts/inter-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="stylesheet" href="assets/app.css?v=24">
+    <link rel="stylesheet" href="assets/app.css?v=26">
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-N10ZLNFZHE"></script>
     <script>
@@ -115,7 +115,7 @@
         <div class="page-intro">
             <p class="eyebrow">Job fit check &middot; for defense industry sales, BD and capture</p>
             <h1 class="h1">Is this job a good fit?</h1>
-            <p class="lede">Add your resume and the job posting. You get a straight answer, the gaps that matter, what it should pay, and your resume rewritten for that job. Your resume file never leaves your browser.</p>
+            <p class="lede">Add your resume and the job posting. You get a straight answer, what the posting asks for next to what your resume shows, what it should pay, and your resume rewritten for that job.</p>
         </div>
 
         <div class="calc">
@@ -136,16 +136,12 @@
                     <div class="verdict" data-tone="neutral" id="emptyPlain">
                         <p class="eyebrow">Your answer shows up here</p>
                         <p class="verdict-label" style="margin-top:8px">Add the job and your resume, then run the check.</p>
-                        <p class="verdict-explain">You get a call on whether it's worth your time, the reason, and what to do next.</p>
                     </div>
-                    <div class="verdict preview" data-tone="caution" id="examplePreview" hidden>
-                        <p class="eyebrow"><span class="example-tag">Example</span>What you get back</p>
-                        <div class="verdict-head">
-                            <div class="verdict-num"><b id="previewScore"></b><span>resume fit<br>out of 100</span></div>
-                            <p class="verdict-label" id="previewLabel"></p>
-                        </div>
-                        <p class="verdict-explain" id="previewHeadline"></p>
-                        <div class="row" style="margin-top:16px"><button class="btn ink" data-action="example">See the full example</button></div>
+                    <div class="sample-peek" id="examplePreview" hidden>
+                        <p class="eyebrow">What you get back &middot; from the sample</p>
+                        <div class="req-list on-panel" id="peekRows"></div>
+                        <p class="body-sm muted">Each requirement in the posting, next to what your resume shows for it. Plus a call on whether to apply, the pay, and a tailored resume.</p>
+                        <button class="btn" type="button" data-action="example">See a sample result</button>
                     </div>
                 </div>
 
@@ -165,7 +161,7 @@
                 </div>
                 <div id="verdictWrap" class="stack" hidden>
                     <button class="btn text back-link" type="button" id="backToBatch" data-action="back-to-batch" hidden><svg class="icon flip"><use href="#i-next"/></svg>Back to the comparison</button>
-                    <p class="example-note" id="exampleNote" hidden><strong>This is an example</strong> from a made-up resume and posting. Add your own job and resume to get your answer.</p>
+                    <div class="example-note" id="exampleNote" hidden><span class="grow"><strong>This is an example</strong> from a made-up resume and posting.</span><button class="btn ink" type="button" data-action="exit-example">Check my own job</button></div>
                     <div class="verdict" id="verdict" data-tone="neutral">
                         <p class="eyebrow"><span class="example-tag" id="exampleTag" hidden>Example</span><span id="roleLine"></span></p>
                         <div class="verdict-head">
@@ -173,10 +169,7 @@
                             <p class="verdict-label" id="recAction" aria-live="polite"></p>
                         </div>
                         <p class="verdict-explain" id="recHeadline"></p>
-                        <div class="evidence" id="recEvidence" hidden>
-                            <div><span>The posting asks for</span><b id="evidenceRequired"></b></div>
-                            <div><span>Your resume shows</span><b id="evidenceCandidate"></b></div>
-                        </div>
+                        <div class="req-list" id="recEvidence" hidden></div>
                         <ul class="rec-reasons" id="recReasons"></ul>
                         <div class="ask-box" id="recQuestionBox" hidden>
                             <p class="eyebrow">Question to send the recruiter</p>
@@ -226,7 +219,7 @@
                 <h2 class="h3">1. The job</h2>
                 <label class="field" id="jobField">
                     <span class="field-label">Job link or description</span>
-                    <textarea id="jobDescription" rows="4" placeholder="Paste a link to the posting or the job description. You can also drop a PDF or Word file here."></textarea>
+                    <textarea id="jobDescription" rows="3" placeholder="Paste a link to the posting or the job description. You can also drop a PDF or Word file here."></textarea>
                     <span class="supporting"><span id="jobCount"></span><span>Ctrl / &#8984; + Enter to run</span></span>
                 </label>
                 <div class="banner info" id="jobLinkHelp" hidden>
@@ -284,6 +277,7 @@
                         </div>
                     </details>
                 </div>
+                <p class="body-sm muted" id="resumePrivacy">We read the file in your browser and send the extracted text for AI analysis when you run a check.</p>
                 <button class="btn text" type="button" id="compareVersionsBtn" data-action="compare-versions" hidden><svg class="icon"><use href="#i-compare"/></svg><span id="compareVersionsText">Compare my resume versions for this job</span></button>
                 <details class="disclosure" id="resumeCheck" hidden>
                     <summary><svg class="icon"><use href="#i-check"/></svg><span id="resumeCheckSummary">Resume check</span><svg class="icon chev"><use href="#i-chevron"/></svg></summary>
@@ -313,9 +307,10 @@
 
             <div class="analyze-bar" id="analyzeBar">
                 <p class="field-error" id="inlineError" role="alert" hidden></p>
-                <button id="analyzeBtn" class="btn primary lg" data-action="analyze"><span id="btnText">Check this job</span><svg class="icon"><use href="#i-next"/></svg></button>
-                <p class="body-sm muted">We read your resume file in your browser. When you run a check, we send the extracted text for AI analysis.</p>
-                <button class="btn text" data-action="example" id="exampleLink">See an example</button>
+                <div class="analyze-row">
+                    <button id="analyzeBtn" class="btn primary lg" data-action="analyze"><span id="btnText">Check this job</span><svg class="icon"><use href="#i-next"/></svg></button>
+                    <button class="btn lg" type="button" data-action="example" id="exampleLink">See a sample result</button>
+                </div>
             </div>
             </section>
         </div>
@@ -405,13 +400,14 @@
                         </div>
                         <div id="tailoredWrap" class="stack" style="margin-top:16px" hidden>
                             <div class="row">
-                                <button class="btn" data-action="download-docx"><svg class="icon"><use href="#i-download"/></svg>Download Word (.docx)</button>
+                                <button class="btn primary" data-action="download-docx"><svg class="icon"><use href="#i-download"/></svg>Download Word (.docx)</button>
                                 <button class="btn" data-action="copy-tailored"><svg class="icon"><use href="#i-copy"/></svg>Copy as text</button>
                                 <button class="btn text" id="useTailoredBtn" data-action="use-tailored">Use as my resume and re-score</button>
                             </div>
                             <div class="banner info" id="tailorScoreLine" hidden></div>
                             <div class="banner info" id="tailorChanges"></div>
-                            <div class="paper resume-preview" id="tailoredPreview"></div>
+                            <label class="switch-row compact"><input type="checkbox" id="sourceToggle" checked><span class="switch" aria-hidden="true"></span><span><span class="label-lg">Show where each line came from</span><span class="body-sm">Under every bullet, the line in your resume it was written from. These notes are not in the download.</span></span></label>
+                            <div class="paper resume-preview show-sources" id="tailoredPreview"></div>
                             <p class="body-sm muted">Read every line before you send it. The AI is told not to add anything, but you are the one signing it.</p>
                         </div>
                     </div>
@@ -606,6 +602,7 @@
             <p class="eyebrow">Job search &middot; for defense industry sales, BD and capture</p>
             <h1 class="h1">Find defense and federal jobs</h1>
             <p class="lede">Search LinkedIn, the clearance boards or Google for openings, then bring a posting back to check your fit.</p>
+            <p class="body-md" style="margin-top:8px"><a href="#employers" id="browseEmployersLink" class="jump-link">Browse defense employers</a></p>
         </div>
 
         <form class="panel stack" id="searchForm" novalidate>
@@ -682,8 +679,11 @@
         </div>
 
         <div class="plain">
-            <h2 class="h3">Company job boards</h2>
-            <p class="body-md muted" style="margin-top:4px">Each one opens that company's jobs page on LinkedIn.</p>
+            <h2 class="h3" id="employers">Browse defense employers</h2>
+            <p class="body-md muted" style="margin-top:4px">Each name opens that company's open jobs on LinkedIn, in a new tab.</p>
+            <label class="field sm" style="margin-top:12px; max-width:360px"><span class="field-label">Filter by company or type</span>
+                <input type="search" id="employerFilter" autocomplete="off" placeholder="e.g. Leidos, cloud, reseller"><span class="supporting"><span id="employerCount" aria-live="polite"></span></span></label>
+            <p class="body-md muted" id="employerNone" hidden>No employer matches that. Try a shorter name, or use the search above.</p>
             <div id="companyBoards"></div>
         </div>
     </section>
@@ -718,7 +718,7 @@
     <button class="icon-btn" data-action="dismiss-snackbar" aria-label="Dismiss"><svg class="icon"><use href="#i-close"/></svg></button>
 </div>
 
-<script src="assets/files.js?v=24"></script>
-<script src="assets/app.js?v=24"></script>
+<script src="assets/files.js?v=26"></script>
+<script src="assets/app.js?v=26"></script>
 </body>
 </html>

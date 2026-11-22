@@ -291,7 +291,7 @@
         if (!results.length) showInlineError('None of the candidates could be screened. Try again in a minute.');
         else {
             snackbar(`Ranked ${results.length} candidate${results.length > 1 ? 's' : ''}${failed ? `; ${failed} could not be screened` : ''}.`);
-            $('resultsCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            $('resultsCard').scrollIntoView({ behavior: (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) ? 'auto' : 'smooth', block: 'start' });
         }
         if (results.length) { try { localStorage.setItem(USED_KEY, '1'); } catch (e) { /* not essential */ } }
         track('recruiter_ranking_complete', { count: results.length });
@@ -314,10 +314,14 @@
     }
 
     function topConcern(result) {
-        const dealbreaker = (result.recruiter_summary || {}).dealbreaker;
-        if (dealbreaker) return { text: dealbreaker, dealbreaker: true };
-        const gap = keyPart(lines(result, 'gap')[0]) || ((result.gap_strategies || []).find(g => g && g.gap) || {}).gap || '';
-        return { text: gap, dealbreaker: false };
+        const summary = result.recruiter_summary || {};
+        if (summary.dealbreaker) return { text: summary.dealbreaker, dealbreaker: true };
+        if (summary.concern) return { text: summary.concern, dealbreaker: false };
+        // No concern written out: say what is missing, not just which requirement it was.
+        const first = (Array.isArray(result.analysis) ? result.analysis : []).find(x => /^\s*gap\b/i.test(x)) || '';
+        const [req, found] = first.replace(/^\s*gap\s*:\s*/i, '').split(/\s*(?:\u2192|->)\s*/);
+        const fallback = ((result.gap_strategies || []).find(g => g && g.gap) || {}).gap || '';
+        return { text: found ? `${found} (job asks for: ${req})` : (req || fallback), dealbreaker: false };
     }
 
     function applySort() {
@@ -428,7 +432,7 @@ What we need
         { name: 'Maya Okafor',
           resume: 'MAYA OKAFOR (fictional example)\nSenior Federal Account Executive, cloud software. Nine years selling to Army and Air Force program offices. 118% average quota attainment on a $4.5M number. Closed a $6.2M Army data platform deal through SEWP with a reseller partner. Active TS/SCI clearance.',
           result: { score: 88, verdict: 'Strong fit',
-            recruiter_summary: { risk_level: 'green', top_strength: 'Nine years selling cloud to the Army and Air Force, above quota', dealbreaker: '' },
+            recruiter_summary: { risk_level: 'green', top_strength: 'Nine years selling cloud to the Army and Air Force, above quota', concern: 'No OTA deals shown; the role sells through OTAs', dealbreaker: '' },
             analysis: ['Match: 7+ years selling to the DoD → nine years, Army and Air Force accounts', 'Match: Quota record with $1M+ deals → 118% average on $4.5M, including a $6.2M Army deal', 'Match: Active Secret, TS/SCI preferred → holds an active TS/SCI', 'Match: Contract vehicles and resellers → closed through SEWP with a reseller', 'Gap: OTA experience → not mentioned'],
             tailored_summary: 'Maya has sold cloud software to the Army and Air Force for nine years and has averaged 118% of a $4.5M quota. Her largest deal, $6.2M, ran through SEWP with a reseller, which is how this role sells. She holds an active TS/SCI. The one thing to ask about is OTAs, which her resume does not mention.',
             gap_strategies: [{ gap: 'No OTA deals shown', strategy: 'Ask whether she has supported an OTA or worked beside a team that did.', talking_points: 'Her SEWP and reseller experience covers most of how this role transacts.' }],
@@ -437,7 +441,7 @@ What we need
         { name: 'Daniel Reyes',
           resume: 'DANIEL REYES (fictional example)\nRegional Sales Manager, federal cybersecurity. Eleven years selling to DoD and the intelligence community. Closed $9M in 2025 against a $7M quota. Works through Carahsoft and SEWP. Secret clearance, inactive since 2023 after moving to a role that did not require it.',
           result: { score: 79, verdict: 'Strong seller, clearance to confirm',
-            recruiter_summary: { risk_level: 'yellow', top_strength: 'Eleven years of DoD selling, $9M closed last year', dealbreaker: '' },
+            recruiter_summary: { risk_level: 'yellow', top_strength: 'Eleven years of DoD selling, $9M closed last year', concern: 'Secret clearance inactive since 2023; the role needs an active one. Verify it can be reinstated.', dealbreaker: '' },
             analysis: ['Match: 7+ years selling to the DoD → eleven years across DoD and the IC', 'Match: Quota record with $1M+ deals → $9M closed against a $7M quota in 2025', 'Match: Contract vehicles and resellers → sells through Carahsoft and SEWP', 'Gap: Active Secret clearance → Secret has been inactive since 2023', 'Gap: Cloud data platform experience → background is cybersecurity, not data'],
             tailored_summary: 'Daniel has the strongest sales numbers of the four: $9M closed against $7M last year, across eleven years of DoD and IC selling. Two things hold him at review. His Secret clearance has been inactive since 2023, and the role asks for an active one. His products have been cybersecurity, not data platforms. If the clearance can be reinstated quickly, he belongs on the shortlist.',
             gap_strategies: [{ gap: 'Secret clearance inactive since 2023', strategy: 'Confirm with your security officer whether it can be reinstated without a new investigation.', talking_points: 'Ask the hiring manager whether an interim period without access is workable.' }, { gap: 'No data platform sales', strategy: 'Probe how fast he learned his last product line.', talking_points: 'His buyers and vehicles are the same ones this role uses.' }],
@@ -446,7 +450,7 @@ What we need
         { name: 'Priya Shah',
           resume: 'PRIYA SHAH (fictional example)\nEnterprise Account Executive, commercial SaaS data analytics. Six years selling to Fortune 500 financial services and healthcare. 135% of a $3M quota in 2025, largest deal $2.4M. Supported one state government pilot. No security clearance.',
           result: { score: 62, verdict: 'Good seller, no federal background',
-            recruiter_summary: { risk_level: 'yellow', top_strength: 'Sells data platforms, 135% of quota last year', dealbreaker: '' },
+            recruiter_summary: { risk_level: 'yellow', top_strength: 'Sells data platforms, 135% of quota last year', concern: 'No federal selling and no clearance; the role needs 7+ years with the DoD', dealbreaker: '' },
             analysis: ['Match: Quota record with $1M+ deals → 135% of $3M, largest deal $2.4M', 'Match: Cloud data platform experience → six years selling data analytics SaaS', 'Gap: 7+ years selling to the DoD → no federal selling; one state government pilot', 'Gap: Active Secret clearance → no clearance', 'Gap: Contract vehicles and acquisition process → not shown'],
             tailored_summary: 'Priya knows the product category better than anyone else in this group and beat a $3M quota by 35% last year. She has not sold to the federal government and holds no clearance, so she would need sponsorship and a long ramp. Worth a conversation only if the hiring manager is open to a commercial seller.',
             gap_strategies: [{ gap: 'No DoD selling experience', strategy: 'Ask the hiring manager whether a commercial hire is on the table before spending her time.', talking_points: 'Her data platform knowledge would shorten product ramp, not account ramp.' }, { gap: 'No clearance', strategy: 'Confirm the company will sponsor a Secret and how long the role can run without it.', talking_points: '' }],
@@ -476,7 +480,7 @@ What we need
         document.querySelectorAll('#filterTabs [role="tab"]').forEach(t => { const on = t.dataset.filter === 'all'; t.setAttribute('aria-selected', String(on)); t.tabIndex = on ? 0 : -1; });
         setFileStatus(); showInlineError(''); updateJobCount();
         applySort(); renderQueue(); renderResults(); renderExampleState();
-        if (auto !== true) { $('resultsCard').scrollIntoView({ behavior: 'smooth', block: 'start' }); track('recruiter_example'); }
+        if (auto !== true) { $('resultsCard').scrollIntoView({ behavior: (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) ? 'auto' : 'smooth', block: 'start' }); track('recruiter_example'); }
     }
 
     // Leave the example. keepJob: the recruiter has started typing their own job over the sample.
@@ -531,7 +535,7 @@ What we need
         'clear-job': () => { clearExample(); $('jobDescription').value = ''; $('jobFileInfo').textContent = ''; updateJobCount(); $('jobDescription').focus(); },
         'clear-queue': () => { if (running) return; queue = []; results = []; setFileStatus(); showInlineError(''); $('analyzeText').textContent = 'Rank these candidates'; renderQueue(); renderResults(); },
         'example': () => showExample(false),
-        'clear-example': () => { clearExample(); $('jobDescription').focus(); window.scrollTo({ top: 0, behavior: 'smooth' }); },
+        'clear-example': () => { clearExample(); $('jobDescription').focus(); window.scrollTo({ top: 0, behavior: (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) ? 'auto' : 'smooth' }); },
         'add-pasted': () => {
             clearExample();
             const out = addToQueue($('candidateResume').value, $('candidateName').value.trim());

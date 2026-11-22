@@ -660,3 +660,46 @@ button.batch-row:focus-visible { outline: 3px solid var(--ink); outline-offset: 
 @media (max-width: 699px) { .wide-only { display: none; } .narrow-only { display: inline; } }
 #moreMenu { left: 0; right: auto; min-width: 230px; }
 @media print { .tailor-card { display: none !important; } }
+
+/* v25: posting-versus-resume rows, a visible start, source lines */
+.req-list { margin-top: 14px; border-radius: var(--r-sm); background: rgba(255, 255, 255, .62); padding: 4px 14px; }
+.req-list.on-panel { background: var(--page); margin-top: 0; }
+.req-head { font: 600 12px/16px var(--font); letter-spacing: .08em; text-transform: uppercase; color: var(--ink); opacity: .75; padding: 10px 0 2px; }
+.req { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 0; }
+.req + .req { border-top: 1px solid rgba(11, 18, 21, .14); }
+.req-main { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.req-what { font: 400 15px/21px var(--font); }
+.req-what b { font-weight: 700; }
+.req-tag { display: inline-block; margin-right: 8px; padding: 0 6px; border-radius: 6px; background: rgba(11, 18, 21, .1); font: 600 11px/18px var(--font); letter-spacing: .06em; text-transform: uppercase; vertical-align: 1px; }
+.req-shows { font: 400 14px/20px var(--font); color: var(--ink); opacity: .82; }
+.req .chip { flex: none; }
+.sample-peek { display: flex; flex-direction: column; gap: 12px; margin-top: 16px; padding: 18px 20px; border-radius: var(--r-md); background: var(--panel); }
+.sample-peek .btn { align-self: flex-start; background: var(--page); }
+.example-note { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.example-note .grow { flex: 1 1 220px; }
+.analyze-row { display: flex; gap: 10px; flex-wrap: wrap; }
+.analyze-row #analyzeBtn { flex: 1 1 220px; }
+/* The check button stays in view: it rides the bottom of the window until its place in the form scrolls in. */
+.analyze-bar { position: sticky; bottom: 0; z-index: 5; margin: 0 -8px; padding: 10px 8px 12px; background: linear-gradient(to bottom, rgba(255,255,255,0), var(--page) 14px); }
+.resume-preview .src { display: none; margin-top: 2px; font-size: 13px; line-height: 18px; color: var(--muted); }
+.resume-preview.show-sources .src { display: block; }
+.resume-preview .src.flag { color: var(--danger-ink); font-weight: 600; }
+.switch-row.compact { padding: 0; }
+@media (max-width: 879px) { body.example-compact .req-list { display: none !important; } }
+@media print { .analyze-bar { position: static; } .resume-preview .src { display: none !important; } }
+
+.jump-link { color: var(--ink); font-weight: 600; text-underline-offset: 3px; }
+#companyBoards a[hidden], #companyBoards .board-group[hidden] { display: none !important; }
+#employers { scroll-margin-top: 16px; }
+/* Phones, first visit: the compact example and the start of the form both fit on the first screen. */
+@media (max-width: 879px) { body.example-compact .page-intro .lede { display: none; } body.example-compact .page-intro { padding-bottom: 12px; } }
+
+/* v26: motion that reports honestly and points at what matters */
+.linear-progress.indeterminate > div { width: 35%; transition: none; animation: slide 1.3s ease-in-out infinite; }
+@keyframes slide { from { transform: translateX(-110%); } to { transform: translateX(300%); } }
+.resume-preview li.spotlight { animation: spotlight 2.6s ease-out; border-radius: 6px; }
+@keyframes spotlight { 0%, 45% { background: var(--caution); box-shadow: 0 0 0 6px var(--caution); } 100% { background: transparent; box-shadow: 0 0 0 6px transparent; } }
+@media (prefers-reduced-motion: reduce) {
+    .linear-progress.indeterminate > div { animation: none; width: 100%; opacity: .45; }
+    .resume-preview li.spotlight { animation: none; background: var(--caution); box-shadow: 0 0 0 6px var(--caution); }
+}

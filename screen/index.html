@@ -32,7 +32,7 @@
     <link rel="apple-touch-icon" href="../apple-touch-icon.png">
     <link rel="manifest" href="../site.webmanifest">
     <link rel="preload" href="../assets/fonts/inter-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="stylesheet" href="../assets/app.css?v=24">
+    <link rel="stylesheet" href="../assets/app.css?v=26">
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-N10ZLNFZHE"></script>
     <script>
@@ -84,7 +84,7 @@
         <div class="page-intro">
             <p class="eyebrow">Candidate screen &middot; for defense industry recruiters</p>
             <h1 class="h1">Who should you send to the hiring manager?</h1>
-            <p class="lede">Add the job and drop in the resumes. You get a ranked shortlist with a send, review or pass call on each candidate, and the reasons behind it. Resume files are read in your browser, not uploaded.</p>
+            <p class="lede">Add the job and drop in the resumes. You get a ranked shortlist with a send, review or pass call on each candidate, and the reasons behind it.</p>
         </div>
 
         <div class="calc">
@@ -129,6 +129,7 @@
                         </span>
                     </div>
                     <input type="file" id="resumeFiles" multiple accept=".pdf,.docx,.txt,.md,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain" hidden>
+                    <p class="body-sm muted" id="resumePrivacy">We read the files in your browser and send the extracted text for AI analysis when you rank. Nothing is stored on our servers.</p>
                     <div id="fileStatus" role="status" aria-live="polite" hidden></div>
                     <details class="disclosure" id="pasteRow">
                         <summary><svg class="icon"><use href="#i-edit"/></svg><span>Or paste a resume</span><svg class="icon chev"><use href="#i-chevron"/></svg></summary>
@@ -210,7 +211,7 @@
     <button class="icon-btn" data-action="dismiss-snackbar" aria-label="Dismiss"><svg class="icon"><use href="#i-close"/></svg></button>
 </div>
 
-<script src="../assets/files.js?v=24"></script>
-<script src="screen.js?v=24"></script>
+<script src="../assets/files.js?v=26"></script>
+<script src="screen.js?v=26"></script>
 </body>
 </html>
