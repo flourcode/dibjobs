@@ -32,7 +32,7 @@
     <link rel="apple-touch-icon" href="apple-touch-icon.png">
     <link rel="manifest" href="site.webmanifest">
     <link rel="preload" href="assets/fonts/inter-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="stylesheet" href="assets/app.css?v=28">
+    <link rel="stylesheet" href="assets/app.css?v=30">
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-N10ZLNFZHE"></script>
     <script>
@@ -230,22 +230,22 @@
             <div class="panel stack" id="jobCard">
                 <h2 class="h3">1. The job</h2>
                 <label class="field" id="jobField">
-                    <span class="field-label">Job link or description</span>
-                    <textarea id="jobDescription" rows="3" aria-describedby="jobError" placeholder="Paste a link to the posting or the job description. You can also drop a PDF or Word file here."></textarea>
+                    <span class="field-label">Job description or link</span>
+                    <textarea id="jobDescription" rows="3" aria-describedby="jobError" placeholder="Paste the job description, or a link to the posting. You can also drop a PDF or Word file here."></textarea>
                     <span class="supporting"><span id="jobCount"></span><span>Ctrl / &#8984; + Enter to run</span></span>
                 </label>
                 <p class="field-error" id="jobError" role="alert" hidden></p>
                 <div class="banner info" id="jobLinkHelp" hidden>
-                    <span class="grow"><span id="jobLinkMsg"></span> <a id="jobLinkAnchor" href="#" target="_blank" rel="noopener noreferrer"></a></span>
-                    <button class="btn" type="button" id="pasteInsteadBtn" data-action="paste-instead">Paste the job description instead</button>
+                    <span class="grow"><span id="jobLinkMsg" aria-live="polite"></span> <a id="jobLinkAnchor" href="#" target="_blank" rel="noopener noreferrer"></a></span>
+                    <button class="btn text" type="button" id="dropLinkBtn" data-action="drop-link">Remove link</button>
                 </div>
                 <details class="disclosure" id="moreJobsRow">
                     <summary><svg class="icon"><use href="#i-compare"/></svg><span>Compare several jobs <span class="optional" id="moreJobsState">optional</span></span><svg class="icon chev"><use href="#i-chevron"/></svg></summary>
                     <div class="disclosure-body stack-sm">
                         <p class="body-sm muted">Add up to three more postings. Each is checked against your resume and they come back ranked, so you know where to start.</p>
-                        <label class="field sm"><span class="field-label">Job 2</span><textarea id="extraJob1" class="extra-job" rows="2" placeholder="Paste a link or the job description"></textarea></label>
-                        <label class="field sm"><span class="field-label">Job 3</span><textarea id="extraJob2" class="extra-job" rows="2" placeholder="Paste a link or the job description"></textarea></label>
-                        <label class="field sm"><span class="field-label">Job 4</span><textarea id="extraJob3" class="extra-job" rows="2" placeholder="Paste a link or the job description"></textarea></label>
+                        <label class="field sm"><span class="field-label">Job 2</span><textarea id="extraJob1" class="extra-job" rows="2" placeholder="Paste the job description text"></textarea></label>
+                        <label class="field sm"><span class="field-label">Job 3</span><textarea id="extraJob2" class="extra-job" rows="2" placeholder="Paste the job description text"></textarea></label>
+                        <label class="field sm"><span class="field-label">Job 4</span><textarea id="extraJob3" class="extra-job" rows="2" placeholder="Paste the job description text"></textarea></label>
                     </div>
                 </details>
             </div>
@@ -739,7 +739,7 @@
     <button class="icon-btn" data-action="dismiss-snackbar" aria-label="Dismiss"><svg class="icon"><use href="#i-close"/></svg></button>
 </div>
 
-<script src="assets/files.js?v=28"></script>
-<script src="assets/app.js?v=28"></script>
+<script src="assets/files.js?v=30"></script>
+<script src="assets/app.js?v=30"></script>
 </body>
 </html>

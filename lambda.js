@@ -1,7 +1,7 @@
 // DIB Jobs Lambda: resume-vs-job analysis and the tools around it. No npm packages.
 // v3.1 - rebuilt on the patterns from the QuotaBird Lambda (same Gemini call shape, retry, logging, health check).
 //
-// POST { "request_type": "resume_match" | "market_intel" | "suggest_roles" | "tailor_resume"
+// POST { "request_type": "resume_match" | "market_intel" | "suggest_roles" | "read_posting" | "tailor_resume"
 //        | "generate_linkedin_messages" | "generate_intro_email" | "ask_expert" | "extract_resume"
 //        | "recruiter_screen", ... }
 // "recruiter_screen" serves the recruiter page (/screen/): one candidate against one job, written for the recruiter.
@@ -29,7 +29,7 @@
 // site's copy ("Your resume is not stored on our servers").
 
 const env = process.env;
-const VERSION = '3.5.1';
+const VERSION = '3.6.0';
 
 function clampInt(v, def, min, max) {
     const n = Number.parseInt(v, 10);
@@ -48,8 +48,9 @@ const CONFIG = {
     MAX_FILE_BASE64_LENGTH: 5500000, // extract_resume only: ~4 MB file; Lambda's payload limit is 6 MB
     MIN_JD_LENGTH: 50,
     MIN_RESUME_LENGTH: 100,
+    MIN_POSTING_LENGTH: 300,         // a page read from a link with less text than this is not a posting
+    READER_TIMEOUT_MS: 12000,
     AI_TIMEOUT_MS: clampInt(env.GEMINI_TIMEOUT_MS, 25000, 5000, 55000),
-    JINA_TIMEOUT_MS: 10000,
     AI_TEMPERATURE: 0.4,
     // Output limits. Generous so a long JSON answer is never cut off mid-object.
     AI_MAX_TOKENS: 8192,
@@ -135,25 +136,75 @@ const sanitizeInput = (text) => {
 };
 
 // =============================================================================
-// URL CONTENT FETCHER (using Jina.ai)
+// POSTING READER (read_posting)
+// A link is read through Jina's reader and the text is handed back to the browser, which shows it to the
+// visitor before anything is scored. Nothing is analyzed here, and a page that does not look like one job
+// posting is refused so a wrong page never becomes a wrong answer. The link is not logged.
 // =============================================================================
-const fetchUrlContent = async (url) => {
+const READ_FAIL = {
+    bad: "That doesn't look like a complete link. Use the full address, starting with https://",
+    search: 'That link is a list of search results, not one posting. Open the posting you want and use its link, or paste its text.',
+    unreachable: "We couldn't read that link. Open the posting, copy the whole job description, and paste it here.",
+    wall: 'That site showed a sign-in page instead of the posting. Open the posting, copy the whole job description, and paste it here.',
+    gone: 'That posting looks closed or removed. If you can still see it, copy the job description and paste it here.',
+    list: 'That link returned several jobs, not one posting. Open the one you want, copy its description, and paste it here.',
+    thin: "That link didn't return a full job posting. Open the posting, copy the whole job description, and paste it here."
+};
+const SEARCH_URL = /(linkedin\.com\/jobs\/(search|collections)|indeed\.com\/(jobs|q-)|google\.[a-z.]+\/search|clearancejobs\.com\/jobs\?|[?&](q|query|keywords|search)=)/i;
+const WALL_TEXT = /(sign in to (view|see|continue|access)|log ?in to (view|see|continue|access)|join (now )?to (view|see)|sign in or join|create (an|a free) account to|authwall|verify (that )?you are (a )?human|are you a robot|enable javascript|access denied|unusual activity|captcha|just a moment\.\.\.)/i;
+const GONE_TEXT = /(no longer (available|accepting applications|open)|job (has )?(expired|been (removed|filled|closed))|position (has been|is) (filled|closed)|posting (has )?(expired|closed)|page (not found|doesn.t exist|does not exist)|\b404\b)/i;
+const TAIL_HEADING = /\n[#*\s]*(similar jobs|more jobs like this|people also viewed|related jobs|recommended jobs|other jobs (at|you)|jobs you may (like|be interested in)|explore (more|similar) jobs)\b/i;
+const JOB_WORDS = [/requir/i, /qualif/i, /responsib/i, /experience/i, /\byears?\b/i, /clearance/i, /\bskills?\b/i, /salary|compensation|\bpay\b/i, /benefits/i, /\bapply\b/i, /\b(role|position)\b/i, /\bteam\b/i];
+
+// Turn the reader's markdown into plain posting text and judge whether it is one job posting.
+const judgePosting = (raw) => {
+    let body = String(raw || '').replace(/\r/g, '');
+    let title = '';
+    const t = body.match(/^Title:\s*(.+)$/m);
+    if (t) title = t[1].trim();
+    const mark = body.indexOf('Markdown Content:');
+    if (mark !== -1) body = body.slice(mark + 'Markdown Content:'.length);
+    else body = body.replace(/^(Title|URL Source|Published Time|Warning):.*$/gm, '');
+    body = body
+        .replace(/!\[[^\]]*\]\([^)]*\)/g, '')              // images
+        .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1')           // links keep their words
+        .replace(/^\s*[#>]+\s*/gm, '')                     // heading and quote marks
+        .replace(/\*\*|__|`/g, '')
+        .replace(/^[ \t]*[-*=_]{3,}[ \t]*$/gm, '')
+        .replace(/[ \t]+\n/g, '\n').replace(/\n{3,}/g, '\n\n').trim();
+    const tail = body.search(TAIL_HEADING);
+    if (tail > 200) body = body.slice(0, tail).trim();     // drop "similar jobs" lists under the posting
+    const head = body.slice(0, 700);
+    if (GONE_TEXT.test(head) && body.length < 2500) return { fail: 'gone' };
+    if (WALL_TEXT.test(body) && body.length < 1500) return { fail: 'wall' };
+    if (body.length < CONFIG.MIN_POSTING_LENGTH) return { fail: WALL_TEXT.test(body) ? 'wall' : 'thin' };
+    const ages = (body.match(/\b\d+\+?\s+(hour|day|week|month)s?\s+ago\b/gi) || []).length;
+    if (ages >= 5 || /\b\d[\d,]*\+?\s+(jobs|results|open positions|openings)\b/i.test(head)) return { fail: 'list' };
+    if (JOB_WORDS.filter(w => w.test(body)).length < 2) return { fail: 'thin' };
+    return { text: sanitizeInput(body).substring(0, CONFIG.MAX_JD_LENGTH), title: sanitizeInput(title).replace(/\s+/g, ' ').substring(0, 140), truncated: body.length > CONFIG.MAX_JD_LENGTH };
+};
+
+const readPosting = async (url) => {
+    const fail = (why) => { const e = new Error(READ_FAIL[why]); e.status = 422; e.userFacing = true; e.unreadable = why; return e; };
+    let parsed;
+    try { parsed = new URL(String(url || '').trim()); } catch (e) { throw fail('bad'); }
+    if (!/^https?:$/.test(parsed.protocol) || !parsed.hostname.includes('.') || parsed.href.length > 2000) throw fail('bad');
+    if (SEARCH_URL.test(parsed.href)) throw fail('search');
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), CONFIG.JINA_TIMEOUT_MS);
+    const timer = setTimeout(() => controller.abort(), CONFIG.READER_TIMEOUT_MS);
+    let raw = '';
     try {
-        const jinaUrl = `https://r.jina.ai/${encodeURIComponent(url)}`;
-        const response = await fetch(jinaUrl, {
-            method: 'GET',
-            headers: { 'Accept': 'text/plain', 'X-Timeout': '8', 'User-Agent': BOT_UA },
-            signal: controller.signal
-        });
-        clearTimeout(timeoutId);
-        if (!response.ok) return null;
-        return await response.text();
-    } catch (error) {
-        clearTimeout(timeoutId);
-        return null;
-    }
+        const headers = { 'Accept': 'text/plain', 'X-Timeout': '10', 'User-Agent': BOT_UA };
+        if (env.JINA_API_KEY) headers.Authorization = `Bearer ${env.JINA_API_KEY}`;
+        const res = await fetch(`https://r.jina.ai/${parsed.href}`, { method: 'GET', headers, signal: controller.signal });
+        if (!res.ok) throw fail('unreachable');
+        raw = await res.text();
+    } catch (e) {
+        throw e.unreadable ? e : fail('unreachable');
+    } finally { clearTimeout(timer); }
+    const judged = judgePosting(raw);
+    if (judged.fail) throw fail(judged.fail);
+    return { text: judged.text, title: judged.title, truncated: judged.truncated, url: parsed.href };
 };
 
 // =============================================================================
@@ -973,6 +1024,16 @@ async function handleRequest(event = {}) {
         requestType = body.request_type || 'resume_match';
         const cleanText = (value, max) => sanitizeInput(value).substring(0, max);
 
+        // Read a posting from its link. The text goes back to the browser for the visitor to check; nothing is scored.
+        if (requestType === "read_posting") {
+            try { return createResponse(200, await readPosting(body.url)); }
+            catch (e) {
+                if (!e.unreadable) throw e;
+                console.log(JSON.stringify({ read_posting: 'refused', reason: e.unreadable, ms: Date.now() - startTime }));
+                return createResponse(422, { error: e.message, unreadable: e.unreadable });
+            }
+        }
+
         // Handle resume text extraction from a PDF the browser could not read
         if (requestType === "extract_resume") {
             const { file_data, mime_type } = body;
@@ -1079,22 +1140,15 @@ async function handleRequest(event = {}) {
         jobDescription = sanitizeInput(jobDescription).substring(0, CONFIG.MAX_JD_LENGTH);
         const cleanResume = sanitizeInput(resumeText).substring(0, CONFIG.MAX_RESUME_LENGTH);
         
-        // Handle URL input for job description
-        const isUrl = /^https?:\/\/\S+$/i.test(jobDescription);
-        if (isUrl) {
-            const fetchedText = await fetchUrlContent(jobDescription);
-            if (!fetchedText || fetchedText.length < CONFIG.MIN_JD_LENGTH) {
-                return createResponse(400, { 
-                    error: 'Could not read that URL (many job sites block automated access). Please copy/paste the job description text directly.' 
-                });
-            }
-            jobDescription = sanitizeInput(fetchedText).substring(0, CONFIG.MAX_JD_LENGTH);
-        } else {
-            if (jobDescription.length < CONFIG.MIN_JD_LENGTH) {
-                return createResponse(400, { error: 'Job description is too short.' });
-            }
+        // A bare link is never scored. The browser reads it first (read_posting) and shows the visitor the text,
+        // so the answer is always about a posting they have seen.
+        if (/^https?:\/\/\S+$/i.test(jobDescription)) {
+            return createResponse(400, { error: 'That is a link, not the posting text. Paste the job description, or reload the page to have links read for you.' });
         }
-        
+        if (jobDescription.length < CONFIG.MIN_JD_LENGTH) {
+            return createResponse(400, { error: 'Job description is too short.' });
+        }
+
         if (cleanResume.length < CONFIG.MIN_RESUME_LENGTH) {
             return createResponse(400, { error: 'Resume is too short. Please provide more details.' });
         }
@@ -1102,11 +1156,6 @@ async function handleRequest(event = {}) {
         const matchData = requestType === 'recruiter_screen'
             ? await screenCandidate(jobDescription, cleanResume)
             : await generateResumeMatch(jobDescription, cleanResume, militaryTransition);
-        // When the JD came from a URL, hand the fetched text back so the browser
-        // can show the user what was analyzed and reuse it for follow-up calls.
-        if (isUrl) {
-            matchData.job_description_text = jobDescription;
-        }
         return createResponse(200, matchData);
     } catch (error) {
         // Log the request type and timing only: never the resume, job description, or question.

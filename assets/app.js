@@ -41,7 +41,8 @@
         trackedId: null,       // tracker entry the job on screen came from (so saving upgrades it)
         postingUrl: '',        // link to the posting on screen, kept even when the text is pasted
         linkedText: '',        // the job text those two belong to; a different job in the box breaks the link
-        linkHelp: null,        // null | 'failed' | 'kept'
+        readingLink: '', readSeq: 0, linkTitle: '',
+        linkHelp: null,        // null | 'reading' | 'read' (text came from the link: check it) | 'kept' (link held while the text is pasted)
         loadingTimer: null,
         snackTimer: null,
         draftTimer: null
@@ -510,7 +511,7 @@
         const resume = $('resumeText').value, job = $('jobDescription').value;
         const fmt = (t) => t.trim() ? `${countWords(t).toLocaleString()} words` : '';
         $('resumeCount').textContent = fmt(resume) + (resume.length > MAX_RESUME_CHARS ? ` (only the first ${MAX_RESUME_CHARS.toLocaleString()} characters are analyzed)` : '');
-        $('jobCount').textContent = /^https?:\/\/\S+$/i.test(job.trim()) ? 'Link detected: we will fetch the posting' : fmt(job);
+        $('jobCount').textContent = isUrl(job) ? 'Link: it is read first, so you can check the posting before it is scored.' : fmt(job);
         updateBatchUi();
         if ($('resumeText').value.trim().length >= 100) clearFieldError('resume');
         updateHandoffLabel();
@@ -663,6 +664,7 @@
 
     // Anything that swaps the job on screen calls this first, so a slow reply for the old job is ignored.
     function resetAnalyzeUi() {
+        stopReadingLink();
         state.runId++;
         state.batch = null;
         $('compareVersionsBtn').disabled = false;
@@ -675,45 +677,81 @@
 
     // The job box was replaced by hand: forget which posting or tracker entry it used to be.
     function jobReplaced() {
-        if (state.linkHelp === 'kept') return;      // the link was kept on purpose while the text is pasted in
+        if (state.linkHelp === 'kept' || state.linkHelp === 'read') return;      // the link stays with the job while its text is checked, fixed or pasted in
         state.postingUrl = ''; state.trackedId = null; state.linkedText = '';
         if (state.linkHelp) { state.linkHelp = null; renderLinkHelp(); }
     }
 
+    // The banner under the job box: a link being read, a link that was read (check it), or a link kept for the tracker.
     function renderLinkHelp() {
         const mode = state.linkHelp, box = $('jobLinkHelp');
         box.hidden = !mode || !isUrl(state.postingUrl);
         if (box.hidden) return;
-        $('jobLinkMsg').textContent = mode === 'failed' ? 'We couldn\'t read this link:' : 'Link kept for your tracker:';
+        box.className = 'banner ' + (mode === 'read' ? 'warn' : 'info');
+        const title = mode === 'read' && state.linkTitle ? `<strong>${escapeHtml(state.linkTitle)}</strong>. ` : '';
+        $('jobLinkMsg').innerHTML = mode === 'reading' ? 'Reading the posting from this link...'
+            : mode === 'read' ? `Read from the link: ${title}Check that this is the right posting, then run the check.`
+            : 'Link kept for your tracker:';
         $('jobLinkAnchor').textContent = state.postingUrl;
         $('jobLinkAnchor').href = state.postingUrl;
-        $('pasteInsteadBtn').hidden = mode !== 'failed';
+        $('dropLinkBtn').hidden = mode === 'reading';
     }
+    function dropLink() { stopReadingLink(); state.postingUrl = ''; state.linkHelp = null; state.linkTitle = ''; renderLinkHelp(); $('jobDescription').focus(); }
 
-    function pasteInstead() {
-        state.linkHelp = 'kept';
+    // The link could not be read, or did not look like one posting: keep it for the tracker and ask for the text.
+    const LINK_MSG = 'We couldn\'t read that link. Open the posting, copy the whole job description, and paste it here.';
+    function linkToPaste(url, message) {
+        state.postingUrl = url.trim(); state.linkHelp = 'kept'; state.linkedText = ''; state.linkTitle = '';
         $('jobDescription').value = '';
         showInlineError(''); updateCounts(); renderLinkHelp();
-        $('jobDescription').focus();
+        fieldError('job', message || LINK_MSG);
     }
+
+    // A link is read first and its text put in the job box for the visitor to check. It is never scored unseen:
+    // job sites sometimes return a sign-in page or a different job, and that must not become a wrong answer.
+    async function readLink(url, opts = {}) {
+        url = url.trim();
+        if (state.readingLink === url) return;
+        const read = ++state.readSeq, box = $('jobDescription'), btn = $('analyzeBtn');
+        state.readingLink = url; state.postingUrl = url; state.linkHelp = 'reading'; state.linkedText = ''; state.linkTitle = '';
+        state.exampleDismissed = true;
+        box.value = url; box.readOnly = true;
+        fieldError(null); showInlineError(''); updateCounts(); renderLinkHelp();
+        btn.disabled = true; $('btnText').textContent = 'Reading the posting...';
+        let result = null, failure = '';
+        try { result = await api({ request_type: 'read_posting', url }); }
+        catch (e) { failure = e.transient || /not available yet/i.test(e.message) ? LINK_MSG : e.message; }
+        if (read !== state.readSeq) return;                       // a newer link, or a new job, took over
+        state.readingLink = ''; box.readOnly = false;
+        btn.disabled = false; $('btnText').textContent = idleLabel();
+        if (!result || !result.text) { linkToPaste(url, failure || LINK_MSG); if (opts.trackedId != null) state.trackedId = opts.trackedId; return; }
+        box.value = result.text; box.scrollTop = 0;
+        state.linkHelp = 'read'; state.linkedText = result.text; state.linkTitle = tidy(result.title || '', 140);
+        if (opts.trackedId != null) state.trackedId = opts.trackedId;
+        updateCounts(); renderLinkHelp();
+        $('jobCard').scrollIntoView({ behavior: scrollBehavior(), block: 'nearest' });
+        box.focus({ preventScroll: true }); box.setSelectionRange(0, 0);
+        if (result.truncated) snackbar(`That posting is long: the first ${MAX_JD_CHARS.toLocaleString()} characters were kept.`, 6000);
+        track('posting_link_read');
+    }
+    const stopReadingLink = () => { if (state.readingLink) { state.readSeq++; state.readingLink = ''; $('jobDescription').readOnly = false; $('analyzeBtn').disabled = false; $('btnText').textContent = idleLabel(); } };
 
     async function analyzeJob() {
         const jd = $('jobDescription').value.trim();
         const resume = $('resumeText').value.trim().substring(0, MAX_RESUME_CHARS);
         fieldError(null);
         // Step 1 is the job, so that is asked for first.
+        if (state.readingLink) return;
         if (!jd) return fieldError('job', 'Paste the job description, or a link to the posting.');
+        if (isUrl(jd)) return readLink(jd);
         if (!resume) return fieldError('resume', state.pendingOcrFile ? 'Your PDF had no readable text. Use "Read with AI" above, or paste your resume text.' : 'Add your resume: drop in a PDF or Word file, or paste the text.');
         if (resume.length < 100) return fieldError('resume', 'That resume is too short to check. Add more detail.');
         if (state.resumeSource === 'example' && resume === state.exampleResume && jd !== state.exampleJd) return fieldError('resume', 'That is the example resume, not yours. Add your own resume to check a real job.');
 
         resetAnalyzeUi();
         const run = state.runId, stale = () => run !== state.runId;
-        const jdIsUrl = isUrl(jd);
         // If the box now holds a different job than the one a link or tracker entry was attached to, drop that attachment.
-        if (jdIsUrl) { const t = state.trackedId != null ? findJob(state.trackedId) : null; if (state.trackedId != null && !(t && sameUrl(t.url, jd))) state.trackedId = null; }
-        else if (state.linkedText && textHead(jd) !== textHead(state.linkedText)) jobReplaced();
-        if (jdIsUrl) { state.postingUrl = jd; state.linkHelp = null; }
+        if (state.linkedText && textHead(jd) !== textHead(state.linkedText)) jobReplaced();
         renderLinkHelp();
         const btn = $('analyzeBtn');
         btn.disabled = true;
@@ -766,7 +804,6 @@
             stopLoading();
             setResultState(state.analysis ? 'ready' : 'empty');
             showInlineError(lastError.message);
-            if (jdIsUrl) { state.linkHelp = 'failed'; renderLinkHelp(); }
             $('analyzeBar').scrollIntoView({ behavior: scrollBehavior(), block: 'center' });
         }
     }
@@ -810,6 +847,9 @@
         if (state.resumeSource === 'example') return fieldError('resume', 'That is the example resume, not yours. Add your own resume first.');
         const first = $('jobDescription').value.trim();
         if (!first) return fieldError('job', 'Add the first job here, then the others below it.');
+        const linkAt = [first, ...extraJobs()].findIndex(isUrl);
+        if (linkAt === 0) return readLink(first);
+        if (linkAt > 0) return fieldError('job', 'One of the extra jobs is a link. Paste its job description text there instead: only the first box reads links.');
         const seen = new Set(), jobs = [];
         [first, ...extraJobs()].forEach(jd => { const key = isUrl(jd) ? normalizeUrl(jd) : jobKey(jd); if (!seen.has(key)) { seen.add(key); jobs.push(jd); } });
         if (jobs.length < 2) return fieldError('job', 'Those are the same job. Add a different posting to compare.');
@@ -820,6 +860,7 @@
         fieldError(null);
         const jd = $('jobDescription').value.trim();
         if (!jd) return fieldError('job', 'Add the job here first, then compare your resume versions against it.');
+        if (isUrl(jd)) return readLink(jd);
         const versions = resumeVersions();
         if (versions.length < 2) return fieldError('resume', 'Save at least two versions of your resume to compare them.');
         return runBatch('versions', versions.map(v => ({ jd, resumeText: v.text, resumeName: v.name })));
@@ -833,6 +874,9 @@
     }
 
     async function runBatch(kind, items) {
+        // A link pasted earlier was kept for the tracker: it belongs to the job in the first box.
+        const keptLink = (state.linkHelp === 'kept' || state.linkHelp === 'read') && isUrl(state.postingUrl) ? state.postingUrl : '';
+        if (keptLink) (kind === 'versions' ? items : items.slice(0, 1)).forEach(item => { item.url = keptLink; });
         resetAnalyzeUi();
         const run = state.runId, stale = () => run !== state.runId;
         state.batch = { kind, items };
@@ -852,13 +896,6 @@
             try {
                 const data = await batchCall(item);
                 if (stale()) return;
-                if (isUrl(item.jd)) item.url = item.jd;
-                if (data.job_description_text) {
-                    // A link was given: keep the text that was read, and reuse it for the remaining versions of the same job.
-                    const text = data.job_description_text; delete data.job_description_text;
-                    if (kind === 'versions') items.forEach(other => { other.url = item.url; other.jd = text; });
-                    item.jd = text;
-                }
                 verifyKeywords(data, item.resumeText);
                 item.analysis = data;
             } catch (e) {
@@ -2264,15 +2301,18 @@
     function prepareJob(text, opts = {}) {
         resetAnalyzeUi();
         dropExampleResume();
-        $('jobDescription').value = text;
+        const linkOnly = isUrl(text);
+        state.exampleDismissed = true;      // a real job is on its way in: the sample stays out of it
+        $('jobDescription').value = linkOnly ? '' : text;
         state.analysis = null; state.jd = ''; state.isExample = false;
         state.trackedId = opts.trackedId ?? null;
-        state.postingUrl = isUrl(text) ? text.trim() : isUrl(opts.url) ? opts.url.trim() : '';
-        state.linkHelp = null; state.linkedText = isUrl(text) ? '' : text;
+        state.postingUrl = linkOnly ? text.trim() : isUrl(opts.url) ? opts.url.trim() : '';
+        state.linkHelp = null; state.linkedText = linkOnly ? '' : text;
         resetGenerated();
         setResultState('empty');
         showInlineError(''); updateCounts(); renderLinkHelp();
         showView('analyze');
+        if (linkOnly) { readLink(text, { trackedId: state.trackedId }); return; }
         const ready = $('resumeText').value.trim().length >= 100;
         if (!ready) setResumeMode(true);
         (ready ? $('analyzeBtn') : $('resumeDrop')).focus();
@@ -2639,6 +2679,7 @@ Amazon is an Equal Opportunity Employer.`;
         'save-job': () => saveToTracker(),
         'download-report': () => downloadReport(),
         'share': () => shareTool(),
+        'drop-link': () => dropLink(),
         'copy-link': () => { copyText(SHARE_URL, 'Link copied. Paste it anywhere.'); track('share', { method: 'copy_link' }); },
         'tailor': (b) => buildTailoredResume(b),
         'view-tailored': () => viewTailored(),
@@ -2664,7 +2705,6 @@ Amazon is an Equal Opportunity Employer.`;
         'handoff-check': () => handoffCheck(),
         'handoff-save': () => openSaveForm(),
         'handoff-save-cancel': () => closeSaveForm(),
-        'paste-instead': () => pasteInstead(),
         'dismiss-snackbar': () => $('snackbar').classList.remove('show')
     };
 
@@ -2705,7 +2745,7 @@ Amazon is an Equal Opportunity Employer.`;
             if (delEl) return deleteSavedResume(delEl.dataset.deleteResume);
         });
         $('resumeText').addEventListener('input', onResumeChanged);
-        $('jobDescription').addEventListener('input', (e) => { if (!e.target.value.trim()) jobReplaced(); if (e.target.value.trim()) clearFieldError('job'); updateCounts(); });
+        $('jobDescription').addEventListener('input', (e) => { if (e.inputType === 'insertFromPaste' && isUrl(e.target.value)) return readLink(e.target.value); if (state.linkHelp === 'read' && e.target.value !== state.linkedText) { state.linkHelp = 'kept'; state.linkedText = ''; renderLinkHelp(); } if (!e.target.value.trim()) jobReplaced(); if (e.target.value.trim()) clearFieldError('job'); updateCounts(); });
         $('jobDescription').addEventListener('paste', (e) => { const t = e.target; if (t.selectionStart === 0 && t.selectionEnd === t.value.length) jobReplaced(); });
         $('militaryToggle').addEventListener('change', (e) => { store.set(KEYS.military, e.target.checked ? '1' : '0'); $('militaryChip').hidden = !e.target.checked; });
         $('restoreFile').addEventListener('change', (e) => restoreData(e.target.files[0]));

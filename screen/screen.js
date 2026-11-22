@@ -256,7 +256,8 @@
         let jd = $('jobDescription').value.trim().substring(0, MAX_JD_CHARS);
         showInlineError('');
         const jdIsUrl = /^https?:\/\/\S+$/i.test(jd);
-        if (jd.length < 50 && !jdIsUrl) return showInlineError('Add the job description in step 1 first.');
+        if (jdIsUrl) { $('jobDescription').focus(); return showInlineError('Paste the job description text in step 1. A link can\'t be read reliably.'); }
+        if (jd.length < 50) return showInlineError('Add the job description in step 1 first.');
         if (!queue.length) return showInlineError('Add at least one resume in step 2.');
         if (running) return;
         running = true;

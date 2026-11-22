@@ -722,3 +722,8 @@ button.batch-row:focus-visible { outline: 3px solid var(--ink); outline-offset: 
 }
 .panel > .field-error { margin-top: 8px; }
 #jobDescription[aria-invalid="true"] { border-color: var(--danger-ink); }
+
+/* v30: a posting read from a link is shown for checking before it is scored */
+#jobLinkHelp a { word-break: break-all; }
+#jobDescription[readonly] { color: var(--muted); }
+#jobLinkHelp .btn.text { background: transparent; color: var(--ink); text-decoration: underline; flex: none; padding: 0; min-height: 24px; justify-content: flex-start; }
