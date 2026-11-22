@@ -32,7 +32,7 @@
     <link rel="apple-touch-icon" href="apple-touch-icon.png">
     <link rel="manifest" href="site.webmanifest">
     <link rel="preload" href="assets/fonts/inter-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="stylesheet" href="assets/app.css?v=23">
+    <link rel="stylesheet" href="assets/app.css?v=24">
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-N10ZLNFZHE"></script>
     <script>
@@ -115,7 +115,7 @@
         <div class="page-intro">
             <p class="eyebrow">Job fit check &middot; for defense industry sales, BD and capture</p>
             <h1 class="h1">Is this job a good fit?</h1>
-            <p class="lede">Add your resume and the job posting. You get a straight answer, the gaps that matter, what it should pay, and what to do next. Your resume file never leaves your browser.</p>
+            <p class="lede">Add your resume and the job posting. You get a straight answer, the gaps that matter, what it should pay, and your resume rewritten for that job. Your resume file never leaves your browser.</p>
         </div>
 
         <div class="calc">
@@ -191,18 +191,24 @@
 
                     <button class="btn" type="button" id="exampleExpand" data-action="example-expand">See the full example<svg class="icon"><use href="#i-chevron"/></svg></button>
                     <div class="row" id="actionBar">
-                        <button class="btn primary" id="primaryActionBtn" data-action="primary-action"><svg class="icon"><use href="#i-copy"/></svg><span id="primaryActionText">Next step</span></button>
-                        <button class="btn" id="tailorActionBtn" data-action="view-tailored" hidden><svg class="icon"><use href="#i-spark"/></svg><span id="tailorActionText">Get a tailored resume</span></button>
+                        <button class="btn primary" id="primaryActionBtn" data-action="primary-action"><svg class="icon"><use href="#i-spark"/></svg><span id="primaryActionText">Next step</span></button>
+                        <button class="btn" id="tailorActionBtn" data-action="view-tailored" hidden><svg class="icon"><use href="#i-spark"/></svg><span id="tailorActionText">Tailor my resume to this job</span></button>
+                        <button class="btn" id="emailActionBtn" data-action="go-email" hidden><svg class="icon"><use href="#i-send"/></svg><span>Write intro email</span></button>
                         <button class="btn" id="saveToTrackerBtn" data-action="save-job"><svg class="icon"><use href="#i-bookmark"/></svg><span>Save to tracker</span></button>
-                        <button class="btn" data-action="download-report"><svg class="icon"><use href="#i-pdf"/></svg><span>Report</span></button>
-                        <button class="btn" data-action="new-job"><svg class="icon"><use href="#i-add"/></svg><span>New job</span></button>
+                        <div class="menu-anchor">
+                            <button class="btn" id="moreMenuBtn" data-menu="moreMenu" aria-haspopup="menu" aria-expanded="false">More<svg class="icon"><use href="#i-chevron"/></svg></button>
+                            <div class="menu" id="moreMenu" role="menu" hidden>
+                                <button class="menu-item" role="menuitem" data-action="download-report"><svg class="icon"><use href="#i-pdf"/></svg>Print or save the report</button>
+                                <button class="menu-item" role="menuitem" data-action="new-job"><svg class="icon"><use href="#i-add"/></svg>Start a new job</button>
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="tailor-teaser" id="tailorTeaser" hidden>
-                        <svg class="icon"><use href="#i-spark"/></svg>
-                        <div class="grow"><p class="title-sm" id="tailorTeaserTitle">Your tailored resume is ready</p><p class="body-sm" id="tailorTeaserText"></p></div>
-                        <span class="score-shift" id="tailorTeaserScore" hidden></span>
-                        <div class="row tight"><button class="btn" data-action="view-tailored">View it</button><button class="btn" data-action="download-docx"><svg class="icon"><use href="#i-download"/></svg>Word</button></div>
+                    <div class="tailor-card" id="tailorTeaser" hidden>
+                        <div class="tailor-card-head"><h3 class="title-md" id="tailorTeaserTitle"></h3><span class="score-shift" id="tailorTeaserScore" hidden></span></div>
+                        <div class="stack-sm" id="tailorPairs"></div>
+                        <p class="body-sm" id="tailorTeaserText"></p>
+                        <button class="btn" type="button" id="tailorViewBtn" data-action="view-tailored" hidden>See the full tailored resume</button>
                     </div>
 
                     <div class="rows" id="breakdown">
@@ -320,7 +326,7 @@
             <div>
                 <div class="tabs" role="tablist" aria-label="Result sections" id="resultTabs">
                     <button class="tab" role="tab" data-panel="overview" aria-selected="true">Overview</button>
-                    <button class="tab" role="tab" data-panel="resume" aria-selected="false" tabindex="-1">Resume</button>
+                    <button class="tab" role="tab" data-panel="resume" aria-selected="false" tabindex="-1"><span class="wide-only">Tailored resume</span><span class="narrow-only">Tailor</span></button>
                     <button class="tab" role="tab" data-panel="interview" aria-selected="false" tabindex="-1">Interview</button>
                     <button class="tab" role="tab" data-panel="outreach" aria-selected="false" tabindex="-1">Outreach</button>
                     <button class="tab" role="tab" data-panel="ask" aria-selected="false" tabindex="-1">Ask AI</button>
@@ -394,7 +400,7 @@
                                     <h3 class="title-md">Tailored resume for this job</h3>
                                     <p class="body-md">Your full resume, reordered and reworded for this role, using only facts already in it. Download as Word and edit from there.</p>
                                 </div>
-                                <button class="btn primary" id="tailorBtn" data-action="tailor"><svg class="icon"><use href="#i-spark"/></svg><span>Build tailored resume</span></button>
+                                <button class="btn primary" id="tailorBtn" data-action="tailor"><svg class="icon"><use href="#i-spark"/></svg><span>Tailor my resume to this job</span></button>
                             </div>
                         </div>
                         <div id="tailoredWrap" class="stack" style="margin-top:16px" hidden>
@@ -712,7 +718,7 @@
     <button class="icon-btn" data-action="dismiss-snackbar" aria-label="Dismiss"><svg class="icon"><use href="#i-close"/></svg></button>
 </div>
 
-<script src="assets/files.js?v=23"></script>
-<script src="assets/app.js?v=23"></script>
+<script src="assets/files.js?v=24"></script>
+<script src="assets/app.js?v=24"></script>
 </body>
 </html>

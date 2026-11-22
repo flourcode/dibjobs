@@ -1008,7 +1008,7 @@
     }
 
     function resetGenerated() {
-        state.tailored = null; state.tailorScore = null; state.tailorKeywords = null; state.chat = [];
+        state.tailored = null; state.tailorScore = null; state.tailorKeywords = null; state.tailorPairs = null; state.chat = [];
         $('tailoredWrap').hidden = true;
         syncTailorUi();
         $('linkedinList').innerHTML = '';
@@ -1090,8 +1090,8 @@
     // The decision the job seeker came for: is this role worth my time, and what do I do next?
     // Uses the AI's call when present; otherwise a rule of thumb from the score and clearance.
     const ACTIONS_META = {
-        apply:               { tone: 'good',    label: 'Apply now.',                     cta: ['spark', 'Write intro email'] },
-        fix_first:           { tone: 'caution', label: 'Tailor your resume first.',      cta: ['spark', 'Build tailored resume'] },
+        apply:               { tone: 'good',    label: 'Apply now.',                     cta: ['spark', 'Tailor my resume to this job'] },
+        fix_first:           { tone: 'caution', label: 'Tailor your resume first.',      cta: ['spark', 'Tailor my resume to this job'] },
         confirm_requirement: { tone: 'caution', label: 'Confirm a requirement first.',   cta: ['copy', 'Copy recruiter question'] },
         skip:                { tone: 'bad',     label: 'Prioritize other roles.',        cta: ['next', 'Explore other roles'] }
     };
@@ -1147,8 +1147,6 @@
         $('recNext').innerHTML = r.next_step ? `${icon('next')}<span>Next step: ${escapeHtml(r.next_step)}</span>` : '';
         $('verdictChip').textContent = data.verdict || '';
         $('verdictChip').hidden = !data.verdict;
-        $('primaryActionText').textContent = meta.cta[1];
-        $('primaryActionBtn').querySelector('use').setAttribute('href', '#i-' + meta.cta[0]);
     }
 
     // One primary button, tied to the verdict.
@@ -1156,11 +1154,16 @@
         if (!state.analysis) return;
         switch (state.primaryAction) {
             case 'confirm_requirement': copyText(state.recruiterQuestion, 'Question copied. Paste it into a message to the recruiter.'); break;
-            case 'fix_first': viewTailored(); break;
-            case 'apply': showPanel('outreach'); $('emailBtn').scrollIntoView({ behavior: 'smooth', block: 'center' }); if ($('emailWrap').hidden) writeIntroEmail($('emailBtn')); break;
+            case 'fix_first': case 'apply': if (state.tailored) downloadTailoredDocx(); else viewTailored(); break;
             default: showView('explore');
         }
         track('primary_action', { action: state.primaryAction });
+    }
+
+    function goToEmail() {
+        showPanel('outreach');
+        $('emailBtn').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        if ($('emailWrap').hidden) writeIntroEmail($('emailBtn'));
     }
 
     function renderFitSignals(data) {
@@ -1201,7 +1204,9 @@
         $('salaryNotes').textContent = '';
         $('compQuestionsSection').hidden = true;
         if (sal && Number(sal.low) > 0 && Number(sal.high) >= Number(sal.low)) {
-            const variable = !!sal.is_variable_comp;
+            // A posting that gives one range sometimes comes back as both base and on-target pay: show it once.
+            const oneRange = Number(sal.base_low) === Number(sal.low) && Number(sal.base_high) === Number(sal.high);
+            const variable = !!sal.is_variable_comp && !oneRange;
             const mid = Number(sal.mid) || (sal.low + sal.high) / 2;
             const src = (v) => v === 'posting' ? 'From the posting' : 'AI estimate';
             const hasBase = variable && Number(sal.base_low) > 0 && Number(sal.base_high) >= Number(sal.base_low);
@@ -1265,18 +1270,22 @@
     // RESUME TOOLS: tailored resume, Word (.docx) export
     // ======================================================================
     async function buildTailoredResume(button) {
-        if (!state.analysis) return;
-        await withBusy(button, 'Writing your resume...', async () => {
-            const forJob = state.analysis;
-            const data = await api({ request_type: 'tailor_resume', job_description: state.jd, resume_text: state.resumeText, analysis_data: slimAnalysis(), military_transition: isMilitary() });
-            if (state.analysis !== forJob) return;
-            state.tailored = data.resume;
-            state.tailorKeywords = keywordShift(forJob, state.resumeText, tailoredToText(data.resume));   // instant
-            state.tailorScore = { before: Math.round(forJob.score || 0), pending: true };
-            renderTailored(data.resume);
-            scoreTailored(forJob);          // starts at once, not awaited: the resume is usable while its score is checked
-            track('tailored_resume_built');
-        });
+        if (!state.analysis || state.tailoring) return;
+        state.tailoring = true; syncTailorUi();
+        try {
+            await withBusy(button, 'Writing your resume...', async () => {
+                const forJob = state.analysis;
+                const data = await api({ request_type: 'tailor_resume', job_description: state.jd, resume_text: state.resumeText, analysis_data: slimAnalysis(), military_transition: isMilitary() });
+                if (state.analysis !== forJob) return;
+                state.tailored = data.resume;
+                state.tailorPairs = tailoredPairs(state.resumeText, data.resume);
+                state.tailorKeywords = keywordShift(forJob, state.resumeText, tailoredToText(data.resume));   // instant
+                state.tailorScore = { before: Math.round(forJob.score || 0), pending: true };
+                renderTailored(data.resume);
+                scoreTailored(forJob);          // starts at once, not awaited: the resume is usable while its score is checked
+                track('tailored_resume_built');
+            });
+        } finally { state.tailoring = false; syncTailorUi(); }
     }
 
     // Check the tailored version against the same job, so the user sees whether it actually fits better.
@@ -1317,35 +1326,74 @@
         return { total: kws.length, was, now, added, lost };
     }
 
-    // One place that keeps the tailored-resume button, the strip under the verdict and the score line in step.
+    // Lines in "what changed" that describe the AI's own instructions rather than the resume are dropped.
+    const META_NOTE = /\b(json|markdown|plain[- ]text|no[- ]invention|instructions?|hard rules?|rules|compliance|output|formatting requirements?)\b/i;
+    const tailorChangesList = (r) => arr(r && r.changes).filter(x => !META_NOTE.test(x));
+
+    // Pairs each rewritten bullet with the original line it came from, so the change can be shown side by side.
+    function tailoredPairs(originalText, tailored) {
+        const words = (x) => new Set((String(x).toLowerCase().match(/[a-z0-9$%+.]+/g) || []).filter(w => w.length > 2));
+        const lines = String(originalText).split('\n').map(l => l.replace(/^[\s•\-*–·]+/, '').trim()).filter(l => l.length >= 25).map(l => ({ text: l, set: words(l) }));
+        const out = [];
+        (Array.isArray(tailored.experience) ? tailored.experience : []).forEach(job => arr(job.bullets).forEach(bullet => {
+            const set = words(bullet); let best = null;
+            lines.forEach(o => { let shared = 0; set.forEach(w => { if (o.set.has(w)) shared++; }); const sim = shared / ((set.size + o.set.size - shared) || 1); if (!best || sim > best.sim) best = { sim, before: o.text }; });
+            // Clearly the same line (enough shared words), and clearly reworded (not a copy).
+            if (best && best.sim >= 0.4 && best.sim < 0.9) out.push({ before: best.before, after: bullet, sim: best.sim });
+        }));
+        return out.sort((a, b) => a.sim - b.sim).slice(0, 2);
+    }
+
+    const pairHtml = (p) => `<div class="rewrite"><div class="before"><span class="tag">Before</span>${escapeHtml(p.before)}</div><div class="after"><span class="tag">After</span><span>${escapeHtml(p.after)}</span></div></div>`;
+
+    // One place that keeps the action row, the before-and-after card and the score line in step.
+    // Tailoring leads whenever applying makes sense: first "Tailor my resume", then "Download", then the email.
     function syncTailorUi() {
-        const built = !!state.tailored, t = state.tailorScore, k = state.tailorKeywords;
-        const btn = $('tailorActionBtn');
-        btn.hidden = !state.analysis || (state.primaryAction === 'fix_first' && !built);
-        $('tailorActionText').textContent = built ? 'View tailored resume' : 'Get a tailored resume';
+        const a = state.analysis, built = !!state.tailored, t = state.tailorScore, k = state.tailorKeywords;
+        const act = state.primaryAction, tailorLeads = act === 'apply' || act === 'fix_first';
+        const meta = ACTIONS_META[act] || ACTIONS_META.fix_first;
+        const cta = !tailorLeads ? meta.cta : state.tailoring ? ['spark', 'Writing your resume...'] : built ? ['download', 'Download tailored resume'] : ['spark', 'Tailor my resume to this job'];
+        $('primaryActionText').textContent = cta[1];
+        $('primaryActionBtn').querySelector('use').setAttribute('href', '#i-' + cta[0]);
+        $('primaryActionBtn').disabled = tailorLeads && !!state.tailoring;
+        $('tailorActionBtn').hidden = !a || tailorLeads;
+        $('tailorActionText').textContent = built ? 'View tailored resume' : 'Tailor my resume to this job';
+        $('emailActionBtn').hidden = !a || act !== 'apply';
         $('useTailoredBtn').hidden = !!state.isExample;
+        const tailorBtn = $('tailorBtn');
+        if (!tailorBtn.disabled) { tailorBtn.classList.toggle('primary', !built); tailorBtn.querySelector('span').textContent = built ? 'Rewrite it again' : 'Tailor my resume to this job'; }
+
         const lines = []; let shift = '', caution = '';
         if (k) {
             lines.push(k.now > k.was ? `Covers ${k.now} of ${k.total} keywords from the posting, up from ${k.was}.`
                 : k.now === k.was ? `Covers ${k.now} of ${k.total} keywords from the posting, the same as your original.`
                 : `Covers ${k.now} of ${k.total} keywords from the posting, down from ${k.was}. Dropped: ${k.lost.join(', ')}.`);
-            if (k.now > k.was) shift = `${k.was} \u2192 ${k.now} keywords`;
+            if (k.now > k.was) shift = `${k.was} → ${k.now} keywords`;
             if (k.added.length) caution = `New in this version: ${k.added.join(', ')}. Make sure each is true for you before you send it.`;
         }
         if (t && t.pending) lines.push('Checking the fit score...');
         else if (t) {
             const d = t.after - t.before;
-            if (d > SCORE_NOISE) { lines.push(`Fit score went from ${t.before} to ${t.after}.`); shift = `${t.before} \u2192 ${t.after}`; }
+            if (d > SCORE_NOISE) { lines.push(`Fit score went from ${t.before} to ${t.after}.`); shift = `${t.before} → ${t.after}`; }
             else if (d < -SCORE_NOISE) lines.push(`Fit score came back lower: ${t.after}, against ${t.before} for your original. Read both before you choose.`);
             else lines.push(`Fit score is about the same: ${t.after}, against ${t.before} for your original. A point or two either way is normal between runs.`);
         }
-        const teaser = $('tailorTeaser');
-        teaser.hidden = !built;
-        if (built) {
-            $('tailorTeaserTitle').textContent = state.isExample ? 'A tailored resume, written for this job' : 'Your tailored resume is ready';
-            $('tailorTeaserText').textContent = lines.join(' ') || arr(state.tailored.changes)[0] || 'Reordered and reworded for this role, using only facts already in your resume.';
-            $('tailorTeaserScore').hidden = !shift;
+
+        // The card under the action row: one rewritten line before tailoring, the real before-and-after once it is done.
+        const card = $('tailorTeaser');
+        const sample = a && Array.isArray(a.bullet_rewrites) ? a.bullet_rewrites.filter(b => b && b.original && b.improved).map(b => ({ before: b.original, after: b.improved })) : [];
+        let pairs = [];
+        if (built) pairs = state.isExample ? sample.slice(0, 2) : (state.tailorPairs || []);
+        else if (a && act !== 'skip') pairs = sample.slice(0, 1);
+        card.hidden = !a || (!built && !pairs.length);
+        if (!card.hidden) {
+            $('tailorTeaserTitle').textContent = built ? (state.isExample ? 'A resume tailored to this job' : 'Your resume, tailored to this job') : 'One line from your resume, rewritten for this job';
+            $('tailorPairs').innerHTML = pairs.map(pairHtml).join('');
+            $('tailorTeaserText').textContent = built ? (lines.join(' ') || tailorChangesList(state.tailored)[0] || 'Reordered and reworded for this role, using only facts already in your resume.')
+                : 'Tailoring does this for your whole resume, using only what is already in it, and gives you a Word file.';
+            $('tailorTeaserScore').hidden = !built || !shift;
             $('tailorTeaserScore').textContent = shift;
+            $('tailorViewBtn').hidden = !built;
         }
         const line = $('tailorScoreLine');
         line.hidden = !built || !lines.length;
@@ -1378,7 +1426,7 @@
             ${section('Summary', r.summary ? `<p>${escapeHtml(r.summary)}</p>` : '')}
             ${section('Core skills', arr(r.skills).length ? `<p>${arr(r.skills).map(escapeHtml).join(' &middot; ')}</p>` : '')}
             ${section('Experience', jobs)}${section('Education', lines(r.education))}${section('Certifications', lines(r.certifications))}${section('Additional', lines(r.additional))}`;
-        const changes = arr(r.changes);
+        const changes = tailorChangesList(r);
         $('tailorChanges').hidden = !changes.length;
         $('tailorChanges').innerHTML = `${icon('info')}<span class="grow"><strong>What changed</strong><br>${changes.map(escapeHtml).join('<br>')}</span>`;
         $('tailoredWrap').hidden = false;
@@ -2459,6 +2507,7 @@ Amazon is an Equal Opportunity Employer.`;
         'copy-link': () => { copyText(SHARE_URL, 'Link copied. Paste it anywhere.'); track('share', { method: 'copy_link' }); },
         'tailor': (b) => buildTailoredResume(b),
         'view-tailored': () => viewTailored(),
+        'go-email': () => goToEmail(),
         'download-docx': () => downloadTailoredDocx(),
         'copy-tailored': () => state.tailored && copyText(tailoredToText(state.tailored), 'Resume text copied.'),
         'use-tailored': () => useTailoredAsResume(),

@@ -29,7 +29,7 @@
 // site's copy ("Your resume is not stored on our servers").
 
 const env = process.env;
-const VERSION = '3.4.1';
+const VERSION = '3.4.2';
 
 function clampInt(v, def, min, max) {
     const n = Number.parseInt(v, 10);
@@ -761,6 +761,7 @@ HARD RULES:
 - You may drop bullets that are irrelevant to this job, but keep at least 2 per job when the resume has them.
 - Do not add skills the resume gives no evidence for.
 - Plain text only. No markdown, no asterisks.
+- The "changes" notes are read by the candidate. Write them about the resume content only. Never mention these rules, instructions, formatting, JSON, or what you were told to do or avoid.
 ${militaryTransition ? '- The candidate is leaving the military: translate military jargon into commercial language, keeping the facts.\n' : ''}
 OUTPUT VALID JSON ONLY:
 {
@@ -782,7 +783,7 @@ OUTPUT VALID JSON ONLY:
     "education": ["string"],
     "certifications": ["string"],
     "additional": ["string (awards, affiliations, military service; empty array if none)"],
-    "changes": ["string (3-5 short notes on what you changed and why)"]
+    "changes": ["string (3-5 short notes to the candidate on what you changed in the resume and why it helps for this job, e.g. 'Moved your Army agreement to the first bullet because the posting leads with large DoD deals.')"]
 }`;
     const parsed = await callGemini({
         prompt, json: true, label: 'tailor_resume',

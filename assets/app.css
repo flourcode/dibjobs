@@ -649,3 +649,14 @@ button.batch-row:focus-visible { outline: 3px solid var(--ink); outline-offset: 
 #tailorScoreLine { align-items: center; }
 @media print { .tailor-teaser { display: none !important; } }
 .tailor-teaser .score-shift, #tailorScoreLine .score-shift { font-size: 16px; }
+
+/* v24: tailoring leads the result */
+.tailor-card { display: flex; flex-direction: column; gap: 12px; padding: 18px 20px; border-radius: var(--r-md); background: var(--panel); }
+.tailor-card-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.tailor-card .rewrite { background: var(--page); }
+.tailor-card .body-sm { color: var(--muted); }
+.tailor-card .btn { align-self: flex-start; background: var(--page); }
+.narrow-only { display: none; }
+@media (max-width: 699px) { .wide-only { display: none; } .narrow-only { display: inline; } }
+#moreMenu { left: 0; right: auto; min-width: 230px; }
+@media print { .tailor-card { display: none !important; } }
