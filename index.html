@@ -32,7 +32,7 @@
     <link rel="apple-touch-icon" href="apple-touch-icon.png">
     <link rel="manifest" href="site.webmanifest">
     <link rel="preload" href="assets/fonts/inter-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="stylesheet" href="assets/app.css?v=51">
+    <link rel="stylesheet" href="assets/app.css?v=53">
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-N10ZLNFZHE"></script>
     <script>
@@ -196,13 +196,16 @@
                         <p class="req-count" id="reqCount" hidden></p>
                         <button class="tailor-status" type="button" id="tailorStatus" data-action="tailor-jump" hidden><span class="ts-mark" id="tailorStatusMark" aria-hidden="true"></span><span class="grow" id="tailorStatusText" aria-live="polite"></span><svg class="icon" aria-hidden="true"><use href="#i-chevron"/></svg><span class="ts-bar" aria-hidden="true"><span id="tailorStatusBar"></span></span></button>
                         <p class="assess-note" id="assessNote" hidden><span id="assessText"></span> <button class="link-btn" type="button" id="rescoreBtn" data-action="rescore"><span>Re-score with the updated resume</span></button></p>
-                        <div class="req-list" id="recEvidence" hidden></div>
-                        <ul class="rec-reasons" id="recReasons"></ul>
-                        <div class="ask-box" id="recQuestionBox" hidden>
-                            <p class="eyebrow">Question to send the recruiter</p>
-                            <p class="body-md" id="recQuestion"></p>
-                        </div>
-                        <p class="rec-next" id="recNext" hidden></p>
+                        <details class="verdict-more" id="verdictMore" open>
+                            <summary><span>Why this score</span><svg class="icon chev" aria-hidden="true"><use href="#i-chevron"/></svg></summary>
+                            <div class="req-list" id="recEvidence" hidden></div>
+                            <ul class="rec-reasons" id="recReasons"></ul>
+                            <div class="ask-box" id="recQuestionBox" hidden>
+                                <p class="eyebrow">Question to send the recruiter</p>
+                                <p class="body-md" id="recQuestion"></p>
+                            </div>
+                            <p class="rec-next" id="recNext" hidden></p>
+                        </details>
                         <div class="chips verdict-chips">
                             <span class="chip sm" id="verdictChip"></span>
                             <span class="chip sm" id="scoreDelta" hidden></span>
@@ -220,13 +223,16 @@
                             <p class="body-sm" id="tailorWait" aria-live="polite"></p>
                             <p class="eyebrow" id="tailorPeekLabel" hidden>A first look while the rest is written</p>
                         </div>
+                        <div class="row" id="tailorLeadActions" hidden>
+                            <button class="btn primary" type="button" data-action="download-docx"><svg class="icon"><use href="#i-download"/></svg><span class="dl-label">Download Word (.docx)</span></button>
+                            <button class="btn" type="button" data-action="copy-tailored"><svg class="icon"><use href="#i-copy"/></svg>Copy as text</button>
+                            <button class="btn text" type="button" id="tailorViewBtn" data-action="view-tailored">What changed</button>
+                            <button class="btn text" type="button" id="tailorAskBtn" data-action="gap-jump" hidden></button>
+                        </div>
                         <ul class="tailor-stats" id="tailorStats" hidden></ul>
                         <div class="stack-sm" id="tailorPairs"></div>
                         <p class="body-sm" id="tailorTeaserText" aria-live="polite"></p>
-                        <div class="row" id="tailorLeadActions" hidden>
-                            <button class="btn primary" type="button" data-action="download-docx"><svg class="icon"><use href="#i-download"/></svg><span class="dl-label">Download Word (.docx)</span></button>
-                            <button class="btn" type="button" id="tailorViewBtn" data-action="view-tailored">See every change and the full resume</button>
-                        </div>
+                        <div class="paper resume-preview" id="tailoredPreview" hidden></div>
                         <div class="row" id="tailorGateActions" hidden>
                             <button class="btn primary" type="button" id="tailorStartBtn" data-action="tailor-start"><svg class="icon"><use href="#i-spark"/></svg><span>Tailor my resume</span></button>
                             <button class="btn" type="button" id="tailorGateFind" data-action="go-find" hidden>Find other jobs</button>
@@ -237,10 +243,18 @@
                         <h2 class="title-md" id="gapTitle"></h2>
                         <p class="body-sm" id="gapText"></p>
                         <form class="stack" id="gapForm" novalidate>
+                            <div class="who" id="gapWho" hidden></div>
                             <div class="stack" id="gapFields"></div>
                             <button class="btn stand-out-more" type="button" id="standOutBtn" data-action="stand-out" hidden><svg class="icon"><use href="#i-spark"/></svg><span id="standOutText">Help me stand out</span></button>
                             <p class="field-error" id="gapError" role="alert" hidden>Answer at least one question, or choose "Skip these".</p>
-                            <label class="keep-row"><input type="checkbox" class="checkbox" id="gapKeep" checked><span>Keep my answers in this browser, so the next job can reuse them</span></label>
+                            <div class="keep-block">
+                                <label class="keep-row"><input type="checkbox" class="checkbox" id="gapKeep" checked><span>Keep my answers in this browser, so the next job can reuse them</span></label>
+                                <label class="field sm keep-name" id="gapPersonField"><span class="field-label">Whose resume is this?</span>
+                                    <input type="text" id="gapPerson" maxlength="60" autocomplete="off" list="peopleList" aria-describedby="gapPersonHint gapPersonError">
+                                    <span class="body-sm muted" id="gapPersonHint">Saved answers are offered again only for this person, and only after you say a resume is theirs.</span></label>
+                                <datalist id="peopleList"></datalist>
+                                <p class="field-error" id="gapPersonError" role="alert" hidden>Add the name of the person this resume belongs to, or untick the box.</p>
+                            </div>
                             <div class="row">
                                 <button class="btn primary" type="submit" id="gapSubmit"><svg class="icon"><use href="#i-spark"/></svg><span>Update my resume</span></button>
                                 <button class="btn text" type="button" id="gapSkipBtn" data-action="gap-skip">Skip these</button>
@@ -380,7 +394,12 @@
                 <details class="disclosure" id="answerRecord" hidden>
                     <summary><svg class="icon"><use href="#i-bookmark"/></svg><span id="answerRecordTitle">Your saved answers</span><svg class="icon chev"><use href="#i-chevron"/></svg></summary>
                     <div class="disclosure-body stack-sm">
-                        <p class="body-sm muted">What you told us about your experience, kept in this browser only. Each one is offered again when a later posting asks for the same thing.</p>
+                        <p class="body-sm muted">What you told us about your experience, kept in this browser only. Each one belongs to a named person and is offered again when a later posting asks the same thing of a resume you have said is theirs.</p>
+                        <div class="unassigned" id="answerUnassigned" hidden>
+                            <p class="body-sm" id="answerUnassignedText"></p>
+                            <div class="row"><label class="field sm grow"><span class="field-label">Whose answers are these?</span><input type="text" id="assignName" maxlength="60" autocomplete="off" list="peopleList"></label>
+                                <button class="btn" type="button" data-action="answers-assign">Assign</button></div>
+                        </div>
                         <div class="stack-sm" id="answerRecordList"></div>
                         <button class="btn text" type="button" data-action="answers-clear">Delete all saved answers</button>
                     </div>
@@ -427,7 +446,7 @@
             <div>
                 <div class="tabs" role="tablist" aria-label="Result sections" id="resultTabs">
                     <button class="tab" role="tab" data-panel="overview" aria-selected="true">Overview</button>
-                    <button class="tab" role="tab" data-panel="resume" aria-selected="false" tabindex="-1"><span class="wide-only">Tailored resume</span><span class="narrow-only">Tailor</span></button>
+                    <button class="tab" role="tab" data-panel="resume" aria-selected="false" tabindex="-1"><span class="wide-only">What changed</span><span class="narrow-only">Changes</span></button>
                     <button class="tab" role="tab" data-panel="interview" aria-selected="false" tabindex="-1">Interview</button>
                     <button class="tab" role="tab" data-panel="outreach" aria-selected="false" tabindex="-1">Outreach</button>
                     <button class="tab" role="tab" data-panel="ask" aria-selected="false" tabindex="-1">Ask AI</button>
@@ -486,27 +505,20 @@
                         <div class="panel accent">
                             <div class="row between">
                                 <div class="grow" style="min-width:220px">
-                                    <h3 class="title-md">Tailored resume for this job</h3>
-                                    <p class="body-md">Your full resume, reordered and reworded for this role, using only your resume and what you told us. Download as Word and edit from there.</p>
+                                    <h3 class="title-md">What changed in your resume</h3>
+                                    <p class="body-md">Each reworded line next to the line it came from. The resume itself is at the top of the page.</p>
                                 </div>
                                 <button class="btn primary" id="tailorBtn" data-action="tailor"><svg class="icon"><use href="#i-spark"/></svg><span>Tailor my resume</span></button>
                             </div>
                         </div>
                         <div id="tailoredWrap" class="stack" style="margin-top:16px" hidden>
-                            <div class="row">
-                                <button class="btn primary" data-action="download-docx"><svg class="icon"><use href="#i-download"/></svg><span class="dl-label">Download Word (.docx)</span></button>
-                                <button class="btn" data-action="copy-tailored"><svg class="icon"><use href="#i-copy"/></svg>Copy as text</button>
-                                <button class="btn text" id="useTailoredBtn" data-action="use-tailored">Use as my resume and re-score</button>
-                            </div>
                             <div class="banner info" id="tailorScoreLine" hidden></div>
                             <div class="change-list" id="tailorChangeBox" hidden>
                                 <h3 class="title-md" id="tailorChangeTitle">What changed</h3>
                                 <p class="body-sm muted" id="tailorChangeNote">Each reworded line, next to the line in your resume it came from. Lines that were only moved are not listed.</p>
                                 <div class="stack-sm" id="tailorChangeList"></div>
                             </div>
-                            <h3 class="title-md" id="tailoredPreviewTitle">The full resume</h3>
-                            <div class="paper resume-preview" id="tailoredPreview"></div>
-                            <p class="body-sm muted">Read every line before you send it. The AI is told to use only your resume and your answers, but you are the one signing it.</p>
+                            <p class="body-sm muted">Read every line before you send it. The AI is told to use only your resume and your answers, but you are the one signing it. <button class="link-btn" type="button" id="useTailoredBtn" data-action="use-tailored">Use the tailored version as my resume and re-score</button></p>
                         </div>
                     </div>
 
@@ -853,7 +865,7 @@
     <button class="icon-btn" data-action="dismiss-snackbar" aria-label="Dismiss"><svg class="icon"><use href="#i-close"/></svg></button>
 </div>
 
-<script src="assets/files.js?v=51"></script>
-<script src="assets/app.js?v=51"></script>
+<script src="assets/files.js?v=53"></script>
+<script src="assets/app.js?v=53"></script>
 </body>
 </html>

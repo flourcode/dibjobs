@@ -17,7 +17,8 @@
         draft: 'dib_jobs_resume_draft',
         tracker: 'dougOMaticTracker',       // legacy name kept so existing users keep their data
         military: 'dib_jobs_military',
-        answers: 'dib_jobs_answers',        // what the visitor told us about their experience, for the next job
+        answers: 'dib_jobs_answers',
+        people: 'dib_jobs_people',          // which person each resume was confirmed as (a short code per resume, never its text)        // what the visitor told us about their experience, for the next job
         keepAnswers: 'dib_jobs_keep_answers'
     };
     const SHARE_URL = 'https://dibjobs.com/';
@@ -621,6 +622,9 @@
     // window with a single result on screen, the form folds to one line, the work (the resume, the questions, the
     // detail tabs) takes the main pane, and the score box stays beside it as the page scrolls.
     const WIDE = window.matchMedia('(min-width: 1100px)');
+    // Below the wide layout the score box sits between the form and the resume, so its evidence starts folded there.
+    const ROOMY = window.matchMedia('(min-width: 1100px)');       // only the wide layout has the score box beside the resume
+    const foldEvidence = () => { $('verdictMore').open = ROOMY.matches; };
     const resultTop = () => (document.body.classList.contains('desk-result') ? $('stage') : $('resultCol'));     // the result column has no box of its own in the wide layout
     function syncLayout() {
         const calc = document.querySelector('.calc'), stage = $('stage');
@@ -697,6 +701,7 @@
     function resetAnalyzeUi() {
         stopReadingLink();
         state.runId++;
+        cancelTailoring();      // a rewrite still running belongs to the job being left
         state.batch = null;
         $('compareVersionsBtn').disabled = false;
         stopLoading();
@@ -1095,7 +1100,7 @@
     function resetGenerated() {
         state.tailored = null; state.tailorKeywords = null; state.tailorPairs = null; state.tailorUnmatched = 0; state.tailorAdded = []; state.tailorGate = null; state.tailorError = false;
         state.confirmedFacts = []; state.appliedFacts = []; state.gapSkipped = false; state.gapEditing = false;
-        state.tailorVersion = ''; state.rescored = null; state.restoredFrom = null; clearInterval(state.tailorTimer);
+        state.tailorVersion = ''; state.rescored = null; state.restoredFrom = null; cancelTailoring();
         state.standOut = false; state.profile = null; renderProfile(); state.chat = [];
         $('tailoredWrap').hidden = true;
         syncTailorUi();
@@ -1478,20 +1483,52 @@
     const FILLER = new Set('the and for with you your have has had what was were did any how that this from are our their they them when which who been does into its can could would ever yes not please give state tell much many long about least more than over each per shows show'.split(' '));
     const topicWords = (x) => new Set((String(x).toLowerCase().match(/[a-z0-9$+#/]+/g) || []).filter(w => w.length > 2 && !FILLER.has(w)));
     const overlap = (a, b) => { const A = topicWords(a), B = topicWords(b); if (!A.size || !B.size) return 0; let n = 0; A.forEach(w => { if (B.has(w)) n++; }); return n / Math.min(A.size, B.size); };
-    // Answers belong to the person on the resume, not to the browser: a colleague's resume in the same browser
-    // is not offered yours. The owner is the resume's first line, which is the name on nearly every resume.
-    const resumeOwner = (text) => { const line = String(text || '').split('\n').map(l => l.trim()).find(l => /[a-z]/i.test(l)) || ''; return line.toLowerCase().replace(/[^a-z ]+/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 60); };
-    const ownerName = (text) => { const line = String(text || '').split('\n').map(l => l.trim()).find(l => /[a-z]/i.test(l)) || ''; return line.length <= 60 ? line : ''; };
-    const currentOwner = () => resumeOwner(state.resumeText || $('resumeText').value);
-    const mine = (a) => !a.owner || a.owner === currentOwner();      // answers saved before owners existed stay available
+    // Answers belong to a named person, and a resume is tied to that person only when the visitor says so.
+    // The name is suggested from the resume's first line, but a suggestion is not an identity: two resumes that
+    // both open with "RESUME" share nothing, and nothing is offered for a resume until its person is confirmed
+    // (by saving answers under a name, or by picking the name from the people already in this browser).
+    const GENERIC_HEAD = /^(resume|résumé|curriculum vitae|cv|professional (resume|summary|profile)|confidential|summary|profile|objective|contact( information)?|page \d+.*|untitled.*)$/i;
+    const firstLine = (text) => String(text || '').split('\n').map(l => l.trim()).find(l => /[a-z]/i.test(l)) || '';
+    const guessPerson = (text) => {
+        const line = firstLine(text).split(/[|•·,\t]| {2,}| - /)[0].trim();
+        const words = line.split(/\s+/);
+        return line.length <= 50 && words.length >= 2 && words.length <= 5 && !/[\d@:/]/.test(line) && !GENERIC_HEAD.test(line) ? line : '';
+    };
+    const personKey = (name) => String(name || '').toLowerCase().replace(/[^a-z]+/g, ' ').trim();
+    const samePerson = (a, b) => !!personKey(a) && personKey(a) === personKey(b);
+    const currentResume = () => state.resumeText || $('resumeText').value || '';
+    const resumeKey = (text) => { const t = String(text).toLowerCase().replace(/\s+/g, ' ').trim(); let h = 5381; for (let i = 0; i < t.length; i++) h = ((h << 5) + h + t.charCodeAt(i)) >>> 0; return h.toString(36) + '.' + t.length; };
+    const getPeople = () => { const v = store.get(KEYS.people, {}); return v && typeof v === 'object' && !Array.isArray(v) ? v : {}; };
+    const confirmedPerson = () => { const p = getPeople()[resumeKey(currentResume())]; return typeof p === 'string' ? p : ''; };
+    function confirmPerson(name) {
+        const people = getPeople(), key = resumeKey(currentResume());
+        delete people[key]; people[key] = name;
+        const keys = Object.keys(people); keys.slice(0, Math.max(0, keys.length - 60)).forEach(k => delete people[k]);      // oldest first
+        store.set(KEYS.people, people);
+    }
+    function forgetPerson() { const people = getPeople(); delete people[resumeKey(currentResume())]; store.set(KEYS.people, people); }
+    const knownPeople = () => { const seen = []; getAnswers().forEach(a => { if (a.person && !seen.some(p => samePerson(p, a.person))) seen.push(a.person); }); return seen; };
+    const mine = (a) => !!a.person && samePerson(a.person, confirmedPerson());
+    // Answers saved before people existed. One that carried a plausible name keeps it as a label (still not
+    // offered until a resume is confirmed as that person's); the rest are unassigned and wait to be claimed.
+    const adoptAnswer = (a) => {
+        if (typeof a.person !== 'string') a.person = guessPerson(a.ownerName || '') ? String(a.ownerName).trim().slice(0, 60) : '';
+        delete a.owner; delete a.ownerName;
+        return a;
+    };
+    function migrateAnswers() {
+        const raw = store.get(KEYS.answers, []);
+        if (Array.isArray(raw) && raw.some(a => a && (typeof a.person !== 'string' || 'owner' in a))) store.set(KEYS.answers, raw.filter(Boolean).map(adoptAnswer));
+    }
     const niceDate = (iso) => { const d = new Date(iso + 'T12:00:00'); return isNaN(d) ? iso : `${d.getDate()} ${['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][d.getMonth()]} ${d.getFullYear()}`; };
     const getAnswers = () => { const v = store.get(KEYS.answers, []); return (Array.isArray(v) ? v : []).filter(a => a && typeof a.answer === 'string' && a.answer.trim() && typeof a.question === 'string'); };
     function setAnswers(list) { list.length ? store.set(KEYS.answers, list.slice(0, MAX_SAVED_ANSWERS)) : store.remove(KEYS.answers); renderAnswerRecord(); }
-    function rememberAnswers(facts) {
+    function rememberAnswers(facts, person) {
+        confirmPerson(person);
         let list = getAnswers();
         facts.forEach(f => {
             list = list.filter(a => !mine(a) || overlap(a.topic + ' ' + a.question, factTopic(f) + ' ' + f.question) < SAME_TOPIC);     // a newer answer on the same subject replaces the old one
-            list.unshift({ id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6), topic: factTopic(f), question: f.question, answer: f.answer, saved: todayISO(), owner: currentOwner(), ownerName: ownerName(state.resumeText) });
+            list.unshift({ id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6), topic: factTopic(f), question: f.question, answer: f.answer, saved: todayISO(), person });
         });
         setAnswers(list);
     }
@@ -1502,10 +1539,35 @@
     }
     function renderAnswerRecord() {
         const list = getAnswers(), box = $('answerRecord');
+        $('peopleList').innerHTML = knownPeople().map(p => `<option value="${escapeHtml(p)}"></option>`).join('');
         box.hidden = !list.length;
         if (!list.length) { box.open = false; return; }
         $('answerRecordTitle').textContent = `Your saved answers (${list.length})`;
-        $('answerRecordList').innerHTML = list.map(a => `<div class="answer-row"><div class="grow"><p class="body-sm muted">${escapeHtml(a.topic || a.question)}</p><p class="body-md">${escapeHtml(a.answer)}</p><p class="body-sm muted">${escapeHtml(['Saved ' + niceDate(a.saved || ''), a.ownerName ? 'for the resume of ' + a.ownerName : ''].filter(Boolean).join(', '))}</p></div><button class="icon-btn" type="button" data-answer-delete="${escapeHtml(a.id)}" aria-label="Delete this saved answer">${icon('trash')}</button></div>`).join('');
+        const loose = list.filter(a => !a.person).length;
+        $('answerUnassigned').hidden = !loose;
+        $('answerUnassignedText').textContent = `${loose} ${loose === 1 ? 'answer was' : 'answers were'} saved before answers were tied to a person. ${loose === 1 ? 'It is' : 'They are'} not offered to anyone until you say whose ${loose === 1 ? 'it is' : 'they are'}.`;
+        $('answerRecordList').innerHTML = list.map(a => `<div class="answer-row${a.person ? '' : ' loose'}"><div class="grow"><p class="body-sm muted">${escapeHtml(a.topic || a.question)}</p><p class="body-md">${escapeHtml(a.answer)}</p><p class="body-sm muted">${escapeHtml(['Saved ' + niceDate(a.saved || ''), a.person ? 'for ' + a.person : 'not assigned to anyone'].join(', '))}</p></div><button class="icon-btn" type="button" data-answer-delete="${escapeHtml(a.id)}" aria-label="Delete this saved answer">${icon('trash')}</button></div>`).join('');
+    }
+    function assignLooseAnswers() {
+        const name = $('assignName').value.replace(/\s+/g, ' ').trim().slice(0, 60);
+        if (!personKey(name)) { $('assignName').focus(); snackbar('Type the name of the person these answers belong to.'); return; }
+        setAnswers(getAnswers().map(a => (a.person ? a : Object.assign({}, a, { person: name }))));
+        $('assignName').value = '';
+        snackbar(`Assigned to ${name}. They are offered when you say a resume is ${name}'s.`, 6000);
+        $('gapFields').dataset.key = ''; syncGapUi();
+    }
+    // Saying whose resume this is, or taking it back. Either way the boxes are redrawn; taking it back empties
+    // them, so one person's saved answers are never left sitting in another person's form.
+    function choosePerson(name) { confirmPerson(name); $('gapFields').dataset.key = ''; syncGapUi(); track('answers_person_confirmed'); }
+    function clearPerson() { forgetPerson(); $('gapFields').innerHTML = ''; $('gapFields').dataset.key = ''; syncGapUi(); }
+    function renderGapWho() {
+        const who = $('gapWho'), person = confirmedPerson(), people = knownPeople();
+        const has = person && getAnswers().some(mine);
+        who.hidden = !(has || (!person && people.length));
+        if (who.hidden) return;
+        who.innerHTML = has
+            ? `<span>Saved answers for <b>${escapeHtml(person)}</b> are offered below.</span> <button class="link-btn" type="button" data-action="person-clear">This resume is someone else's</button>`
+            : `<span>This browser has saved answers. If this resume belongs to one of these people, choose the name to reuse them.</span><span class="chips">${people.map(p => `<button class="chip" type="button" data-person="${escapeHtml(p)}">${escapeHtml(p)}</button>`).join('')}</span>`;
     }
     function deleteAnswer(id) { setAnswers(getAnswers().filter(a => a.id !== id)); snackbar('Saved answer deleted.'); }
     function clearAnswers() { setAnswers([]); snackbar('All saved answers deleted from this browser.'); }
@@ -1549,12 +1611,14 @@
         $('gapEditBtn').dataset.action = mode === 'offer' ? 'stand-out' : 'gap-edit';
         const lead = qs.filter(q => q.kind === 'missing').length, extra = qs.length - lead;
         if (mode === 'ask') {
-            const key = state.runId + '|' + qs.map(q => q.question).join('|');
+            const key = state.runId + '|' + confirmedPerson() + '|' + qs.map(q => q.question).join('|');
+            renderGapWho();
             const fields = $('gapFields');
             if (fields.dataset.key !== key) {
                 fields.dataset.key = key;
                 const typed = {};       // what is already in the boxes survives the form growing
-                fields.querySelectorAll('textarea').forEach(t => { if (t.value.trim()) typed[t.dataset.q] = t.value; });
+                if (fields.dataset.run === String(state.runId)) fields.querySelectorAll('textarea').forEach(t => { if (t.value.trim()) typed[t.dataset.q] = t.value; });      // never carried from one job, or one person, to the next
+                fields.dataset.run = String(state.runId);
                 fields.innerHTML = qs.map((q, i) => {
                     const prior = typed[q.question] || (used.find(f => f.question === q.question) || {}).answer, saved = prior ? null : recallAnswer(q);
                     const head = lead && extra && (i === 0 || i === lead) ? `<p class="eyebrow gap-group">${i === 0 ? 'Missing from your resume' : 'Lines that would land harder with a fact'}</p>` : '';
@@ -1563,6 +1627,8 @@
                         <span class="body-sm muted" id="gapHint${i}">${saved ? `<b>From your saved answers${saved.saved ? ', ' + escapeHtml(niceDate(saved.saved)) : ''}.</b> Change it if it no longer holds. ` : ''}Unclassified details only, and nothing a customer would call confidential.</span></label>`;
                 }).join('');
                 $('gapKeep').checked = store.getRaw(KEYS.keepAnswers) !== '0';
+                $('gapPerson').value = confirmedPerson() || guessPerson(currentResume());
+                $('gapPersonField').hidden = !$('gapKeep').checked; $('gapPersonError').hidden = true;
                 $('gapError').hidden = true;
             }
             $('standOutBtn').hidden = !more.length || gate;
@@ -1604,9 +1670,11 @@
         gapQuestions().forEach((q, i) => { const box = $('gapAnswer' + i), v = box ? box.value.trim() : ''; if (v) facts.push({ requirement: q.requirement, line: q.line, question: q.question, answer: v.slice(0, MAX_ANSWER_CHARS) }); });
         $('gapError').hidden = facts.length > 0;
         if (!facts.length) { const first = $('gapAnswer0'); if (first) first.focus(); return; }
-        const keep = $('gapKeep').checked;
+        const keep = $('gapKeep').checked, person = $('gapPerson').value.replace(/\s+/g, ' ').trim().slice(0, 60);
+        $('gapPersonError').hidden = !keep || !!personKey(person);
+        if (keep && !personKey(person)) { $('gapPerson').focus(); return; }
         store.set(KEYS.keepAnswers, keep ? '1' : '0');
-        if (keep) rememberAnswers(facts);
+        if (keep) rememberAnswers(facts, person);
         state.confirmedFacts = facts; state.gapEditing = false; state.gapSkipped = false;
         track('gap_answers_sent', { count: facts.length, kept: keep });
         await buildTailoredResume($('gapSubmit'), { auto: true });
@@ -1662,42 +1730,71 @@
         $('tailorPeekLabel').hidden = !box.children.length;
     }
 
+    // A button held busy for a rewrite. Unlike withBusy, the idle label is remembered on the button itself, so a
+    // second hold on a button that is already busy can never record "Writing…" as the label to go back to.
+    function holdButton(button, busyLabel) {
+        const label = button.querySelector('span') || button;
+        if (button.dataset.idleLabel === undefined) button.dataset.idleLabel = label.textContent;
+        button.disabled = true; label.textContent = busyLabel;
+        let ic = button.querySelector('.icon'), spin = null;
+        if (ic) { spin = document.createElement('span'); spin.className = 'spinner'; ic.replaceWith(spin); }
+        return () => {
+            if (button.dataset.idleLabel === undefined) return;
+            button.disabled = false; label.textContent = button.dataset.idleLabel; delete button.dataset.idleLabel;
+            if (spin && spin.isConnected) spin.replaceWith(ic);
+        };
+    }
+
+    // Each rewrite owns a ticket. Changing jobs tears up the ticket: the page is free at once for the next job,
+    // and when the old request finally answers it finds it no longer owns anything and touches nothing.
+    function cancelTailoring() {
+        state.tailorTicket = (state.tailorTicket || 0) + 1;
+        clearInterval(state.tailorTimer);
+        if (state.tailorRelease) { state.tailorRelease(); state.tailorRelease = null; }
+        state.tailoring = false; state.updating = false;
+    }
+
     async function buildTailoredResume(button, opts = {}) {
         if (!state.analysis || state.tailoring) return;
         const facts = (state.confirmedFacts || []).map(f => ({ requirement: f.requirement, line: f.line || '', question: f.question, answer: f.answer }));
         const early = opts.auto && !facts.length && state.earlyTailor && state.earlyTailor.run === state.runId ? state.earlyTailor : null;
         state.earlyTailor = null;
+        const ticket = state.tailorTicket = (state.tailorTicket || 0) + 1, forJob = state.analysis;
+        const mine = () => ticket === state.tailorTicket && state.analysis === forJob;
         state.updating = !!state.tailored && facts.length > 0;
         state.tailoring = true; state.tailorError = false; state.tailorGate = null;
         state.tailorStarted = early ? early.started : Date.now();
         $('tailorPairs').innerHTML = '';
-        syncTailorUi(); tickTailor();
         clearInterval(state.tailorTimer); state.tailorTimer = setInterval(tickTailor, 1000);
-        const forJob = state.analysis;
+        if (state.tailorRelease) state.tailorRelease();
+        state.tailorRelease = holdButton(button, state.updating ? 'Updating your resume…' : 'Writing your resume…');
+        syncTailorUi(); tickTailor();
+        let resume = null, failure = null;
         try {
-            await withBusy(button, state.updating ? 'Updating your resume…' : 'Writing your resume…', async () => {
-                let resume = early ? await early.promise : null;
-                if (!resume) resume = (await api({ request_type: 'tailor_resume', job_description: state.jd, resume_text: state.resumeText, analysis_data: slimAnalysis(), military_transition: isMilitary(), confirmed_facts: facts })).resume;
-                if (state.analysis !== forJob) return;
-                const wasUpdate = state.updating;
-                state.tailored = resume;
-                state.appliedFacts = facts;
-                state.tailorVersion = facts.length ? 'updated' : 'first'; state.restoredFrom = null;
-                state.tailorSeconds = Math.max(1, Math.round((Date.now() - state.tailorStarted) / 1000));
-                state.tailorPairs = tailoredPairs(state.resumeText, resume);
-                state.tailorKeywords = keywordShift(forJob, state.resumeText, tailoredToText(resume));   // counted in the browser, instant
-                state.tailoring = false; state.updating = false;
-                renderTailored(resume, !!opts.auto);
-                celebrate(wasUpdate);
-                keepWithTrackedJob();
-                track('tailored_resume_built', { auto: !!opts.auto, answers: facts.length, seconds: state.tailorSeconds });
-            });
-        } finally {
-            clearInterval(state.tailorTimer);
-            state.tailoring = false; state.updating = false;
-            if (state.analysis === forJob && !state.tailored) state.tailorError = true;
-            syncTailorUi();
+            resume = early ? await early.promise : null;
+            if (!resume && mine()) resume = (await api({ request_type: 'tailor_resume', job_description: state.jd, resume_text: state.resumeText, analysis_data: slimAnalysis(), military_transition: isMilitary(), confirmed_facts: facts })).resume;
+        } catch (e) { failure = e; }
+        if (!mine()) return;          // the job changed while this was running: its result, its error and its cleanup all belong to nobody
+        clearInterval(state.tailorTimer);
+        if (state.tailorRelease) { state.tailorRelease(); state.tailorRelease = null; }
+        const wasUpdate = state.updating;
+        state.tailoring = false; state.updating = false;
+        if (resume && Array.isArray(resume.experience)) {
+            state.tailored = resume;
+            state.appliedFacts = facts;
+            state.tailorVersion = facts.length ? 'updated' : 'first'; state.restoredFrom = null;
+            state.tailorSeconds = Math.max(1, Math.round((Date.now() - state.tailorStarted) / 1000));
+            state.tailorPairs = tailoredPairs(state.resumeText, resume);
+            state.tailorKeywords = keywordShift(forJob, state.resumeText, tailoredToText(resume));   // counted in the browser, instant
+            renderTailored(resume, !!opts.auto);
+            celebrate(wasUpdate);
+            keepWithTrackedJob();
+            track('tailored_resume_built', { auto: !!opts.auto, answers: facts.length, seconds: state.tailorSeconds });
+        } else {
+            snackbar((failure && failure.message) || 'Something went wrong. Please try again.', 7000);
+            if (!state.tailored) state.tailorError = true;
         }
+        syncTailorUi();
     }
 
     // The moment the resume lands: the card and the line in the score box turn green once. No sound, no confetti.
@@ -1763,12 +1860,12 @@
         const a = state.analysis, built = !!state.tailored, k = state.tailorKeywords;
         const act = state.primaryAction, tailorLeads = act === 'apply' || act === 'fix_first';
         const meta = ACTIONS_META[act] || ACTIONS_META.fix_first;
-        const cta = !tailorLeads ? meta.cta : state.tailoring ? ['spark', 'Writing your resume…'] : built ? ['doc', 'Review tailored resume'] : ['spark', 'Tailor my resume to this job'];
+        const cta = !tailorLeads ? meta.cta : state.tailoring ? ['spark', 'Writing your resume…'] : built ? ['doc', 'See what changed'] : ['spark', 'Tailor my resume to this job'];
         $('primaryActionText').textContent = cta[1];
         $('primaryActionBtn').querySelector('use').setAttribute('href', '#i-' + cta[0]);
         $('primaryActionBtn').disabled = tailorLeads && !!state.tailoring;
         $('tailorActionBtn').hidden = !a || tailorLeads;
-        $('tailorActionText').textContent = built ? 'View tailored resume' : 'Tailor my resume to this job';
+        $('tailorActionText').textContent = built ? 'See what changed' : 'Tailor my resume to this job';
         $('emailActionBtn').hidden = !a || act !== 'apply';
         $('useTailoredBtn').hidden = !!state.isExample;
         const tailorBtn = $('tailorBtn');
@@ -1796,13 +1893,12 @@
         let mode = 'idle', pairs = [], title = '', text = '', note = '';
         if (state.tailoring) { mode = 'working'; title = state.updating ? 'Updating your resume…' : 'Tailoring your resume…'; text = state.updating ? 'Adding what you told us, in your words. Your first version stays available until the new one is ready.' : ''; }
         else if (built) {
-            mode = 'done'; pairs = (all.length ? all : sample).slice(0, 1);
+            mode = 'done';      // the resume itself fills the card: no sample pair, no summary in front of it
             const updated = state.tailorVersion === 'updated', openQs = !state.isExample && !updated && !state.gapSkipped ? missingQuestions().length : 0, sharper = !state.isExample && !updated && !openQs ? standOutQuestions().length : 0;
             title = state.isExample ? `A resume tailored to ${role}` : updated ? `Your updated resume, tailored to ${role}` : `Your resume, tailored to ${role}`;
             if (state.restoredFrom) note = `Saved with this job${state.restoredFrom === true ? '' : ' on ' + state.restoredFrom}. This is the version you reviewed.`;
-            else if (openQs) note = `Your first version is ready. Answer the ${openQs === 1 ? 'question' : ['two', 'three'][openQs - 2] + ' questions'} below to add relevant experience your resume may be missing.`;
-            else if (sharper) note = `Your first version is ready. "Help me stand out" below asks about ${sharper === 1 ? 'a line' : sharper + ' lines'} that would land harder with a number.`;
-            text = state.tailorUnmatched ? `${state.tailorUnmatched} ${state.tailorUnmatched === 1 ? 'line has' : 'lines have'} no close match in your original and ${state.tailorUnmatched === 1 ? 'is' : 'are'} highlighted: check ${state.tailorUnmatched === 1 ? 'it' : 'them'} before you send it.` : '';
+            state.askLabel = openQs ? `Answer ${openQs === 1 ? '1 question' : openQs + ' questions'} to strengthen it` : sharper ? 'Help me stand out' : '';
+            text = '';
         } else if (gate) {
             mode = 'gate'; title = 'One thing before the rewrite';
             text = `This posting requires ${gate.length === 1 ? gate[0] : gate.slice(0, -1).join(', ') + ' and ' + gate[gate.length - 1]}, and your resume does not show ${gate.length === 1 ? 'it' : 'them'}. Recruiters screen on ${gate.length === 1 ? 'this' : 'these'} first, and a rewrite cannot add what is not there. ${gapQuestions().length ? 'If you have it, say so below. Or tailor your resume as it stands.' : 'You can still tailor your resume for this job.'}`;
@@ -1818,19 +1914,20 @@
             if (mode !== 'working') $('tailorPairs').innerHTML = pairs.map(pairHtml).join('');      // while working, tickTailor adds the lines
             $('tailorTeaserText').innerHTML = (text ? `<span>${escapeHtml(text)}</span> ` : '') + (note ? `<strong>${escapeHtml(note)}</strong>` : '');
             $('tailorTeaserText').hidden = !(text || note);
-            // What the rewrite came to, as counted in this browser.
+            // Only what needs the reader's attention sits above the resume.
             const stats = [];
             if (mode === 'done') {
-                if (all.length) stats.push(['', `${all.length} ${all.length === 1 ? 'line' : 'lines'} reworded`]);
-                if (added.length) stats.push(['good', `${added.length} added from your answers`]);
-                if (k && k.now > k.was) stats.push(['', `${k.now} of ${k.total} posting keywords, up from ${k.was}`]);
-                stats.push(state.tailorUnmatched ? ['warn', `${state.tailorUnmatched} ${state.tailorUnmatched === 1 ? 'line' : 'lines'} to check`] : ['good', (state.appliedFacts || []).length ? 'Every line traced to your resume or your answers' : 'Every line traced to your resume']);
+                if (added.length) stats.push(['good', `${added.length} ${added.length === 1 ? 'line' : 'lines'} added from your answers`]);
+                if (state.tailorUnmatched) stats.push(['warn', `${state.tailorUnmatched} highlighted ${state.tailorUnmatched === 1 ? 'line' : 'lines'} to check before you send it`]);
             }
             $('tailorStats').hidden = !stats.length;
             $('tailorStats').innerHTML = stats.map(([cls, label]) => `<li class="${cls}">${escapeHtml(label)}</li>`).join('');
             document.querySelectorAll('.dl-label').forEach(el => { el.textContent = state.tailorVersion === 'updated' && !state.isExample ? 'Download updated Word (.docx)' : 'Download Word (.docx)'; });
             $('tailorLeadActions').hidden = mode !== 'done';
-            $('tailorViewBtn').textContent = all.length + added.length > 1 ? `See all ${all.length + added.length} changes and the full resume` : 'See the full resume';
+            $('tailorViewBtn').textContent = all.length + added.length ? `What changed (${all.length + added.length})` : 'What changed';
+            $('tailorAskBtn').hidden = mode !== 'done' || !state.askLabel || !!state.isExample || state.tailorVersion === 'updated';
+            $('tailorAskBtn').textContent = state.askLabel || '';
+            $('tailoredPreview').hidden = !(mode === 'done' || (mode === 'working' && state.updating && built));
             $('tailorGateActions').hidden = !(mode === 'gate' || mode === 'error' || mode === 'idle');
             $('tailorGateFind').hidden = mode !== 'gate';
             const startBtn = $('tailorStartBtn');
@@ -1851,7 +1948,7 @@
         if (!status.hidden) {
             status.dataset.mode = sMode;
             if (sMode !== 'working') $('tailorStatusText').textContent = sMode === 'done'
-                ? `${state.tailorVersion === 'updated' ? 'Your updated resume is ready' : 'Your tailored resume is ready'}${all.length ? `: ${all.length} ${all.length === 1 ? 'line' : 'lines'} reworded` : ''}${added.length ? `, ${added.length} added from your answers` : ''}. See it and download`
+                ? `${state.tailorVersion === 'updated' ? 'Your updated resume is ready' : 'Your tailored resume is ready'}${added.length ? `, ${added.length} added from your answers` : ''}. See it`
                 : sMode === 'gate' ? 'One thing to settle before the rewrite. See it' : 'The rewrite did not finish. Try it again';
         }
         const usedFacts = (state.appliedFacts || []).filter(f => f.used);
@@ -1868,7 +1965,7 @@
 
     function viewTailored() {
         showPanel('resume');
-        $('tailorBlock').scrollIntoView({ behavior: scrollBehavior(), block: 'start' });
+        $('results').scrollIntoView({ behavior: scrollBehavior(), block: 'start' });
         if (!state.tailored) buildTailoredResume($('tailorBtn'));
         track('tailored_resume_opened');
     }
@@ -2512,7 +2609,7 @@
     }
 
     function backupData() {
-        const data = { app: 'dibjobs', version: 1, exportedAt: new Date().toISOString(), resumes: getSavedResumes(), draft: store.getRaw(KEYS.draft), tracker: state.tracked, answers: getAnswers(), keepAnswers: store.getRaw(KEYS.keepAnswers) !== '0' };
+        const data = { app: 'dibjobs', version: 1, exportedAt: new Date().toISOString(), resumes: getSavedResumes(), draft: store.getRaw(KEYS.draft), tracker: state.tracked, answers: getAnswers(), people: getPeople(), keepAnswers: store.getRaw(KEYS.keepAnswers) !== '0' };
         downloadBlob(new Blob([JSON.stringify(data)], { type: 'application/json' }), `dib-jobs-backup-${todayISO()}.json`);
         snackbar('Backup downloaded. It contains your resumes, tailored versions and saved answers, so store it somewhere private.', 7000);
     }
@@ -2532,7 +2629,8 @@
             if (!persistTracker() || !store.set(KEYS.resumes, resumes)) throw new Error('storage');
             if (typeof data.draft === 'string' && data.draft.trim()) { store.set(KEYS.draft, data.draft); $('resumeText').value = data.draft; }
             if (Array.isArray(data.answers)) {      // backups made before saved answers existed leave the current ones alone
-                setAnswers(data.answers.filter(a => a && typeof a.answer === 'string' && a.answer.trim() && typeof a.question === 'string').map(a => ({ id: String(a.id || Math.random().toString(36).slice(2)), topic: String(a.topic || '').slice(0, 120), question: a.question.slice(0, 240), answer: a.answer.slice(0, MAX_ANSWER_CHARS), saved: String(a.saved || '').slice(0, 10), owner: String(a.owner || '').slice(0, 60), ownerName: String(a.ownerName || '').slice(0, 60) })));
+                setAnswers(data.answers.filter(a => a && typeof a.answer === 'string' && a.answer.trim() && typeof a.question === 'string').map(a => ({ id: String(a.id || Math.random().toString(36).slice(2)), topic: String(a.topic || '').slice(0, 120), question: a.question.slice(0, 240), answer: a.answer.slice(0, MAX_ANSWER_CHARS), saved: String(a.saved || '').slice(0, 10), person: typeof a.person === 'string' ? a.person.slice(0, 60) : undefined, ownerName: a.ownerName })).map(adoptAnswer));
+                if (data.people && typeof data.people === 'object' && !Array.isArray(data.people)) { const kept = {}; Object.keys(data.people).slice(-60).forEach(k => { if (typeof data.people[k] === 'string' && /^[a-z0-9.]{3,40}$/.test(k)) kept[k] = data.people[k].slice(0, 60); }); store.set(KEYS.people, kept); }
                 if (typeof data.keepAnswers === 'boolean') store.set(KEYS.keepAnswers, data.keepAnswers ? '1' : '0');
             }
             state.compareIds.clear();
@@ -2853,7 +2951,11 @@
         $('saveForm').addEventListener('submit', savePostingForLater);
         $('gapForm').addEventListener('submit', submitGapAnswers);
         WIDE.addEventListener('change', syncLayout);
+        ROOMY.addEventListener('change', foldEvidence); foldEvidence();
         syncLayout();
+        $('gapWho').addEventListener('click', (e) => { const b = e.target.closest('[data-person]'); if (b) choosePerson(b.dataset.person); });
+        $('gapKeep').addEventListener('change', () => { $('gapPersonField').hidden = !$('gapKeep').checked; $('gapPersonError').hidden = true; });
+        migrateAnswers();
         $('answerRecordList').addEventListener('click', (e) => { const b = e.target.closest('[data-answer-delete]'); if (b) deleteAnswer(b.dataset.answerDelete); });
         renderAnswerRecord();
         $('employerFilter').addEventListener('input', filterEmployers);
@@ -3342,8 +3444,11 @@ Harborlight Software is a fictional company used for this example.`;
         'quick-interview': () => toResults('interview'),
         'quick-outreach': () => quickOutreach(),
         'gap-skip': () => skipGapQuestions(),
+        'gap-jump': () => { if (!missingQuestions().length && standOutQuestions().length && !state.standOut) { openStandOut(); return; } $('gapCard').scrollIntoView({ behavior: scrollBehavior(), block: 'start' }); const box = $('gapAnswer0'); if (box) box.focus({ preventScroll: true }); },
         'gap-edit': () => editGapAnswers(),
         'answers-clear': () => clearAnswers(),
+        'answers-assign': () => assignLooseAnswers(),
+        'person-clear': () => clearPerson(),
         'view-tailored': () => viewTailored(),
         'go-email': () => goToEmail(),
         'download-docx': () => downloadTailoredDocx(),
