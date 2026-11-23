@@ -32,7 +32,7 @@
     <link rel="apple-touch-icon" href="apple-touch-icon.png">
     <link rel="manifest" href="site.webmanifest">
     <link rel="preload" href="assets/fonts/inter-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="stylesheet" href="assets/app.css?v=48">
+    <link rel="stylesheet" href="assets/app.css?v=49">
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-N10ZLNFZHE"></script>
     <script>
@@ -192,6 +192,7 @@
                             <p class="verdict-label" id="recAction" aria-live="polite"></p>
                         </div>
                         <p class="verdict-explain" id="recHeadline"></p>
+                        <p class="req-count" id="reqCount" hidden></p>
                         <button class="tailor-status" type="button" id="tailorStatus" data-action="tailor-jump" hidden><span class="ts-mark" id="tailorStatusMark" aria-hidden="true"></span><span class="grow" id="tailorStatusText" aria-live="polite"></span><svg class="icon" aria-hidden="true"><use href="#i-chevron"/></svg><span class="ts-bar" aria-hidden="true"><span id="tailorStatusBar"></span></span></button>
                         <p class="assess-note" id="assessNote" hidden><span id="assessText"></span> <button class="link-btn" type="button" id="rescoreBtn" data-action="rescore"><span>Re-score with the updated resume</span></button></p>
                         <div class="req-list" id="recEvidence" hidden></div>
@@ -236,6 +237,7 @@
                         <p class="body-sm" id="gapText"></p>
                         <form class="stack" id="gapForm" novalidate>
                             <div class="stack" id="gapFields"></div>
+                            <button class="btn stand-out-more" type="button" id="standOutBtn" data-action="stand-out" hidden><svg class="icon"><use href="#i-spark"/></svg><span id="standOutText">Help me stand out</span></button>
                             <p class="field-error" id="gapError" role="alert" hidden>Answer at least one question, or choose "Skip these".</p>
                             <label class="keep-row"><input type="checkbox" class="checkbox" id="gapKeep" checked><span>Keep my answers in this browser, so the next job can reuse them</span></label>
                             <div class="row">
@@ -245,6 +247,16 @@
                         </form>
                         <ul class="gap-list" id="gapList" hidden></ul>
                         <div class="row" id="gapAfter" hidden><button class="btn" type="button" id="gapEditBtn" data-action="gap-edit">Change my answers</button></div>
+                    </div>
+
+                    <div class="quick" id="quickPrompts" hidden>
+                        <p class="eyebrow">What next</p>
+                        <div class="chips">
+                            <button class="chip" type="button" id="quickStandOut" data-action="stand-out"><svg class="icon"><use href="#i-spark"/></svg>Help me stand out</button>
+                            <button class="chip" type="button" data-action="quick-profile"><svg class="icon"><use href="#i-edit"/></svg>Write my LinkedIn headline</button>
+                            <button class="chip" type="button" data-action="quick-interview"><svg class="icon"><use href="#i-search"/></svg>What will they ask me?</button>
+                            <button class="chip" type="button" data-action="quick-outreach"><svg class="icon"><use href="#i-send"/></svg>Draft a note to the recruiter</button>
+                        </div>
                     </div>
 
                     <div class="row" id="actionBar">
@@ -494,6 +506,23 @@
                             <h3 class="title-md" id="tailoredPreviewTitle">The full resume</h3>
                             <div class="paper resume-preview" id="tailoredPreview"></div>
                             <p class="body-sm muted">Read every line before you send it. The AI is told to use only your resume and your answers, but you are the one signing it.</p>
+                        </div>
+                    </div>
+
+                    <div class="section" id="profileBlock">
+                        <div class="row between">
+                            <div class="grow" style="min-width:220px">
+                                <h3 class="section-title">Your LinkedIn profile, for roles like this</h3>
+                                <p class="body-md muted">Recruiters search LinkedIn before they read a resume. This writes a headline and an About section from the same facts as your resume. It never names the employer or says you are looking.</p>
+                            </div>
+                            <button class="btn" id="profileBtn" data-action="linkedin-profile"><svg class="icon"><use href="#i-spark"/></svg><span>Write headline and About</span></button>
+                        </div>
+                        <div class="stack" id="profileOut" hidden>
+                            <div class="rewrite" style="margin-top:16px"><div class="after"><span class="tag">Headline</span><span id="profileHeadline"></span></div>
+                                <div class="foot"><span id="profileHeadlineCount"></span><button class="btn text" data-copy="#profileHeadline"><svg class="icon"><use href="#i-copy"/></svg>Copy</button></div></div>
+                            <div class="rewrite"><div class="after"><span class="tag">About</span><span id="profileAbout" style="white-space:pre-line"></span></div>
+                                <div class="foot"><span id="profileAboutCount"></span><button class="btn text" data-copy="#profileAbout"><svg class="icon"><use href="#i-copy"/></svg>Copy</button></div></div>
+                            <p class="body-sm muted" id="profileNote"></p>
                         </div>
                     </div>
 
@@ -822,7 +851,7 @@
     <button class="icon-btn" data-action="dismiss-snackbar" aria-label="Dismiss"><svg class="icon"><use href="#i-close"/></svg></button>
 </div>
 
-<script src="assets/files.js?v=48"></script>
-<script src="assets/app.js?v=48"></script>
+<script src="assets/files.js?v=49"></script>
+<script src="assets/app.js?v=49"></script>
 </body>
 </html>

@@ -941,3 +941,15 @@ p, li { text-wrap: pretty; }
 .tailor-status[data-mode="working"] .ts-bar { display: block; }
 .tailor-status[data-mode="working"] { padding-bottom: 14px; }
 #tailorTeaserText > span, #tailorTeaserText > strong { display: block; } #tailorTeaserText > span + strong { margin-top: 8px; } #tailorTeaserText > strong { font-weight: 650; }
+
+/* v49: the plain count, stand-out questions, quick prompts */
+.req-count { margin-top: 14px; font: 500 16px/23px var(--font); letter-spacing: -0.01em; }
+.req-count b { font-weight: 800; }
+.gap-group { margin-top: 12px; }
+.gap-group:first-child { margin-top: 0; }
+.gap-line { display: block; margin-bottom: 8px; padding: 8px 12px; border-radius: var(--r-sm); background: var(--page); font: 500 14px/20px var(--font); color: var(--muted); }
+.gap-card .btn.stand-out-more { align-self: flex-start; background: var(--page); text-align: left; white-space: normal; height: auto; min-height: 44px; padding-top: 10px; padding-bottom: 10px; }
+.gap-card[data-mode="offer"] .btn { background: var(--action); }
+.quick { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
+.quick .chip { font-weight: 600; }
+@media print { .quick { display: none !important; } }

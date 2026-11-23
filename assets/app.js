@@ -1067,7 +1067,8 @@
     function resetGenerated() {
         state.tailored = null; state.tailorKeywords = null; state.tailorPairs = null; state.tailorUnmatched = 0; state.tailorAdded = []; state.tailorGate = null; state.tailorError = false;
         state.confirmedFacts = []; state.appliedFacts = []; state.gapSkipped = false; state.gapEditing = false;
-        state.tailorVersion = ''; state.rescored = null; state.restoredFrom = null; clearInterval(state.tailorTimer); state.chat = [];
+        state.tailorVersion = ''; state.rescored = null; state.restoredFrom = null; clearInterval(state.tailorTimer);
+        state.standOut = false; state.profile = null; renderProfile(); state.chat = [];
         $('tailoredWrap').hidden = true;
         syncTailorUi();
         $('linkedinList').innerHTML = '';
@@ -1214,7 +1215,19 @@
     // The requirement list in the answer: screen-out checks first with a one-line tally, then the rest.
     const sameReq = (a, b) => String(a).toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim() === String(b).toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
     const suppliedFor = (r) => !state.rescored && (state.appliedFacts || []).some(f => f.used && f.requirement && sameReq(f.requirement, r.requirement));
-    function refreshEvidence() { if (state.analysis) { const reqs = keyRequirements(state.analysis); $('recEvidence').hidden = !reqs.length; $('recEvidence').innerHTML = requirementList(reqs); } }
+    function refreshEvidence() { if (state.analysis) { const reqs = keyRequirements(state.analysis); $('recEvidence').hidden = !reqs.length; $('recEvidence').innerHTML = requirementList(reqs); renderReqCount(reqs); } }
+    // The plain count: how many of the posting's required qualifications the resume shows. Only "Met" counts;
+    // a requirement that is partly shown or needs confirming is named as that, never rounded up.
+    function renderReqCount(rows) {
+        const required = rows.filter(r => r.type === 'required'), set = required.length >= 2 ? required : rows, word = required.length >= 2 ? 'required qualifications' : 'listed qualifications';
+        const el = $('reqCount');
+        el.hidden = set.length < 2;
+        if (el.hidden) return;
+        const n = (st) => set.filter(r => r.status === st).length, met = n('met');
+        const rest = [[n('partial'), 'partly shown'], [n('verify'), 'to confirm'], [n('missing'), 'not shown']].filter(x => x[0]).map(x => `${x[0]} ${x[1]}`);
+        el.innerHTML = `<b>You meet ${met} of the ${set.length} ${word}.</b>${rest.length ? ' <span>' + escapeHtml(rest.join(', ')) + '.</span>' : ''}`;
+        el.dataset.all = met === set.length ? '1' : '0';
+    }
     function requirementList(rows) {
         if (!rows.length) return '';
         const knock = rows.filter(r => r.knockout), rest = rows.filter(r => !r.knockout);
@@ -1292,6 +1305,7 @@
         const reqs = keyRequirements(data);
         $('recEvidence').hidden = !reqs.length;
         $('recEvidence').innerHTML = requirementList(reqs);
+        renderReqCount(reqs);
 
         const reasons = (Array.isArray(r.reasons) ? r.reasons : []).filter(x => typeof x === 'string' && x.trim()).slice(0, 3);
         $('recReasons').innerHTML = reasons.map(x => `<li>${escapeHtml(x)}</li>`).join('');
@@ -1448,14 +1462,14 @@
     function rememberAnswers(facts) {
         let list = getAnswers();
         facts.forEach(f => {
-            list = list.filter(a => !mine(a) || overlap(a.topic + ' ' + a.question, f.requirement + ' ' + f.question) < SAME_TOPIC);     // a newer answer on the same subject replaces the old one
-            list.unshift({ id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6), topic: f.requirement, question: f.question, answer: f.answer, saved: todayISO(), owner: currentOwner(), ownerName: ownerName(state.resumeText) });
+            list = list.filter(a => !mine(a) || overlap(a.topic + ' ' + a.question, factTopic(f) + ' ' + f.question) < SAME_TOPIC);     // a newer answer on the same subject replaces the old one
+            list.unshift({ id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6), topic: factTopic(f), question: f.question, answer: f.answer, saved: todayISO(), owner: currentOwner(), ownerName: ownerName(state.resumeText) });
         });
         setAnswers(list);
     }
     function recallAnswer(q) {
         let best = null, score = SAME_TOPIC;
-        getAnswers().filter(mine).forEach(a => { const s = overlap(a.topic + ' ' + a.question, q.requirement + ' ' + q.question); if (s >= score) { best = a; score = s; } });
+        getAnswers().filter(mine).forEach(a => { const s = overlap(a.topic + ' ' + a.question, factTopic(q) + ' ' + q.question); if (s >= score) { best = a; score = s; } });
         return best;
     }
     function renderAnswerRecord() {
@@ -1468,12 +1482,22 @@
     function deleteAnswer(id) { setAnswers(getAnswers().filter(a => a.id !== id)); snackbar('Saved answer deleted.'); }
     function clearAnswers() { setAnswers([]); snackbar('All saved answers deleted from this browser.'); }
 
-    const gapQuestions = () => {
+    // Two kinds of question. "Missing": the posting asks for it and the resume does not show it. "Stronger": the
+    // line is there but has no number, customer or result. The second kind waits behind "Help me stand out".
+    const missingQuestions = () => {
         const a = state.analysis;
         return (a && Array.isArray(a.evidence_questions) ? a.evidence_questions : [])
             .filter(q => q && typeof q.question === 'string' && q.question.trim())
-            .map(q => ({ requirement: String(q.requirement || '').trim(), question: q.question.trim() })).slice(0, 3);
+            .map(q => ({ kind: 'missing', requirement: String(q.requirement || '').trim(), line: '', question: q.question.trim() })).slice(0, 3);
     };
+    const standOutQuestions = () => {
+        const a = state.analysis;
+        return (a && Array.isArray(a.stand_out_questions) ? a.stand_out_questions : [])
+            .filter(q => q && typeof q.question === 'string' && q.question.trim() && typeof q.line === 'string' && q.line.trim())
+            .map(q => ({ kind: 'stronger', requirement: '', line: q.line.trim(), question: q.question.trim() })).slice(0, 3);
+    };
+    const gapQuestions = () => missingQuestions().concat(state.standOut ? standOutQuestions() : []);     // the ones on the form now
+    const factTopic = (f) => f.requirement || f.line || f.question;
 
     // The card under the rewrite. Its fields are drawn once per job, so typing is never interrupted by a redraw.
     function syncGapUi() {
@@ -1481,32 +1505,43 @@
         const gate = !built && !state.tailoring && Array.isArray(state.tailorGate);
         const used = state.appliedFacts || [];
         let mode = '';
+        const more = state.isExample || state.standOut ? [] : standOutQuestions();
         if (state.analysis && !state.batch && qs.length && (built || gate)) {
             mode = state.isExample ? 'sample' : (used.length && !state.gapEditing) ? 'done' : state.gapSkipped ? 'skipped' : 'ask';
+        } else if (state.analysis && !state.batch && !state.isExample && built && more.length) {
+            mode = 'offer';       // nothing is missing, but some lines could carry more
         }
         card.hidden = !mode;
         if (!mode) return;
         card.dataset.mode = mode;
         const n = qs.length, things = n === 1 ? 'One thing' : `${['Two', 'Three'][n - 2]} things`;
         $('gapForm').hidden = mode !== 'ask';
-        $('gapList').hidden = mode === 'ask' || mode === 'skipped';
+        $('gapList').hidden = mode === 'ask' || mode === 'skipped' || mode === 'offer';
         $('gapAfter').hidden = mode === 'ask' || mode === 'sample';
+        $('gapEditBtn').dataset.action = mode === 'offer' ? 'stand-out' : 'gap-edit';
+        const lead = qs.filter(q => q.kind === 'missing').length, extra = qs.length - lead;
         if (mode === 'ask') {
             const key = state.runId + '|' + qs.map(q => q.question).join('|');
             const fields = $('gapFields');
             if (fields.dataset.key !== key) {
                 fields.dataset.key = key;
+                const typed = {};       // what is already in the boxes survives the form growing
+                fields.querySelectorAll('textarea').forEach(t => { if (t.value.trim()) typed[t.dataset.q] = t.value; });
                 fields.innerHTML = qs.map((q, i) => {
-                    const prior = (used.find(f => f.question === q.question) || {}).answer, saved = prior ? null : recallAnswer(q);
-                    return `<label class="field sm gap-field"><span class="field-label">${escapeHtml(q.question)}</span>
-                        <textarea id="gapAnswer${i}" rows="2" maxlength="${MAX_ANSWER_CHARS}" placeholder="Leave blank if this is not true for you" aria-describedby="gapHint${i}">${escapeHtml(prior || (saved ? saved.answer : ''))}</textarea>
+                    const prior = typed[q.question] || (used.find(f => f.question === q.question) || {}).answer, saved = prior ? null : recallAnswer(q);
+                    const head = lead && extra && (i === 0 || i === lead) ? `<p class="eyebrow gap-group">${i === 0 ? 'Missing from your resume' : 'Lines that would land harder with a fact'}</p>` : '';
+                    return `${head}<label class="field sm gap-field">${q.line ? `<span class="gap-line">Your resume says: ${escapeHtml(q.line)}</span>` : ''}<span class="field-label">${escapeHtml(q.question)}</span>
+                        <textarea id="gapAnswer${i}" data-q="${escapeHtml(q.question)}" rows="2" maxlength="${MAX_ANSWER_CHARS}" placeholder="${q.line ? 'Leave blank to keep the line as it is' : 'Leave blank if this is not true for you'}" aria-describedby="gapHint${i}">${escapeHtml(prior || (saved ? saved.answer : ''))}</textarea>
                         <span class="body-sm muted" id="gapHint${i}">${saved ? `<b>From your saved answers${saved.saved ? ', ' + escapeHtml(niceDate(saved.saved)) : ''}.</b> Change it if it no longer holds. ` : ''}Unclassified details only, and nothing a customer would call confidential.</span></label>`;
                 }).join('');
                 $('gapKeep').checked = store.getRaw(KEYS.keepAnswers) !== '0';
                 $('gapError').hidden = true;
             }
-            $('gapTitle').textContent = `${things} this posting asks for that your resume does not show`;
-            $('gapText').textContent = gate
+            $('standOutBtn').hidden = !more.length || gate;
+            $('standOutText').textContent = `Help me stand out: ${more.length} more ${more.length === 1 ? 'question' : 'questions'} about lines you already have`;
+            $('gapTitle').textContent = lead ? `${lead === 1 ? 'One thing' : ['Two', 'Three'][lead - 2] + ' things'} this posting asks for that your resume does not show`
+                : `${extra === 1 ? 'One of your lines' : ['Two', 'Three'][extra - 2] + ' of your lines'} would land harder with a fact`;
+            $('gapText').textContent = !lead ? 'Each of these matters for this posting and has no number, customer or result. Add the fact in a sentence and the line is rewritten with it, marked so you can find it.' : gate
                 ? `If ${n === 1 ? 'it is' : 'any of these are'} true for you, say so in a sentence and it goes into the rewrite. Write only what you would say to a recruiter.`
                 : `If ${n === 1 ? 'it is' : 'any of these are'} true for you, say so in a sentence and it goes into your resume, marked so you can find it. Write only what you would say to a recruiter.`;
             const btn = $('gapSubmit');
@@ -1517,11 +1552,15 @@
             $('gapTitle').textContent = !u ? (used.length === 1 ? 'Your answer did not change the resume' : 'Your answers did not change the resume')
                 : used.length === 1 ? 'Your resume now uses your answer' : u === used.length ? `Your resume now uses your ${u} answers` : `Your resume now uses ${u} of your ${used.length} answers`;
             $('gapText').textContent = u ? 'Each line built from an answer is marked "From your answer" in the full resume.' : 'Nothing was added, so nothing is marked. An answer has to state experience to be written in.';
-            $('gapList').innerHTML = used.map(f => `<li class="${f.used ? 'used' : 'unused'}"><span class="body-sm muted">${escapeHtml(f.requirement || f.question)}</span><span>${escapeHtml(f.answer)}</span><span class="gap-result">${f.used ? 'Added to your resume' : 'Not added: this answer gave no experience to write in. Change it if there is more to say.'}</span></li>`).join('');
+            $('gapList').innerHTML = used.map(f => `<li class="${f.used ? 'used' : 'unused'}"><span class="body-sm muted">${escapeHtml(factTopic(f))}</span><span>${escapeHtml(f.answer)}</span><span class="gap-result">${f.used ? 'Added to your resume' : 'Not added: this answer gave no experience to write in. Change it if there is more to say.'}</span></li>`).join('');
             $('gapEditBtn').textContent = 'Change my answers';
+        } else if (mode === 'offer') {
+            $('gapTitle').textContent = 'Your resume covers what this posting asks for';
+            $('gapText').textContent = `${more.length === 1 ? 'One line' : ['Two', 'Three'][more.length - 2] + ' lines'} that ${more.length === 1 ? 'matters' : 'matter'} for this job ${more.length === 1 ? 'has' : 'have'} no number, customer or result. Answer ${more.length === 1 ? 'a question' : 'a few questions'} and ${more.length === 1 ? 'it is' : 'they are'} rewritten with the fact.`;
+            $('gapEditBtn').textContent = 'Help me stand out';
         } else if (mode === 'skipped') {
             $('gapTitle').textContent = `${n} ${n === 1 ? 'question' : 'questions'} skipped`;
-            $('gapText').textContent = 'The posting asks for things your resume does not show. You can still answer and update the resume.';
+            $('gapText').textContent = lead ? 'The posting asks for things your resume does not show. You can still answer and update the resume.' : 'Some of your lines could carry a number or a name. You can still answer and update the resume.';
             $('gapEditBtn').textContent = n === 1 ? 'Answer it' : 'Answer them';
         } else {
             $('gapTitle').textContent = 'Then it asks about what is missing';
@@ -1534,7 +1573,7 @@
         e.preventDefault();
         if (state.tailoring || !state.analysis) return;
         const facts = [];
-        gapQuestions().forEach((q, i) => { const box = $('gapAnswer' + i), v = box ? box.value.trim() : ''; if (v) facts.push({ requirement: q.requirement, question: q.question, answer: v.slice(0, MAX_ANSWER_CHARS) }); });
+        gapQuestions().forEach((q, i) => { const box = $('gapAnswer' + i), v = box ? box.value.trim() : ''; if (v) facts.push({ requirement: q.requirement, line: q.line, question: q.question, answer: v.slice(0, MAX_ANSWER_CHARS) }); });
         $('gapError').hidden = facts.length > 0;
         if (!facts.length) { const first = $('gapAnswer0'); if (first) first.focus(); return; }
         const keep = $('gapKeep').checked;
@@ -1543,6 +1582,18 @@
         state.confirmedFacts = facts; state.gapEditing = false; state.gapSkipped = false;
         track('gap_answers_sent', { count: facts.length, kept: keep });
         await buildTailoredResume($('gapSubmit'), { auto: true });
+    }
+    // "Help me stand out": bring the second kind of question onto the form, keeping anything already typed.
+    function openStandOut() {
+        if (!state.analysis || state.isExample) return;
+        if (!standOutQuestions().length) { snackbar('Every line that matters for this job is already specific.'); return; }
+        const first = missingQuestions().length;
+        state.standOut = true; state.gapSkipped = false;
+        if ((state.appliedFacts || []).length) { state.gapEditing = true; }
+        syncTailorUi();
+        $('gapCard').scrollIntoView({ behavior: scrollBehavior(), block: 'start' });
+        const box = $('gapAnswer' + first); if (box) box.focus({ preventScroll: true });
+        track('stand_out_opened');
     }
     function skipGapQuestions() { state.gapSkipped = true; syncGapUi(); track('gap_questions_skipped'); }
     function editGapAnswers() {
@@ -1585,7 +1636,7 @@
 
     async function buildTailoredResume(button, opts = {}) {
         if (!state.analysis || state.tailoring) return;
-        const facts = (state.confirmedFacts || []).map(f => ({ requirement: f.requirement, question: f.question, answer: f.answer }));
+        const facts = (state.confirmedFacts || []).map(f => ({ requirement: f.requirement, line: f.line || '', question: f.question, answer: f.answer }));
         const early = opts.auto && !facts.length && state.earlyTailor && state.earlyTailor.run === state.runId ? state.earlyTailor : null;
         state.earlyTailor = null;
         state.updating = !!state.tailored && facts.length > 0;
@@ -1718,10 +1769,11 @@
         if (state.tailoring) { mode = 'working'; title = state.updating ? 'Updating your resume…' : 'Tailoring your resume…'; text = state.updating ? 'Adding what you told us, in your words. Your first version stays available until the new one is ready.' : ''; }
         else if (built) {
             mode = 'done'; pairs = (all.length ? all : sample).slice(0, 1);
-            const updated = state.tailorVersion === 'updated', openQs = !state.isExample && !updated && !state.gapSkipped ? gapQuestions().length : 0;
+            const updated = state.tailorVersion === 'updated', openQs = !state.isExample && !updated && !state.gapSkipped ? missingQuestions().length : 0, sharper = !state.isExample && !updated && !openQs ? standOutQuestions().length : 0;
             title = state.isExample ? `A resume tailored to ${role}` : updated ? `Your updated resume, tailored to ${role}` : `Your resume, tailored to ${role}`;
             if (state.restoredFrom) note = `Saved with this job${state.restoredFrom === true ? '' : ' on ' + state.restoredFrom}. This is the version you reviewed.`;
             else if (openQs) note = `Your first version is ready. Answer the ${openQs === 1 ? 'question' : ['two', 'three'][openQs - 2] + ' questions'} below to add relevant experience your resume may be missing.`;
+            else if (sharper) note = `Your first version is ready. "Help me stand out" below asks about ${sharper === 1 ? 'a line' : sharper + ' lines'} that would land harder with a number.`;
             text = state.tailorUnmatched ? `${state.tailorUnmatched} ${state.tailorUnmatched === 1 ? 'line has' : 'lines have'} no close match in your original and ${state.tailorUnmatched === 1 ? 'is' : 'are'} highlighted: check ${state.tailorUnmatched === 1 ? 'it' : 'them'} before you send it.` : '';
         } else if (gate) {
             mode = 'gate'; title = 'One thing before the rewrite';
@@ -1781,6 +1833,9 @@
             $('rescoreBtn').hidden = !!state.rescored;
         }
         syncGapUi();
+        const quick = $('quickPrompts');
+        quick.hidden = !state.analysis || !!state.batch || !!state.isExample || !built;
+        $('quickStandOut').hidden = state.standOut || !standOutQuestions().length;
     }
 
     function viewTailored() {
@@ -1968,6 +2023,34 @@
         });
     }
 
+    // A headline and an About section for roles like this one, from the same facts as the tailored resume.
+    function renderProfile() {
+        const p = state.profile;
+        $('profileOut').hidden = !p;
+        $('profileBtn').querySelector('span').textContent = p ? 'Write them again' : 'Write headline and About';
+        if (!p) return;
+        $('profileHeadline').textContent = p.headline; $('profileAbout').textContent = p.about;
+        $('profileHeadlineCount').textContent = `${p.headline.length} of 220 characters`;
+        $('profileAboutCount').textContent = `${p.about.trim().split(/\s+/).length} words`;
+        const kw = arr(p.keywords).filter(k => typeof k === 'string');
+        $('profileNote').textContent = (kw.length ? `Covers what recruiters search for: ${kw.join(', ')}. ` : '') + 'Read it before you paste it. It is written for this kind of role, so it does not name the employer.';
+    }
+    async function writeProfile(button) {
+        if (!state.analysis || state.isExample) return;
+        await withBusy(button || $('profileBtn'), 'Writing…', async () => {
+            const forJob = state.analysis;
+            const data = await api({ request_type: 'linkedin_profile', job_description: state.jd, resume_text: state.resumeText, military_transition: isMilitary(), confirmed_facts: (state.appliedFacts || []).map(f => ({ requirement: f.requirement, line: f.line || '', question: f.question, answer: f.answer })) });
+            if (state.analysis !== forJob || !data.profile) return;
+            state.profile = data.profile;
+            renderProfile(); keepWithTrackedJob();
+            track('linkedin_profile_written');
+        });
+        renderProfile();        // after the button is handed back, so its label reads "Write them again"
+    }
+    const toResults = (panel, el) => { showPanel(panel); (el || $('results')).scrollIntoView({ behavior: scrollBehavior(), block: 'start' }); };
+    function quickProfile() { toResults('resume', $('profileBlock')); if (!state.profile) writeProfile($('profileBtn')); }
+    function quickOutreach() { toResults('outreach'); if (!$('linkedinList').children.length) writeLinkedInNotes($('linkedinBtn')); }
+
     async function writeIntroEmail(button) {
         if (!state.analysis) return;
         await withBusy(button, 'Writing…', async () => {
@@ -2093,7 +2176,7 @@
     // What gets kept with a saved job: the resume as tailored, the resume it was written from, and the answers
     // that went into it. Reopening the job brings back the version that was reviewed and downloaded.
     const deliverable = () => state.tailored && !state.isExample
-        ? { tailored: state.tailored, facts: (state.appliedFacts || []).map(f => ({ requirement: f.requirement, question: f.question, answer: f.answer, used: !!f.used })), resume: state.resumeText, tailoredAt: todayISO(), rescoredFrom: state.rescored ? state.rescored.before : null }
+        ? { tailored: state.tailored, facts: (state.appliedFacts || []).map(f => ({ requirement: f.requirement, line: f.line || '', question: f.question, answer: f.answer, used: !!f.used })), profile: state.profile || null, resume: state.resumeText, tailoredAt: todayISO(), rescoredFrom: state.rescored ? state.rescored.before : null }
         : {};
     function keepWithTrackedJob() {
         const job = state.trackedId != null ? findJob(state.trackedId) : null;
@@ -2326,6 +2409,8 @@
             state.appliedFacts = (Array.isArray(job.facts) ? job.facts : []).map(f => Object.assign({}, f));
             state.confirmedFacts = state.appliedFacts.map(f => Object.assign({}, f));
             state.tailorVersion = state.appliedFacts.length ? 'updated' : 'first';
+            state.standOut = state.appliedFacts.some(f => f.line);
+            state.profile = job.profile && typeof job.profile.headline === 'string' ? job.profile : null; renderProfile();
             state.rescored = typeof job.rescoredFrom === 'number' ? { before: job.rescoredFrom } : null;
             state.restoredFrom = job.tailoredAt ? niceDate(job.tailoredAt) : true;
             state.tailorPairs = tailoredPairs(state.resumeText, job.tailored);
@@ -3220,6 +3305,11 @@ Harborlight Software is a fictional company used for this example.`;
         'tailor-start': () => startTailoring(),
         'tailor-jump': () => { $('tailorTeaser').scrollIntoView({ behavior: scrollBehavior(), block: 'start' }); if (state.tailorError && !state.tailoring) startTailoring(); },
         'rescore': () => rescoreUpdated(),
+        'stand-out': () => openStandOut(),
+        'linkedin-profile': (el) => writeProfile(el),
+        'quick-profile': () => quickProfile(),
+        'quick-interview': () => toResults('interview'),
+        'quick-outreach': () => quickOutreach(),
         'gap-skip': () => skipGapQuestions(),
         'gap-edit': () => editGapAnswers(),
         'answers-clear': () => clearAnswers(),
