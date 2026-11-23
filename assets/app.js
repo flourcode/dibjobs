@@ -211,6 +211,7 @@
         document.querySelectorAll('main > .view').forEach(v => { v.hidden = v.id !== 'view-' + name; });
         if (from !== to) animateIn($('view-' + name), to > from ? 'enter-l' : 'enter-r');
         window.scrollTo({ top: 0 });
+        syncLayout();
         if (name === 'tracker') renderTracker();
         try { history.replaceState(null, '', VIEW_HASH[name] || location.pathname + location.search); } catch (e) { /* ignore */ }
     }
@@ -615,6 +616,31 @@
     }
 
     // The inputs never move; the answer column swaps between empty, loading and ready.
+    // ---- Wide windows: a supporting-pane layout once a result is showing ----
+    // Below 1100px, and before there is a result, the page is one column (or the form beside the result). On a wide
+    // window with a single result on screen, the form folds to one line, the work (the resume, the questions, the
+    // detail tabs) takes the main pane, and the score box stays beside it as the page scrolls.
+    const WIDE = window.matchMedia('(min-width: 1100px)');
+    const resultTop = () => (document.body.classList.contains('desk-result') ? $('stage') : $('resultCol'));     // the result column has no box of its own in the wide layout
+    function syncLayout() {
+        const calc = document.querySelector('.calc'), stage = $('stage');
+        const desk = WIDE.matches && calc.classList.contains('is-ready') && !calc.classList.contains('editing') && currentView() === 'analyze';
+        document.body.classList.toggle('desk-result', desk);
+        stage.classList.toggle('desk', desk);
+        // The role facts and the feedback question follow the detail tabs in the wide layout, so they are moved,
+        // not just restyled: reading order and tab order stay the same as what is seen.
+        const snap = $('roleSnapshot'), fb = $('feedback');
+        if (desk && snap.parentElement !== stage) { stage.appendChild(snap); stage.appendChild(fb); }
+        else if (!desk && snap.parentElement === stage) { $('verdictWrap').appendChild(snap); $('verdictWrap').appendChild(fb); }
+        // The folded form is drawn above everything in the wide layout, so it comes first in the markup there too.
+        const inputs = $('inputs'), col = $('resultCol');
+        if (desk && calc.firstElementChild !== inputs) calc.insertBefore(inputs, col);
+        else if (!desk && calc.lastElementChild !== inputs) calc.appendChild(inputs);
+        // In the wide layout the score box is a pane that can scroll by itself, so it has to be reachable by keyboard.
+        const v = $('verdict');
+        if (desk) { v.tabIndex = 0; v.setAttribute('role', 'region'); v.setAttribute('aria-label', 'Fit score and requirements'); }
+        else { v.removeAttribute('tabindex'); v.removeAttribute('role'); v.removeAttribute('aria-label'); }
+    }
     function setResultState(mode) {
         $('resultEmpty').hidden = mode !== 'empty';
         $('loading').hidden = mode !== 'loading';
@@ -624,7 +650,9 @@
         $('results').hidden = mode !== 'ready';
         const calc = document.querySelector('.calc');
         calc.classList.toggle('has-result', mode !== 'empty');
-        calc.classList.remove('editing');      // on phones the form folds to one line under a result until "Change" is pressed
+        calc.classList.toggle('is-ready', mode === 'ready');
+        calc.classList.remove('editing');      // the form folds to one line under a result until "Change" is pressed
+        syncLayout();
         const a = state.analysis;
         $('inputsFoldText').textContent = mode === 'batch' ? 'Your comparison' : state.isExample ? 'The sample job and resume' : (a && a.job_title) ? `${a.job_title}${a.company && !/not specified|unknown/i.test(a.company) ? ' at ' + a.company : ''}` : 'Your job and resume';
         if (mode === 'empty') {
@@ -654,8 +682,8 @@
     // Scrolling follows the visitor's motion setting, and only happens when the target is not already in view.
     const scrollBehavior = () => (reducedMotion() ? 'auto' : 'smooth');
     function revealResult() {
-        const r = $('resultCol').getBoundingClientRect();
-        if (r.top < 0 || r.top > window.innerHeight * 0.6) $('resultCol').scrollIntoView({ behavior: scrollBehavior(), block: 'start' });
+        const r = resultTop().getBoundingClientRect();
+        if (r.top < 0 || r.top > window.innerHeight * 0.6) resultTop().scrollIntoView({ behavior: scrollBehavior(), block: 'start' });
     }
 
     function stopLoading() {
@@ -883,7 +911,7 @@
         $('analyzeBtn').disabled = true; $('compareVersionsBtn').disabled = true;
         setResultState('loading');
         clearInterval(state.loadingTimer);
-        $('resultCol').scrollIntoView({ behavior: scrollBehavior(), block: 'start' });
+        resultTop().scrollIntoView({ behavior: scrollBehavior(), block: 'start' });
         for (let i = 0; i < items.length; i++) {
             const item = items[i];
             $('btnText').textContent = `Checking ${i + 1} of ${items.length}...`;
@@ -984,7 +1012,7 @@
         renderResults(it.analysis);
         if (state.trackedId != null) setSaveButton(true, 'In your tracker');
         if (!it.analysis.salary_intel && !it.intelAsked) { it.intelAsked = true; fetchMarketIntel(); }
-        $('resultCol').scrollIntoView({ behavior: scrollBehavior(), block: 'start' });
+        resultTop().scrollIntoView({ behavior: scrollBehavior(), block: 'start' });
     }
 
     function backToBatch() {
@@ -993,7 +1021,7 @@
         resetGenerated();
         restoreBatchInputs();
         renderBatch();
-        $('resultCol').scrollIntoView({ behavior: scrollBehavior(), block: 'start' });
+        resultTop().scrollIntoView({ behavior: scrollBehavior(), block: 'start' });
     }
 
     // Saves every checked job with its analysis, through the same path as the Save button.
@@ -1860,7 +1888,8 @@
         const named = new Set(arr(r.from_answers).map(flat)), addedLines = [];
         const fromAnswer = (b) => facts.length > 0 && (named.has(flat(b)) || (match(b).sim < SOURCE_FOUND && facts.some(f => overlap(f.answer, b) >= 0.5)));
         const section = (title, html) => html ? `<h4>${title}</h4>${html}` : '';
-        const lines = (list) => arr(list).map(x => `<p>${escapeHtml(x)}</p>`).join('');
+        // Outside the experience section only a line the rewrite names as coming from an answer is marked (a status such as "U.S. Citizen").
+        const lines = (list) => arr(list).map(x => { const mine = facts.length > 0 && named.has(flat(x)); if (mine) addedLines.push(x); return `<p${mine ? ' class="answer"' : ''}>${escapeHtml(x)}</p>`; }).join('');
         const jobs = (Array.isArray(r.experience) ? r.experience : []).map(j => `<div class="job"><b>${escapeHtml(j.title || '')}</b>${j.company ? ', ' + escapeHtml(j.company) : ''}${j.location ? ' &middot; ' + escapeHtml(j.location) : ''}${j.dates ? ' &middot; ' + escapeHtml(j.dates) : ''}<ul>${arr(j.bullets).map(b => {
             // Nothing but the resume is written into this preview, so selecting and copying it gives a clean resume.
             // A line with no close match in the original is only highlighted; the reason is in the summary above.
@@ -2823,6 +2852,8 @@
         $('view-explore').addEventListener('click', (e) => { const chip = e.target.closest('[data-fill-title]'); if (chip) fillTitle(chip.dataset.fillTitle); });
         $('saveForm').addEventListener('submit', savePostingForLater);
         $('gapForm').addEventListener('submit', submitGapAnswers);
+        WIDE.addEventListener('change', syncLayout);
+        syncLayout();
         $('answerRecordList').addEventListener('click', (e) => { const b = e.target.closest('[data-answer-delete]'); if (b) deleteAnswer(b.dataset.answerDelete); });
         renderAnswerRecord();
         $('employerFilter').addEventListener('input', filterEmployers);
@@ -3237,7 +3268,7 @@ Harborlight Software is a fictional company used for this example.`;
         state.trackedId = null; state.postingUrl = ''; state.linkHelp = null; state.linkedText = ''; renderLinkHelp();
         showInlineError('');
         showExamplePreview();
-        $('resultCol').scrollIntoView({ behavior: scrollBehavior(), block: 'start' });
+        resultTop().scrollIntoView({ behavior: scrollBehavior(), block: 'start' });
         track('example_viewed');
     }
 
@@ -3296,7 +3327,7 @@ Harborlight Software is a fictional company used for this example.`;
         'door-posting': () => { if (state.isExample) exitExample(); document.querySelector('.calc').classList.add('editing'); $('jobCard').scrollIntoView({ behavior: scrollBehavior(), block: 'center' }); $('jobDescription').focus({ preventScroll: true }); track('door', { choice: 'posting' }); },
         'copy-snapshot-questions': () => copyText((state.snapshotQuestions || []).map(q => '- ' + q).join('\n'), 'Questions copied.'),
         'toggle-employers': () => { const open = $('companyBoards').hidden; if (!open) { $('employerFilter').value = ''; filterEmployers(); } showAllEmployers(open); },
-        'edit-inputs': () => { document.querySelector('.calc').classList.add('editing'); $('jobCard').scrollIntoView({ behavior: scrollBehavior(), block: 'start' }); $('jobDescription').focus({ preventScroll: true }); },
+        'edit-inputs': () => { document.querySelector('.calc').classList.add('editing'); syncLayout(); $('jobCard').scrollIntoView({ behavior: scrollBehavior(), block: 'start' }); $('jobDescription').focus({ preventScroll: true }); },
         'save-job': () => saveToTracker(),
         'download-report': () => downloadReport(),
         'drop-link': () => dropLink(),

@@ -30,7 +30,7 @@
 // site's copy ("Your resume is not stored on our servers").
 
 const env = process.env;
-const VERSION = '3.11.0';
+const VERSION = '3.11.1';
 
 function clampInt(v, def, min, max) {
     const n = Number.parseInt(v, 10);
@@ -969,6 +969,9 @@ KNOWN GAPS (do not paper over these with invented experience): ${analysisLines(a
 HARD RULES:
 - Use ONLY facts in the resume${facts.length ? ' and in the candidate\'s answers' : ''}. Never invent or change employers, job titles, dates, numbers, clearances, degrees, or certifications.${facts.length ? `
 - CANDIDATE ANSWERS. Work each answer that states a real fact into the resume where it belongs: as a bullet under the job it relates to when the answer says which, otherwise in the summary or skills. Write only what the answer states. Do not round a number up, add a customer, a date or a result the answer does not give, or turn "some" into a figure. An answer that says no, is empty of facts, or is unrelated adds nothing: leave it out. When an answer is about a resume line, add its fact to that line instead of writing a second line about the same thing, and list the rewritten line in "from_answers". Answers never change an employer, a title or a date already in the resume.
+- WRITE ANSWERS IN RESUME VOICE, NEVER PASTED. The answer is how the candidate talks; the resume line is how a resume reads. Start with a verb, no "I", "my", "mine" or "which was", and none of the answer's conversational phrasing. Wrong: "Engaged with federal science agencies, including NASA Kennedy Space Center which was a customer of mine." Right, folded into a line the job already has: "Generated $8M in sales and renewals of Red Hat Enterprise Linux and OpenStack to government and enterprise customers, including NASA Kennedy Space Center."
+- AN ANSWER THAT COVERS SEVERAL JOBS. Never write the same sentence twice anywhere in the resume. First choice: add the fact to an existing bullet in each job it names, where that bullet already describes the customers, the selling or the result, so each job reads differently. If a job has no bullet it fits, leave that job alone. If it fits no existing bullet at all, write ONE new bullet under the most recent job it names, saying across which employers (for example "Sold to NASA Kennedy Space Center across three employers: AWS, Red Hat and Western Digital."). Do not claim anything about what was sold or how much unless the answer or that job's own bullets say it.
+- A PLAIN "YES" TO A STATUS QUESTION IS A FACT. When the question asks about a status (US citizenship, an active clearance, a degree, a certification) and the answer is yes, state that status in the few words a resume uses, in the place a resume puts it: citizenship and similar in "additional" (for example "U.S. Citizen"), a clearance in "clearance", a degree in "education". Add no date, level or detail the answer does not give. Count it in "answers_used" and list the exact text you added in "from_answers".
 - List in "from_answers" the exact text of every bullet you wrote that relies on an answer, copied character for character from "experience". If the summary relies on an answer, set "summary_uses_answers" to true.
 - List in "answers_used" the number of each answer you worked into the resume. Leave out the number of an answer that added nothing: the candidate is told which answers were not used, so be exact.` : ''}
 - SALES NUMBERS keep their meaning. A quota or target the candidate was assigned, a territory or book of business, revenue managed, pipeline and total contract value are different things: never restate one as another, even when the posting asks for a quota. An individual's number stays individual and a team's number stays the team's. Revenue sold through partners, resellers or integrators stays partner revenue, and direct stays direct. Keep the resume's own word for each figure.
@@ -1010,6 +1013,18 @@ OUTPUT VALID JSON ONLY:
         validate: (p) => Array.isArray(p.experience) && p.experience.length > 0
     });
     if (typeof parsed.name !== 'string') parsed.name = '';
+    // Last line of defence against a pasted answer: the same bullet may not appear twice in one resume. The first
+    // one (the most recent job) stays.
+    const seenBullets = new Set();
+    parsed.experience.forEach(job => {
+        if (!job || !Array.isArray(job.bullets)) return;
+        job.bullets = job.bullets.filter(b => {
+            const key = String(b).toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+            if (key.length < 20) return true;
+            if (seenBullets.has(key)) return false;
+            seenBullets.add(key); return true;
+        });
+    });
     parsed.from_answers = facts.length && Array.isArray(parsed.from_answers) ? parsed.from_answers.filter(x => typeof x === 'string' && x.trim()) : [];
     parsed.summary_uses_answers = facts.length > 0 && parsed.summary_uses_answers === true;
     // Which of the answers the browser sent ended up in the resume, by position in the list it sent. null when
