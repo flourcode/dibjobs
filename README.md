@@ -17,7 +17,7 @@ Static site (plain HTML, CSS and JavaScript) plus one AWS Lambda that calls Goog
 
 ## Deploying the site
 
-Upload everything except `lambda.js` and this README to the web root. When `assets/app.js`, `assets/app.css` or `assets/files.js` change, bump the `?v=` number on their references in all five HTML pages (currently `?v=47`).
+Upload everything except `lambda.js` and this README to the web root. When `assets/app.js`, `assets/app.css` or `assets/files.js` change, bump the `?v=` number on their references in all five HTML pages (currently `?v=48`).
 
 ## Deploying the Lambda
 
@@ -28,7 +28,9 @@ Upload everything except `lambda.js` and this README to the web root. When `asse
 
 ## Privacy
 
-Resume files are parsed in the browser. Text is sent to the Lambda only when the user tailors a resume or uses one of the tools around it. The Lambda does not log or store resumes, job descriptions, questions, or the answers a user gives to follow-up questions. Saved resumes, saved answers and the tracker live in the browser's localStorage. Find Jobs only builds links to LinkedIn, ClearanceJobs, Indeed and Google.
+Resume files are parsed in the browser. Text is sent to the Lambda only when the user tailors a resume or uses one of the tools around it. The Lambda does not log or store resumes, job descriptions, questions, or the answers a user gives to follow-up questions. Saved resumes, saved answers and the tracker (which keeps each job's tailored resume, source resume and answers) live in the browser's localStorage.
+
+The page asks for the rewrite (`tailor_resume`) at the same moment as the fit analysis (`resume_match`), so every run makes two Gemini calls at once. Lambda 3.10.0 or later accepts a rewrite request with no analysis attached; with an older Lambda the page falls back to asking after the analysis. Find Jobs only builds links to LinkedIn, ClearanceJobs, Indeed and Google.
 
 
 ## About, Privacy and Terms

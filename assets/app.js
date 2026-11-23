@@ -640,7 +640,7 @@
     function startLoading() {
         setResultState('loading');
         setLoadingProgress(null);
-        $('loadingStep').textContent = 'Reading the posting against your resume…';
+        $('loadingStep').textContent = 'Scoring your fit and starting the rewrite…';
         revealResult();
         clearInterval(state.loadingTimer);
     }
@@ -760,6 +760,7 @@
         btn.disabled = true;
         $('btnText').textContent = 'Reading the posting…';
         startLoading();
+        startEarlyTailor(run, jd, resume);
         let lastError = null;
         for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
             try {
@@ -1065,7 +1066,8 @@
 
     function resetGenerated() {
         state.tailored = null; state.tailorKeywords = null; state.tailorPairs = null; state.tailorUnmatched = 0; state.tailorAdded = []; state.tailorGate = null; state.tailorError = false;
-        state.confirmedFacts = []; state.appliedFacts = []; state.gapSkipped = false; state.gapEditing = false; state.chat = [];
+        state.confirmedFacts = []; state.appliedFacts = []; state.gapSkipped = false; state.gapEditing = false;
+        state.tailorVersion = ''; state.rescored = null; state.restoredFrom = null; clearInterval(state.tailorTimer); state.chat = [];
         $('tailoredWrap').hidden = true;
         syncTailorUi();
         $('linkedinList').innerHTML = '';
@@ -1210,6 +1212,9 @@
         return knock.length ? [...knock, ...rows.filter(r => !r.knockout).slice(0, Math.max(2, 5 - knock.length))] : rows.slice(0, 4);
     }
     // The requirement list in the answer: screen-out checks first with a one-line tally, then the rest.
+    const sameReq = (a, b) => String(a).toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim() === String(b).toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+    const suppliedFor = (r) => !state.rescored && (state.appliedFacts || []).some(f => f.used && f.requirement && sameReq(f.requirement, r.requirement));
+    function refreshEvidence() { if (state.analysis) { const reqs = keyRequirements(state.analysis); $('recEvidence').hidden = !reqs.length; $('recEvidence').innerHTML = requirementList(reqs); } }
     function requirementList(rows) {
         if (!rows.length) return '';
         const knock = rows.filter(r => r.knockout), rest = rows.filter(r => !r.knockout);
@@ -1220,7 +1225,7 @@
         return `<p class="req-head">Recruiters screen on ${knock.length === 1 ? 'this' : 'these'} first</p><p class="req-tally${open.length ? ' open' : ''}" id="knockoutTally">${escapeHtml(tally)}</p>${requirementRows(knock)}`
             + (rest.length ? `<p class="req-head rest">Other requirements</p>${requirementRows(rest)}` : '');
     }
-    const requirementRows = (rows) => rows.map(r => `<div class="req"><div class="req-main"><span class="req-what">${r.type ? `<span class="req-tag">${r.type === 'required' ? 'Required' : 'Preferred'}</span>` : ''}<b>${escapeHtml(r.requirement)}</b></span><span class="req-shows">Your resume: ${escapeHtml(r.shows || 'Not shown')}</span></div><span class="chip sm ${REQ_STATUS[r.status][0]}">${REQ_STATUS[r.status][1]}</span></div>`).join('');
+    const requirementRows = (rows) => rows.map(r => `<div class="req"><div class="req-main"><span class="req-what">${r.type ? `<span class="req-tag">${r.type === 'required' ? 'Required' : 'Preferred'}</span>` : ''}<b>${escapeHtml(r.requirement)}</b></span><span class="req-shows">Your resume: ${escapeHtml(r.shows || 'Not shown')}</span>${suppliedFor(r) ? '<span class="req-supplied">You supplied more on this. It is in the updated resume below.</span>' : ''}</div><span class="chip sm ${REQ_STATUS[r.status][0]}">${REQ_STATUS[r.status][1]}</span></div>`).join('');
 
     // The role at a glance: what kind of seat it is, who it sells to, whose number it is, where, and how much travel.
     // Everything comes from the posting. What the posting leaves out becomes a question for the recruiter.
@@ -1431,19 +1436,26 @@
     const FILLER = new Set('the and for with you your have has had what was were did any how that this from are our their they them when which who been does into its can could would ever yes not please give state tell much many long about least more than over each per shows show'.split(' '));
     const topicWords = (x) => new Set((String(x).toLowerCase().match(/[a-z0-9$+#/]+/g) || []).filter(w => w.length > 2 && !FILLER.has(w)));
     const overlap = (a, b) => { const A = topicWords(a), B = topicWords(b); if (!A.size || !B.size) return 0; let n = 0; A.forEach(w => { if (B.has(w)) n++; }); return n / Math.min(A.size, B.size); };
+    // Answers belong to the person on the resume, not to the browser: a colleague's resume in the same browser
+    // is not offered yours. The owner is the resume's first line, which is the name on nearly every resume.
+    const resumeOwner = (text) => { const line = String(text || '').split('\n').map(l => l.trim()).find(l => /[a-z]/i.test(l)) || ''; return line.toLowerCase().replace(/[^a-z ]+/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 60); };
+    const ownerName = (text) => { const line = String(text || '').split('\n').map(l => l.trim()).find(l => /[a-z]/i.test(l)) || ''; return line.length <= 60 ? line : ''; };
+    const currentOwner = () => resumeOwner(state.resumeText || $('resumeText').value);
+    const mine = (a) => !a.owner || a.owner === currentOwner();      // answers saved before owners existed stay available
+    const niceDate = (iso) => { const d = new Date(iso + 'T12:00:00'); return isNaN(d) ? iso : `${d.getDate()} ${['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][d.getMonth()]} ${d.getFullYear()}`; };
     const getAnswers = () => { const v = store.get(KEYS.answers, []); return (Array.isArray(v) ? v : []).filter(a => a && typeof a.answer === 'string' && a.answer.trim() && typeof a.question === 'string'); };
     function setAnswers(list) { list.length ? store.set(KEYS.answers, list.slice(0, MAX_SAVED_ANSWERS)) : store.remove(KEYS.answers); renderAnswerRecord(); }
     function rememberAnswers(facts) {
         let list = getAnswers();
         facts.forEach(f => {
-            list = list.filter(a => overlap(a.topic + ' ' + a.question, f.requirement + ' ' + f.question) < SAME_TOPIC);     // a newer answer on the same subject replaces the old one
-            list.unshift({ id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6), topic: f.requirement, question: f.question, answer: f.answer, saved: new Date().toISOString().slice(0, 10) });
+            list = list.filter(a => !mine(a) || overlap(a.topic + ' ' + a.question, f.requirement + ' ' + f.question) < SAME_TOPIC);     // a newer answer on the same subject replaces the old one
+            list.unshift({ id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6), topic: f.requirement, question: f.question, answer: f.answer, saved: todayISO(), owner: currentOwner(), ownerName: ownerName(state.resumeText) });
         });
         setAnswers(list);
     }
     function recallAnswer(q) {
         let best = null, score = SAME_TOPIC;
-        getAnswers().forEach(a => { const s = overlap(a.topic + ' ' + a.question, q.requirement + ' ' + q.question); if (s >= score) { best = a; score = s; } });
+        getAnswers().filter(mine).forEach(a => { const s = overlap(a.topic + ' ' + a.question, q.requirement + ' ' + q.question); if (s >= score) { best = a; score = s; } });
         return best;
     }
     function renderAnswerRecord() {
@@ -1451,7 +1463,7 @@
         box.hidden = !list.length;
         if (!list.length) { box.open = false; return; }
         $('answerRecordTitle').textContent = `Your saved answers (${list.length})`;
-        $('answerRecordList').innerHTML = list.map(a => `<div class="answer-row"><div class="grow"><p class="body-sm muted">${escapeHtml(a.topic || a.question)}</p><p class="body-md">${escapeHtml(a.answer)}</p></div><button class="icon-btn" type="button" data-answer-delete="${escapeHtml(a.id)}" aria-label="Delete this saved answer">${icon('trash')}</button></div>`).join('');
+        $('answerRecordList').innerHTML = list.map(a => `<div class="answer-row"><div class="grow"><p class="body-sm muted">${escapeHtml(a.topic || a.question)}</p><p class="body-md">${escapeHtml(a.answer)}</p><p class="body-sm muted">${escapeHtml(['Saved ' + niceDate(a.saved || ''), a.ownerName ? 'for the resume of ' + a.ownerName : ''].filter(Boolean).join(', '))}</p></div><button class="icon-btn" type="button" data-answer-delete="${escapeHtml(a.id)}" aria-label="Delete this saved answer">${icon('trash')}</button></div>`).join('');
     }
     function deleteAnswer(id) { setAnswers(getAnswers().filter(a => a.id !== id)); snackbar('Saved answer deleted.'); }
     function clearAnswers() { setAnswers([]); snackbar('All saved answers deleted from this browser.'); }
@@ -1488,7 +1500,7 @@
                     const prior = (used.find(f => f.question === q.question) || {}).answer, saved = prior ? null : recallAnswer(q);
                     return `<label class="field sm gap-field"><span class="field-label">${escapeHtml(q.question)}</span>
                         <textarea id="gapAnswer${i}" rows="2" maxlength="${MAX_ANSWER_CHARS}" placeholder="Leave blank if this is not true for you" aria-describedby="gapHint${i}">${escapeHtml(prior || (saved ? saved.answer : ''))}</textarea>
-                        <span class="body-sm muted" id="gapHint${i}">${saved ? '<b>From your saved answers.</b> Change it if it no longer holds. ' : ''}Unclassified details only, and nothing a customer would call confidential.</span></label>`;
+                        <span class="body-sm muted" id="gapHint${i}">${saved ? `<b>From your saved answers${saved.saved ? ', ' + escapeHtml(niceDate(saved.saved)) : ''}.</b> Change it if it no longer holds. ` : ''}Unclassified details only, and nothing a customer would call confidential.</span></label>`;
                 }).join('');
                 $('gapKeep').checked = store.getRaw(KEYS.keepAnswers) !== '0';
                 $('gapError').hidden = true;
@@ -1501,9 +1513,11 @@
             if (!btn.disabled) btn.querySelector('span').textContent = gate ? 'Tailor with my answers' : 'Update my resume';
             $('gapSkipBtn').hidden = gate;
         } else if (mode === 'done') {
-            $('gapTitle').textContent = `Your resume now uses ${used.length === 1 ? 'your answer' : `your ${used.length} answers`}`;
-            $('gapText').textContent = 'Each line built from an answer is marked "From your answer" in the full resume. The fit score was worked out before you answered.';
-            $('gapList').innerHTML = used.map(f => `<li><span class="body-sm muted">${escapeHtml(f.requirement || f.question)}</span><span>${escapeHtml(f.answer)}</span></li>`).join('');
+            const u = used.filter(f => f.used).length;
+            $('gapTitle').textContent = !u ? (used.length === 1 ? 'Your answer did not change the resume' : 'Your answers did not change the resume')
+                : used.length === 1 ? 'Your resume now uses your answer' : u === used.length ? `Your resume now uses your ${u} answers` : `Your resume now uses ${u} of your ${used.length} answers`;
+            $('gapText').textContent = u ? 'Each line built from an answer is marked "From your answer" in the full resume.' : 'Nothing was added, so nothing is marked. An answer has to state experience to be written in.';
+            $('gapList').innerHTML = used.map(f => `<li class="${f.used ? 'used' : 'unused'}"><span class="body-sm muted">${escapeHtml(f.requirement || f.question)}</span><span>${escapeHtml(f.answer)}</span><span class="gap-result">${f.used ? 'Added to your resume' : 'Not added: this answer gave no experience to write in. Change it if there is more to say.'}</span></li>`).join('');
             $('gapEditBtn').textContent = 'Change my answers';
         } else if (mode === 'skipped') {
             $('gapTitle').textContent = `${n} ${n === 1 ? 'question' : 'questions'} skipped`;
@@ -1529,7 +1543,6 @@
         state.confirmedFacts = facts; state.gapEditing = false; state.gapSkipped = false;
         track('gap_answers_sent', { count: facts.length, kept: keep });
         await buildTailoredResume($('gapSubmit'), { auto: true });
-        if (state.appliedFacts && state.appliedFacts.length) $('tailorTeaser').scrollIntoView({ behavior: scrollBehavior(), block: 'start' });
     }
     function skipGapQuestions() { state.gapSkipped = true; syncGapUi(); track('gap_questions_skipped'); }
     function editGapAnswers() {
@@ -1538,24 +1551,81 @@
         const first = $('gapAnswer0'); if (first) first.focus();
     }
 
+    // The rewrite is the slow part, so it is started at the same moment as the fit analysis instead of after it.
+    // By the time the score is on screen the rewrite is usually half done. A reply that fails here is simply
+    // dropped: the ordinary request below is made instead.
+    function startEarlyTailor(run, jd, resume) {
+        const promise = api({ request_type: 'tailor_resume', job_description: jd, resume_text: resume, military_transition: isMilitary(), confirmed_facts: [] })
+            .then(d => (d && d.resume && Array.isArray(d.resume.experience) && d.resume.experience.length ? d.resume : null), () => null);
+        state.earlyTailor = { run, promise, started: Date.now() };
+    }
+
+    // While the rewrite runs the card shows that it is moving: an estimate bar, how long it has been, and real
+    // lines from this resume, reworded, one at a time. Nothing here is decoration; the lines came with the analysis.
+    const TAILOR_TYPICAL_MS = 30000, PEEK_EVERY_MS = 6000;
+    const peekPairs = () => { const a = state.analysis; return (a && Array.isArray(a.bullet_rewrites) ? a.bullet_rewrites : []).filter(b => b && b.original && b.improved).slice(0, 3).map(b => ({ before: b.original, after: b.improved })); };
+    function tickTailor() {
+        if (!state.tailoring) return;
+        const ms = Date.now() - state.tailorStarted, secs = Math.floor(ms / 1000);
+        const pct = Math.min(96, Math.round(100 * (1 - Math.exp(-ms / TAILOR_TYPICAL_MS * 1.6))));      // eases toward the end and never claims to be finished
+        $('tailorBar').style.width = pct + '%';
+        $('tailorStatusBar').style.width = pct + '%';
+        $('tailorBar').parentElement.setAttribute('aria-valuenow', String(pct));
+        const wait = secs < 40 ? `Usually under a minute. ${secs < 4 ? 'The fit call above is ready to read now.' : `${secs} seconds so far.`}`
+            : secs < 75 ? `Still writing, ${secs} seconds in. Long resumes take a little longer. Nothing is stuck.`
+            : `${secs} seconds in, longer than usual. It will finish, or tell you plainly if it could not.`;
+        if ($('tailorWait').textContent !== wait) $('tailorWait').textContent = wait;
+        $('tailorStatusText').textContent = `${state.updating ? 'Updating' : 'Tailoring'} your resume… ${secs < 3 ? 'usually under a minute' : secs + ' seconds so far'}`;
+        if (state.updating) return;
+        // One more reworded line every few seconds, added to the end so nothing already on screen moves.
+        const box = $('tailorPairs'), pairs = peekPairs(), want = Math.min(pairs.length, 1 + Math.floor(ms / PEEK_EVERY_MS));
+        while (box.children.length < want) box.insertAdjacentHTML('beforeend', pairHtml(pairs[box.children.length]).replace('class="rewrite"', 'class="rewrite arrive"'));
+        $('tailorPeekLabel').hidden = !box.children.length;
+    }
+
     async function buildTailoredResume(button, opts = {}) {
         if (!state.analysis || state.tailoring) return;
-        const facts = state.confirmedFacts || [];
+        const facts = (state.confirmedFacts || []).map(f => ({ requirement: f.requirement, question: f.question, answer: f.answer }));
+        const early = opts.auto && !facts.length && state.earlyTailor && state.earlyTailor.run === state.runId ? state.earlyTailor : null;
+        state.earlyTailor = null;
         state.updating = !!state.tailored && facts.length > 0;
-        state.tailoring = true; state.tailorError = false; state.tailorGate = null; syncTailorUi();
+        state.tailoring = true; state.tailorError = false; state.tailorGate = null;
+        state.tailorStarted = early ? early.started : Date.now();
+        $('tailorPairs').innerHTML = '';
+        syncTailorUi(); tickTailor();
+        clearInterval(state.tailorTimer); state.tailorTimer = setInterval(tickTailor, 1000);
         const forJob = state.analysis;
         try {
             await withBusy(button, state.updating ? 'Updating your resume…' : 'Writing your resume…', async () => {
-                const data = await api({ request_type: 'tailor_resume', job_description: state.jd, resume_text: state.resumeText, analysis_data: slimAnalysis(), military_transition: isMilitary(), confirmed_facts: facts.map(f => ({ requirement: f.requirement, question: f.question, answer: f.answer })) });
+                let resume = early ? await early.promise : null;
+                if (!resume) resume = (await api({ request_type: 'tailor_resume', job_description: state.jd, resume_text: state.resumeText, analysis_data: slimAnalysis(), military_transition: isMilitary(), confirmed_facts: facts })).resume;
                 if (state.analysis !== forJob) return;
-                state.tailored = data.resume;
+                const wasUpdate = state.updating;
+                state.tailored = resume;
                 state.appliedFacts = facts;
-                state.tailorPairs = tailoredPairs(state.resumeText, data.resume);
-                state.tailorKeywords = keywordShift(forJob, state.resumeText, tailoredToText(data.resume));   // counted in the browser, instant
-                renderTailored(data.resume, !!opts.auto);
-                track('tailored_resume_built', { auto: !!opts.auto, answers: facts.length });
+                state.tailorVersion = facts.length ? 'updated' : 'first'; state.restoredFrom = null;
+                state.tailorSeconds = Math.max(1, Math.round((Date.now() - state.tailorStarted) / 1000));
+                state.tailorPairs = tailoredPairs(state.resumeText, resume);
+                state.tailorKeywords = keywordShift(forJob, state.resumeText, tailoredToText(resume));   // counted in the browser, instant
+                state.tailoring = false; state.updating = false;
+                renderTailored(resume, !!opts.auto);
+                celebrate(wasUpdate);
+                keepWithTrackedJob();
+                track('tailored_resume_built', { auto: !!opts.auto, answers: facts.length, seconds: state.tailorSeconds });
             });
-        } finally { state.tailoring = false; state.updating = false; if (state.analysis === forJob && !state.tailored) state.tailorError = true; syncTailorUi(); }
+        } finally {
+            clearInterval(state.tailorTimer);
+            state.tailoring = false; state.updating = false;
+            if (state.analysis === forJob && !state.tailored) state.tailorError = true;
+            syncTailorUi();
+        }
+    }
+
+    // The moment the resume lands: the card and the line in the score box turn green once. No sound, no confetti.
+    function celebrate(wasUpdate) {
+        if (reducedMotion()) return;
+        [$('tailorTeaser'), $('tailorStatus')].forEach(el => { el.classList.remove('landed'); void el.offsetWidth; el.classList.add('landed'); });
+        if (wasUpdate) $('tailorTeaser').scrollIntoView({ behavior: scrollBehavior(), block: 'start' });
     }
 
     // How many of the posting's keywords each version covers. Worked out in the browser the moment the
@@ -1644,14 +1714,15 @@
         const all = built ? (state.tailorPairs || []) : [];
         const role = a && a.job_title ? a.job_title : 'this job';
         const gate = !built && !state.tailoring && Array.isArray(state.tailorGate) ? state.tailorGate : null;
-        let mode = 'idle', pairs = [], title = '', text = '';
-        if (state.tailoring) { mode = 'working'; title = state.updating ? 'Updating your resume…' : 'Tailoring your resume…'; text = state.updating ? 'Adding what you told us, in your words. The version below stays as it is until the new one is ready.' : 'Rewriting it for this posting, using only what is already in it. This usually takes under a minute. The fit call below is ready now.'; }
+        let mode = 'idle', pairs = [], title = '', text = '', note = '';
+        if (state.tailoring) { mode = 'working'; title = state.updating ? 'Updating your resume…' : 'Tailoring your resume…'; text = state.updating ? 'Adding what you told us, in your words. Your first version stays available until the new one is ready.' : ''; }
         else if (built) {
             mode = 'done'; pairs = (all.length ? all : sample).slice(0, 1);
-            title = state.isExample ? `A resume tailored to ${role}` : `Your resume, tailored to ${role}`;
-            text = (all.length ? `${all.length} ${all.length === 1 ? 'line was' : 'lines were'} reworded. Each one is shown next to the line it came from.` : 'Reordered for this role. No lines needed rewording.')
-                + (added.length ? ` ${added.length} ${added.length === 1 ? 'line was' : 'lines were'} added from your answers.` : '')
-                + (state.tailorUnmatched ? ` ${state.tailorUnmatched} ${state.tailorUnmatched === 1 ? 'line has' : 'lines have'} no close match in your original and ${state.tailorUnmatched === 1 ? 'is' : 'are'} highlighted: check ${state.tailorUnmatched === 1 ? 'it' : 'them'} before you send it.` : '');
+            const updated = state.tailorVersion === 'updated', openQs = !state.isExample && !updated && !state.gapSkipped ? gapQuestions().length : 0;
+            title = state.isExample ? `A resume tailored to ${role}` : updated ? `Your updated resume, tailored to ${role}` : `Your resume, tailored to ${role}`;
+            if (state.restoredFrom) note = `Saved with this job${state.restoredFrom === true ? '' : ' on ' + state.restoredFrom}. This is the version you reviewed.`;
+            else if (openQs) note = `Your first version is ready. Answer the ${openQs === 1 ? 'question' : ['two', 'three'][openQs - 2] + ' questions'} below to add relevant experience your resume may be missing.`;
+            text = state.tailorUnmatched ? `${state.tailorUnmatched} ${state.tailorUnmatched === 1 ? 'line has' : 'lines have'} no close match in your original and ${state.tailorUnmatched === 1 ? 'is' : 'are'} highlighted: check ${state.tailorUnmatched === 1 ? 'it' : 'them'} before you send it.` : '';
         } else if (gate) {
             mode = 'gate'; title = 'One thing before the rewrite';
             text = `This posting requires ${gate.length === 1 ? gate[0] : gate.slice(0, -1).join(', ') + ' and ' + gate[gate.length - 1]}, and your resume does not show ${gate.length === 1 ? 'it' : 'them'}. Recruiters screen on ${gate.length === 1 ? 'this' : 'these'} first, and a rewrite cannot add what is not there. ${gapQuestions().length ? 'If you have it, say so below. Or tailor your resume as it stands.' : 'You can still tailor your resume for this job.'}`;
@@ -1662,10 +1733,22 @@
             card.dataset.mode = mode;
             $('tailorTeaserTitle').textContent = title;
             $('tailorWorking').hidden = mode !== 'working';
-            $('tailorPairs').innerHTML = pairs.map(pairHtml).join('');
-            $('tailorTeaserText').textContent = text;
-            $('tailorTeaserScore').hidden = !(built && shift);
-            $('tailorTeaserScore').textContent = shift;
+            $('tailorSteps').hidden = !!state.updating;
+            $('tailorStepScore').textContent = a && a.score != null ? `Scored your fit: ${Math.round(a.score)} out of 100` : 'Scored your fit';
+            if (mode !== 'working') $('tailorPairs').innerHTML = pairs.map(pairHtml).join('');      // while working, tickTailor adds the lines
+            $('tailorTeaserText').innerHTML = (text ? `<span>${escapeHtml(text)}</span> ` : '') + (note ? `<strong>${escapeHtml(note)}</strong>` : '');
+            $('tailorTeaserText').hidden = !(text || note);
+            // What the rewrite came to, as counted in this browser.
+            const stats = [];
+            if (mode === 'done') {
+                if (all.length) stats.push(['', `${all.length} ${all.length === 1 ? 'line' : 'lines'} reworded`]);
+                if (added.length) stats.push(['good', `${added.length} added from your answers`]);
+                if (k && k.now > k.was) stats.push(['', `${k.now} of ${k.total} posting keywords, up from ${k.was}`]);
+                stats.push(state.tailorUnmatched ? ['warn', `${state.tailorUnmatched} ${state.tailorUnmatched === 1 ? 'line' : 'lines'} to check`] : ['good', (state.appliedFacts || []).length ? 'Every line traced to your resume or your answers' : 'Every line traced to your resume']);
+            }
+            $('tailorStats').hidden = !stats.length;
+            $('tailorStats').innerHTML = stats.map(([cls, label]) => `<li class="${cls}">${escapeHtml(label)}</li>`).join('');
+            document.querySelectorAll('.dl-label').forEach(el => { el.textContent = state.tailorVersion === 'updated' && !state.isExample ? 'Download updated Word (.docx)' : 'Download Word (.docx)'; });
             $('tailorLeadActions').hidden = mode !== 'done';
             $('tailorViewBtn').textContent = all.length + added.length > 1 ? `See all ${all.length + added.length} changes and the full resume` : 'See the full resume';
             $('tailorGateActions').hidden = !(mode === 'gate' || mode === 'error' || mode === 'idle');
@@ -1682,6 +1765,21 @@
         line.hidden = !built || !(lines.length || caution || summary);
         line.className = 'banner tailor-summary ' + (shift ? 'success' : 'info');
         line.innerHTML = line.hidden ? '' : `${shift ? `<span class="score-shift">${escapeHtml(shift)}</span>` : icon('info')}<span class="grow">${lines.length ? `<strong>${escapeHtml(lines[0])}</strong>` : ''}${lines.slice(1).map(x => `<span>${escapeHtml(x)}</span>`).join('')}${summary ? `<span>${escapeHtml(summary)}</span>` : ''}${caution ? `<span class="tailor-caution" id="tailorCaution">${escapeHtml(caution)}</span>` : ''}</span>`;
+        // The same news inside the score box, so nobody has to scroll to learn the resume is under way or ready.
+        const status = $('tailorStatus'), sMode = card.hidden ? '' : card.dataset.mode;
+        status.hidden = !(sMode === 'working' || sMode === 'done' || sMode === 'gate' || sMode === 'error') || !!state.isExample || !!state.batch;
+        if (!status.hidden) {
+            status.dataset.mode = sMode;
+            if (sMode !== 'working') $('tailorStatusText').textContent = sMode === 'done'
+                ? `${state.tailorVersion === 'updated' ? 'Your updated resume is ready' : 'Your tailored resume is ready'}${all.length ? `: ${all.length} ${all.length === 1 ? 'line' : 'lines'} reworded` : ''}${added.length ? `, ${added.length} added from your answers` : ''}. See it and download`
+                : sMode === 'gate' ? 'One thing to settle before the rewrite. See it' : 'The rewrite did not finish. Try it again';
+        }
+        const usedFacts = (state.appliedFacts || []).filter(f => f.used);
+        $('assessNote').hidden = !(built && usedFacts.length && !state.isExample) && !state.rescored;
+        if (!$('assessNote').hidden) {
+            $('assessText').textContent = state.rescored ? `Scored on your updated resume. Your original scored ${state.rescored.before}.` : 'This score is based on your original resume, before your answers.';
+            $('rescoreBtn').hidden = !!state.rescored;
+        }
         syncGapUi();
     }
 
@@ -1722,7 +1820,11 @@
             ${section('Core skills', arr(r.skills).length ? `<p>${arr(r.skills).map(escapeHtml).join(' &middot; ')}</p>` : '')}
             ${section('Experience', jobs)}${section('Education', lines(r.education))}${section('Certifications', lines(r.certifications))}${section('Additional', lines(r.additional))}`;
         state.tailorUnmatched = unmatched; state.tailorAdded = addedLines;
+        // Say only what happened: an answer counts as used when the rewrite names it, or a marked line plainly rests on it.
+        const named2 = Array.isArray(r.answers_used) ? new Set(r.answers_used) : null;
+        facts.forEach((f, i) => { f.used = (named2 ? named2.has(i) : false) || addedLines.some(b => overlap(f.answer, b) >= 0.5) || (!named2 && facts.length === 1 && r.summary_uses_answers === true); });
         $('tailoredWrap').hidden = false;
+        refreshEvidence();
         syncTailorUi();
         if (!quiet) $('tailoredWrap').scrollIntoView({ behavior: scrollBehavior(), block: 'nearest' });
     }
@@ -1809,13 +1911,33 @@
         ]);
     }
 
-    function downloadTailoredDocx() {
-        if (!state.tailored) return;
-        const a = state.analysis || {};
+    function downloadTailoredDocx(job) {
+        const tailored = job ? job.tailored : state.tailored;
+        if (!tailored) return;
+        const a = (job ? job.analysis : state.analysis) || {};
+        const updated = job ? (job.facts || []).length > 0 : state.tailorVersion === 'updated';
         const safe = (s) => String(s || '').replace(/[\\/:*?"<>|]+/g, ' ').replace(/\s+/g, ' ').trim().substring(0, 40);
-        const name = [safe(state.tailored.name) || 'Resume', safe(knownCompany(a.company)), safe(a.job_title)].filter(Boolean).join(' - ');
-        downloadBlob(buildDocx(state.tailored), name + '.docx');
-        track('tailored_resume_downloaded');
+        const name = [safe(tailored.name) || 'Resume', safe(knownCompany(a.company)), safe(a.job_title)].filter(Boolean).join(' - ') + (updated ? ' (updated)' : '');
+        downloadBlob(buildDocx(tailored), name + '.docx');
+        track('tailored_resume_downloaded', { from: job ? 'tracker' : 'result', updated });
+    }
+
+    // The score and the requirement rows were worked out on the original resume. After answers have been added,
+    // this scores the updated resume against the same posting and shows that instead. The resume itself is untouched.
+    async function rescoreUpdated() {
+        if (!state.tailored || !state.analysis || state.tailoring) return;
+        const forJob = state.analysis, before = Math.round(forJob.score || 0);
+        await withBusy($('rescoreBtn'), 'Re-scoring…', async () => {
+            const data = await api({ request_type: 'resume_match', job_description: state.jd, resume_text: tailoredToText(state.tailored).substring(0, MAX_RESUME_CHARS), military_transition: isMilitary() });
+            if (state.analysis !== forJob) return;
+            data.evidence_questions = forJob.evidence_questions;      // the questions already asked and answered stay as they are
+            ['salary_intel', 'competition', 'company_intel'].forEach(k => { if (forJob[k] && !data[k]) data[k] = forJob[k]; });
+            state.analysis = data; state.rescored = { before };
+            state.lastScores[jobKey(state.jd)] = data.score;
+            renderResults(data, before);
+            keepWithTrackedJob();
+            track('rescored_updated', { before, after: Math.round(data.score || 0) });
+        });
     }
 
     function useTailoredAsResume() {
@@ -1968,6 +2090,19 @@
     const sameUrl = (a, b) => isUrl(a) && isUrl(b) && normalizeUrl(a) === normalizeUrl(b);
     const STORAGE_FULL = 'Could not save. Browser storage is full: remove an old job from the tracker and try again.';
 
+    // What gets kept with a saved job: the resume as tailored, the resume it was written from, and the answers
+    // that went into it. Reopening the job brings back the version that was reviewed and downloaded.
+    const deliverable = () => state.tailored && !state.isExample
+        ? { tailored: state.tailored, facts: (state.appliedFacts || []).map(f => ({ requirement: f.requirement, question: f.question, answer: f.answer, used: !!f.used })), resume: state.resumeText, tailoredAt: todayISO(), rescoredFrom: state.rescored ? state.rescored.before : null }
+        : {};
+    function keepWithTrackedJob() {
+        const job = state.trackedId != null ? findJob(state.trackedId) : null;
+        if (!job || !state.tailored || state.isExample) return;
+        const before = Object.assign({}, job);
+        Object.assign(job, deliverable(), { analysis: state.analysis, score: state.analysis.score || 0 });
+        if (!persistTracker()) { Object.keys(job).forEach(k => delete job[k]); Object.assign(job, before); persistTracker(); }
+    }
+
     function saveToTracker(opts = {}) {
         const a = state.analysis;
         if (!a) return;
@@ -2001,7 +2136,7 @@
         let entry = existing;
         if (existing) {
             const wasBare = !existing.analysis;
-            Object.assign(existing, { score: a.score || 0, analysis: a, jd });
+            Object.assign(existing, { score: a.score || 0, analysis: a, jd }, deliverable());
             if (wasBare) {
                 if (existing.autoLabel || !existing.role) existing.role = role;
                 if (!existing.company) existing.company = company;
@@ -2009,7 +2144,7 @@
             }
             if (!existing.url && link) existing.url = link;
         } else {
-            entry = { id: newJobId(), company, role, score: a.score || 0, status: 'saved', date: new Date().toLocaleDateString(), jd, analysis: a, url: link, notes: '', nextAction: '', nextDate: '' };
+            entry = Object.assign({ id: newJobId(), company, role, score: a.score || 0, status: 'saved', date: new Date().toLocaleDateString(), jd, analysis: a, url: link, notes: '', nextAction: '', nextDate: '' }, deliverable());
             state.tracked.unshift(entry);
         }
         if (!persistTracker()) {
@@ -2020,7 +2155,7 @@
         setSaveButton(true, existing ? 'Updated in tracker' : 'Saved to tracker');
         updateTrackerBadge();
         if (opts.silent) { /* the caller reports once for the whole batch */ }
-        else if (!opts.quiet) snackbar(existing ? 'Tracker entry updated with this analysis.' : 'Saved. Open Tracker to set a follow-up date.');
+        else if (!opts.quiet) snackbar(existing ? (state.tailored ? 'Tracker entry updated, with this tailored resume.' : 'Tracker entry updated with this analysis.') : (state.tailored ? 'Saved with your tailored resume. Open Tracker to set a follow-up date.' : 'Saved. Open Tracker to set a follow-up date.'));
         else snackbar('Your saved job now has this result.');
         track('job_saved');
         return true;
@@ -2085,6 +2220,7 @@
                     <div class="row end">
                         ${isUrl(j.url) ? `<a class="btn text" href="${escapeHtml(j.url)}" target="_blank" rel="noopener noreferrer">${icon('open')}Open posting</a>` : ''}
                         <button class="btn text danger" data-remove>Remove</button>
+                        ${j.tailored ? `<button class="btn" data-docx>${icon('download')}Download tailored resume</button>` : ''}
                         ${j.analysis ? '<button class="btn" data-open>Open analysis</button>' : canCheck ? '<button class="btn" data-open>Tailor my resume to this job</button>' : ''}
                     </div>
                 </div>
@@ -2132,6 +2268,8 @@
                 details.hidden = !details.hidden;
                 toggle.setAttribute('aria-expanded', String(!details.hidden));
                 toggle.style.transform = details.hidden ? '' : 'rotate(180deg)';
+            } else if (e.target.closest('[data-docx]')) {
+                downloadTailoredDocx(job);
             } else if (e.target.closest('[data-open]')) {
                 openTrackedJob(job);
             } else if (e.target.closest('[data-remove]')) {
@@ -2181,6 +2319,22 @@
         showView('analyze');
         renderResults(job.analysis);
         setSaveButton(true, 'In your tracker');
+        if (job.tailored && Array.isArray(job.tailored.experience)) {
+            // Bring back the resume as it was reviewed, with the lines traced against the resume it was written from.
+            if (typeof job.resume === 'string' && job.resume.trim()) state.resumeText = job.resume;
+            state.tailored = job.tailored;
+            state.appliedFacts = (Array.isArray(job.facts) ? job.facts : []).map(f => Object.assign({}, f));
+            state.confirmedFacts = state.appliedFacts.map(f => Object.assign({}, f));
+            state.tailorVersion = state.appliedFacts.length ? 'updated' : 'first';
+            state.rescored = typeof job.rescoredFrom === 'number' ? { before: job.rescoredFrom } : null;
+            state.restoredFrom = job.tailoredAt ? niceDate(job.tailoredAt) : true;
+            state.tailorPairs = tailoredPairs(state.resumeText, job.tailored);
+            state.tailorKeywords = keywordShift(job.analysis, state.resumeText, tailoredToText(job.tailored));
+            const kept = state.appliedFacts.map(f => f.used);
+            renderTailored(job.tailored, true);
+            state.appliedFacts.forEach((f, i) => { if (typeof kept[i] === 'boolean') f.used = kept[i]; });
+            refreshEvidence(); syncTailorUi();
+        }
     }
 
     const topLine = (analysis, kind) => { const s = splitAnalysis(analysis || {}); const l = (kind === 'gap' ? s.gaps : s.matches)[0]; return l ? l.split(/\s*(?:→|->)\s*/)[0] : 'n/a'; };
@@ -2244,9 +2398,9 @@
     }
 
     function backupData() {
-        const data = { app: 'dibjobs', version: 1, exportedAt: new Date().toISOString(), resumes: getSavedResumes(), draft: store.getRaw(KEYS.draft), tracker: state.tracked };
+        const data = { app: 'dibjobs', version: 1, exportedAt: new Date().toISOString(), resumes: getSavedResumes(), draft: store.getRaw(KEYS.draft), tracker: state.tracked, answers: getAnswers(), keepAnswers: store.getRaw(KEYS.keepAnswers) !== '0' };
         downloadBlob(new Blob([JSON.stringify(data)], { type: 'application/json' }), `dib-jobs-backup-${todayISO()}.json`);
-        snackbar('Backup downloaded. It contains your resumes, so store it somewhere private.', 6000);
+        snackbar('Backup downloaded. It contains your resumes, tailored versions and saved answers, so store it somewhere private.', 7000);
     }
 
     async function restoreData(file) {
@@ -2258,11 +2412,15 @@
             const jobs = data.tracker.filter(j => j && typeof j === 'object' && j.role).map(j => Object.assign({}, j, { id: Number(j.id) || Date.now() + Math.random(), score: (j.score == null && !j.analysis) ? null : Number(j.score) || 0, status: STATUSES.some(s => s[0] === j.status) ? j.status : 'saved' }));
             const resumes = {};
             Object.entries(data.resumes || {}).forEach(([n, r]) => { if (r && typeof r.text === 'string') resumes[String(n).substring(0, 50)] = { text: r.text, savedAt: r.savedAt || '' }; });
-            const ok = await askDialog({ title: 'Restore this backup?', body: `Backup from ${escapeHtml(new Date(data.exportedAt).toLocaleDateString())} with ${jobs.length} tracked job${jobs.length !== 1 ? 's' : ''} and ${Object.keys(resumes).length} saved resume${Object.keys(resumes).length !== 1 ? 's' : ''}.<br><br>This replaces what is in this browser now.`, okText: 'Restore' });
+            const ok = await askDialog({ title: 'Restore this backup?', body: `Backup from ${escapeHtml(new Date(data.exportedAt).toLocaleDateString())} with ${jobs.length} tracked job${jobs.length !== 1 ? 's' : ''} and ${Object.keys(resumes).length} saved resume${Object.keys(resumes).length !== 1 ? 's' : ''}${Array.isArray(data.answers) ? `, and ${data.answers.length} saved answer${data.answers.length !== 1 ? 's' : ''}` : ''}.<br><br>This replaces what is in this browser now.`, okText: 'Restore' });
             if (!ok) return;
             state.tracked = jobs;
             if (!persistTracker() || !store.set(KEYS.resumes, resumes)) throw new Error('storage');
             if (typeof data.draft === 'string' && data.draft.trim()) { store.set(KEYS.draft, data.draft); $('resumeText').value = data.draft; }
+            if (Array.isArray(data.answers)) {      // backups made before saved answers existed leave the current ones alone
+                setAnswers(data.answers.filter(a => a && typeof a.answer === 'string' && a.answer.trim() && typeof a.question === 'string').map(a => ({ id: String(a.id || Math.random().toString(36).slice(2)), topic: String(a.topic || '').slice(0, 120), question: a.question.slice(0, 240), answer: a.answer.slice(0, MAX_ANSWER_CHARS), saved: String(a.saved || '').slice(0, 10), owner: String(a.owner || '').slice(0, 60), ownerName: String(a.ownerName || '').slice(0, 60) })));
+                if (typeof data.keepAnswers === 'boolean') store.set(KEYS.keepAnswers, data.keepAnswers ? '1' : '0');
+            }
             state.compareIds.clear();
             updateResumeSelector(); onResumeChanged(); renderTracker();
             snackbar('Backup restored.');
@@ -3060,6 +3218,8 @@ Harborlight Software is a fictional company used for this example.`;
         'copy-link': () => { copyText(SHARE_URL, 'Link copied. Paste it anywhere.'); track('share', { method: 'copy_link' }); },
         'tailor': (b) => buildTailoredResume(b),
         'tailor-start': () => startTailoring(),
+        'tailor-jump': () => { $('tailorTeaser').scrollIntoView({ behavior: scrollBehavior(), block: 'start' }); if (state.tailorError && !state.tailoring) startTailoring(); },
+        'rescore': () => rescoreUpdated(),
         'gap-skip': () => skipGapQuestions(),
         'gap-edit': () => editGapAnswers(),
         'answers-clear': () => clearAnswers(),

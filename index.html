@@ -32,7 +32,7 @@
     <link rel="apple-touch-icon" href="apple-touch-icon.png">
     <link rel="manifest" href="site.webmanifest">
     <link rel="preload" href="assets/fonts/inter-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="stylesheet" href="assets/app.css?v=47">
+    <link rel="stylesheet" href="assets/app.css?v=48">
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-N10ZLNFZHE"></script>
     <script>
@@ -185,13 +185,44 @@
                 <div id="verdictWrap" class="stack" hidden>
                     <button class="btn text back-link" type="button" id="backToBatch" data-action="back-to-batch" hidden><svg class="icon flip"><use href="#i-next"/></svg>Back to the comparison</button>
                     <div class="example-note" id="exampleNote" hidden><span class="grow"><strong>This is an example</strong> from a made-up resume and posting.</span><span class="seg" role="group" aria-label="Which sample"><button class="seg-btn" type="button" data-example="seller" aria-pressed="true">Seller</button><button class="seg-btn" type="button" data-example="leader" aria-pressed="false">Sales leader</button></span><button class="btn" type="button" data-action="exit-example">Check my own job</button></div>
+                    <div class="verdict" id="verdict" data-tone="neutral">
+                        <p class="eyebrow"><span class="example-tag" id="exampleTag" hidden>Example</span><span id="roleLine"></span></p>
+                        <div class="verdict-head">
+                            <div class="verdict-num"><b id="scoreNum">0</b><span>resume fit<br>out of 100</span></div>
+                            <p class="verdict-label" id="recAction" aria-live="polite"></p>
+                        </div>
+                        <p class="verdict-explain" id="recHeadline"></p>
+                        <button class="tailor-status" type="button" id="tailorStatus" data-action="tailor-jump" hidden><span class="ts-mark" id="tailorStatusMark" aria-hidden="true"></span><span class="grow" id="tailorStatusText" aria-live="polite"></span><svg class="icon" aria-hidden="true"><use href="#i-chevron"/></svg><span class="ts-bar" aria-hidden="true"><span id="tailorStatusBar"></span></span></button>
+                        <p class="assess-note" id="assessNote" hidden><span id="assessText"></span> <button class="link-btn" type="button" id="rescoreBtn" data-action="rescore"><span>Re-score with the updated resume</span></button></p>
+                        <div class="req-list" id="recEvidence" hidden></div>
+                        <ul class="rec-reasons" id="recReasons"></ul>
+                        <div class="ask-box" id="recQuestionBox" hidden>
+                            <p class="eyebrow">Question to send the recruiter</p>
+                            <p class="body-md" id="recQuestion"></p>
+                        </div>
+                        <p class="rec-next" id="recNext" hidden></p>
+                        <div class="chips verdict-chips">
+                            <span class="chip sm" id="verdictChip"></span>
+                            <span class="chip sm" id="scoreDelta" hidden></span>
+                        </div>
+                    </div>
                     <div class="tailor-card tailor-lead" id="tailorTeaser" hidden>
-                        <div class="tailor-card-head"><h2 class="title-md" id="tailorTeaserTitle"></h2><span class="score-shift" id="tailorTeaserScore" hidden></span></div>
-                        <div id="tailorWorking" hidden><div class="linear-progress indeterminate" role="progressbar" aria-label="Tailoring your resume"><div></div></div></div>
+                        <div class="tailor-card-head"><h2 class="title-md" id="tailorTeaserTitle"></h2></div>
+                        <div class="tailor-working" id="tailorWorking" hidden>
+                            <ol class="steps" id="tailorSteps">
+                                <li class="done"><span class="step-mark" aria-hidden="true"></span><span>Read the posting</span></li>
+                                <li class="done"><span class="step-mark" aria-hidden="true"></span><span id="tailorStepScore">Scored your fit</span></li>
+                                <li class="now"><span class="step-mark" aria-hidden="true"></span><span id="tailorStepWrite">Rewriting your experience for this job</span></li>
+                            </ol>
+                            <div class="linear-progress" role="progressbar" aria-label="Tailoring your resume" aria-valuemin="0" aria-valuemax="100"><div id="tailorBar"></div></div>
+                            <p class="body-sm" id="tailorWait" aria-live="polite"></p>
+                            <p class="eyebrow" id="tailorPeekLabel" hidden>A first look while the rest is written</p>
+                        </div>
+                        <ul class="tailor-stats" id="tailorStats" hidden></ul>
                         <div class="stack-sm" id="tailorPairs"></div>
                         <p class="body-sm" id="tailorTeaserText" aria-live="polite"></p>
                         <div class="row" id="tailorLeadActions" hidden>
-                            <button class="btn primary" type="button" data-action="download-docx"><svg class="icon"><use href="#i-download"/></svg>Download Word (.docx)</button>
+                            <button class="btn primary" type="button" data-action="download-docx"><svg class="icon"><use href="#i-download"/></svg><span class="dl-label">Download Word (.docx)</span></button>
                             <button class="btn" type="button" id="tailorViewBtn" data-action="view-tailored">See every change and the full resume</button>
                         </div>
                         <div class="row" id="tailorGateActions" hidden>
@@ -216,25 +247,6 @@
                         <div class="row" id="gapAfter" hidden><button class="btn" type="button" id="gapEditBtn" data-action="gap-edit">Change my answers</button></div>
                     </div>
 
-                    <div class="verdict" id="verdict" data-tone="neutral">
-                        <p class="eyebrow"><span class="example-tag" id="exampleTag" hidden>Example</span><span id="roleLine"></span></p>
-                        <div class="verdict-head">
-                            <div class="verdict-num"><b id="scoreNum">0</b><span>resume fit<br>out of 100</span></div>
-                            <p class="verdict-label" id="recAction" aria-live="polite"></p>
-                        </div>
-                        <p class="verdict-explain" id="recHeadline"></p>
-                        <div class="req-list" id="recEvidence" hidden></div>
-                        <ul class="rec-reasons" id="recReasons"></ul>
-                        <div class="ask-box" id="recQuestionBox" hidden>
-                            <p class="eyebrow">Question to send the recruiter</p>
-                            <p class="body-md" id="recQuestion"></p>
-                        </div>
-                        <p class="rec-next" id="recNext" hidden></p>
-                        <div class="chips verdict-chips">
-                            <span class="chip sm" id="verdictChip"></span>
-                            <span class="chip sm" id="scoreDelta" hidden></span>
-                        </div>
-                    </div>
                     <div class="row" id="actionBar">
                         <button class="btn primary" id="primaryActionBtn" data-action="primary-action"><svg class="icon"><use href="#i-spark"/></svg><span id="primaryActionText">Next step</span></button>
                         <button class="btn" id="tailorActionBtn" data-action="view-tailored" hidden><svg class="icon"><use href="#i-spark"/></svg><span id="tailorActionText">Tailor my resume to this job</span></button>
@@ -469,7 +481,7 @@
                         </div>
                         <div id="tailoredWrap" class="stack" style="margin-top:16px" hidden>
                             <div class="row">
-                                <button class="btn primary" data-action="download-docx"><svg class="icon"><use href="#i-download"/></svg>Download Word (.docx)</button>
+                                <button class="btn primary" data-action="download-docx"><svg class="icon"><use href="#i-download"/></svg><span class="dl-label">Download Word (.docx)</span></button>
                                 <button class="btn" data-action="copy-tailored"><svg class="icon"><use href="#i-copy"/></svg>Copy as text</button>
                                 <button class="btn text" id="useTailoredBtn" data-action="use-tailored">Use as my resume and re-score</button>
                             </div>
@@ -810,7 +822,7 @@
     <button class="icon-btn" data-action="dismiss-snackbar" aria-label="Dismiss"><svg class="icon"><use href="#i-close"/></svg></button>
 </div>
 
-<script src="assets/files.js?v=47"></script>
-<script src="assets/app.js?v=47"></script>
+<script src="assets/files.js?v=48"></script>
+<script src="assets/app.js?v=48"></script>
 </body>
 </html>
