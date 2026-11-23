@@ -1,7 +1,7 @@
 {
   "name": "DIB Jobs",
   "short_name": "DIB Jobs",
-  "description": "Resume fit check for defense industry roles.",
+  "description": "Tailor your resume to a defense industry job.",
   "start_url": "/",
   "scope": "/",
   "display": "browser",

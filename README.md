@@ -6,18 +6,18 @@ Static site (plain HTML, CSS and JavaScript) plus one AWS Lambda that calls Goog
 
 | Path | What it is |
 | --- | --- |
-| `index.html`, `assets/` | The main app: Check a job, Find Jobs, Tracker |
+| `index.html`, `assets/` | The main app: Tailor a resume, Find Jobs, Tracker |
 | `screen/` | Recruiter page. Uses the same Lambda (`recruiter_screen` request) |
 | `onepage/` | One-page resume tool (standalone) |
 | `vendor/` | pdf.js and mammoth, used to read resume files in the browser |
 | `favicon.*`, `apple-touch-icon.png`, `icon-*.png`, `site.webmanifest` | Icons |
-| `og-fit-83-2x.png` | 2400x1260 share image. Give it a new filename whenever it changes, because LinkedIn caches by address (`og-fit-83.png`, `og-image.png` and `dibjobs.png` are copies kept for old links) |
+| `og-dibjobs-2x.png`, `og-recruiters-2x.png` | 2400x1260 share images: the first for the main site and its About, Privacy and Terms pages, the second for `/screen/`. Give a file a new name whenever its picture changes, because LinkedIn caches by address |
 | `robots.txt`, `sitemap.xml` | Search engine files |
 | `lambda.js` | Backend source. Deploy it to Lambda as `index.mjs`. It does not need to be on the web server. |
 
 ## Deploying the site
 
-Upload everything except `lambda.js` and this README to the web root. When `assets/app.js`, `assets/app.css` or `assets/files.js` change, bump the `?v=` number on their references in `index.html` and `screen/index.html`.
+Upload everything except `lambda.js` and this README to the web root. When `assets/app.js`, `assets/app.css` or `assets/files.js` change, bump the `?v=` number on their references in all five HTML pages (currently `?v=47`).
 
 ## Deploying the Lambda
 
@@ -28,10 +28,10 @@ Upload everything except `lambda.js` and this README to the web root. When `asse
 
 ## Privacy
 
-Resume files are parsed in the browser. Text is sent to the Lambda only when the user runs a check. The Lambda does not log or store resumes, job descriptions or questions. Saved resumes and the tracker live in the browser's localStorage. Find Jobs only builds links to LinkedIn, ClearanceJobs, Indeed and Google.
+Resume files are parsed in the browser. Text is sent to the Lambda only when the user tailors a resume or uses one of the tools around it. The Lambda does not log or store resumes, job descriptions, questions, or the answers a user gives to follow-up questions. Saved resumes, saved answers and the tracker live in the browser's localStorage. Find Jobs only builds links to LinkedIn, ClearanceJobs, Indeed and Google.
 
 
-## Pages added in v37
+## About, Privacy and Terms
 
 - `about/`, `privacy/` and `terms/` are plain pages that share `assets/app.css`. Upload the three folders next to `index.html`.
 - The About page is written in Mark's name from the QuotaBird About page; edit it freely.

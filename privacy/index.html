@@ -13,7 +13,7 @@
     <meta property="og:title" content="Privacy: DIB Jobs">
     <meta property="og:description" content="What DIB Jobs sends for analysis, what stays in your browser, and what it counts.">
     <meta property="og:url" content="https://dibjobs.com/privacy/">
-    <meta property="og:image" content="https://dibjobs.com/og-fit-83-2x.png">
+    <meta property="og:image" content="https://dibjobs.com/og-dibjobs-2x.png">
     <meta name="twitter:card" content="summary_large_image">
     <!-- Icons -->
     <link rel="icon" href="../favicon.ico" sizes="48x48">
@@ -21,7 +21,7 @@
     <link rel="apple-touch-icon" href="../apple-touch-icon.png">
     <link rel="manifest" href="../site.webmanifest">
     <link rel="preload" href="../assets/fonts/inter-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="stylesheet" href="../assets/app.css?v=44">
+    <link rel="stylesheet" href="../assets/app.css?v=47">
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-N10ZLNFZHE"></script>
     <script>
@@ -42,7 +42,7 @@
         <span class="brand-title">DIB Jobs</span>
     </a>
     <nav class="nav" id="mainTabs" aria-label="Sections">
-        <a class="nav-item" href="../">Check a job</a>
+        <a class="nav-item" href="../">Tailor a resume</a>
         <a class="nav-item" href="../#find">Find Jobs</a>
         <a class="nav-item" href="../#tracker">Tracker</a>
     </nav>
@@ -65,12 +65,13 @@
         <p class="doc-date">Last updated November 2026</p>
         <section>
             <h2>The short version</h2>
-            <p>No accounts, no ads, no sign-up. Your resume is read in your browser. When you press a button that runs a check, its text and the job description go through the DIB Jobs server to Google's Gemini AI, and the server does not keep them. The site counts page visits and button presses, never what you typed.</p>
+            <p>No accounts, no ads, no sign-up. Your resume is read in your browser. When you tailor a resume, its text and the job description go through the DIB Jobs server to Google's Gemini AI, and the server does not keep them. The site counts page visits and button presses, never what you typed.</p>
         </section>
         <section>
             <h2>What is sent for analysis</h2>
             <ul>
-                <li><strong>Resume and job text.</strong> Sent when you run a check, tailor a resume, write outreach, or ask the AI a question. The DIB Jobs server passes it to Google's Gemini API and returns the answer. It does not log or store resumes, job descriptions, questions or answers. Google's Gemini API terms apply to that step.</li>
+                <li><strong>Resume and job text.</strong> Sent when you tailor a resume, compare jobs, write outreach, or ask the AI a question. The DIB Jobs server passes it to Google's Gemini API and returns the answer. It does not log or store resumes, job descriptions, questions or answers. Google's Gemini API terms apply to that step.</li>
+                <li><strong>Your answers to follow-up questions.</strong> After a rewrite, the page may ask about something the posting wants and your resume does not show. What you type is sent with your resume so it can be written in, and is not logged or stored by the server. Lines built from an answer are marked in the preview.</li>
                 <li><strong>Job links.</strong> When you give a link instead of the posting text, the link (not your resume) is sent to Jina AI's reader service, which fetches the page so you can check it before anything is scored.</li>
                 <li><strong>Resume files.</strong> PDF and Word files are read in your browser and only their text is sent. If a PDF cannot be read in the browser, the file itself is sent once to extract its text, and is not kept.</li>
                 <li><strong>Recruiters.</strong> The same applies to candidates' resumes. With "Hide names" on, the name, email and profile links the page can find are removed from the text before it is sent.</li>
@@ -81,6 +82,7 @@
             <h2>What stays in your browser</h2>
             <ul>
                 <li>Your saved resumes, your job tracker and your settings are kept in your browser's local storage on your device. They are not sent to a server and I cannot see them.</li>
+                <li>Your answers to follow-up questions are kept the same way, only while "Keep my answers in this browser" is ticked, so a later job can offer them again. You can delete any of them, or all of them, under "Your saved answers" beside your resume.</li>
                 <li>On the recruiter page, the job, candidates and ranking are kept in the browser tab only and are gone when you close it.</li>
                 <li>The Word download of a tailored resume is built in your browser.</li>
                 <li>To remove everything, clear site data for dibjobs.com in your browser.</li>
@@ -89,7 +91,7 @@
         <section>
             <h2>What DIB Jobs counts</h2>
             <p>The site uses Google Analytics 4 to count visits: pages viewed, browser and device type, approximate location and the site you came from. It sets cookies to tell visits apart.</p>
-            <p>It also records named events, such as a check being completed, a tailored resume being downloaded, a link being shared, or a thumbs up or down on a result. A completed check records the fit score and whether the military option was on. A thumbs up or down records your vote, the score, and the reason you picked if you picked one. No event carries your resume, the job description, names, or anything you typed.</p>
+            <p>It also records named events, such as a resume being tailored, a tailored resume being downloaded, follow-up questions being answered or skipped, or a thumbs up or down on a result. A finished run records the fit score and whether the military option was on. Answering follow-up questions records how many you answered, never what you wrote. A thumbs up or down records your vote, the score, and the reason you picked if you picked one. No event carries your resume, the job description, names, or anything you typed.</p>
             <p>You can stop this by blocking analytics cookies or using Google's opt-out browser add-on.</p>
         </section>
         <section>
