@@ -17,7 +17,7 @@ Static site (plain HTML, CSS and JavaScript) plus one AWS Lambda that calls Goog
 
 ## Deploying the site
 
-Upload everything except `lambda.js` and this README to the web root. When `assets/app.js`, `assets/app.css` or `assets/files.js` change, bump the `?v=` number on their references in all five HTML pages (currently `?v=54`).
+Upload everything except `lambda.js` and this README to the web root. When `assets/app.js`, `assets/app.css` or `assets/files.js` change, bump the `?v=` number on their references in all five HTML pages (currently `?v=55`).
 
 ## Deploying the Lambda
 
