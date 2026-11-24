@@ -640,11 +640,11 @@
         const inputs = $('inputs'), col = $('resultCol');
         if (desk && calc.firstElementChild !== inputs) calc.insertBefore(inputs, col);
         else if (!desk && calc.lastElementChild !== inputs) calc.appendChild(inputs);
-        // In the wide layout the score box is a pane that can scroll by itself, so it has to be reachable by keyboard.
-        const v = $('verdict');
-        if (desk) { v.tabIndex = 0; v.setAttribute('role', 'region'); v.setAttribute('aria-label', 'Fit score and requirements'); }
-        else { v.removeAttribute('tabindex'); v.removeAttribute('role'); v.removeAttribute('aria-label'); }
+        fitSide();
     }
+    // Sticky only while the whole score box fits in the window; otherwise it travels with the page.
+    function fitSide() { const v = $('verdict'); v.classList.toggle('fits', document.body.classList.contains('desk-result') && v.offsetHeight <= window.innerHeight - 32); }
+
     function setResultState(mode) {
         $('resultEmpty').hidden = mode !== 'empty';
         $('loading').hidden = mode !== 'loading';
@@ -2951,6 +2951,8 @@
         $('saveForm').addEventListener('submit', savePostingForLater);
         $('gapForm').addEventListener('submit', submitGapAnswers);
         WIDE.addEventListener('change', syncLayout);
+        window.addEventListener('resize', fitSide);
+        if (window.ResizeObserver) new ResizeObserver(fitSide).observe($('verdict'));
         ROOMY.addEventListener('change', foldEvidence); foldEvidence();
         syncLayout();
         $('gapWho').addEventListener('click', (e) => { const b = e.target.closest('[data-person]'); if (b) choosePerson(b.dataset.person); });

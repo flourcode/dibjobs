@@ -970,8 +970,10 @@ body.desk-result #view-analyze > .page-intro { display: none; }
 .stage.desk > .calc, .stage.desk #resultCol, .stage.desk #verdictWrap { display: contents; }
 .stage.desk #inputs { grid-column: 1 / -1; grid-row: 1; margin: 0 0 24px; }
 .stage.desk #verdictWrap > *, .stage.desk > #results, .stage.desk > #roleSnapshot, .stage.desk > #feedback { grid-column: 1; margin-top: 0; margin-bottom: 20px; min-width: 0; }
-/* The supporting pane stays in view and scrolls by itself when it is taller than the window, so the score never leaves the screen. */
-.stage.desk #verdict { grid-column: 2; grid-row: 2 / span 40; margin: 0; position: sticky; top: 16px; max-height: calc(100vh - 32px); overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: rgba(11, 18, 21, 0.35) transparent; }
+/* The score box stays in view while it fits in the window. When it is taller (its evidence is open on a short
+   window) it simply scrolls with the page: no scroll bar of its own. */
+.stage.desk #verdict { grid-column: 2; grid-row: 2 / span 40; margin: 0; }
+.stage.desk #verdict.fits { position: sticky; top: 16px; }
 .stage.desk > #results { margin-top: 12px; margin-bottom: 32px; }
 .stage.desk > #roleSnapshot { max-width: 640px; }
 .stage.desk > #feedback { max-width: 640px; }
@@ -983,7 +985,6 @@ body.desk-result #view-analyze > .page-intro { display: none; }
 .stage.desk #gapFields { max-width: 720px; }
 .stage.desk #results .panel[role="tabpanel"] > .section { max-width: 860px; }
 @media print { body.desk-result .app { max-width: none; } .stage.desk { display: block; } .stage.desk #verdict { position: static; } }
-.stage.desk #verdict:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
 
 /* v52: saved answers belong to a named person */
 .who { display: flex; flex-direction: column; gap: 10px; padding: 12px 14px; border-radius: var(--r-sm); background: var(--page); font: 500 15px/21px var(--font); }
